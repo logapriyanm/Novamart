@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #CCDDEA;
+  --color-secondary: #2772A0;
+  --color-accent: #2772A0;
+  --color-background: #CCDDEA;
+  --color-foreground: #1E293B;
+  --color-success: #2772A0;
+  --color-danger: #2772A0;
+  --color-warning: #2772A0;
+}
+
+@layer base {
+  :root {
+    --primary: #CCDDEA;
+    --secondary: #2772A0;
+    --accent: #2772A0;
+    --background: #CCDDEA;
+    --foreground: #1E293B;
+    --card: rgba(255, 255, 255, 0.5);
+    --border: rgba(39, 114, 160, 0.2);
+    --glass: rgba(255, 255, 255, 0.3);
+    --success: #2772A0;
+    --danger: #2772A0;
+    --warning: #2772A0;
+  }
+
+  body {
+    @apply bg-background text-foreground min-h-screen overflow-x-hidden;
+    background: linear-gradient(135deg, #CCDDEA 0%, #BCCCDA 100%);
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-[#2772A0] to-[#1E293B];
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  .animate-bounce-slow {
+    animation: bounceSlow 3s infinite ease-in-out;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bounceSlow {
+
+    0%,
+    100% {
+      transform: translateY(-5%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+
+    50% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+}

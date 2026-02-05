@@ -1,0 +1,45 @@
+'use client';
+
+import React from 'react';
+import { ShieldAlert, LogOut, Home } from 'lucide-react';
+import Link from 'next/link';
+
+export default function SuspendedPage() {
+    return (
+        <div className="min-h-screen flex items-center justify-center p-6 bg-[#CCDDEA]">
+            <div className="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl shadow-[#2772A0]/20 border border-rose-500/20 text-center animate-fade-in">
+                <div className="w-20 h-20 bg-rose-500 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-rose-500/30">
+                    <ShieldAlert className="w-10 h-10" />
+                </div>
+
+                <h1 className="text-3xl font-bold text-[#1E293B] mb-2">Account Suspended</h1>
+                <p className="text-[#1E293B]/60 text-sm font-medium mb-8 leading-relaxed">
+                    Your access to Novamart has been restricted due to a policy violation or governance audit. Please contact our support team to appeal this decision.
+                </p>
+
+                <div className="grid grid-cols-1 gap-3">
+                    <Link
+                        href="/"
+                        className="flex items-center justify-center gap-2 px-6 py-4 bg-[#2772A0] text-[#CCDDEA] text-sm font-bold rounded-2xl hover:bg-[#1E5F86] transition-all active:scale-95 shadow-lg shadow-[#2772A0]/20"
+                    >
+                        <Home className="w-4 h-4" />
+                        Back to Home
+                    </Link>
+                    <button
+                        onClick={() => {/* handle logout */ }}
+                        className="flex items-center justify-center gap-2 px-6 py-4 bg-white border border-[#2772A0]/10 text-[#2772A0] text-sm font-bold rounded-2xl hover:bg-[#2772A0]/5 transition-all"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        Log Out
+                    </button>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-[#2772A0]/10">
+                    <p className="text-[10px] text-[#2772A0]/40 font-bold uppercase tracking-widest">
+                        Ref ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}
