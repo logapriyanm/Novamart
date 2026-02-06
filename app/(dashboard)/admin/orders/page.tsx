@@ -1,135 +1,133 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import {
-    FaSearch as Search,
-    FaFilter as Filter,
-    FaDownload as Download,
-    FaShoppingCart as ShoppingCart,
-    FaExternalLinkAlt as ExternalLink,
-    FaEllipsisV as MoreVertical,
-    FaClock as Clock,
-    FaCheckCircle as CheckCircle2,
-    FaTimesCircle as XCircle
+    FaShoppingCart,
+    FaTruck,
+    FaCheckCircle,
+    FaExclamationTriangle,
+    FaSearch,
+    FaArrowLeft,
+    FaBoxOpen,
+    FaRegClock,
+    FaEye
 } from 'react-icons/fa';
-import { StatusBadge } from '../../../../src/components/ui/AdminUI';
+import Link from 'next/link';
 
-const orders = [
-    { id: 'ORD-99021', date: '2024-03-15', entity: 'Global Manufacturing Inc.', amount: '$12,400.00', status: 'COMPLETED', items: 12 },
-    { id: 'ORD-99022', date: '2024-03-15', entity: 'Regional Tech Spares', amount: '$4,200.00', status: 'PENDING', items: 5 },
-    { id: 'ORD-99023', date: '2024-03-14', entity: 'Apex Logistics Ltd.', amount: '$8,900.00', status: 'IN_TRANSIT', items: 8 },
-    { id: 'ORD-99024', date: '2024-03-14', entity: 'Future Systems', amount: '$2,100.00', status: 'CANCELLED', items: 2 },
+const orderStream = [
+    { id: 'ORD-LX21', status: 'Shipped', customer: 'Rahul S.', total: '₹42,999', items: 1, date: '2h ago', level: 'Standard' },
+    { id: 'ORD-LX25', status: 'Processing', customer: 'Sunil V.', total: '₹8,500', items: 3, date: '4h ago', level: 'High Value' },
+    { id: 'ORD-LX30', status: 'Hold', customer: 'Meera K.', total: '₹18,200', items: 1, date: '6h ago', level: 'Under Review' },
 ];
 
-const OrdersPage = () => {
+export default function OrderOversightPanel() {
     return (
-        <div className="space-y-8 animate-fade-in">
-            <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-3xl font-bold text-white">Platform Orders</h1>
-                    <p className="text-slate-400 text-sm">Monitor all b2b2c transactions and fulfillment status across the platform.</p>
-                </div>
-                <div className="flex gap-3">
-                    <button className="glass flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-300 hover:bg-white/5">
-                        <Filter className="w-4 h-4" />
-                        Filters
-                    </button>
-                    <button className="bg-white/5 border border-white/10 flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-300 hover:bg-white/10 rounded-xl transition-all">
-                        <Download className="w-4 h-4" />
-                        Export
-                    </button>
-                </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass p-6 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-                        <Clock className="w-6 h-6" />
-                    </div>
+        <div className="space-y-8 animate-fade-in pb-12">
+            {/* Header */}
+            <div className="flex flex-col gap-2">
+                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
+                    <FaArrowLeft className="w-3 h-3" />
+                    Back to Mission Control
+                </Link>
+                <div className="flex items-center justify-between">
                     <div>
-                        <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">Pending</span>
-                        <span className="text-2xl font-bold text-slate-100">124</span>
-                    </div>
-                </div>
-                <div className="glass p-6 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-                        <CheckCircle2 className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">Fulfilled</span>
-                        <span className="text-2xl font-bold text-slate-100">2,840</span>
-                    </div>
-                </div>
-                <div className="glass p-6 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-400">
-                        <XCircle className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">Disputed</span>
-                        <span className="text-2xl font-bold text-slate-100">18</span>
+                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">Supply Chain <span className="text-[#10367D]">Oversight</span></h1>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Ecosystem-Wide Order Monitoring & Audit</p>
                     </div>
                 </div>
             </div>
 
-            <div className="glass overflow-hidden">
-                <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-                    <div className="relative w-96">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                        <input
-                            type="text"
-                            placeholder="Search by order ID, entity, or amount..."
-                            className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-indigo-500/50 transition-all text-slate-300"
-                        />
+            {/* Global Order Health */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {[
+                    { label: 'Live Orders', value: '184', icon: FaBoxOpen, color: 'text-blue-500', bg: 'bg-blue-50' },
+                    { label: 'In Transit', value: '1,204', icon: FaTruck, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                    { label: 'Pending Audit', value: '12', icon: FaRegClock, color: 'text-amber-500', bg: 'bg-amber-50' },
+                    { label: 'Halted/Risk', value: '03', icon: FaExclamationTriangle, color: 'text-rose-500', bg: 'bg-rose-50' },
+                ].map((stat) => (
+                    <div key={stat.label} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                            <h3 className="text-3xl font-black text-[#1E293B]">{stat.value}</h3>
+                        </div>
+                        <div className={`w-12 h-12 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center`}>
+                            <stat.icon className="w-6 h-6" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Order Ledger */}
+            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+                <div className="p-8 lg:p-10 border-b border-slate-50 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-widest">Global Transaction Stream</h2>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Real-time Order Distribution Data</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="relative w-64">
+                            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-3 h-3" />
+                            <input type="text" placeholder="Search Order ID..." className="w-full bg-white border border-slate-100 rounded-xl py-2 pl-9 pr-4 text-xs focus:outline-none" />
+                        </div>
+                        <button className="px-5 py-2 bg-[#10367D]/5 text-[#10367D] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#10367D] hover:text-white transition-all">Filter</button>
                     </div>
                 </div>
 
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="border-b border-white/5 bg-white/[0.01]">
-                            <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Order ID</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Entity</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Amount</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {orders.map((order) => (
-                            <tr key={order.id} className="hover:bg-white/[0.02] transition-colors group">
-                                <td className="px-6 py-4">
-                                    <span className="text-sm font-mono text-indigo-400">{order.id}</span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className="text-sm text-slate-300">{order.date}</span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className="text-sm font-semibold text-white">{order.entity}</span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className="text-sm font-bold text-slate-200">{order.amount}</span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <StatusBadge status={order.status} />
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <div className="flex justify-end gap-2">
-                                        <button className="p-2 hover:bg-white/5 rounded-lg text-slate-500 hover:text-white transition-colors">
-                                            <ExternalLink className="w-4 h-4" />
-                                        </button>
-                                        <button className="p-2 hover:bg-white/5 rounded-lg text-slate-500 hover:text-white transition-colors">
-                                            <MoreVertical className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </td>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="border-b border-slate-50 bg-white">
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Order Protocol</th>
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Buyer/Entity</th>
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Protocol Status</th>
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Value Index</th>
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {orderStream.map((order) => (
+                                <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-10 py-6">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-black text-[#1E293B]">{order.id}</span>
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{order.date}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-10 py-6 text-sm font-bold text-[#1E293B]">
+                                        {order.customer}
+                                    </td>
+                                    <td className="px-10 py-6 text-center">
+                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${order.status === 'Shipped' ? 'bg-emerald-100 text-emerald-700' :
+                                                order.status === 'Processing' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-rose-100 text-rose-700'
+                                            }`}>
+                                            {order.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-10 py-6 text-center">
+                                        <p className="text-sm font-black text-[#1E293B]">{order.total}</p>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">{order.level}</p>
+                                    </td>
+                                    <td className="px-10 py-6 text-right">
+                                        <button className="w-10 h-10 rounded-xl bg-[#10367D]/5 text-[#10367D] flex items-center justify-center hover:bg-[#10367D] hover:text-white transition-all ml-auto">
+                                            <FaEye className="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="p-10 border-t border-slate-50 bg-[#10367D]/5 flex justify-center">
+                    <p className="text-[10px] font-black text-[#10367D] uppercase tracking-[0.2em] flex items-center gap-3">
+                        <FaCheckCircle className="w-3 h-3" />
+                        Supply Chain Data Persisted • Full Logistic Transparency Active
+                    </p>
+                </div>
             </div>
         </div>
     );
-};
+}
 
-export default OrdersPage;

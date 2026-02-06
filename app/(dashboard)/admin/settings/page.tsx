@@ -1,71 +1,165 @@
 'use client';
 
-import React from 'react';
-import { StatusBadge } from '../../../../src/components/ui/AdminUI';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
-    FaAward as Award,
-    FaCog as Settings,
-    FaSearch as Search,
-    FaChartLine as Activity,
-    FaChartBar as BarChart4
+    FaCog,
+    FaShieldAlt,
+    FaDatabase,
+    FaNetworkWired,
+    FaArrowLeft,
+    FaSave,
+    FaExclamationTriangle,
+    FaMicrochip
 } from 'react-icons/fa';
+import Link from 'next/link';
 
-const PlatformSettings = () => {
+export default function PlatformSettingsPortal() {
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = () => {
+        setIsSaving(true);
+        setTimeout(() => setIsSaving(false), 1500);
+    };
+
     return (
-        <div className="space-y-8 animate-fade-in">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold text-white">Platform Governance Settings</h1>
-                <p className="text-slate-400 text-sm">Critical system toggles, API keys, and global business parameters.</p>
+        <div className="space-y-8 animate-fade-in pb-12">
+            {/* Header */}
+            <div className="flex flex-col gap-2">
+                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
+                    <FaArrowLeft className="w-3 h-3" />
+                    Back to Mission Control
+                </Link>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">Terminal <span className="text-[#10367D]">Configuration</span></h1>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">High-Level Platform Parameter Control</p>
+                    </div>
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="px-8 py-3 bg-[#10367D] text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-3"
+                    >
+                        {isSaving ? 'Deploying Changes...' : 'Save System Parameters'}
+                    </button>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="glass p-8 space-y-6">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-indigo-400" />
-                        System Toggles
-                    </h3>
-                    <div className="space-y-6">
-                        {[
-                            { name: 'Allow Public Manufacturer Signup', desc: 'If off, only invite-only onboarding is allowed.' },
-                            { name: 'Global Maintenance Mode', desc: 'Restricts all public facing APIs and frontend.' },
-                            { name: 'Automatic Escrow Release', desc: 'Release funds 48h after delivery heartbeat.' }
-                        ].map((toggle) => (
-                            <div key={toggle.name} className="flex items-center justify-between gap-8">
-                                <div className="flex-1">
-                                    <p className="text-sm font-bold text-slate-200">{toggle.name}</p>
-                                    <p className="text-xs text-slate-500">{toggle.desc}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                {/* Core System Toggles */}
+                <div className="lg:col-span-8 space-y-8">
+                    <div className="bg-white rounded-[3rem] p-10 lg:p-12 border border-slate-100 shadow-sm">
+                        <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-[0.2em] mb-10 flex items-center gap-4">
+                            <FaMicrochip className="text-[#10367D]" />
+                            Operational Overrides
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-black text-[#1E293B] uppercase tracking-widest">Maintenance Mode</h3>
+                                    <div className="w-10 h-5 bg-slate-300 rounded-full p-1 flex justify-start">
+                                        <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
+                                    </div>
                                 </div>
-                                <div className="w-12 h-6 bg-slate-800 rounded-full flex items-center px-1 border border-white/5"><div className="w-4 h-4 bg-slate-600 rounded-full" /></div>
+                                <p className="text-[10px] text-slate-500 font-bold leading-relaxed">Kill-switch for public access. All non-admin routes will be redirected to splash.</p>
                             </div>
-                        ))}
+
+                            <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-black text-[#1E293B] uppercase tracking-widest">Strict KYC Gate</h3>
+                                    <div className="w-10 h-5 bg-emerald-500 rounded-full p-1 flex justify-end">
+                                        <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-slate-500 font-bold leading-relaxed">Require full document verification before any cart operations are allowed.</p>
+                            </div>
+
+                            <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-black text-[#1E293B] uppercase tracking-widest">Escrow Hold-All</h3>
+                                    <div className="w-10 h-5 bg-[#10367D] rounded-full p-1 flex justify-end">
+                                        <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-slate-500 font-bold leading-relaxed">Prevent automatic settlements for all entities till manual audit completion.</p>
+                            </div>
+
+                            <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-black text-[#1E293B] uppercase tracking-widest">Debug Logging</h3>
+                                    <div className="w-10 h-5 bg-slate-300 rounded-full p-1 flex justify-start">
+                                        <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-slate-500 font-bold leading-relaxed">Enable high-verbosity logs in the Audit Persistence module.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-rose-50 rounded-[2.5rem] p-10 border border-rose-100 flex items-start gap-6">
+                        <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-600 flex-shrink-0">
+                            <FaExclamationTriangle className="w-7 h-7" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-black text-rose-800 uppercase tracking-widest mb-2">Destructive Protocol Center</h4>
+                            <p className="text-[11px] font-bold text-rose-700 leading-relaxed mb-6">These actions affect the fundamental platform state and cannot be undone without manual database intervention.</p>
+                            <div className="flex gap-4">
+                                <button className="px-6 py-3 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 active:scale-95 transition-all">Flush Audit Buffer</button>
+                                <button className="px-6 py-3 bg-white border border-rose-200 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">Reset All API Tokens</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div className="glass p-8 space-y-6">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        <Settings className="w-5 h-5 text-indigo-400" />
-                        API & Integration Status
-                    </h3>
-                    <div className="space-y-4">
-                        <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl flex items-center justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-200">Payment Gateway</span>
-                                <span className="text-xs text-slate-500">Stripe / Razorpay Connected</span>
+                {/* API & Cloud Settings */}
+                <div className="lg:col-span-4 space-y-8">
+                    <div className="bg-[#1E293B] rounded-[3rem] p-10 text-white shadow-2xl overflow-hidden relative group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#10367D]/10 blur-2xl rounded-full" />
+                        <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-10 opacity-60 flex items-center gap-3">
+                            <FaNetworkWired className="w-4 h-4 text-[#10367D]" />
+                            Cloud Handshake
+                        </h3>
+
+                        <div className="space-y-8">
+                            <div className="space-y-3">
+                                <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Escrow Gateway ID</label>
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 font-mono text-xs">
+                                    RZP_LIVE_9901_ZAA
+                                </div>
                             </div>
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                            <div className="space-y-3">
+                                <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Auth Salt Level</label>
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                                    <span className="text-xs font-bold text-[#10367D]">RATING: PARANOID</span>
+                                    <FaShieldAlt className="w-4 h-4 text-emerald-500" />
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">System Version</label>
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 text-xs font-black text-[#10367D]">
+                                    NovaMart Engine v4.8.2-Stable
+                                </div>
+                            </div>
                         </div>
-                        <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl flex items-center justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-slate-200">Logistics API</span>
-                                <span className="text-xs text-slate-500">FedEx / DHL Real-time Feed</span>
+                    </div>
+
+                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Database Health</h3>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between text-[10px] font-bold">
+                                <span className="text-slate-400 uppercase tracking-widest">Indexing Efficiency</span>
+                                <span className="text-emerald-500">99.8%</span>
                             </div>
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-emerald-500 w-[99.8%]" />
+                            </div>
+                            <p className="text-[9px] font-medium text-slate-400 leading-relaxed italic">Last automated maintenance ran 4h ago during low throughput period.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     );
-};
+}
 
-export default PlatformSettings;

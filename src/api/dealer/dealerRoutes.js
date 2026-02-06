@@ -32,3 +32,4 @@ router.post('/orders/:orderId/ship', dealerController.shipOrder);
 router.get('/orders/:orderId/payout', dealerController.requestSettlement);
 
 export default router;
+

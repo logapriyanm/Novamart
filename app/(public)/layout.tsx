@@ -3,6 +3,7 @@
 import React from 'react';
 import Navbar from '../../src/components/layout/Navbar';
 import Footer from '../../src/components/layout/Footer';
+import { SidebarProvider } from '../../src/context/SidebarContext';
 
 export default function PublicLayout({
     children,
@@ -10,12 +11,15 @@ export default function PublicLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen flex flex-col">
-            <Navbar />
-            <main className="flex-1">
-                {children}
-            </main>
-            <Footer />
-        </div>
+        <SidebarProvider>
+            <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-1">
+                    {children}
+                </main>
+                <Footer />
+            </div>
+        </SidebarProvider>
     );
 }
+

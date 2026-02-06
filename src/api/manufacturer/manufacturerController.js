@@ -80,3 +80,4 @@ export default {
     getManufacturerStats,
     getMyDealers
 };
+

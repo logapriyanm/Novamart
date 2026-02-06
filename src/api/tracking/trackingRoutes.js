@@ -17,3 +17,4 @@ router.post('/signals', authenticateOptional, trackingController.triggerFraudSig
 router.get('/heatmap', trackingController.getDemandMap);
 
 export default router;
+

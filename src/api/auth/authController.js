@@ -1,9 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../../lib/prisma.js';
+import { OAuth2Client } from 'google-auth-library';
 import auditService from '../../services/audit.js';
 import { verifyOTP } from './otpController.js';
 
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
 /**
@@ -139,4 +141,69 @@ export const loginWithPhone = async (req, res) => {
     }
 };
 
-export default { register, login, loginWithPhone };
+/**
+ * Google OAuth2 Login (Customer Only)
+ */
+export const googleLogin = async (req, res) => {
+    const { idToken } = req.body;
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const payload = ticket.getPayload();
+        const { email, name, sub: googleId, picture } = payload;
+
+        // Check if user exists
+        let user = await prisma.user.findUnique({ where: { email } });
+
+        if (user) {
+            // Restriction: Only allow CUSTOMER role via Google
+            if (user.role !== 'CUSTOMER') {
+                return res.status(403).json({
+                    error: 'RESTRICTED_ROLE',
+                    message: 'Please use standard secure login for your account type.'
+                });
+            }
+        } else {
+            // Auto-register new Google user as CUSTOMER
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    role: 'CUSTOMER',
+                    status: 'ACTIVE',
+                    customer: {
+                        create: { name: name || email.split('@')[0] }
+                    }
+                }
+            });
+        }
+
+        const token = jwt.sign({ id: user.id, role: user.role, status: user.status }, JWT_SECRET, { expiresIn: '24h' });
+
+        await prisma.session.create({
+            data: {
+                userId: user.id,
+                token: token,
+                ipAddress: req.ip,
+                device: req.headers['user-agent'],
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+            }
+        });
+
+        await auditService.logAction('USER_LOGIN_GOOGLE', 'USER', user.id, {
+            userId: user.id,
+            req
+        });
+
+        res.json({ token, role: user.role, status: user.status });
+    } catch (error) {
+        console.error('❌ Google Auth Error:', error);
+        res.status(400).json({ error: 'GOOGLE_AUTH_FAILED', details: error.message });
+    }
+};
+
+export default { register, login, loginWithPhone, googleLogin };
+

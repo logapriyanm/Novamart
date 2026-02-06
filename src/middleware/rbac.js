@@ -33,3 +33,4 @@ const authorize = (allowedRoles = [], allowedAdminRoles = [], requiredStatus = '
 };
 
 export default authorize;
+

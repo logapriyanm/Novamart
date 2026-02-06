@@ -1,34 +1,34 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #CCDDEA;
-  --color-secondary: #2772A0;
-  --color-accent: #2772A0;
-  --color-background: #CCDDEA;
+  --color-primary: #10367D;
+  --color-secondary: #74B4DA;
+  --color-accent: #74B4DA;
+  --color-background: #EBEBEB;
   --color-foreground: #1E293B;
-  --color-success: #2772A0;
-  --color-danger: #2772A0;
-  --color-warning: #2772A0;
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
 }
 
 @layer base {
   :root {
-    --primary: #CCDDEA;
-    --secondary: #2772A0;
-    --accent: #2772A0;
-    --background: #CCDDEA;
+    --primary: #10367D;
+    --secondary: #74B4DA;
+    --accent: #74B4DA;
+    --background: #EBEBEB;
     --foreground: #1E293B;
-    --card: rgba(255, 255, 255, 0.5);
-    --border: rgba(39, 114, 160, 0.2);
-    --glass: rgba(255, 255, 255, 0.3);
-    --success: #2772A0;
-    --danger: #2772A0;
-    --warning: #2772A0;
+    --card: #FFFFFF;
+    --border: rgba(16, 54, 125, 0.1);
+    --glass: rgba(255, 255, 255, 0.5);
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
   }
 
   body {
-    @apply bg-background text-foreground min-h-screen overflow-x-hidden;
-    background: linear-gradient(135deg, #CCDDEA 0%, #BCCCDA 100%);
+    @apply bg-background text-foreground min-h-screen overflow-x-hidden font-sans;
+    background-color: #EBEBEB;
   }
 }
 
@@ -38,7 +38,7 @@
   }
 
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-[#2772A0] to-[#1E293B];
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-[#10367D] to-[#0F172A];
   }
 }
 
@@ -86,3 +86,4 @@
     }
   }
 }
+

@@ -23,37 +23,40 @@ import {
 } from 'react-icons/fa';
 
 const adminMenuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
-    { name: 'User Management', icon: Users, path: '/admin/users' },
-    { name: 'Manufacturers', icon: Factory, path: '/admin/manufacturers' },
-    { name: 'Dealers', icon: Store, path: '/admin/dealers' },
-    { name: 'Product Approvals', icon: CheckCircle2, path: '/admin/products' },
-    { name: 'Orders', icon: ShoppingCart, path: '/admin/orders' },
-    { name: 'Escrow & Payments', icon: Wallet, path: '/admin/escrow' },
-    { name: 'Disputes', icon: AlertTriangle, path: '/admin/disputes' },
-    { name: 'Fraud & Risk', icon: ShieldAlert, path: '/admin/fraud' },
-    { name: 'Margin & Tax Rules', icon: Percent, path: '/admin/rules' },
-    { name: 'Badges & Trust', icon: Award, path: '/admin/badges' },
-    { name: 'Tracking & Analytics', icon: BarChart3, path: '/admin/analytics' },
-    { name: 'Audit Logs', icon: History, path: '/admin/audit' },
-    { name: 'Platform Settings', icon: Settings, path: '/admin/settings' },
+    { name: 'Mission Control', icon: LayoutDashboard, path: '/admin' },
+    { name: 'Account Entities', icon: Users, path: '/admin/users' },
+    { name: 'Manufacturer Gates', icon: Factory, path: '/admin/manufacturers' },
+    { name: 'Dealer Onboarding', icon: Store, path: '/admin/dealers' },
+    { name: 'Inventory Queue', icon: CheckCircle2, path: '/admin/products' },
+    { name: 'Order Oversight', icon: ShoppingCart, path: '/admin/orders' },
+    { name: 'Escrow & Treasury', icon: Wallet, path: '/admin/escrow' },
+    { name: 'Conflict Tribunal', icon: AlertTriangle, path: '/admin/disputes' },
+    { name: 'Anomaly Detection', icon: ShieldAlert, path: '/admin/fraud' },
+    { name: 'Economic Rules', icon: Percent, path: '/admin/rules' },
+    { name: 'Trust Signals', icon: Award, path: '/admin/badges' },
+    { name: 'Review Audit', icon: Grid, path: '/admin/reviews' },
+    { name: 'Strategic Intel', icon: BarChart3, path: '/admin/analytics' },
+    { name: 'Audit Persistence', icon: History, path: '/admin/audit' },
+    { name: 'Terminal Config', icon: Settings, path: '/admin/settings' },
 ];
 
 const dealerMenuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dealer/dashboard' },
-    { name: 'Product Grid', icon: Grid, path: '/dealer/products' },
-    { name: 'Orders & Retail', icon: ShoppingCart, path: '/dealer/orders' },
-    { name: 'Settlements', icon: Wallet, path: '/dealer/settlements' },
-    { name: 'Analytics', icon: BarChart3, path: '/dealer/analytics' },
-    { name: 'Business Settings', icon: Settings, path: '/dealer/settings' },
+    { name: 'Command Center', icon: LayoutDashboard, path: '/dealer' },
+    { name: 'Supply Sourcing', icon: Factory, path: '/dealer/source' },
+    { name: 'Owned Inventory', icon: Grid, path: '/dealer/inventory' },
+    { name: 'Retail Pipeline', icon: ShoppingCart, path: '/dealer/orders' },
+    { name: 'Support Desk', icon: Users, path: '/dealer/support' },
+    { name: 'Sales Intel', icon: BarChart3, path: '/dealer/analytics' },
+    { name: 'Compliance Portal', icon: Settings, path: '/dealer/settings' },
 ];
 
 const manufacturerMenuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/manufacturer/dashboard' },
-    { name: 'Inventory Management', icon: Grid, path: '/manufacturer/inventory' },
+    { name: 'Command Center', icon: LayoutDashboard, path: '/manufacturer' },
+    { name: 'Bulk Catalog', icon: Grid, path: '/manufacturer/inventory' },
     { name: 'Dealer Network', icon: Store, path: '/manufacturer/dealers' },
-    { name: 'Production Logs', icon: History, path: '/manufacturer/logs' },
-    { name: 'Settings', icon: Settings, path: '/manufacturer/settings' },
+    { name: 'Supply Requests', icon: ShoppingCart, path: '/manufacturer/orders' },
+    { name: 'Strategic Intel', icon: BarChart3, path: '/manufacturer/analytics' },
+    { name: 'Compliance Portal', icon: Settings, path: '/manufacturer/settings' },
 ];
 
 const customerMenuItems = [
@@ -86,7 +89,7 @@ const Sidebar = ({ isOpen, onClose, role = 'ADMIN' }: SidebarProps) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="fixed inset-0 bg-[#2772A0]/20 backdrop-blur-sm z-40 lg:hidden"
+                    className="fixed inset-0 bg-[#10367D]/20 backdrop-blur-sm z-40 lg:hidden"
                 />
             )}
 
@@ -97,16 +100,16 @@ const Sidebar = ({ isOpen, onClose, role = 'ADMIN' }: SidebarProps) => {
                 }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
                 className={`
-                    fixed inset-y-0 left-0 z-50 w-72 bg-white/40 backdrop-blur-xl border-r border-[#2772A0]/10 flex flex-col transition-all overflow-hidden group
+                    fixed inset-y-0 left-0 z-50 w-72 bg-white/40 backdrop-blur-xl border-r border-[#10367D]/10 flex flex-col transition-all overflow-hidden group
                     lg:relative lg:translate-x-0 lg:z-auto lg:flex
                 `}
             >
                 <div className="p-6 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-[#2772A0]/20 bg-white">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-[#10367D]/20 bg-white">
                             <img src="/logo.png" alt="Novamart" className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-[#2772A0]">Novamart</span>
+                        <span className="text-xl font-bold tracking-tight text-[#10367D]">Novamart</span>
                     </div>
                 </div>
 
@@ -121,16 +124,16 @@ const Sidebar = ({ isOpen, onClose, role = 'ADMIN' }: SidebarProps) => {
                                     className={`
                                         flex items-center gap-3 px-4 py-3 rounded-xl transition-all group
                                         ${isActive
-                                            ? 'bg-[#2772A0]/10 text-[#2772A0] border border-[#2772A0]/20 shadow-inner'
-                                            : 'text-[#1E293B]/60 hover:bg-white/60 hover:text-[#2772A0]'}
+                                            ? 'bg-[#10367D]/10 text-[#10367D] border border-[#10367D]/20 shadow-inner'
+                                            : 'text-[#1E293B]/60 hover:bg-white/60 hover:text-[#10367D]'}
                                     `}
                                 >
-                                    <item.icon className={`w-5 h-5 ${isActive ? 'text-[#2772A0]' : 'text-[#2772A0]/40 group-hover:text-[#2772A0]'}`} />
+                                    <item.icon className={`w-5 h-5 ${isActive ? 'text-[#10367D]' : 'text-[#10367D]/40 group-hover:text-[#10367D]'}`} />
                                     <span className="text-sm font-bold">{item.name}</span>
                                     {isActive && (
                                         <motion.div
                                             layoutId="sidebar-active"
-                                            className="ml-auto w-1 h-4 bg-[#2772A0] rounded-full"
+                                            className="ml-auto w-1 h-4 bg-[#10367D] rounded-full"
                                         />
                                     )}
                                 </motion.div>
@@ -139,14 +142,18 @@ const Sidebar = ({ isOpen, onClose, role = 'ADMIN' }: SidebarProps) => {
                     })}
                 </nav>
 
-                <div className="p-6 border-t border-[#2772A0]/10">
-                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/40 border border-[#2772A0]/10">
-                        <div className="w-10 h-10 rounded-full bg-[#2772A0] flex items-center justify-center text-xs font-bold text-[#CCDDEA]">
-                            SA
+                <div className="p-6 border-t border-[#10367D]/10">
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/40 border border-[#10367D]/10">
+                        <div className="w-10 h-10 rounded-full bg-[#10367D] flex items-center justify-center text-[10px] font-black text-white">
+                            {role === 'ADMIN' ? 'AD' : role === 'MANUFACTURER' ? 'MF' : role === 'DEALER' ? 'DL' : 'CU'}
                         </div>
                         <div className="flex flex-col overflow-hidden">
-                            <span className="text-sm font-bold text-[#1E293B]">Super Admin</span>
-                            <span className="text-[10px] text-[#2772A0]/60 font-bold uppercase tracking-wider">Platform Owner</span>
+                            <span className="text-sm font-black text-[#1E293B]">
+                                {role === 'ADMIN' ? 'Platform Governor' : role === 'MANUFACTURER' ? 'Supply Authority' : role === 'DEALER' ? 'Regional Partner' : 'Consumer Account'}
+                            </span>
+                            <span className="text-[10px] text-[#10367D]/60 font-black uppercase tracking-wider">
+                                {role === 'ADMIN' ? 'Governance Master' : 'Verified Identity'}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -156,3 +163,4 @@ const Sidebar = ({ isOpen, onClose, role = 'ADMIN' }: SidebarProps) => {
 };
 
 export default Sidebar;
+

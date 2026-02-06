@@ -1,120 +1,157 @@
 'use client';
 
-import React from 'react';
-import { StatusBadge } from '../../../../src/components/ui/AdminUI';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-    FaEllipsisV as MoreVertical,
-    FaSearch as Search,
-    FaFilter as Filter,
-    FaDownload as Download,
-    FaExclamationCircle as AlertCircle
+    FaUsers,
+    FaUserShield,
+    FaUserTie,
+    FaStore,
+    FaIndustry,
+    FaSearch,
+    FaArrowLeft,
+    FaRegClock,
+    FaBan,
+    FaKey,
+    FaEllipsisV,
+    FaFilter
 } from 'react-icons/fa';
+import Link from 'next/link';
 
-const users = [
-    { id: '1', name: 'Global Manufacturing Inc.', email: 'admin@globalmfg.com', role: 'MANUFACTURER', status: 'ACTIVE', risk: 'Low' },
-    { id: '2', name: 'Regional Tech Spares', email: 'sales@techspares.in', role: 'DEALER', status: 'PENDING', risk: 'Medium' },
-    { id: '3', name: 'Apex Logistics Ltd.', email: 'gov@apex.com', role: 'MANUFACTURER', status: 'SUSPENDED', risk: 'High' },
-    { id: '4', name: 'John Doe', email: 'john@example.com', role: 'CUSTOMER', status: 'ACTIVE', risk: 'Low' },
+const systemUsers = [
+    { id: 'USR-001', name: 'Alex Thompson', role: 'ADMIN', email: 'alex.t@novamart.gov', status: 'Active', activity: '2m ago', avatar: 'AT' },
+    { id: 'USR-042', name: 'Elite Electronics', role: 'DEALER', email: 'ops@elite-mumbai.com', status: 'Active', activity: '1h ago', avatar: 'EE' },
+    { id: 'USR-089', name: 'Nexus Appliance Corp', role: 'MANUFACTURER', email: 'nexus.factory@nexus.com', status: 'Under Review', activity: 'Yesterday', avatar: 'NA' },
+    { id: 'USR-112', name: 'Sanjay Kumar', role: 'CUSTOMER', email: 'sanjay.k@gmail.com', status: 'Banned', activity: '3d ago', avatar: 'SK' },
 ];
 
-const UserManagement = () => {
+export default function UserManagementPortal() {
+    const [selectedRole, setSelectedRole] = useState('ALL');
+
+    const filteredUsers = selectedRole === 'ALL'
+        ? systemUsers
+        : systemUsers.filter(u => u.role === selectedRole);
+
     return (
-        <div className="space-y-8 animate-fade-in">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex flex-col gap-1">
-                    <h1 className="text-2xl lg:text-3xl font-bold text-[#2772A0]">User Management</h1>
-                    <p className="text-[#1E293B]/60 text-xs lg:text-sm font-medium">Review, verify, and moderate all platform participants.</p>
-                </div>
-                <div className="flex flex-wrap gap-2 lg:gap-3 w-full sm:w-auto">
-                    <button className="flex-1 sm:flex-none justify-center bg-white/40 border border-[#2772A0]/10 flex items-center gap-2 px-3 lg:px-4 py-2 text-xs lg:text-sm font-bold text-[#2772A0] hover:bg-white/60 rounded-xl transition-all shadow-sm">
-                        <Filter className="w-4 h-4" />
-                        Filters
-                    </button>
-                    <button className="flex-1 sm:flex-none justify-center bg-[#2772A0] text-[#CCDDEA] flex items-center gap-2 px-3 lg:px-4 py-2 text-xs lg:text-sm font-bold hover:bg-[#1E5F86] rounded-xl transition-all shadow-lg shadow-[#2772A0]/20">
-                        <Download className="w-4 h-4" />
-                        Export
-                    </button>
+        <div className="space-y-8 animate-fade-in pb-12">
+            {/* Header */}
+            <div className="flex flex-col gap-2">
+                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
+                    <FaArrowLeft className="w-3 h-3" />
+                    Back to Mission Control
+                </Link>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">Identity <span className="text-[#10367D]">Oversight</span></h1>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Global User Directory & Privilege Governance</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="relative w-64">
+                            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-3 h-3" />
+                            <input type="text" placeholder="Search identities..." className="w-full bg-white border border-slate-100 rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:border-[#10367D]/30 shadow-sm" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-white/40 border border-[#2772A0]/10 rounded-3xl overflow-hidden backdrop-blur-md">
-                <div className="p-4 lg:p-6 border-b border-[#2772A0]/10 bg-white/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="relative w-full md:w-96">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2772A0]/60" />
-                        <input
-                            type="text"
-                            placeholder="Search entities..."
-                            className="w-full bg-white/40 border border-[#2772A0]/10 rounded-xl py-2 pl-10 pr-4 text-xs lg:text-sm focus:outline-none focus:border-[#2772A0]/50 transition-all text-[#1E293B]"
-                        />
-                    </div>
-                    <div className="flex items-center">
-                        <span className="text-[9px] lg:text-[10px] font-bold text-amber-600 uppercase tracking-widest flex items-center gap-2 px-3 py-1 bg-amber-500/10 rounded-full border border-amber-500/20">
-                            <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                            12 Pending
-                        </span>
-                    </div>
+            {/* Quick Role Filters */}
+            <div className="flex flex-wrap gap-3">
+                {['ALL', 'ADMIN', 'DEALER', 'MANUFACTURER', 'CUSTOMER'].map((role) => (
+                    <button
+                        key={role}
+                        onClick={() => setSelectedRole(role)}
+                        className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedRole === role
+                                ? 'bg-[#10367D] text-white shadow-xl shadow-[#10367D]/20 scale-105'
+                                : 'bg-white text-slate-400 border border-slate-100 hover:border-[#10367D]/20'
+                            }`}
+                    >
+                        {role}S
+                    </button>
+                ))}
+            </div>
+
+            {/* User Directory Table */}
+            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+                <div className="p-8 lg:p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                    <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-widest flex items-center gap-3">
+                        <FaUsers className="text-[#10367D]" />
+                        Active Identity Ledger
+                    </h2>
+                    <button className="text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:underline flex items-center gap-2">
+                        <FaFilter className="w-3 h-3" />
+                        Advanced Audit Filters
+                    </button>
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[800px]">
+                    <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b border-[#2772A0]/10 bg-[#2772A0]/5">
-                                <th className="px-6 py-4 text-[10px] font-bold text-[#2772A0]/60 uppercase tracking-wider">Entity / Name</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-[#2772A0]/60 uppercase tracking-wider">Role</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-[#2772A0]/60 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-[#2772A0]/60 uppercase tracking-wider">Risk Score</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-[#2772A0]/60 uppercase tracking-wider text-right">Actions</th>
+                            <tr className="border-b border-slate-50">
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Entity</th>
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Privilege Level</th>
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Protocol Status</th>
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Last Handshake</th>
+                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#2772A0]/5">
-                            {users.map((user) => (
-                                <tr key={user.id} className="hover:bg-white/40 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-[#1E293B] group-hover:text-[#2772A0] transition-colors">{user.name}</span>
-                                            <span className="text-xs text-[#2772A0]/60 font-medium">{user.email}</span>
+                        <tbody className="divide-y divide-slate-50">
+                            {filteredUsers.map((user) => (
+                                <tr key={user.id} className="hover:bg-slate-50 group transition-colors">
+                                    <td className="px-10 py-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-[#10367D] flex items-center justify-center text-white text-xs font-black shadow-lg shadow-[#10367D]/10 group-hover:scale-110 transition-transform">
+                                                {user.avatar}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-[#1E293B] leading-none">{user.name}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-1.5">{user.email}</p>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-[10px] font-bold text-[#2772A0] px-2 py-0.5 bg-[#2772A0]/5 rounded border border-[#2772A0]/10 uppercase tracking-tighter">{user.role}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <StatusBadge status={user.status} />
-                                    </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-10 py-6">
                                         <div className="flex items-center gap-2">
-                                            <div className={`w-1.5 h-1.5 rounded-full ${user.risk === 'Low' ? 'bg-emerald-500' :
-                                                user.risk === 'Medium' ? 'bg-amber-500' : 'bg-rose-500'
-                                                }`} />
-                                            <span className="text-xs font-bold text-[#1E293B]/70">{user.risk}</span>
+                                            {user.role === 'ADMIN' ? <FaUserShield className="text-[#10367D] w-3 h-3" /> :
+                                                user.role === 'DEALER' ? <FaStore className="text-[#10367D] w-3 h-3" /> :
+                                                    user.role === 'MANUFACTURER' ? <FaIndustry className="text-[#10367D] w-3 h-3" /> :
+                                                        <FaUserTie className="text-[#10367D] w-3 h-3" />}
+                                            <span className="text-[10px] font-black text-[#1E293B] uppercase tracking-widest">{user.role}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <button className="p-2 hover:bg-[#2772A0]/10 rounded-lg text-[#2772A0]/40 hover:text-[#2772A0] transition-colors">
-                                                <MoreVertical className="w-4 h-4" />
-                                            </button>
-                                            {user.status === 'PENDING' && (
-                                                <button className="bg-[#2772A0] text-[#CCDDEA] text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-[#1E5F86] transition-all uppercase tracking-widest active:scale-95">Verify</button>
-                                            )}
+                                    <td className="px-10 py-6 text-center">
+                                        <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${user.status === 'Active' ? 'bg-emerald-100 text-emerald-700' :
+                                                user.status === 'Banned' ? 'bg-rose-100 text-rose-700' :
+                                                    'bg-amber-100 text-amber-700'
+                                            }`}>
+                                            {user.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-10 py-6 text-center">
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-xs font-bold text-slate-600">{user.activity}</span>
+                                            <span className="text-[8px] font-black text-slate-400 uppercase mt-0.5 tracking-widest">Via Web-Terminal</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-10 py-6 text-right">
+                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button title="Reset Auth" className="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-[#10367D] hover:text-white transition-all"><FaKey className="w-3.5 h-3.5" /></button>
+                                            <button title="Ban User" className="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"><FaBan className="w-3.5 h-3.5" /></button>
+                                            <button title="More Options" className="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-all"><FaEllipsisV className="w-3.5 h-3.5" /></button>
                                         </div>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                </div>
 
-                    <div className="p-4 border-t border-[#2772A0]/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[9px] lg:text-[10px] font-bold text-[#2772A0]/60 uppercase tracking-wider bg-white/20">
-                        <span>Showing 4 of 2,840 users</span>
-                        <div className="flex gap-2">
-                            <button className="px-3 py-1.5 rounded-lg bg-white/40 border border-[#2772A0]/10 hover:bg-white/60 disabled:opacity-50" disabled>Previous</button>
-                            <button className="px-3 py-1.5 rounded-lg bg-white/40 border border-[#2772A0]/10 hover:bg-white/60">Next</button>
-                        </div>
-                    </div>
+                <div className="p-10 border-t border-slate-50 bg-slate-50/50 flex justify-center">
+                    <p className="text-[10px] font-black text-slate-400 flex items-center gap-2 uppercase tracking-[0.2em]">
+                        <FaRegClock className="text-[#10367D]" />
+                        Showing {filteredUsers.length} identities from NovaMart Global Directory
+                    </p>
                 </div>
             </div>
         </div>
     );
-};
+}
 
-export default UserManagement;

@@ -108,3 +108,4 @@ class ManufacturerService {
 }
 
 export default new ManufacturerService();
+

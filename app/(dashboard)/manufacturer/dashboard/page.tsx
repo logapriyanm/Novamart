@@ -6,3 +6,4 @@ import ManufacturerPage from '../page';
 export default function ManufacturerDashboardPage() {
     return <ManufacturerPage />;
 }
+

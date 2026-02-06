@@ -1,114 +1,183 @@
 'use client';
 
-import React from 'react';
-import { StatusBadge } from '../../../../src/components/ui/AdminUI';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-    FaCheck as Check,
-    FaTimes as X,
-    FaExternalLinkAlt as ExternalLink,
-    FaFileAlt as FileText,
-    FaExclamationCircle as AlertCircle
+    FaCheckCircle,
+    FaTimesCircle,
+    FaExclamationCircle,
+    FaShieldAlt,
+    FaArrowLeft,
+    FaBox,
+    FaIndustry,
+    FaInfoCircle,
+    FaSearch,
+    FaGavel
 } from 'react-icons/fa';
+import Link from 'next/link';
 
-const products = [
-    {
-        id: 'P-101',
-        name: 'Industrial Grade Steel Bearings',
-        manufacturer: 'SteelCorp Global',
-        category: 'Hardware',
-        price: '$45.00',
-        moq: 50,
-        status: 'PENDING'
-    },
-    {
-        id: 'P-102',
-        name: 'Precision Logic Controllers V4',
-        manufacturer: 'TechSystems SA',
-        category: 'Electronics',
-        price: '$1,200.00',
-        moq: 1,
-        status: 'PENDING'
-    },
-    {
-        id: 'P-103',
-        name: 'Eco-Friendly Insulation Rolls',
-        manufacturer: 'GreenBuild Ltd.',
-        category: 'Construction',
-        price: '$89.00',
-        moq: 200,
-        status: 'PENDING'
-    },
+const approvalQueue = [
+    { id: 'MFP-102', name: 'Pro-Mix Grinder X', manufacturer: 'Industrial Kitchen Tech', price: '₹8,400', date: '2h ago', category: 'Kitchen Tech', tax: '18%', specs: '750W, Copper Motor, 3 Jars' },
+    { id: 'MFP-105', name: 'Solar Panel 400W', manufacturer: 'Sun-Core Energy Ltd', price: '₹12,200', date: '4h ago', category: 'Energy', tax: '12%', specs: 'Monocrystalline, IP68' },
 ];
 
-const ProductApproval = () => {
+export default function AdminProductApproval() {
+    const [selectedProduct, setSelectedProduct] = useState<any>(null);
+    const [auditStatus, setAuditStatus] = useState<null | 'APPROVED' | 'REJECTED'>(null);
+
+    const handleAudit = (status: 'APPROVED' | 'REJECTED') => {
+        setAuditStatus(status);
+        setTimeout(() => {
+            setSelectedProduct(null);
+            setAuditStatus(null);
+        }, 2000);
+    };
+
     return (
-        <div className="space-y-8 animate-fade-in">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold text-white">Product Approval Queue</h1>
-                <p className="text-slate-400 text-sm">Review safety, compliance, and pricing before listing products to the marketplace.</p>
+        <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
+            {/* Header */}
+            <div className="flex flex-col gap-2">
+                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
+                    <FaArrowLeft className="w-3 h-3" />
+                    Back to Mission Control
+                </Link>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-black tracking-tight italic">Governance <span className="text-[#10367D]">Queue</span></h1>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Product Verification & Compliance Terminal</p>
+                    </div>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
-                {products.map((product) => (
-                    <div key={product.id} className="glass p-6 flex items-center gap-8 group hover:border-indigo-500/20 transition-all">
-                        <div className="w-24 h-24 rounded-2xl bg-slate-900 border border-white/5 flex items-center justify-center text-slate-700">
-                            <FileText className="w-8 h-8" />
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+                {/* List View */}
+                <div className="xl:col-span-7 space-y-8">
+                    <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+                        <div className="p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                            <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-[0.2em] italic">Awaiting Platform Audit</h2>
+                            <div className="relative">
+                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
+                                <input type="text" placeholder="Search Filter..." className="bg-white border border-slate-100 rounded-xl py-2 pl-10 pr-4 text-[9px] font-black uppercase tracking-widest focus:outline-none focus:border-[#10367D]/30" />
+                            </div>
                         </div>
-
-                        <div className="flex-1 flex flex-col gap-1">
-                            <div className="flex items-center gap-3">
-                                <span className="text-lg font-bold text-slate-100">{product.name}</span>
-                                <StatusBadge status={product.status} />
-                            </div>
-                            <div className="flex items-center gap-4 text-xs font-medium">
-                                <span className="text-indigo-400">{product.manufacturer}</span>
-                                <span className="text-slate-600">•</span>
-                                <span className="text-slate-400">{product.category}</span>
-                                <span className="text-slate-600">•</span>
-                                <span className="text-slate-400">ID: {product.id}</span>
-                            </div>
-                            <div className="mt-4 flex gap-8">
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-slate-600 uppercase font-black">Base Price</span>
-                                    <span className="text-sm font-bold text-slate-300">{product.price}</span>
+                        <div className="divide-y divide-slate-50">
+                            {approvalQueue.map((item) => (
+                                <div
+                                    key={item.id}
+                                    onClick={() => setSelectedProduct(item)}
+                                    className={`p-10 hover:bg-slate-50/50 transition-all cursor-pointer group flex items-center justify-between ${selectedProduct?.id === item.id ? 'bg-blue-50/30 border-l-4 border-l-[#10367D]' : ''}`}
+                                >
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 text-[#10367D] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                            <FaBox className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-black text-[#1E293B]">{item.name}</h4>
+                                            <div className="flex items-center gap-2 mt-1 italic">
+                                                <FaIndustry className="w-2.5 h-2.5 text-slate-400" />
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.manufacturer}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">{item.date}</span>
+                                        <span className="text-[8px] font-black uppercase px-3 py-1 bg-amber-50 text-amber-600 rounded-full border border-amber-100">Pending Review</span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[10px] text-slate-600 uppercase font-black">MOQ</span>
-                                    <span className="text-sm font-bold text-slate-300">{product.moq} units</span>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="p-10 bg-blue-50/50 border border-[#10367D]/10 rounded-[3rem] flex items-center gap-8">
+                        <div className="w-16 h-16 rounded-[1.8rem] bg-white text-[#10367D] border border-blue-100 flex items-center justify-center shrink-0 shadow-sm">
+                            <FaShieldAlt className="w-8 h-8" />
+                        </div>
+                        <p className="text-[10px] font-bold text-[#1E293B] uppercase tracking-widest leading-relaxed">
+                            Audit Protocol: Verify Tax slabs, ISO certifications, and technical safety specs. Verified items become visible to the **Dealer Distribution Network** immediately.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Detail/Verification View */}
+                <div className="xl:col-span-5 relative">
+                    <AnimatePresence mode="wait">
+                        {selectedProduct ? (
+                            <motion.div
+                                key={selectedProduct.id}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="h-full bg-white rounded-[3.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col"
+                            >
+                                <div className="p-10 bg-[#1E293B] text-white">
+                                    <h3 className="text-2xl font-black tracking-tight">{selectedProduct.name}</h3>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-2 italic">Product Verification Sheet • {selectedProduct.id}</p>
                                 </div>
+
+                                <div className="flex-1 p-10 space-y-10 overflow-y-auto custom-scrollbar">
+                                    <div className="grid grid-cols-2 gap-8">
+                                        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Proposed Price</p>
+                                            <p className="text-lg font-black text-[#1E293B]">{selectedProduct.price}</p>
+                                        </div>
+                                        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Tax Category</p>
+                                            <p className="text-lg font-black text-[#1E293B]">{selectedProduct.tax}</p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <FaInfoCircle className="text-[#10367D]" /> Technical Specifications
+                                        </h4>
+                                        <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 text-sm font-bold text-[#1E293B] italic leading-relaxed">
+                                            {selectedProduct.specs}
+                                        </div>
+                                    </div>
+
+                                    {auditStatus && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className={`p-10 rounded-[2.5rem] text-center ${auditStatus === 'APPROVED' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}
+                                        >
+                                            <FaGavel className="w-8 h-8 mx-auto mb-4" />
+                                            <p className="text-lg font-black uppercase tracking-widest italic">{auditStatus} Protocol Initiated</p>
+                                        </motion.div>
+                                    )}
+                                </div>
+
+                                <div className="p-10 border-t border-slate-50 space-y-4">
+                                    <div className="flex items-center gap-4">
+                                        <button
+                                            onClick={() => handleAudit('APPROVED')}
+                                            className="flex-1 py-5 bg-[#10367D] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center justify-center gap-3"
+                                        >
+                                            <FaCheckCircle className="w-3 h-3" />
+                                            Approve Asset
+                                        </button>
+                                        <button
+                                            onClick={() => handleAudit('REJECTED')}
+                                            className="flex-1 py-5 bg-white border border-rose-100 text-rose-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 transition-all flex items-center justify-center gap-3"
+                                        >
+                                            <FaTimesCircle className="w-3 h-3" />
+                                            Reject with Reason
+                                        </button>
+                                    </div>
+                                    <p className="text-[8px] font-black text-slate-400 text-center uppercase tracking-widest">Decision triggers immediate automated email notification to manufacturer.</p>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <div className="h-full bg-slate-50/30 rounded-[3.5rem] border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-center p-12">
+                                <FaExclamationCircle className="w-16 h-16 text-slate-200 mb-6" />
+                                <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Select Entity for Audit</h3>
+                                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-2 max-w-[200px]">Commence governance review by choosing a pending submission.</p>
                             </div>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
-                                <Check className="w-4 h-4" />
-                                Approve
-                            </button>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
-                                <X className="w-4 h-4" />
-                                Reject
-                            </button>
-                        </div>
-
-                        <div className="w-px h-16 bg-white/5 mr-2" />
-
-                        <button className="flex flex-col items-center justify-center gap-2 p-4 text-slate-500 hover:text-indigo-400 transition-colors">
-                            <ExternalLink className="w-5 h-5" />
-                            <span className="text-[10px] uppercase font-black">Details</span>
-                        </button>
-                    </div>
-                ))}
-
-                {products.length === 0 && (
-                    <div className="glass p-20 flex flex-col items-center justify-center text-center opacity-50">
-                        <Check className="w-16 h-16 text-emerald-500 mb-4" />
-                        <h2 className="text-xl font-bold text-white">All Clear!</h2>
-                        <p className="text-slate-400 text-sm">No pending products in the approval queue.</p>
-                    </div>
-                )}
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
         </div>
     );
-};
+}
 
-export default ProductApproval;

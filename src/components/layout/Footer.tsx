@@ -57,9 +57,9 @@ export default function Footer() {
     return (
         <footer className="bg-[#101827] text-white pt-20 pb-10 overflow-hidden relative">
             {/* Ambient Background Accents */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#2772A0] via-[#2772A0] to-[#2772A0]" />
-            <div className="absolute top-0 right-0 w-96 h-96 bg-[#2772A0]/5 blur-[120px] rounded-full -mr-48 -mt-48" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#2772A0]/5 blur-[120px] rounded-full -ml-48 -mb-48" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#10367D] via-[#10367D] to-[#10367D]" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#10367D]/5 blur-[120px] rounded-full -mr-48 -mt-48" />
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#10367D]/5 blur-[120px] rounded-full -ml-48 -mb-48" />
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-20">
@@ -70,7 +70,7 @@ export default function Footer() {
                                 <img src="/logo.png" alt="Novamart" className="w-full h-full object-contain" />
                             </div>
                             <span className="text-3xl font-black tracking-tighter">
-                                Novamart<span className="text-[#2772A0] text-[10px] align-top ml-1">®</span>
+                                Novamart<span className="text-[#10367D] text-[10px] align-top ml-1">®</span>
                             </span>
                         </Link>
 
@@ -83,7 +83,7 @@ export default function Footer() {
                                 <Link
                                     key={i}
                                     href={social.href}
-                                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:bg-[#2772A0] hover:text-white hover:border-[#2772A0] transition-all"
+                                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:bg-[#10367D] hover:text-white hover:border-[#10367D] transition-all"
                                 >
                                     <social.icon className="w-5 h-5" />
                                 </Link>
@@ -93,15 +93,15 @@ export default function Footer() {
                         {/* Contact Info Pills */}
                         <div className="space-y-3">
                             <div className="flex items-center gap-3 text-xs font-bold text-white/40 uppercase tracking-widest">
-                                <Mail className="w-4 h-4 text-[#2772A0]" />
+                                <Mail className="w-4 h-4 text-[#10367D]" />
                                 business@novamart.com
                             </div>
                             <div className="flex items-center gap-3 text-xs font-bold text-white/40 uppercase tracking-widest">
-                                <Phone className="w-4 h-4 text-[#2772A0]" />
+                                <Phone className="w-4 h-4 text-[#10367D]" />
                                 +91 1800-NOVAMART
                             </div>
                             <div className="flex items-center gap-3 text-xs font-bold text-white/40 uppercase tracking-widest">
-                                <MapPin className="w-4 h-4 text-[#2772A0]" />
+                                <MapPin className="w-4 h-4 text-[#10367D]" />
                                 Mumbai, Maharashtra, India
                             </div>
                         </div>
@@ -110,7 +110,7 @@ export default function Footer() {
                     {/* Links Sections */}
                     <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
                         <div>
-                            <h3 className="text-xs font-black text-[#2772A0] uppercase tracking-[0.2em] mb-8">Platform</h3>
+                            <h3 className="text-xs font-black text-[#10367D] uppercase tracking-[0.2em] mb-8">Platform</h3>
                             <ul className="space-y-4">
                                 {footerLinks.platform.map((link) => (
                                     <li key={link.name}>
@@ -122,7 +122,7 @@ export default function Footer() {
                             </ul>
                         </div>
                         <div>
-                            <h3 className="text-xs font-black text-[#2772A0] uppercase tracking-[0.2em] mb-8">Business</h3>
+                            <h3 className="text-xs font-black text-[#10367D] uppercase tracking-[0.2em] mb-8">Business</h3>
                             <ul className="space-y-4">
                                 {footerLinks.business.map((link) => (
                                     <li key={link.name}>
@@ -163,21 +163,21 @@ export default function Footer() {
                 {/* Trust Indicators Bar */}
                 <div className="py-8 border-t border-white/5 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                        <ShieldCheck className="w-8 h-8 text-[#2772A0]" />
+                        <ShieldCheck className="w-8 h-8 text-[#10367D]" />
                         <div>
                             <h4 className="text-[10px] font-black uppercase tracking-wider text-white">Escrow Guarded</h4>
                             <p className="text-[10px] text-white/40 font-bold">100% Payment Protection</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                        <Zap className="w-8 h-8 text-[#2772A0]" />
+                        <Zap className="w-8 h-8 text-[#10367D]" />
                         <div>
                             <h4 className="text-[10px] font-black uppercase tracking-wider text-white">Fast Logistics</h4>
                             <p className="text-[10px] text-white/40 font-bold">Fragile-Optimized Shipping</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                        <Globe className="w-8 h-8 text-[#2772A0]" />
+                        <Globe className="w-8 h-8 text-[#10367D]" />
                         <div>
                             <h4 className="text-[10px] font-black uppercase tracking-wider text-white">Global Reach</h4>
                             <p className="text-[10px] text-white/40 font-bold">Verified Manufacturer Network</p>
@@ -189,20 +189,13 @@ export default function Footer() {
                 <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex flex-col md:flex-row items-center gap-4 text-[10px] font-bold text-white/20 uppercase tracking-widest text-center md:text-left">
                         <span>© 2026 Novamart B2B2C Connection Platform.</span>
-                        <span className="hidden md:inline">|</span>
-                        <span>Built for Industrial Excellence in Mumbai, India</span>
+
+
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-                        <span className="text-[8px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                            Secure Transact
-                            <div className="w-1 h-1 bg-[#2772A0] rounded-full animate-pulse" />
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                        Made with <Heart className="w-3 h-3 text-[#2772A0] fill-current mx-1 inline" /> for Bharat
-                    </div>
+
                 </div>
             </div>
         </footer>
     );
 }
+

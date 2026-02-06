@@ -58,3 +58,4 @@ export const verifyOTP = async (phone, otp) => {
 };
 
 export default { sendOTP, verifyOTP };
+

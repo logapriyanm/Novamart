@@ -8,12 +8,19 @@ export default {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+            },
             colors: {
-                primary: "#CCDDEA",
-                secondary: "#2772A0",
-                accent: "#2772A0",
-                background: "#CCDDEA",
-                foreground: "#1E293B",
+                primary: "#10367D", // Brand Blue
+                secondary: "#74B4DA", // Secondary/Hover Blue
+                accent: "#74B4DA",
+                background: "#EBEBEB", // Site Background
+                surface: "#FFFFFF", // Box/Card Background
+                foreground: "#1E293B", // Primary Text
+                "text-secondary": "#475569",
+                "text-muted": "#94A3B8",
+                warning: "#F59E0B",
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

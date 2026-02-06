@@ -1,1 +1,0 @@
-export default function ManufacturerPage() { return <h1>Manufacturer Dashboard</h1>; }

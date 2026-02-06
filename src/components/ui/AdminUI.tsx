@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const Card = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => (
-    <div className={`bg-white/40 backdrop-blur-md border border-[#2772A0]/10 rounded-3xl p-6 ${className}`}>
+    <div className={`bg-white/40 backdrop-blur-md border border-[#10367D]/10 rounded-3xl p-6 ${className}`}>
         {children}
     </div>
 );
@@ -13,20 +13,20 @@ export const StatusBadge = ({ status }: { status: string }) => {
             case 'APPROVED':
             case 'COMPLETED':
                 // High emphasis Secondary
-                return 'bg-[#2772A0] text-[#CCDDEA] border-[#2772A0]';
+                return 'bg-[#10367D] text-white border-[#10367D]';
             case 'PENDING':
             case 'UNDER_VERIFICATION':
                 // Secondary border on Primary background
-                return 'bg-[#CCDDEA] text-[#2772A0] border-[#2772A0]/30';
+                return 'bg-[#EBEBEB] text-[#10367D] border-[#10367D]/30';
             case 'SUSPENDED':
             case 'REJECTED':
             case 'DISPUTED':
                 // Secondary text with subtle Secondary tint
-                return 'bg-[#2772A0]/5 text-[#2772A0] border-[#2772A0]/40 font-black';
+                return 'bg-[#10367D]/5 text-[#10367D] border-[#10367D]/40 font-black';
             case 'HOLD':
-                return 'bg-[#CCDDEA] text-[#2772A0]/60 border-[#2772A0]/10';
+                return 'bg-[#EBEBEB] text-[#10367D]/60 border-[#10367D]/10';
             default:
-                return 'bg-white/50 text-[#2772A0]/40 border-[#2772A0]/10';
+                return 'bg-white/50 text-[#10367D]/40 border-[#10367D]/10';
         }
     };
 
@@ -36,3 +36,4 @@ export const StatusBadge = ({ status }: { status: string }) => {
         </span>
     );
 };
+

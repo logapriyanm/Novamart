@@ -6,3 +6,4 @@ import DealerPage from '../page';
 export default function DealerDashboardPage() {
     return <DealerPage />;
 }
+

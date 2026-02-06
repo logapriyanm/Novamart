@@ -12,7 +12,7 @@ export default function RefundPolicyPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pt-24 pb-20 overflow-hidden">
+        <div className="min-h-screen bg-[#EBEBEB] pt-24 pb-20 overflow-hidden">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <motion.div
@@ -34,7 +34,7 @@ export default function RefundPolicyPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="lg:col-span-12 bg-white/60 backdrop-blur-2xl border border-[#2772A0]/10 rounded-[3rem] p-10 lg:p-16"
+                        className="lg:col-span-12 bg-white/60 backdrop-blur-2xl border border-[#10367D]/10 rounded-[3rem] p-10 lg:p-16"
                     >
                         <h2 className="text-3xl font-black text-[#1E293B] mb-8 uppercase tracking-tighter">The Returns Framework</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -90,7 +90,7 @@ export default function RefundPolicyPage() {
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="lg:col-span-12 bg-[#2772A0] p-10 lg:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10"
+                        className="lg:col-span-12 bg-[#10367D] p-10 lg:p-14 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10"
                     >
                         <div className="max-w-md">
                             <h2 className="text-2xl font-black uppercase tracking-widest mb-4">Refund Methodology</h2>
@@ -112,3 +112,4 @@ export default function RefundPolicyPage() {
         </div>
     );
 }
+

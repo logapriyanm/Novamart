@@ -31,3 +31,4 @@ router.post('/inventory/allocate', manufacturerController.allocateInventory);
 router.get('/analytics', manufacturerController.getManufacturerStats);
 
 export default router;
+

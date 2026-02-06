@@ -38,3 +38,4 @@ const auditLog = (action, entity) => {
 };
 
 export default auditLog;
+

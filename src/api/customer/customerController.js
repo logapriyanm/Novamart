@@ -90,3 +90,4 @@ export default {
     rateService,
     raiseOrderDispute
 };
+

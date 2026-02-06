@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import prisma from './lib/prisma.js';
 
 // Route Imports
@@ -11,15 +13,69 @@ import manufacturerRoutes from './api/manufacturer/manufacturerRoutes.js';
 import dealerRoutes from './api/dealer/dealerRoutes.js';
 import customerRoutes from './api/customer/customerRoutes.js';
 import trackingRoutes from './api/tracking/trackingRoutes.js';
+import chatRoutes from './api/chat/chatRoutes.js';
+import Message from './models/Message.js';
+import Chat from './models/Chat.js';
 
 dotenv.config();
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Socket.IO Logic
+io.on('connection', (socket) => {
+    console.log(`🔌 New Connection: ${socket.id}`);
+
+    socket.on('join-room', (roomId) => {
+        socket.join(roomId);
+        console.log(`👤 User joined room: ${roomId}`);
+    });
+
+    socket.on('chat:message', async (data) => {
+        try {
+            const { chatId, message, senderId, senderRole } = data;
+
+            // 1. Persist to MongoDB
+            const newMessage = new Message({
+                chatId,
+                message,
+                senderId,
+                senderRole
+            });
+            await newMessage.save();
+
+            // 2. Update Chat's last message
+            await Chat.findByIdAndUpdate(chatId, {
+                lastMessage: {
+                    text: message,
+                    senderId,
+                    createdAt: new Date()
+                }
+            });
+
+            // 3. Broadcast to Room
+            io.to(chatId).emit('chat:message', newMessage);
+        } catch (error) {
+            console.error('❌ Socket Message Error:', error);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`🚫 Disconnected: ${socket.id}`);
+    });
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -28,11 +84,12 @@ app.use('/api/manufacturer', manufacturerRoutes);
 app.use('/api/dealer', dealerRoutes);
 app.use('/api/customer', customerRoutes);
 app.use('/api/tracking', trackingRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
-        message: 'Novamart API is running',
+        message: 'Novamart API + Socket.IO is running',
         db: 'PostgreSQL Connected (Prisma)'
     });
 });
@@ -41,16 +98,15 @@ app.get('/api/health', (req, res) => {
 const startServer = async () => {
     try {
         if (process.env.MONGODB_URI) {
-            // Non-blocking connect
-            mongoose.connect(process.env.MONGODB_URI)
-                .then(() => console.log('✅ Connected to MongoDB (Tracking)'))
-                .catch(err => console.error('⚠️ MongoDB Connection Failed (Tracking is disabled):', err.message));
-        } else {
-            console.log('ℹ️ MongoDB URI not provided. Tracking disabled.');
+            mongoose.connect(process.env.MONGODB_URI, {
+                serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of hanging
+            })
+                .then(() => console.log('✅ Connected to MongoDB (Chat & Tracking)'))
+                .catch(err => console.error('⚠️ MongoDB Connection Failed:', err.message));
         }
 
-        app.listen(PORT, () => {
-            console.log(`🚀 API Server running on http://localhost:${PORT}`);
+        httpServer.listen(PORT, () => {
+            console.log(`🚀 Server running on http://localhost:${PORT}`);
         });
     } catch (error) {
         console.error('❌ Server startup failed:', error);
@@ -58,3 +114,4 @@ const startServer = async () => {
 };
 
 startServer();
+
