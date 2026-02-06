@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, MoreHorizontal } from 'lucide-react';
+import { FaStar as Star, FaEllipsisH as MoreHorizontal } from 'react-icons/fa';
 
 interface ProductCardProps {
     image: string;

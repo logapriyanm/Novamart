@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Sidebar from '../../../src/components/admin/Sidebar';
-import { Bell, Search, ShieldCheck, Menu } from 'lucide-react';
+import { FaBell as Bell, FaSearch as Search, FaShieldAlt as ShieldCheck, FaBars as Menu } from 'react-icons/fa';
 
 export default function ManufacturerLayout({
     children,

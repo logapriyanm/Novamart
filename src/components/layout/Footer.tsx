@@ -3,18 +3,18 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-    Facebook,
-    Twitter,
-    Linkedin,
-    Youtube,
-    ShieldCheck,
-    Globe,
-    Zap,
-    Heart,
-    Mail,
-    Phone,
-    MapPin
-} from 'lucide-react';
+    FaFacebook as Facebook,
+    FaTwitter as Twitter,
+    FaLinkedin as Linkedin,
+    FaYoutube as Youtube,
+    FaShieldAlt as ShieldCheck,
+    FaGlobe as Globe,
+    FaBolt as Zap,
+    FaHeart as Heart,
+    FaEnvelope as Mail,
+    FaPhoneAlt as Phone,
+    FaMapMarkerAlt as MapPin
+} from 'react-icons/fa';
 
 const footerLinks = {
     platform: [

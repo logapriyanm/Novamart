@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star, Quote } from 'lucide-react';
+import { FaStar as Star, FaQuoteLeft as Quote } from 'react-icons/fa';
 
 export type TestimonialVariant = 'CENTRIC' | 'QUOTE_FEATURE' | 'HORIZONTAL' | 'CLEAN';
 

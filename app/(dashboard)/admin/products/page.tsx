@@ -3,12 +3,12 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    Check,
-    X,
-    ExternalLink,
-    FileText,
-    AlertCircle
-} from 'lucide-react';
+    FaCheck as Check,
+    FaTimes as X,
+    FaExternalLinkAlt as ExternalLink,
+    FaFileAlt as FileText,
+    FaExclamationCircle as AlertCircle
+} from 'react-icons/fa';
 
 const products = [
     {

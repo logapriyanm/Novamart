@@ -3,7 +3,7 @@
 import React from 'react';
 import { ProductFilterSidebar } from '../ui/ProductFilterSidebar';
 import { ProductManagementCard } from '../ui/ProductManagementCard';
-import { Search, Plus, Grid, List as ListIcon, ChevronRight } from 'lucide-react';
+import { FaSearch as Search, FaPlus as Plus, FaTh as Grid, FaList as ListIcon, FaChevronRight as ChevronRight } from 'react-icons/fa';
 
 const mockProducts = [
     {

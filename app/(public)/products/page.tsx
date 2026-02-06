@@ -2,7 +2,7 @@
 
 import React from 'react';
 import CustomerProductCard from '../../../src/components/ui/CustomerProductCard';
-import { Search, Filter, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { FaSearch as Search, FaFilter as Filter, FaSlidersH as SlidersHorizontal, FaMagic as Sparkles } from 'react-icons/fa';
 
 const allProducts = [
     {

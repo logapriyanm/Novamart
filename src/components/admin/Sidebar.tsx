@@ -5,23 +5,22 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    LayoutDashboard,
-    Users,
-    Factory,
-    Store,
-    CheckCircle2,
-    ShoppingCart,
-    Wallet,
-    AlertTriangle,
-    ShieldAlert,
-    Percent,
-    Award,
-    BarChart3,
-    History,
-    Settings,
-    ShieldCheck,
-    Grid
-} from 'lucide-react';
+    FaThLarge as LayoutDashboard,
+    FaUsers as Users,
+    FaIndustry as Factory,
+    FaStore as Store,
+    FaCheckCircle as CheckCircle2,
+    FaShoppingCart as ShoppingCart,
+    FaWallet as Wallet,
+    FaExclamationTriangle as AlertTriangle,
+    FaShieldAlt as ShieldAlert,
+    FaPercentage as Percent,
+    FaAward as Award,
+    FaChartBar as BarChart3,
+    FaHistory as History,
+    FaCog as Settings,
+    FaTh as Grid
+} from 'react-icons/fa';
 
 const adminMenuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },

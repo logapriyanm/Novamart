@@ -4,17 +4,19 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Search,
-    ShoppingBag,
-    User,
-    Menu,
-    X,
-    ArrowRight,
-    ShieldCheck,
-    Globe,
-    ChevronDown
-} from 'lucide-react';
+    FaSearch as Search,
+    FaShoppingBag as ShoppingBag,
+    FaUser as User,
+    FaBars as Menu,
+    FaTimes as X,
+    FaArrowRight as ArrowRight,
+    FaShieldAlt as ShieldCheck,
+    FaGlobe as Globe,
+    FaChevronDown as ChevronDown
+} from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
+import Logo from "../../../assets/Novamart.png"
+
 
 export default function Navbar() {
     const router = useRouter();
@@ -41,7 +43,7 @@ export default function Navbar() {
     return (
         <header className="fixed top-0 left-0 right-0 z-[100] bg-white border-b border-slate-200">
             {/* Top Row: Logo, Search, User Actions */}
-            <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4">
+            <div className="w-full mx-auto px-4 lg:px-8 py-4">
                 <div className="flex items-center justify-between gap-4 lg:gap-8">
                     {/* Brand & Mobile Toggle */}
                     <div className="flex items-center gap-4">
@@ -52,11 +54,11 @@ export default function Navbar() {
                             <Menu className="w-6 h-6 text-slate-600" />
                         </button>
                         <Link href="/" className="flex items-center gap-2 group">
-                            <div className="w-10 h-10 bg-[#2772A0] rounded-xl flex items-center justify-center p-2 shadow-lg shadow-[#2772A0]/20">
-                                <img src="/logo.png" alt="Novamart" className="w-full h-full object-contain brightness-0 invert" />
+                            <div className="w-10 h-10  flex items-center justify-center bg-transparent">
+                                <img src={Logo.src} alt="Novamart" className="w-full h-full object-contain" />
                             </div>
                             <span className="text-2xl font-black text-[#1E293B] tracking-tighter hidden sm:block">
-                                Novamart<span className="text-[#2772A0] text-[8px] align-top ml-1">®</span>
+                                Novamart
                             </span>
                         </Link>
                     </div>

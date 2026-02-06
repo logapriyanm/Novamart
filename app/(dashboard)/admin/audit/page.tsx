@@ -3,12 +3,12 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    History,
-    Search,
-    Shield,
-    User,
-    ExternalLink
-} from 'lucide-react';
+    FaHistory as History,
+    FaSearch as Search,
+    FaShieldAlt as Shield,
+    FaUser as User,
+    FaExternalLinkAlt as ExternalLink
+} from 'react-icons/fa';
 
 const logs = [
     { id: '1', admin: 'Super Admin', action: 'APPROVE_PRODUCT', entity: 'PRODUCT', entityId: 'P-101', time: '2 mins ago' },

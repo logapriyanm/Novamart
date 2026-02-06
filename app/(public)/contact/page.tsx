@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, MessageSquare, Send, Globe, Github, Twitter } from 'lucide-react';
+import { FaEnvelope as Mail, FaPhoneAlt as Phone, FaMapMarkerAlt as MapPin, FaCommentAlt as MessageSquare, FaPaperPlane as Send, FaGlobe as Globe, FaGithub as Github, FaTwitter as Twitter } from 'react-icons/fa';
 
 const contactMethods = [
     {

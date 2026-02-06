@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, ShieldCheck, Lock, Scale, AlertCircle } from 'lucide-react';
+import { FaFileAlt as FileText, FaShieldAlt as ShieldCheck, FaLock as Lock, FaBalanceScale as Scale, FaExclamationCircle as AlertCircle } from 'react-icons/fa';
 
 export default function TermsPage() {
     const sections = [

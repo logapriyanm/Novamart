@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Eye, Lock, Database, Search } from 'lucide-react';
+import { FaShieldAlt as Shield, FaEye as Eye, FaLock as Lock, FaDatabase as Database, FaSearch as Search } from 'react-icons/fa';
 
 export default function PrivacyPage() {
     const pillars = [

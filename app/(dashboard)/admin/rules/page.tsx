@@ -3,13 +3,13 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    Percent,
-    Map,
-    Plus,
-    Save,
-    CheckCircle,
-    FileText
-} from 'lucide-react';
+    FaPercentage as Percent,
+    FaMapMarkedAlt as Map,
+    FaPlus as Plus,
+    FaSave as Save,
+    FaCheckCircle as CheckCircle,
+    FaFileAlt as FileText
+} from 'react-icons/fa';
 
 const MarginTaxRules = () => {
     return (

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, Mail, CheckCircle, Home } from 'lucide-react';
+import { FaClock as Clock, FaEnvelope as Mail, FaCheckCircle as CheckCircle, FaHome as Home } from 'react-icons/fa';
 import Link from 'next/link';
 
 export default function VerificationPendingPage() {

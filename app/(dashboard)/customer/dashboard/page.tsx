@@ -3,17 +3,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-    Package,
-    Heart,
-    Settings,
-    CreditCard,
-    MapPin,
-    ShoppingBag,
-    Star,
-    TrendingUp,
-    ChevronRight,
-    ArrowUpRight
-} from 'lucide-react';
+    FaBox as Package,
+    FaHeart as Heart,
+    FaCog as Settings,
+    FaCreditCard as CreditCard,
+    FaMapMarkerAlt as MapPin,
+    FaShoppingBag as ShoppingBag,
+    FaStar as Star,
+    FaChartLine as TrendingUp,
+    FaChevronRight as ChevronRight,
+    FaExternalLinkAlt as ArrowUpRight
+} from 'react-icons/fa';
 import { Card, StatusBadge } from '../../../../src/components/ui/AdminUI';
 
 const recentOrders = [

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldAlert, LogOut, Home } from 'lucide-react';
+import { FaShieldAlt as ShieldAlert, FaSignOutAlt as LogOut, FaHome as Home } from 'react-icons/fa';
 import Link from 'next/link';
 
 export default function SuspendedPage() {

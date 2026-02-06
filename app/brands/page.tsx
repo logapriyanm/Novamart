@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { Star, ShieldCheck, ArrowRight } from 'lucide-react';
+import { FaStar as Star, FaShieldAlt as ShieldCheck, FaArrowRight as ArrowRight } from 'react-icons/fa';
 
 export const metadata: Metadata = {
     title: 'Verified Global Brands | Novamart B2B2C',

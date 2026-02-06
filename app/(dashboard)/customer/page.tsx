@@ -2,14 +2,14 @@
 
 import React from 'react';
 import {
-    ShoppingBag,
-    Heart,
-    MapPin,
-    MessageSquare,
-    Package,
-    Clock,
-    Shield
-} from 'lucide-react';
+    FaShoppingBag as ShoppingBag,
+    FaHeart as Heart,
+    FaMapMarkerAlt as MapPin,
+    FaCommentAlt as MessageSquare,
+    FaBox as Package,
+    FaClock as Clock,
+    FaShieldAlt as Shield
+} from 'react-icons/fa';
 import { Card, StatusBadge } from '../../../src/components/ui/AdminUI';
 
 const recentOrders = [

@@ -3,12 +3,12 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    Store,
-    MapPin,
-    TrendingUp,
-    UserCheck,
-    Ban
-} from 'lucide-react';
+    FaStore as Store,
+    FaMapMarkerAlt as MapPin,
+    FaChartLine as TrendingUp,
+    FaUserCheck as UserCheck,
+    FaBan as Ban
+} from 'react-icons/fa';
 
 const dealers = [
     { id: 'D-882', name: 'Central Auto Spares', region: 'Germany / EU', orders: 1240, status: 'ACTIVE', revenue: '$4.2M' },

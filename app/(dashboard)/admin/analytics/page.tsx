@@ -2,12 +2,12 @@
 
 import React from 'react';
 import {
-    BarChart3,
-    TrendingUp,
-    Map,
-    MousePointer2,
-    Users
-} from 'lucide-react';
+    FaChartBar as BarChart3,
+    FaChartLine as TrendingUp,
+    FaMapMarkedAlt as Map,
+    FaMousePointer as MousePointer2,
+    FaUsers as Users
+} from 'react-icons/fa';
 import {
     BarChart,
     Bar,

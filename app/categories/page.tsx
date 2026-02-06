@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { Filter, Grid, List as ListIcon, ChevronDown, Plus } from 'lucide-react';
+import { FaFilter as Filter, FaTh as Grid, FaList as ListIcon, FaChevronDown as ChevronDown, FaPlus as Plus } from 'react-icons/fa';
 
 export const metadata: Metadata = {
     title: 'Industrial Categories | Novamart B2B2C',

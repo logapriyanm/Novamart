@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, ChevronDown, Filter } from 'lucide-react';
+import { FaSearch as Search, FaTimes as X, FaChevronDown as ChevronDown, FaFilter as Filter } from 'react-icons/fa';
 
 const categories = [
     { name: 'Grocery', count: null },

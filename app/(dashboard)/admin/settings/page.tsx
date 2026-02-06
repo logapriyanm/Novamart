@@ -3,12 +3,12 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    Award,
-    Settings,
-    Search,
-    Activity,
-    BarChart4
-} from 'lucide-react';
+    FaAward as Award,
+    FaCog as Settings,
+    FaSearch as Search,
+    FaChartLine as Activity,
+    FaChartBar as BarChart4
+} from 'react-icons/fa';
 
 const PlatformSettings = () => {
     return (

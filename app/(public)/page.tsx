@@ -1,7 +1,22 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import CustomerProductCard from '../../src/components/ui/CustomerProductCard';
-import { Sparkles, ChevronRight, Zap, ShieldCheck, Globe, Trophy, ArrowRight } from 'lucide-react';
+import {
+    FaArrowRight as ArrowRight,
+    FaCheckCircle as CheckCircle2,
+    FaShieldAlt as ShieldCheck,
+    FaTruck as Truck,
+    FaGlobe as Globe,
+    FaStar as Star,
+    FaPlay as PlayCircle,
+    FaClock as Clock,
+    FaUsers as Users,
+    FaBuilding as Building2,
+    FaTrophy as Trophy,
+    FaMagic as Sparkles,
+    FaChevronRight as ChevronRight,
+    FaBolt as Zap
+} from 'react-icons/fa';
 
 export const metadata: Metadata = {
     title: 'Novamart | India\'s Premier Home Appliance Hub',

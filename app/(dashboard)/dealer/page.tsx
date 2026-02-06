@@ -2,17 +2,17 @@
 
 import React from 'react';
 import {
-    ShoppingCart,
-    Box,
-    History,
-    AlertCircle,
-    Store,
-    ArrowUpRight,
-    TrendingUp,
-    ChevronRight,
-    Plus,
-    Quote
-} from 'lucide-react';
+    FaShoppingCart as ShoppingCart,
+    FaBox as Box,
+    FaHistory as History,
+    FaExclamationCircle as AlertCircle,
+    FaStore as Store,
+    FaExternalLinkAlt as ArrowUpRight,
+    FaChartLine as TrendingUp,
+    FaChevronRight as ChevronRight,
+    FaPlus as Plus,
+    FaQuoteLeft as Quote
+} from 'react-icons/fa';
 import { Card, StatusBadge } from '../../../src/components/ui/AdminUI';
 import { TestimonialCard } from '../../../src/components/ui/TestimonialCard';
 

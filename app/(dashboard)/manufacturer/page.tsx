@@ -2,17 +2,17 @@
 
 import React from 'react';
 import {
-    Package,
-    Users,
-    TrendingUp,
-    Truck,
-    Plus,
-    ChevronRight,
-    ArrowUpRight,
-    Settings,
-    Clock,
-    Quote
-} from 'lucide-react';
+    FaBoxOpen as Package,
+    FaUsers as Users,
+    FaChartLine as TrendingUp,
+    FaTruck as Truck,
+    FaPlus as Plus,
+    FaChevronRight as ChevronRight,
+    FaExternalLinkAlt as ArrowUpRight,
+    FaCog as Settings,
+    FaClock as Clock,
+    FaQuoteLeft as Quote
+} from 'react-icons/fa';
 import { Card, StatusBadge } from '../../../src/components/ui/AdminUI';
 import { motion } from 'framer-motion';
 import { TestimonialCard } from '../../../src/components/ui/TestimonialCard';

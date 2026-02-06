@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Factory,
-    Store,
-    User,
-    ArrowRight,
-    ArrowLeft,
-    ShieldCheck,
-    CheckCircle2
-} from 'lucide-react';
+    FaIndustry as Factory,
+    FaStore as Store,
+    FaUser as User,
+    FaArrowRight as ArrowRight,
+    FaArrowLeft as ArrowLeft,
+    FaShieldAlt as ShieldCheck,
+    FaCheckCircle as CheckCircle2
+} from 'react-icons/fa';
 import Link from 'next/link';
 
 type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';

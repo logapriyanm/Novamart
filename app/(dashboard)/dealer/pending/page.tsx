@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, ShieldCheck, Mail, Phone, ArrowLeft, FileSearch } from 'lucide-react';
+import { FaClock as Clock, FaShieldAlt as ShieldCheck, FaEnvelope as Mail, FaPhoneAlt as Phone, FaArrowLeft as ArrowLeft, FaFileContract as FileSearch } from 'react-icons/fa';
 import Link from 'next/link';
 
 export default function DealerPendingPage() {

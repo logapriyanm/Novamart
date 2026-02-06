@@ -3,14 +3,14 @@
  */
 import React from 'react';
 import {
-    TrendingUp,
-    Wallet,
-    AlertCircle,
-    Clock,
-    ShieldAlert,
-    ArrowUpRight,
-    ArrowDownRight
-} from 'lucide-react';
+    FaChartLine as TrendingUp,
+    FaWallet as Wallet,
+    FaExclamationCircle as AlertCircle,
+    FaClock as Clock,
+    FaShieldAlt as ShieldAlert,
+    FaArrowUp as ArrowUpRight,
+    FaArrowDown as ArrowDownRight
+} from 'react-icons/fa';
 
 const stats = [
     { name: 'Total Platform GMV', value: '₹12.4M', change: '+12.5%', isUp: true, icon: TrendingUp },

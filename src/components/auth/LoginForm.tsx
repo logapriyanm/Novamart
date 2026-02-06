@@ -3,13 +3,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Mail,
-    Lock,
-    Phone,
-    ArrowRight,
-    Smartphone,
-    Loader2
-} from 'lucide-react';
+    FaEnvelope as Mail,
+    FaLock as Lock,
+    FaPhoneAlt as Phone,
+    FaArrowRight as ArrowRight,
+    FaMobileAlt as Smartphone,
+    FaSpinner as Loader2
+} from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 

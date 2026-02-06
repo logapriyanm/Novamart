@@ -3,13 +3,13 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    Factory,
-    MapPin,
-    Package,
-    Globe,
-    CheckCircle,
-    XCircle
-} from 'lucide-react';
+    FaIndustry as Factory,
+    FaMapMarkerAlt as MapPin,
+    FaBox as Package,
+    FaGlobe as Globe,
+    FaCheckCircle as CheckCircle,
+    FaTimesCircle as XCircle
+} from 'react-icons/fa';
 
 const manufacturers = [
     { id: 'M-001', name: 'Precision Parts Corp', region: 'North America', status: 'ACTIVE', products: 12, quality: '98%' },

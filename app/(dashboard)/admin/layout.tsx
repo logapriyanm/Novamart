@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Sidebar from '../../../src/components/admin/Sidebar';
-import { Bell, Search, ShieldCheck, Menu, X } from 'lucide-react';
+import { FaBell as Bell, FaSearch as Search, FaShieldAlt as ShieldCheck, FaBars as Menu, FaTimes as X } from 'react-icons/fa';
 
 export default function AdminLayout({
     children,
@@ -57,7 +57,7 @@ export default function AdminLayout({
 
                         <button className="bg-[#2772A0] hover:bg-[#1E5F86] text-[#CCDDEA] text-[10px] lg:text-sm font-bold px-3 lg:px-4 py-2 rounded-xl shadow-lg shadow-[#2772A0]/20 transition-all uppercase tracking-wider">
                             Action
-                            
+
                         </button>
                     </div>
                 </header>
@@ -65,7 +65,7 @@ export default function AdminLayout({
                 {/* Admin Content Area */}
                 <main className="flex-1 p-4 lg:p-8 overflow-y-auto bg-white/20">
                     {children}
-                </main>   
+                </main>
             </div>
         </div>
     );

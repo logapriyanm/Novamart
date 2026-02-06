@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, ShoppingCart, Star, ShieldCheck, X } from 'lucide-react';
+import { FaHeart as Heart, FaShoppingCart as ShoppingCart, FaStar as Star, FaShieldAlt as ShieldCheck, FaTimes as X } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 
 interface ProductCardProps {

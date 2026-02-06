@@ -3,12 +3,12 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    MoreVertical,
-    Search,
-    Filter,
-    Download,
-    AlertCircle
-} from 'lucide-react';
+    FaEllipsisV as MoreVertical,
+    FaSearch as Search,
+    FaFilter as Filter,
+    FaDownload as Download,
+    FaExclamationCircle as AlertCircle
+} from 'react-icons/fa';
 
 const users = [
     { id: '1', name: 'Global Manufacturing Inc.', email: 'admin@globalmfg.com', role: 'MANUFACTURER', status: 'ACTIVE', risk: 'Low' },

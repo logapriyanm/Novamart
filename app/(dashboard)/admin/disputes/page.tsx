@@ -3,12 +3,12 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    ShieldAlert,
-    MapPin,
-    MessageSquare,
-    Scale,
-    Hammer
-} from 'lucide-react';
+    FaShieldAlt as ShieldAlert,
+    FaMapMarkerAlt as MapPin,
+    FaCommentAlt as MessageSquare,
+    FaBalanceScale as Scale,
+    FaGavel as Hammer
+} from 'react-icons/fa';
 
 const disputes = [
     { id: 'DIS-001', order: 'ORD-1229', parties: 'SteelCorp vs Global Dealer', type: 'Quality Mismatch', amount: '$4,500.00', status: 'DISPUTED' },

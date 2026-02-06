@@ -3,12 +3,12 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    Wallet,
-    ArrowRight,
-    Lock,
-    CheckCircle2,
-    AlertCircle
-} from 'lucide-react';
+    FaWallet as Wallet,
+    FaArrowRight as ArrowRight,
+    FaLock as Lock,
+    FaCheckCircle as CheckCircle2,
+    FaExclamationCircle as AlertCircle
+} from 'react-icons/fa';
 
 const escrows = [
     { id: 'ESC-99A', order: 'ORD-881', dealer: 'Mumbai Spares', manufacturer: 'TechSystems', amount: '$12,400.00', status: 'HOLD' },

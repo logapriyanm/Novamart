@@ -2,16 +2,16 @@
 
 import React from 'react';
 import {
-    Search,
-    Filter,
-    Download,
-    ShoppingCart,
-    ExternalLink,
-    MoreVertical,
-    Clock,
-    CheckCircle2,
-    XCircle
-} from 'lucide-react';
+    FaSearch as Search,
+    FaFilter as Filter,
+    FaDownload as Download,
+    FaShoppingCart as ShoppingCart,
+    FaExternalLinkAlt as ExternalLink,
+    FaEllipsisV as MoreVertical,
+    FaClock as Clock,
+    FaCheckCircle as CheckCircle2,
+    FaTimesCircle as XCircle
+} from 'react-icons/fa';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 
 const orders = [

@@ -3,13 +3,13 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    Award,
-    CheckCircle2,
-    ShieldCheck,
-    Star,
-    Zap,
-    Plus
-} from 'lucide-react';
+    FaAward as Award,
+    FaCheckCircle as CheckCircle2,
+    FaShieldAlt as ShieldCheck,
+    FaStar as Star,
+    FaBolt as Zap,
+    FaPlus as Plus
+} from 'react-icons/fa';
 
 const badges = [
     { id: '1', name: 'Verified Manufacturer', icon: ShieldCheck, color: 'text-indigo-400', users: 142 },

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Target, Eye, Shield, Users, Globe, Zap } from 'lucide-react';
+import { FaBullseye as Target, FaEye as Eye, FaShieldAlt as Shield, FaUsers as Users, FaGlobe as Globe, FaBolt as Zap } from 'react-icons/fa';
 
 const values = [
     {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCcw, Truck, CornerUpLeft, Clock, AlertTriangle } from 'lucide-react';
+import { FaSyncAlt as RefreshCcw, FaTruck as Truck, FaUndo as CornerUpLeft, FaClock as Clock, FaExclamationTriangle as AlertTriangle } from 'react-icons/fa';
 
 export default function RefundPolicyPage() {
     const steps = [

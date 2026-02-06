@@ -3,12 +3,12 @@
 import React from 'react';
 import { StatusBadge } from '../../../../src/components/ui/AdminUI';
 import {
-    ShieldAlert,
-    Activity,
-    UserX,
-    Zap,
-    Fingerprint
-} from 'lucide-react';
+    FaShieldAlt as ShieldAlert,
+    FaChartLine as Activity,
+    FaUserTimes as UserX,
+    FaBolt as Zap,
+    FaFingerprint as Fingerprint
+} from 'react-icons/fa';
 
 const risks = [
     { id: '1', target: 'Mumbai Spares', signal: 'Multi-IP Login', severity: 'HIGH', status: 'PENDING' },
