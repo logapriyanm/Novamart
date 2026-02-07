@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-        "./app/**/*.{js,ts,jsx,tsx,mdx}",
-        "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-        "./components/**/*.{js,ts,jsx,tsx,mdx}",
         "./src/**/*.{js,ts,jsx,tsx,mdx}",
     ],
     theme: {
@@ -11,15 +8,16 @@ export default {
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
             },
+            
             colors: {
-                primary: "#10367D", // Brand Blue
-                secondary: "#74B4DA", // Secondary/Hover Blue
-                accent: "#74B4DA",
-                background: "#EBEBEB", // Site Background
-                surface: "#FFFFFF", // Box/Card Background
-                foreground: "#1E293B", // Primary Text
-                "text-secondary": "#475569",
-                "text-muted": "#94A3B8",
+                primary: "#10367D", // Deep Navy
+                secondary: "#d3dbdfff", // Sky Blue
+                accent: "#10367D",
+                background: "#ebececff", // Sky Blue Background
+                surface: "#EBEBEB", // Light Gray Surface
+                foreground: "#101527", // Midnight Blue Text
+                "text-secondary": "#101527",
+                "text-muted": "#10367D",
                 warning: "#F59E0B",
             },
             backgroundImage: {
