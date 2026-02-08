@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import {
     FaUsers,
     FaUserShield,
@@ -14,23 +13,91 @@ import {
     FaBan,
     FaKey,
     FaEllipsisV,
-    FaFilter
+    FaFilter,
+    FaCheckCircle
 } from 'react-icons/fa';
 import Link from 'next/link';
-
-const systemUsers = [
-    { id: 'USR-001', name: 'Alex Thompson', role: 'ADMIN', email: 'alex.t@novamart.gov', status: 'Active', activity: '2m ago', avatar: 'AT' },
-    { id: 'USR-042', name: 'Elite Electronics', role: 'DEALER', email: 'ops@elite-mumbai.com', status: 'Active', activity: '1h ago', avatar: 'EE' },
-    { id: 'USR-089', name: 'Nexus Appliance Corp', role: 'MANUFACTURER', email: 'nexus.factory@nexus.com', status: 'Under Review', activity: 'Yesterday', avatar: 'NA' },
-    { id: 'USR-112', name: 'Sanjay Kumar', role: 'CUSTOMER', email: 'sanjay.k@gmail.com', status: 'Banned', activity: '3d ago', avatar: 'SK' },
-];
+import { adminService } from '../../../../lib/api/services/admin.service';
+import UserVerificationModal from '../../../../client/components/features/admin/UserVerificationModal';
+import { useSnackbar } from '../../../../client/context/SnackbarContext';
 
 export default function UserManagementPortal() {
     const [selectedRole, setSelectedRole] = useState('ALL');
+    const [users, setUsers] = useState<any[]>([]);
+    const [manufacturers, setManufacturers] = useState<any[]>([]);
+    const [dealers, setDealers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const filteredUsers = selectedRole === 'ALL'
-        ? systemUsers
-        : systemUsers.filter(u => u.role === selectedRole);
+    // Verification State
+    const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+    const [selectedEntity, setSelectedEntity] = useState<any>(null);
+    const [entityType, setEntityType] = useState<'MANUFACTURER' | 'DEALER'>('MANUFACTURER');
+
+    const { showSnackbar } = useSnackbar();
+
+    useEffect(() => {
+        fetchAllData();
+    }, []);
+
+    const fetchAllData = async () => {
+        try {
+            const [usersData, mfgData, dealersData] = await Promise.all([
+                adminService.getUsers(),
+                adminService.getManufacturers(),
+                adminService.getDealers()
+            ]);
+            setUsers(usersData || []);
+            setManufacturers(mfgData || []);
+            setDealers(dealersData || []);
+        } catch (error) {
+            console.error('Failed to fetch user data', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyClick = (entity: any, type: 'MANUFACTURER' | 'DEALER') => {
+        setSelectedEntity(entity);
+        setEntityType(type);
+        setVerifyModalOpen(true);
+    };
+
+    const confirmVerification = async (isVerified: boolean) => {
+        try {
+            if (entityType === 'MANUFACTURER') {
+                await adminService.verifyManufacturer(selectedEntity.id, isVerified);
+            } else {
+                await adminService.verifyDealer(selectedEntity.id, isVerified);
+            }
+            showSnackbar(`${entityType} ${isVerified ? 'Verified' : 'Rejected'} Successfully`, 'success');
+            fetchAllData(); // Refresh list
+        } catch (error) {
+            showSnackbar('Action Failed', 'error');
+            throw error;
+        }
+    };
+
+    // Derived list based on selected tab
+    const getDisplayedUsers = () => {
+        if (selectedRole === 'ALL') return users;
+        if (selectedRole === 'MANUFACTURER') return manufacturers.map(m => ({
+            ...m,
+            name: m.companyName,
+            role: 'MANUFACTURER',
+            email: m.user?.email, // Assuming relation exists from fetch
+            status: m.isVerified ? 'Active' : 'Under Review'
+        }));
+        if (selectedRole === 'DEALER') return dealers.map(d => ({
+            ...d,
+            name: d.businessName,
+            role: 'DEALER',
+            email: d.user?.email,
+            status: d.isVerified !== false ? 'Active' : 'Under Review' // Logic might vary
+        }));
+        return users.filter(u => u.role === selectedRole);
+    };
+
+    const displayedList = getDisplayedUsers();
 
     return (
         <div className="space-y-8 animate-fade-in pb-12">
@@ -45,12 +112,6 @@ export default function UserManagementPortal() {
                         <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">Identity <span className="text-[#10367D]">Oversight</span></h1>
                         <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Global User Directory & Privilege Governance</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="relative w-64">
-                            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-3 h-3" />
-                            <input type="text" placeholder="Search identities..." className="w-full bg-white border border-slate-100 rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:border-[#10367D]/30 shadow-sm" />
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -61,8 +122,8 @@ export default function UserManagementPortal() {
                         key={role}
                         onClick={() => setSelectedRole(role)}
                         className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedRole === role
-                                ? 'bg-[#10367D] text-white shadow-xl shadow-[#10367D]/20 scale-105'
-                                : 'bg-white text-slate-400 border border-slate-100 hover:border-[#10367D]/20'
+                            ? 'bg-[#10367D] text-white shadow-xl shadow-[#10367D]/20 scale-105'
+                            : 'bg-white text-slate-400 border border-slate-100 hover:border-[#10367D]/20'
                             }`}
                     >
                         {role}S
@@ -77,10 +138,9 @@ export default function UserManagementPortal() {
                         <FaUsers className="text-[#10367D]" />
                         Active Identity Ledger
                     </h2>
-                    <button className="text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:underline flex items-center gap-2">
-                        <FaFilter className="w-3 h-3" />
-                        Advanced Audit Filters
-                    </button>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        {displayedList.length} Entities Found
+                    </p>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -90,21 +150,22 @@ export default function UserManagementPortal() {
                                 <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Entity</th>
                                 <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Privilege Level</th>
                                 <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Protocol Status</th>
-                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Last Handshake</th>
                                 <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {filteredUsers.map((user) => (
+                            {loading ? (
+                                <tr><td colSpan={4} className="p-10 text-center text-xs font-bold uppercase text-slate-400">Loading Directory...</td></tr>
+                            ) : displayedList.map((user) => (
                                 <tr key={user.id} className="hover:bg-slate-50 group transition-colors">
                                     <td className="px-10 py-6">
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-2xl bg-[#10367D] flex items-center justify-center text-white text-xs font-black shadow-lg shadow-[#10367D]/10 group-hover:scale-110 transition-transform">
-                                                {user.avatar}
+                                                {(user.name || user.email || 'U').substring(0, 2).toUpperCase()}
                                             </div>
                                             <div>
-                                                <p className="text-sm font-black text-[#1E293B] leading-none">{user.name}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 mt-1.5">{user.email}</p>
+                                                <p className="text-sm font-black text-[#1E293B] leading-none">{user.name || 'Unknown User'}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 mt-1.5">{user.email || 'No Email'}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -118,24 +179,23 @@ export default function UserManagementPortal() {
                                         </div>
                                     </td>
                                     <td className="px-10 py-6 text-center">
-                                        <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${user.status === 'Active' ? 'bg-emerald-100 text-emerald-700' :
-                                                user.status === 'Banned' ? 'bg-rose-100 text-rose-700' :
+                                        <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider ${(user.status === 'Active' || user.isVerified) ? 'bg-emerald-100 text-emerald-700' :
+                                                (user.status === 'Banned' || user.isVerified === false) ? 'bg-rose-100 text-rose-700' :
                                                     'bg-amber-100 text-amber-700'
                                             }`}>
-                                            {user.status}
+                                            {user.status || (user.isVerified ? 'Active' : 'Pending')}
                                         </span>
                                     </td>
-                                    <td className="px-10 py-6 text-center">
-                                        <div className="flex flex-col items-center">
-                                            <span className="text-xs font-bold text-slate-600">{user.activity}</span>
-                                            <span className="text-[8px] font-black text-slate-400 uppercase mt-0.5 tracking-widest">Via Web-Terminal</span>
-                                        </div>
-                                    </td>
                                     <td className="px-10 py-6 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button title="Reset Auth" className="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-[#10367D] hover:text-white transition-all"><FaKey className="w-3.5 h-3.5" /></button>
-                                            <button title="Ban User" className="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"><FaBan className="w-3.5 h-3.5" /></button>
-                                            <button title="More Options" className="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-all"><FaEllipsisV className="w-3.5 h-3.5" /></button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            {(selectedRole === 'MANUFACTURER' || selectedRole === 'DEALER') && !user.isVerified && (
+                                                <button
+                                                    onClick={() => handleVerifyClick(user, selectedRole as any)}
+                                                    className="px-3 py-1.5 rounded-lg bg-[#10367D] text-white text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-transform"
+                                                >
+                                                    Verify
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -143,15 +203,15 @@ export default function UserManagementPortal() {
                         </tbody>
                     </table>
                 </div>
-
-                <div className="p-10 border-t border-slate-50 bg-slate-50/50 flex justify-center">
-                    <p className="text-[10px] font-black text-slate-400 flex items-center gap-2 uppercase tracking-[0.2em]">
-                        <FaRegClock className="text-[#10367D]" />
-                        Showing {filteredUsers.length} identities from NovaMart Global Directory
-                    </p>
-                </div>
             </div>
+
+            <UserVerificationModal
+                isOpen={verifyModalOpen}
+                onClose={() => setVerifyModalOpen(false)}
+                onConfirm={confirmVerification}
+                user={selectedEntity}
+                type={entityType}
+            />
         </div>
     );
 }
-

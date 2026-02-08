@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import trackingController from './trackingController.js';
+import trackingController from '../../controllers/trackingController.js';
 import authenticate, { authenticateOptional } from '../../middleware/auth.js';
 
 const router = express.Router();

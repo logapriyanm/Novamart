@@ -16,7 +16,16 @@ interface ProductData {
     images: string[];
     video: string;
     specifications: Record<string, string>;
-    [key: string]: any; // Allow flexibility for now
+    // New fields for appliances
+    subCategory?: string;
+    powerConsumption?: string;
+    capacity?: string;
+    energyRating?: string;
+    installationType?: string;
+    usageType?: string;
+    warranty?: string;
+    isSmart?: boolean;
+    [key: string]: any;
 }
 
 interface ProductFormContextType {
@@ -35,13 +44,16 @@ export function ProductFormProvider({ children }: { children: ReactNode }) {
         name: '',
         description: '',
         category: '',
+        subCategory: '',
         basePrice: '',
         moq: '1',
         colors: [],
         sizes: [],
         images: [],
         video: '',
-        specifications: {}
+        specifications: {},
+        // Defaults
+        isSmart: false
     });
 
     const updateProductData = (updates: Partial<ProductData>) => {
@@ -53,13 +65,10 @@ export function ProductFormProvider({ children }: { children: ReactNode }) {
         try {
             const data = { ...productData, ...overrides };
             await api.post('/products', data);
-            // Redirect or show success
-            // For now, we rely on the component to handle redirection or showing the success step
-            // But usually we might redirect to product list. 
-            // The Wizard has a "Success Step" (Step 7?) or just replaces content.
+            router.push('/manufacturer/products');
         } catch (error) {
             console.error('Failed to submit product:', error);
-            throw error; // Re-throw to let component handle UI error
+            throw error;
         } finally {
             setIsSubmitting(false);
         }

@@ -4,6 +4,7 @@
  */
 
 import prisma from '../lib/prisma.js';
+import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 
 class OrderService {
     /**
@@ -58,7 +59,7 @@ class OrderService {
                 include: { items: true }
             });
 
-            await tx.orderLog.create({
+            await tx.orderTimeline.create({
                 data: { orderId: order.id, fromState: 'CREATED', toState: 'CREATED', reason: 'Order initialized' }
             });
 
@@ -71,6 +72,13 @@ class OrderService {
                     reason: 'User placed a new order'
                 });
             }).catch(err => console.error('Background Audit Log Failed:', err));
+
+            // 5. Emit System Event for Notifications
+            systemEvents.emit(EVENTS.ORDER.PLACED, {
+                order,
+                customerId,
+                dealerId
+            });
 
             return order;
         });
@@ -94,7 +102,7 @@ class OrderService {
                 data: { orderId, amount: order.totalAmount, status: 'HOLD' }
             });
 
-            await tx.orderLog.create({
+            await tx.orderTimeline.create({
                 data: { orderId, fromState: 'CREATED', toState: 'PAID', reason: 'Payment confirmed. Funds held in escrow.' }
             });
 
@@ -106,6 +114,12 @@ class OrderService {
                     reason: 'Payment successful'
                 });
             }).catch(err => console.error('Background Audit Log Failed:', err));
+
+            // Emit System Event
+            systemEvents.emit(EVENTS.ORDER.PAID, {
+                orderId,
+                userId: order.customerId
+            });
 
             return updatedOrder;
         });
@@ -121,7 +135,7 @@ class OrderService {
                 data: { status: 'CONFIRMED' }
             });
 
-            await tx.orderLog.create({
+            await tx.orderTimeline.create({
                 data: { orderId, fromState: 'PAID', toState: 'CONFIRMED', reason: 'Dealer confirmed stock availability.' }
             });
 
@@ -139,13 +153,20 @@ class OrderService {
                 data: { status: 'SHIPPED' }
             });
 
-            await tx.orderLog.create({
+            await tx.orderTimeline.create({
                 data: {
                     orderId,
                     fromState: 'CONFIRMED',
                     toState: 'SHIPPED',
                     reason: `Order shipped via logistics partner. Tracking: ${trackingDetails}`
                 }
+            });
+
+            // Emit System Event
+            systemEvents.emit(EVENTS.ORDER.SHIPPED, {
+                orderId,
+                userId: order.customerId,
+                trackingDetails
             });
 
             return order;
@@ -162,13 +183,19 @@ class OrderService {
                 data: { status: 'DELIVERED' }
             });
 
-            await tx.orderLog.create({
+            await tx.orderTimeline.create({
                 data: {
                     orderId,
                     fromState: 'SHIPPED',
                     toState: 'DELIVERED',
                     reason: 'Logistics provider confirmed delivery.'
                 }
+            });
+
+            // Emit System Event
+            systemEvents.emit(EVENTS.ORDER.DELIVERED, {
+                orderId,
+                userId: order.customerId
             });
 
             return order;
@@ -207,7 +234,7 @@ class OrderService {
             });
 
             // 3. Log Action
-            await tx.orderLog.create({
+            await tx.orderTimeline.create({
                 data: { orderId, fromState: order.status, toState: 'CANCELLED', reason }
             });
 
@@ -219,7 +246,7 @@ class OrderService {
      * Logistics Hook: Update Tracking Information
      */
     async updateTracking(orderId, trackingNumber, carrier) {
-        return await prisma.orderLog.create({
+        return await prisma.orderTimeline.create({
             data: {
                 orderId,
                 fromState: 'SHIPPED',

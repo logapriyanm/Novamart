@@ -3,25 +3,40 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-    FaChartLine,
     FaExclamationTriangle,
-    FaCheckCircle,
-    FaTimesCircle,
     FaFilter,
-    FaSearch,
     FaGavel,
-    FaArrowRight,
-    FaInfoCircle
+    FaInfoCircle,
+    FaCheckCircle
 } from 'react-icons/fa';
+import { apiClient } from '@/lib/api/client';
 import Link from 'next/link';
 
-const performanceData = [
-    { id: 'MFP-101', name: 'Ultra-Quiet AC 2.0', returnRate: '1.2%', rating: 4.8, complaints: 2, status: 'STABLE' },
-    { id: 'MFP-102', name: 'Pro-Mix Grinder X', returnRate: '8.5%', rating: 3.2, complaints: 14, status: 'AT RISK' },
-    { id: 'MFP-105', name: 'Solar Panel 400W', returnRate: '0.5%', rating: 4.9, complaints: 0, status: 'STABLE' },
-];
-
 export default function AdminPerformanceMonitor() {
+    const [performanceData, setPerformanceData] = React.useState<any[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        const fetchPerformance = async () => {
+            try {
+                // Fetch products with analytics/risk flags
+                const data = await apiClient.get<any[]>('/admin/analytics/quality-audit');
+                setPerformanceData(data || []);
+            } catch (error) {
+                console.error('Failed to fetch performance data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchPerformance();
+    }, []);
+
+    const stats = [
+        { l: 'Avg Return Rate', v: '2.4%', c: 'text-[#10367D]', b: 'bg-blue-50' },
+        { l: 'Quality Compliance', v: '98.2%', c: 'text-emerald-600', b: 'bg-emerald-50' },
+        { l: 'Resolution Speed', v: '4.2h', c: 'text-indigo-600', b: 'bg-indigo-50' },
+    ];
+
     return (
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
             {/* Header */}
@@ -33,18 +48,16 @@ export default function AdminPerformanceMonitor() {
                 <div className="flex items-center gap-4 bg-white border border-slate-100 p-2 rounded-2xl">
                     <div className="px-4 py-2 bg-rose-50 border border-rose-100 rounded-xl">
                         <p className="text-[9px] font-black text-rose-500 uppercase">High Risk Alerts</p>
-                        <p className="text-xs font-black text-rose-600">03 Asset Flags</p>
+                        <p className="text-xs font-black text-rose-600">
+                            {performanceData.filter(p => p.status === 'AT_RISK').length.toString().padStart(2, '0')} Asset Flags
+                        </p>
                     </div>
                 </div>
             </div>
 
             {/* Performance Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                    { l: 'Avg Return Rate', v: '2.4%', c: 'text-[#10367D]', b: 'bg-blue-50' },
-                    { l: 'Quality Compliance', v: '98.2%', c: 'text-emerald-600', b: 'bg-emerald-50' },
-                    { l: 'Resolution Speed', v: '4.2h', c: 'text-indigo-600', b: 'bg-indigo-50' },
-                ].map((s, i) => (
+                {stats.map((s, i) => (
                     <div key={i} className={`p-10 rounded-[3.5rem] border border-slate-100 shadow-sm ${s.b}`}>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 italic">{s.l}</p>
                         <p className={`text-4xl font-black ${s.c}`}>{s.v}</p>
@@ -78,7 +91,11 @@ export default function AdminPerformanceMonitor() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {performanceData.map((item) => (
+                                {isLoading ? (
+                                    <tr><td colSpan={4} className="p-10 text-center animate-pulse">Scanning ecosystem units...</td></tr>
+                                ) : performanceData.length === 0 ? (
+                                    <tr><td colSpan={4} className="p-20 text-center italic text-slate-400 text-xs uppercase font-bold tracking-widest">No quality flags detected. Ecosystem stable.</td></tr>
+                                ) : performanceData.map((item) => (
                                     <tr key={item.id} className="group hover:bg-slate-50/30 transition-all">
                                         <td className="px-10 py-8">
                                             <h4 className="text-sm font-black text-[#1E293B]">{item.name}</h4>
@@ -86,8 +103,8 @@ export default function AdminPerformanceMonitor() {
                                         </td>
                                         <td className="px-10 py-8">
                                             <div className="space-y-1">
-                                                <p className="text-xs font-black text-[#1E293B]">{item.returnRate} Returns</p>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase">{item.complaints} Escalations</p>
+                                                <p className="text-xs font-black text-[#1E293B]">{item.returnRate || '0%'} Returns</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase">{item.complaints || 0} Escalations</p>
                                             </div>
                                         </td>
                                         <td className="px-10 py-8">

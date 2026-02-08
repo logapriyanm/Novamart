@@ -19,7 +19,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { CldUploadWidget } from 'next-cloudinary';
-import OptimizedImage from '../../../../client/components/common/OptimizedImage';
+import OptimizedImage from '../../../../client/components/ui/OptimizedImage';
 
 export default function ManufacturerComplianceSettings() {
     const [isSaving, setIsSaving] = useState(false);

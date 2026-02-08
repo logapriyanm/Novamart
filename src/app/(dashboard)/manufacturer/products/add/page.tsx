@@ -6,13 +6,16 @@ import {
     FaCheck
 } from 'react-icons/fa';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import StepMedia from '../../../../../client/components/dashboard/manufacturer/product-form/StepMedia';
-import StepGeneral from '../../../../../client/components/dashboard/manufacturer/product-form/StepGeneral';
-import StepPricing from '../../../../../client/components/dashboard/manufacturer/product-form/StepPricing';
-import StepSpecs from '../../../../../client/components/dashboard/manufacturer/product-form/StepSpecs';
-import StepCompliance from '../../../../../client/components/dashboard/manufacturer/product-form/StepCompliance';
-import StepReview from '../../../../../client/components/dashboard/manufacturer/product-form/StepReview';
+import { apiClient } from '../../../../../lib/api/client';
+import { useSnackbar } from '../../../../../client/context/SnackbarContext';
+import StepMedia from '../../../../../client/components/features/dashboard/manufacturer/product-form/StepMedia';
+import StepGeneral from '../../../../../client/components/features/dashboard/manufacturer/product-form/StepGeneral';
+import StepPricing from '../../../../../client/components/features/dashboard/manufacturer/product-form/StepPricing';
+import StepSpecs from '../../../../../client/components/features/dashboard/manufacturer/product-form/StepSpecs';
+import StepCompliance from '../../../../../client/components/features/dashboard/manufacturer/product-form/StepCompliance';
+import StepReview from '../../../../../client/components/features/dashboard/manufacturer/product-form/StepReview';
 import { ProductFormProvider, useProductForm } from '../../../../../client/context/ProductFormContext';
 
 export default function ManufacturerAddProductPage() {
@@ -24,8 +27,23 @@ export default function ManufacturerAddProductPage() {
 }
 
 function ProductFormContent() {
+    const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
+    const [isVerified, setIsVerified] = useState<boolean | null>(null);
     const { submitProduct, isSubmitting } = useProductForm();
+    const { showSnackbar } = useSnackbar();
+
+    React.useEffect(() => {
+        const checkVerification = async () => {
+            try {
+                const response = await apiClient.get<any>('/manufacturer/profile');
+                setIsVerified(response.isVerified);
+            } catch (error) {
+                console.error('Failed to fetch verification status', error);
+            }
+        };
+        checkVerification();
+    }, []);
 
     const steps = [
         { id: 1, name: 'General Info' },
@@ -43,32 +61,44 @@ function ProductFormContent() {
         try {
             await submitProduct({ status });
             // Handle success (e.g. redirect or show success modal)
-            alert(status === 'DRAFT' ? 'Draft Saved!' : 'Product Submitted Successfully!');
+            showSnackbar(status === 'DRAFT' ? 'Draft Saved!' : 'Product Submitted Successfully!', 'success');
             if (status === 'PENDING') {
-                // Redirect or reset
-                // router.push('/manufacturer/products');
+                router.push('/manufacturer/products');
             }
         } catch (error) {
-            alert('Failed to save product');
+            showSnackbar('Failed to save product', 'error');
         }
     };
 
     return (
         <div className="max-w-7xl mx-auto space-y-8 pb-32 animate-fade-in relative min-h-screen">
             {/* Header */}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 text-[#1E293B]">
                 <nav className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
                     <Link href="/manufacturer/products" className="hover:text-[#0F6CBD]">Products</Link>
                     <span>/</span>
                     <span className="text-[#1E293B]">Add New Product</span>
                 </nav>
-                <div className="flex justify-between items-end">
-                    <h1 className="text-3xl font-black tracking-tight text-[#1E293B]">Create New Product</h1>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-black tracking-tight italic">Create New Product</h1>
+                    </div>
+                    {isVerified && (
+                        <div className="flex items-center gap-3 px-6 py-3 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                            <div className="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                                <FaCheckCircle className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Verified Account</p>
+                                <p className="text-[9px] font-bold text-emerald-600/70">Instant Go-Live Protocol Active</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Stepper (Image 1 Style) */}
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 sticky top-20 z-20">
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 sticky top-20 z-20">
                 <div className="flex items-center justify-between px-12 relative">
                     {/* Progress Lines */}
                     <div className="absolute left-16 right-16 top-5 h-1 bg-slate-100 -z-10">
@@ -161,7 +191,7 @@ function ProductFormContent() {
                                 disabled={isSubmitting}
                                 className="px-8 py-3 bg-[#0F6CBD] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isSubmitting ? 'Submitting...' : 'Submit for Approval'} <FaRocket className="w-3 h-3" />
+                                {isSubmitting ? 'Submitting...' : isVerified ? 'Publish Instantly' : 'Submit for Approval'} <FaRocket className="w-3 h-3" />
                             </button>
                         )}
                     </div>

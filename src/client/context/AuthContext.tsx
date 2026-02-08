@@ -2,13 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { authService } from '../../lib/api/services/auth.service';
 import { apiClient } from '../../lib/api/client';
+import { useSnackbar } from './SnackbarContext';
 import {
     User,
     LoginRequest,
     RegisterRequest,
-    AuthResponse,
-    ENDPOINTS
+    AuthResponse
 } from '../../lib/api/contract';
 
 interface AuthContextType {
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const { showSnackbar } = useSnackbar();
 
     // Hydrate session on mount
     useEffect(() => {
@@ -44,11 +46,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         try {
-            const userData = await apiClient.get<User>(ENDPOINTS.AUTH.ME);
+            const userData = await authService.getCurrentUser();
             setUser(userData);
         } catch (error) {
             console.error('Session hydration failed:', error);
-            // Token might be invalid/expired
             apiClient.setToken(null);
             setUser(null);
         } finally {
@@ -56,11 +57,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const handleAuthSuccess = (response: AuthResponse) => {
-        apiClient.setToken(response.token);
-        setUser(response.user);
+    const handleAuthSuccess = (response: any) => {
+        // response is the 'data' property from the standardized API response
+        // which contains { token, user } or just user depending on the endpoint
+        const token = response.token;
+        const user = response.user;
 
-        switch (response.user.role) {
+        if (token) apiClient.setToken(token);
+        if (user) setUser(user);
+
+        const role = user?.role || response.role;
+        switch (role) {
             case 'ADMIN': router.push('/admin/dashboard'); break;
             case 'MANUFACTURER': router.push('/manufacturer/dashboard'); break;
             case 'DEALER': router.push('/dealer/dashboard'); break;
@@ -71,10 +78,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const login = async (credentials: LoginRequest) => {
         setIsLoading(true);
         try {
-            const response = await apiClient.post<AuthResponse>(ENDPOINTS.AUTH.LOGIN, credentials);
+            const response = await authService.login(credentials);
             handleAuthSuccess(response);
+            showSnackbar('Login successful', 'success');
         } catch (error) {
             console.error('Login failed:', error);
+            showSnackbar('Invalid email or password', 'error');
             throw error;
         } finally {
             setIsLoading(false);
@@ -84,7 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const loginWithGoogle = async (idToken: string) => {
         setIsLoading(true);
         try {
-            const response = await apiClient.post<AuthResponse>(ENDPOINTS.AUTH.GOOGLE, { idToken });
+            const response = await authService.loginWithGoogle(idToken);
             handleAuthSuccess(response);
         } catch (error) {
             console.error('Google Login failed:', error);
@@ -97,7 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const loginWithPhone = async (phone: string, otp: string) => {
         setIsLoading(true);
         try {
-            const response = await apiClient.post<AuthResponse>(ENDPOINTS.AUTH.LOGIN_PHONE, { phone, otp });
+            const response = await authService.loginWithPhone(phone, otp);
             handleAuthSuccess(response);
         } catch (error) {
             console.error('Phone Login failed:', error);
@@ -110,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const sendOtp = async (phone: string) => {
         setIsLoading(true);
         try {
-            await apiClient.post(ENDPOINTS.AUTH.OTP_SEND, { phone });
+            await authService.sendOtp(phone);
         } catch (error) {
             console.error('Send OTP failed:', error);
             throw error;
@@ -122,22 +131,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const register = async (data: RegisterRequest) => {
         setIsLoading(true);
         try {
-            const response = await apiClient.post<AuthResponse>(ENDPOINTS.AUTH.REGISTER, data);
+            const response = await authService.register(data);
             apiClient.setToken(response.token);
             setUser(response.user);
+            showSnackbar('Registration successful. Await verification.', 'success');
             router.push('/auth/login?registered=true');
         } catch (error) {
             console.error('Registration failed:', error);
+            showSnackbar('Something went wrong. Please try again.', 'error');
             throw error;
         } finally {
             setIsLoading(false);
         }
     };
 
-    const logout = () => {
-        apiClient.setToken(null);
-        setUser(null);
-        router.push('/auth/login');
+    const logout = async () => {
+        try {
+            await authService.logout();
+            showSnackbar('Logged out successfully', 'success');
+        } catch (error) {
+            console.error('Logout API failed:', error);
+        } finally {
+            apiClient.setToken(null);
+            setUser(null);
+            router.push('/auth/login');
+        }
     };
 
     return (

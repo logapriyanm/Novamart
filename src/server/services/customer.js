@@ -46,6 +46,52 @@ class CustomerService {
     }
 
     /**
+     * Get Customer Profile.
+     */
+    async getProfile(customerId) {
+        return await prisma.customer.findUnique({
+            where: { id: customerId },
+            include: {
+                user: {
+                    select: {
+                        email: true,
+                        phone: true,
+                        avatar: true,
+                        status: true,
+                        createdAt: true
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Update Customer Profile.
+     */
+    async updateProfile(customerId, data) {
+        const { name, email, phone, avatar } = data;
+
+        return await prisma.$transaction(async (tx) => {
+            // Update Customer record
+            const customer = await tx.customer.update({
+                where: { id: customerId },
+                data: { name }
+            });
+
+            // Update linked User record
+            await tx.user.update({
+                where: { id: customer.userId },
+                data: { email, phone, avatar }
+            });
+
+            return await tx.customer.findUnique({
+                where: { id: customerId },
+                include: { user: true }
+            });
+        });
+    }
+
+    /**
      * Get Customer Order History with Status & Escrow Info.
      */
     async getOrderHistory(customerId) {

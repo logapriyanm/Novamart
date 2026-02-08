@@ -14,40 +14,59 @@ import {
     FaHeadset as Support,
     FaArrowRight as ArrowRight,
 } from 'react-icons/fa';
-import { WhiteCard, TrackingBadge, Stepper } from '../../../../client/components/ui/DashboardUI';
+import { WhiteCard, TrackingBadge, StatusBadge, Stepper } from '../../../../client/components/features/dashboard/DashboardUI';
 
-const ORDERS = [
-    {
-        id: 'NM-88291',
-        dealer: 'TechGlow Systems',
-        total: 1249.00,
-        status: 'IN TRANSIT',
-        currentStep: 3,
-        items: ['UltraWide Monitor (1)', 'Ergonomic Desk Lamp (2)'],
-        date: 'Oct 12, 10:04 AM'
-    },
-    {
-        id: 'NM-87552',
-        dealer: 'Global Supply Co.',
-        total: 450.25,
-        status: 'DELIVERED',
-        currentStep: 4,
-        items: ['Minimalist Oak Wall Clock (1)'],
-        date: 'Oct 08, 2023'
-    },
-    {
-        id: 'NM-86119',
-        dealer: 'HomeStyle Pro',
-        total: 0.00,
-        status: 'CANCELLED',
-        currentStep: -1, // Cancelled
-        items: ['Coffee Table V2'],
-        date: 'Oct 01, 2023',
-        refundStatus: 'Completed'
-    }
-];
+import { apiClient } from '../../../../lib/api/client';
+import { useSnackbar } from '../../../../client/context/SnackbarContext';
 
 export default function MyOrders() {
+    const [orders, setOrders] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const { showSnackbar } = useSnackbar();
+
+    React.useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const data = await apiClient.get<any[]>('/orders/my');
+                const ordersList = data || [];
+
+                // Map API response to UI format
+                const mappedOrders = ordersList.map((order: any) => ({
+                    id: order.id,
+                    displayId: `NM-${order.id.slice(0, 5).toUpperCase()}`,
+                    dealer: order.dealer?.businessName || 'Unknown Dealer',
+                    total: Number(order.totalAmount),
+                    status: order.status,
+                    currentStep: getStepFromStatus(order.status),
+                    items: order.items.map((item: any) => `${item.product.name} (${item.quantity})`),
+                    date: new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                }));
+
+                setOrders(mappedOrders);
+            } catch (error) {
+                console.error('Failed to fetch orders:', error);
+                showSnackbar('Could not load your orders.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, []);
+
+    const getStepFromStatus = (status: string) => {
+        switch (status) {
+            case 'CREATED': return 1;
+            case 'PAID': return 2;
+            case 'PACKED': return 2; // In between
+            case 'SHIPPED': return 3;
+            case 'DELIVERED': return 4;
+            default: return -1;
+        }
+    };
+
+    if (loading) return <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Orders...</div>;
+
     return (
         <div className="space-y-10 pb-20 animate-fade-in">
             {/* Header & Breadcrumbs */}
@@ -59,7 +78,7 @@ export default function MyOrders() {
                 </nav>
                 <h1 className="text-3xl font-black text-slate-800 tracking-tight">My Orders</h1>
                 <p className="text-slate-400 font-bold mt-2">
-                    Manage and track your <span className="text-slate-800">24 recent purchases</span> from various dealers.
+                    Manage and track your <span className="text-slate-800">recent purchases</span> from various dealers.
                 </p>
             </div>
 
@@ -90,8 +109,10 @@ export default function MyOrders() {
 
             {/* Orders List */}
             <div className="space-y-8">
-                {ORDERS.map((order, idx) => (
-                    <WhiteCard key={idx} className="p-0 border-none shadow-xl shadow-blue-600/5 overflow-hidden">
+                {orders.length === 0 ? (
+                    <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-3xl">No orders found. Start shopping!</div>
+                ) : orders.map((order) => (
+                    <WhiteCard key={order.id} className="p-0 border-none shadow-xl shadow-blue-600/5 overflow-hidden">
                         <div className="p-8 space-y-8">
                             {/* Card Header */}
                             <div className="flex flex-wrap justify-between items-start gap-6">
@@ -100,7 +121,7 @@ export default function MyOrders() {
                                         <Package className={`w-6 h-6 ${order.status === 'CANCELLED' ? 'text-slate-400' : 'text-blue-600'}`} />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-black text-slate-800 tracking-tight">Order #{order.id}</h3>
+                                        <h3 className="text-lg font-black text-slate-800 tracking-tight">Order #{order.displayId}</h3>
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                                             Dealer: <span className="text-blue-600 font-black">{order.dealer}</span>
                                         </p>
@@ -110,12 +131,12 @@ export default function MyOrders() {
                                     {order.status !== 'CANCELLED' ? (
                                         <>
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Amount</p>
-                                            <p className="text-xl font-black text-blue-600 tracking-tight">${order.total.toFixed(2)}</p>
+                                            <p className="text-xl font-black text-blue-600 tracking-tight">₹{order.total.toLocaleString()}</p>
                                         </>
                                     ) : (
                                         <>
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Refund Status</p>
-                                            <p className="text-sm font-black text-slate-800">{order.refundStatus}</p>
+                                            <p className="text-sm font-black text-slate-800">{order.refundStatus || 'Processed'}</p>
                                         </>
                                     )}
                                     <div className="mt-2">
@@ -133,7 +154,7 @@ export default function MyOrders() {
 
                             {order.status === 'CANCELLED' && (
                                 <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                                    <p className="text-[11px] font-bold text-slate-500 italic">Canceled by customer on {order.date}</p>
+                                    <p className="text-[11px] font-bold text-slate-500 italic">Canceled on {order.date}</p>
                                     <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Re-order Items</button>
                                 </div>
                             )}

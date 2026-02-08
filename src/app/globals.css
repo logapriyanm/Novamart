@@ -2,9 +2,9 @@
 
 @theme {
   --color-primary: #10367D;
-  --color-secondary: #d3e2ea;
-  --color-accent: #10367D;
-  --color-background: #74B4DA;
+  --color-secondary: #74b4da;
+  --color-accent: #74b4da;
+  --color-background: #EBEBEB;
   --color-foreground: #101527;
   --color-surface: #EBEBEB;
   --color-success: #10B981;
@@ -15,9 +15,9 @@
 @layer base {
   :root {
     --primary: #10367D;
-    --secondary: #d3e2ea;
-    --accent: #10367D;
-    --background: #aecfe4;
+    --secondary: #74b4da;
+    --accent: #74b4da;
+    --background: #EBEBEB;
     --foreground: #101527;
     --surface: #EBEBEB;
     --card: #EBEBEB;

@@ -8,13 +8,13 @@ export default {
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
             },
-            
+
             colors: {
-                primary: "#10367D", // Deep Navy
-                secondary: "#d3dbdfff", // Sky Blue
-                accent: "#10367D",
-                background: "#ebececff", // Sky Blue Background
-                surface: "#EBEBEB", // Light Gray Surface
+                primary: "#10367D", // Deep Navy (Buttons, Important Text)
+                secondary: "#74b4da", // Sky Blue (Minimal Usage)
+                accent: "#74b4da",   // Same as Secondary
+                background: "#EBEBEB", // Global Website Background
+                surface: "#EBEBEB", // Component Surface
                 foreground: "#101527", // Midnight Blue Text
                 "text-secondary": "#101527",
                 "text-muted": "#10367D",

@@ -37,7 +37,7 @@ export default function AddProductPage() {
     return (
         <div className="max-w-6xl mx-auto space-y-6 pb-12 animate-fade-in">
             {/* Back Link */}
-            <Link href="/dealer/source" className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
+            <Link href="/dealer/sourcing" className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
                 <FaArrowLeft className="w-3 h-3" />
                 Back to Sourcing Catalog
             </Link>

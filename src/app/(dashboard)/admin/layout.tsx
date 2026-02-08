@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import Sidebar from '../../../client/components/admin/Sidebar';
-import AdminHeader from '../../../client/components/admin/AdminHeader';
+import Sidebar from '../../../client/components/layout/Sidebar';
+import AdminHeader from '../../../client/components/layout/AdminHeader';
 import { FaBars as Menu } from 'react-icons/fa';
-import RoleGuard from '../../../client/components/auth/RoleGuard';
+import RoleGuard from '../../../client/components/features/auth/RoleGuard';
 import { Role } from '../../../lib/api/contract';
 
 export default function AdminLayout({
@@ -16,7 +16,7 @@ export default function AdminLayout({
 
     return (
         <RoleGuard allowedRoles={[Role.ADMIN]}>
-            <div className="flex min-h-screen bg-secondary">
+            <div className="flex min-h-screen bg-background">
                 <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
                 <div className="flex-1 flex flex-col min-w-0">

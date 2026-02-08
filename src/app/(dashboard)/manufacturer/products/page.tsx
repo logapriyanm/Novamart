@@ -1,62 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FaBox, FaFileUpload, FaPlus, FaSearch, FaFilter,
     FaEdit, FaTrash, FaEye, FaHistory, FaCheckCircle,
     FaClock, FaLayerGroup, FaChevronLeft, FaChevronRight
 } from 'react-icons/fa';
 import Link from 'next/link';
-
-// Mock Data for Product Master
-const products = [
-    {
-        id: 1,
-        name: 'ErgoPro Master Chair',
-        sku: 'NM-7729-BLK',
-        image: 'https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=100&auto=format&fit=crop',
-        category: 'Furniture',
-        basePrice: 289.00,
-        moq: 10,
-        status: 'LIVE',
-        lastActivity: '2h ago',
-    },
-    {
-        id: 2,
-        name: 'SoundFlow Noise ANC v2',
-        sku: 'NM-AUDIO-ANC',
-        image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?q=80&w=100&auto=format&fit=crop',
-        category: 'Electronics',
-        basePrice: 149.50,
-        moq: 50,
-        status: 'PENDING_APPROVAL',
-        lastActivity: '5h ago',
-    },
-    {
-        id: 3,
-        name: 'Clicky-Keys TKL Mechanical',
-        sku: 'NM-KEYB-TKL',
-        image: 'https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=100&auto=format&fit=crop',
-        category: 'Computing',
-        basePrice: 89.99,
-        moq: 100,
-        status: 'DRAFT',
-        lastActivity: 'No activity yet',
-    },
-    {
-        id: 4,
-        name: 'HydroSafe 32oz Flask',
-        sku: 'NM-OUT-FLSK',
-        image: 'https://images.unsplash.com/photo-1602143407151-01114192003f?q=80&w=100&auto=format&fit=crop',
-        category: 'Outdoors',
-        basePrice: 34.00,
-        moq: 200,
-        status: 'LIVE',
-        lastActivity: '1d ago',
-    }
-];
+import { apiClient } from '@/lib/api/client';
+import { ENDPOINTS } from '@/lib/api/contract';
 
 export default function ProductMaster() {
+    const [products, setProducts] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const fetchProducts = async () => {
+        setIsLoading(true);
+        try {
+            const data = await apiClient.get<any[]>(ENDPOINTS.MANUFACTURER.PRODUCTS);
+            setProducts(data);
+        } catch (error) {
+            console.error('Failed to fetch products:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
             {/* Header */}
@@ -81,19 +54,19 @@ export default function ProductMaster() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total SKU</p>
-                    <p className="text-3xl font-black text-[#1E293B] mt-1">1,248</p>
+                    <p className="text-3xl font-black text-[#1E293B] mt-1">{products.length}</p>
                 </div>
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Live Products</p>
-                    <p className="text-3xl font-black text-[#1E293B] mt-1">1,102</p>
+                    <p className="text-3xl font-black text-[#1E293B] mt-1">{products.filter(p => p.status === 'APPROVED').length}</p>
                 </div>
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Awaiting Approval</p>
-                    <p className="text-3xl font-black text-[#1E293B] mt-1">42</p>
+                    <p className="text-3xl font-black text-[#1E293B] mt-1">{products.filter(p => p.status === 'PENDING').length}</p>
                 </div>
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Draft Mode</p>
-                    <p className="text-3xl font-black text-[#1E293B] mt-1">104</p>
+                    <p className="text-3xl font-black text-[#1E293B] mt-1">{products.filter(p => p.status === 'DRAFT').length}</p>
                 </div>
             </div>
 
@@ -129,16 +102,24 @@ export default function ProductMaster() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {products.map((product) => (
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={7} className="px-8 py-12 text-center text-slate-400 font-bold">Loading products...</td>
+                                </tr>
+                            ) : products.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-8 py-12 text-center text-slate-400 font-bold">No products found. Add your first product!</td>
+                                </tr>
+                            ) : products.map((product) => (
                                 <tr key={product.id} className="group hover:bg-slate-50/50 transition-all">
                                     <td className="px-8 py-6">
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 p-1 flex items-center justify-center shrink-0">
-                                                <img src={product.image} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
+                                                <img src={product.images?.[0] || 'https://images.unsplash.com/photo-1586769852044-692d6e3703a0?q=80&w=100&auto=format&fit=crop'} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-black text-[#1E293B]">{product.name}</h4>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">SKU: {product.sku}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">ID: {product.id.split('-')[0]}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -146,7 +127,7 @@ export default function ProductMaster() {
                                         <span className="text-xs font-bold text-slate-600">{product.category}</span>
                                     </td>
                                     <td className="px-6 py-6">
-                                        <span className="text-xs font-black text-[#1E293B]">${product.basePrice.toFixed(2)}</span>
+                                        <span className="text-xs font-black text-[#1E293B]">${Number(product.basePrice).toFixed(2)}</span>
                                     </td>
                                     <td className="px-6 py-6">
                                         <div className="text-xs font-bold text-slate-600">
@@ -154,15 +135,20 @@ export default function ProductMaster() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-6">
-                                        {product.status === 'LIVE' && (
+                                        {product.status === 'APPROVED' && (
                                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-black uppercase tracking-widest">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
                                                 Live
                                             </span>
                                         )}
-                                        {product.status === 'PENDING_APPROVAL' && (
+                                        {product.status === 'PENDING' && (
                                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-100 text-[10px] font-black uppercase tracking-widest">
                                                 Pending Approval
+                                            </span>
+                                        )}
+                                        {product.status === 'REJECTED' && (
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black uppercase tracking-widest">
+                                                Rejected
                                             </span>
                                         )}
                                         {product.status === 'DRAFT' && (
@@ -176,7 +162,7 @@ export default function ProductMaster() {
                                             <FaClock className="w-3 h-3 text-slate-400 group-hover/timeline:text-[#0F6CBD] transition-colors" />
                                             <div className="flex flex-col">
                                                 <span className="text-[10px] font-bold text-[#0F6CBD] group-hover/timeline:underline">View Log</span>
-                                                <span className="text-[9px] text-slate-400 hidden group-hover/timeline:block">{product.lastActivity}</span>
+                                                <span className="text-[9px] text-slate-400 hidden group-hover/timeline:block">Updated {new Date(product.updatedAt).toLocaleDateString()}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -201,25 +187,15 @@ export default function ProductMaster() {
 
                 {/* Pagination */}
                 <div className="p-6 border-t border-slate-50 flex items-center justify-between bg-slate-50/30">
-                    <p className="text-xs font-bold text-slate-500">Showing 1 to 4 of 1,248 products</p>
+                    <p className="text-xs font-bold text-slate-500">Showing {products.length} products</p>
                     <div className="flex items-center gap-2">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50" disabled>
                             <FaChevronLeft className="w-3 h-3" />
                         </button>
                         <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0F6CBD] text-white text-xs font-black shadow-md shadow-blue-500/20">
                             1
                         </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-white transition-all">
-                            2
-                        </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-white transition-all">
-                            3
-                        </button>
-                        <span className="text-slate-400 text-xs">...</span>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-white transition-all">
-                            312
-                        </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50" disabled>
                             <FaChevronRight className="w-3 h-3" />
                         </button>
                     </div>

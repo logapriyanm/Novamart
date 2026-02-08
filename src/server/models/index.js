@@ -1,4 +1,3 @@
-import User from './User.js';
 import RoleProfile from './RoleProfile.js';
 import KYCDocument from './KYCDocument.js';
 import TrustBadge from './TrustBadge.js';
@@ -20,10 +19,12 @@ import AuditLog from './AuditLog.js';
 import SystemConfig from './SystemConfig.js';
 import FeatureFlag from './FeatureFlag.js';
 import AnalyticsSnapshot from './AnalyticsSnapshot.js';
-import { Tracking, FraudSignal, DemandHeatmap } from './Tracking.js';
+import Tracking from './Tracking.js';
+import FraudSignal from './FraudSignal.js';
+import DemandHeatmap from './DemandHeatmap.js';
+// Removed HomepageConfig
 
 export {
-    User,
     RoleProfile,
     KYCDocument,
     TrustBadge,
@@ -51,7 +52,6 @@ export {
 };
 
 export default {
-    User,
     RoleProfile,
     KYCDocument,
     TrustBadge,

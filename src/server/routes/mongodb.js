@@ -13,7 +13,7 @@ router.post('/:collection', async (req, res) => {
         const actorId = req.headers['x-actor-id'] || 'ANONYMOUS';
 
         const doc = await mongoService.create(collection, data, actorId);
-        res.status(201).json(doc);
+        res.status(201).json({ success: true, data: doc });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -29,7 +29,7 @@ router.get('/:collection', async (req, res) => {
         const options = req.query.options ? JSON.parse(req.query.options) : {};
 
         const docs = await mongoService.find(collection, query, options);
-        res.json(docs);
+        res.json({ success: true, data: docs });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -45,7 +45,7 @@ router.patch('/:collection/:id/status', async (req, res) => {
         const actorId = req.headers['x-actor-id'] || 'ADMIN';
 
         const doc = await mongoService.updateStatus(collection, id, status, actorId);
-        res.json(doc);
+        res.json({ success: true, data: doc });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -60,7 +60,7 @@ router.delete('/:collection/:id', async (req, res) => {
         const actorId = req.headers['x-actor-id'] || 'ADMIN';
 
         const doc = await mongoService.softDelete(collection, id, actorId);
-        res.json({ message: 'Document marked as DELETED', doc });
+        res.json({ success: true, message: 'Document marked as DELETED', data: doc });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

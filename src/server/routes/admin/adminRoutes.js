@@ -1,5 +1,13 @@
 import express from 'express';
-import adminController from './adminController.js';
+import dashboardController from '../../controllers/admin/dashboardController.js';
+import userManagementController from '../../controllers/admin/userManagementController.js';
+import productApprovalController from '../../controllers/admin/productApprovalController.js';
+import governanceController from '../../controllers/admin/governanceController.js';
+import escrowManagementController from '../../controllers/admin/escrowManagementController.js';
+import orderLifecycleController from '../../controllers/admin/orderLifecycleController.js';
+import auditLogController from '../../controllers/admin/auditLogController.js';
+import disputeController from '../../controllers/admin/disputeController.js';
+
 import authorize from '../../middleware/rbac.js';
 import auditLog from '../../middleware/audit.js';
 import authenticate from '../../middleware/auth.js';
@@ -14,76 +22,98 @@ router.use(authenticate);
 
 router.get('/stats',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN', 'FINANCE_ADMIN']),
-    adminController.getDashboardStats
+    dashboardController.getDashboardStats
 );
 
 router.put('/users/:id/status',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
     auditLog('UPDATE_USER_STATUS', 'USER'),
-    adminController.manageUser
+    userManagementController.manageUser
+);
+
+router.get('/manufacturers',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    userManagementController.getManufacturers
+);
+
+router.get('/dealers',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    userManagementController.getDealers
 );
 
 router.put('/products/:id/approve',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
     auditLog('APPROVE_PRODUCT', 'PRODUCT'),
-    adminController.approveProduct
+    productApprovalController.approveProduct
 );
 
 router.post('/rules/margin',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'FINANCE_ADMIN']),
     auditLog('CREATE_MARGIN_RULE', 'MARGIN_RULE'),
-    adminController.createMarginRule
+    governanceController.createMarginRule
 );
 
 router.get('/audit-logs',
     authorize(['ADMIN'], ['SUPER_ADMIN']),
-    adminController.getAuditLogs
+    auditLogController.getAuditLogs
 );
 
 router.put('/escrow/settle/:orderId',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'FINANCE_ADMIN']),
     auditLog('ESCROW_SETTLE', 'ESCROW'),
-    adminController.settleEscrow
+    escrowManagementController.settleEscrow
 );
 
 router.post('/escrow/refund/:orderId',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'FINANCE_ADMIN']),
     auditLog('ESCROW_REFUND', 'ESCROW'),
-    adminController.refundEscrow
+    escrowManagementController.refundEscrow
 );
 
 router.put('/orders/:orderId/status',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
     auditLog('UPDATE_ORDER_LIFECYCLE', 'ORDER'),
-    adminController.updateOrderStatus
+    orderLifecycleController.updateOrderStatus
 );
 
 router.get('/inventory/audit',
     authorize(['ADMIN'], ['SUPER_ADMIN']),
-    adminController.auditInventory
+    orderLifecycleController.auditInventory
 );
 
 router.post('/disputes/:disputeId/evaluate',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'TRUST_ADMIN']),
-    adminController.evaluateDispute
+    disputeController.evaluateDispute
 );
 
 router.put('/disputes/:disputeId/resolve',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'TRUST_ADMIN']),
     auditLog('DISPUTE_RESOLVE', 'DISPUTE'),
-    adminController.manualResolveDispute
+    disputeController.manualResolveDispute
 );
 
 router.post('/badges/assign',
     authorize(['ADMIN'], ['SUPER_ADMIN']),
     auditLog('ASSIGN_BADGE', 'USER'),
-    adminController.assignBadge
+    userManagementController.assignBadge
+);
+
+router.put('/manufacturers/:manufacturerId/verify',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    auditLog('VERIFY_MANUFACTURER', 'MANUFACTURER'),
+    userManagementController.verifyManufacturer
+);
+
+router.put('/dealers/:dealerId/verify',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    auditLog('VERIFY_DEALER', 'DEALER'),
+    userManagementController.verifyDealer
 );
 
 router.put('/settings',
     authorize(['ADMIN'], ['SUPER_ADMIN']),
     auditLog('UPDATE_SETTINGS', 'SYSTEM'),
-    adminController.updateSettings
+    governanceController.updateSettings
 );
 
 export default router;

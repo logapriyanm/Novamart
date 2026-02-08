@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Sidebar from '../../../client/components/admin/Sidebar';
+import Sidebar from '../../../client/components/layout/Sidebar';
 import { FaBell as Bell, FaSearch as Search, FaShieldAlt as ShieldCheck, FaBars as Menu } from 'react-icons/fa';
-import RoleGuard from '../../../client/components/auth/RoleGuard';
+import RoleGuard from '../../../client/components/features/auth/RoleGuard';
 import { Role } from '../../../lib/api/contract';
 
 export default function ManufacturerLayout({
@@ -15,18 +15,24 @@ export default function ManufacturerLayout({
 
     return (
         <RoleGuard allowedRoles={[Role.MANUFACTURER]}>
-            <div className="flex min-h-screen bg-secondary text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
+            <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
                 <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} role="MANUFACTURER" />
 
                 <div className="flex-1 flex flex-col min-w-0 relative z-10 w-full overflow-hidden">
                     <header className="h-20 border-b border-foreground/5 bg-surface/60 backdrop-blur-xl sticky top-0 z-30 flex items-center justify-between px-4 lg:px-8">
                         <div className="flex items-center gap-4 flex-1">
-                            <button
-                                onClick={() => setIsSidebarOpen(true)}
-                                className="lg:hidden p-2 rounded-xl bg-background border border-foreground/5 text-primary"
-                            >
-                                <Menu className="w-6 h-6" />
-                            </button>
+                            {/* Mobile Logo & Menu */}
+                            <div className="lg:hidden flex items-center gap-3 mr-4">
+                                <button
+                                    onClick={() => setIsSidebarOpen(true)}
+                                    className="p-2 rounded-xl bg-background border border-foreground/5 text-primary"
+                                >
+                                    <Menu className="w-5 h-5" />
+                                </button>
+                                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1 shadow-md border border-foreground/[0.03]">
+                                    <img src="/logo.png" alt="N" className="w-full h-full object-contain" />
+                                </div>
+                            </div>
                             <form onSubmit={(e) => {
                                 e.preventDefault();
                                 console.log('Search submit');

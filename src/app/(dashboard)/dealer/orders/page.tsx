@@ -18,36 +18,74 @@ import {
     FaLock
 } from 'react-icons/fa';
 import Link from 'next/link';
+import { useSnackbar } from '../../../../client/context/SnackbarContext';
 
-const customerOrders = [
-    { id: 'ORD-RT-99801', customer: 'Viren Malhotra', total: '₹42,200', date: 'Feb 06, 2026 14:22', status: 'Pending', item: 'Ultra-Quiet AC 2.0', address: 'B-402, High-Point Apts, Powai, Mumbai' },
-    { id: 'ORD-RT-99800', customer: 'Sneha Reddy', total: '₹8,400', date: 'Feb 06, 2026 11:10', status: 'Shipped', item: 'Pro-Mix Grinder', address: 'Plot 4, Jubilee Hills, Hyderabad' },
-    { id: 'ORD-RT-99799', customer: 'Amit Taneja', total: '₹22,200', date: 'Feb 05, 2026 19:45', status: 'Delivered', item: 'EcoCool Fridge', address: 'Sector 44, Gurgaon, NL' },
-];
+import { apiClient } from '../../../../lib/api/client';
 
 export default function DealerOrderManagement() {
-    const [orders, setOrders] = useState(customerOrders);
+    const [orders, setOrders] = useState<any[]>([]);
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [filter, setFilter] = useState('All');
+    const { showSnackbar } = useSnackbar();
+
+    React.useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    const fetchOrders = async () => {
+        try {
+            const data = await apiClient.get<any[]>('/orders');
+            const ordersList = data || [];
+
+            const mappedOrders = ordersList.map((order: any) => ({
+                id: order.id,
+                displayId: order.id.slice(0, 8).toUpperCase(),
+                customer: order.customer?.name || 'Guest User',
+                total: Number(order.totalAmount),
+                totalFormatted: `₹${Number(order.totalAmount).toLocaleString()}`,
+                date: new Date(order.createdAt).toLocaleString(),
+                status: order.status === 'CREATED' ? 'Pending' :
+                    order.status === 'PAID' ? 'Pending' :
+                        order.status.charAt(0) + order.status.slice(1).toLowerCase(),
+                address: order.shippingAddress || 'No address provided',
+                rawStatus: order.status
+            }));
+            setOrders(mappedOrders);
+        } catch (error) {
+            console.error('Failed to fetch dealer orders:', error);
+            showSnackbar('Failed to load orders', 'error');
+        }
+    };
 
     const filteredOrders = orders.filter(o =>
         filter === 'All' ? true : o.status === filter
     );
 
-    const handleDispatch = (e: React.MouseEvent) => {
+    const handleDispatch = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!selectedOrder) return;
 
-        const updatedOrders = orders.map(o =>
-            o.id === selectedOrder.id ? { ...o, status: 'Shipped' } : o
-        );
-        setOrders(updatedOrders);
-        setSelectedOrder({ ...selectedOrder, status: 'Shipped' });
-        alert(`Dispatch initiated for Order ${selectedOrder.id}`);
+        try {
+            const res = await apiClient.patch<{ success: boolean }>(`/orders/${selectedOrder.id}/status`, {
+                status: 'SHIPPED'
+            });
+
+            if (res.success) {
+                showSnackbar(`Order ${selectedOrder.displayId} dispatched successfully`, 'success');
+                // Refresh local state
+                setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, status: 'Shipped', rawStatus: 'SHIPPED' } : o));
+                setSelectedOrder(prev => ({ ...prev, status: 'Shipped', rawStatus: 'SHIPPED' }));
+            } else {
+                showSnackbar('Failed to update order status', 'error');
+            }
+        } catch (error) {
+            console.error('Dispatch error:', error);
+            showSnackbar('Error processing dispatch', 'error');
+        }
     };
 
     const handleInvoice = () => {
-        alert('Downloading Tax Invoice... (Mock Action)');
+        showSnackbar('Downloading Tax Invoice... (Mock Action)', 'info');
     };
 
     return (
@@ -102,7 +140,7 @@ export default function DealerOrderManagement() {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-3">
-                                            <h4 className="text-sm font-black text-[#1E293B] italic">{order.id}</h4>
+                                            <h4 className="text-sm font-black text-[#1E293B] italic">{order.displayId}</h4>
                                             <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${order.status === 'Pending' ? 'bg-amber-50 text-amber-600' :
                                                 order.status === 'Shipped' ? 'bg-blue-50 text-blue-600' :
                                                     'bg-emerald-50 text-emerald-600'
@@ -112,7 +150,7 @@ export default function DealerOrderManagement() {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm font-black text-[#1E293B]">{order.total}</p>
+                                    <p className="text-sm font-black text-[#1E293B]">{order.totalFormatted}</p>
                                     <p className="text-[9px] font-bold text-slate-300 uppercase mt-1">{order.date}</p>
                                 </div>
                             </div>
@@ -134,7 +172,7 @@ export default function DealerOrderManagement() {
                                 <div className="p-10 border-b border-slate-50 bg-[#1E293B] text-white">
                                     <div className="flex justify-between items-start mb-10">
                                         <div>
-                                            <h3 className="text-2xl font-black tracking-tight">{selectedOrder.id}</h3>
+                                            <h3 className="text-2xl font-black tracking-tight">{selectedOrder.displayId}</h3>
                                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">Client Transaction Master</p>
                                         </div>
                                         <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
@@ -170,15 +208,15 @@ export default function DealerOrderManagement() {
                                         <div className="space-y-4">
                                             <div className="flex justify-between text-[10px] font-black uppercase text-slate-400">
                                                 <span>Customer Gross</span>
-                                                <span className="text-[#1E293B]">{selectedOrder.total}</span>
+                                                <span className="text-[#1E293B]">{selectedOrder.totalFormatted}</span>
                                             </div>
                                             <div className="flex justify-between text-[10px] font-black uppercase text-rose-500">
                                                 <span>Platform Commission (5%)</span>
-                                                <span>- ₹{(parseInt(selectedOrder.total.replace('₹', '').replace(',', '')) * 0.05).toLocaleString()}</span>
+                                                <span>- ₹{(selectedOrder.total * 0.05).toLocaleString()}</span>
                                             </div>
                                             <div className="pt-4 border-t border-[#10367D]/10 flex justify-between items-center">
                                                 <p className="text-[10px] font-black text-slate-500 uppercase">Payout Estimate</p>
-                                                <p className="text-xl font-black text-[#1E293B]">₹{(parseInt(selectedOrder.total.replace('₹', '').replace(',', '')) * 0.95).toLocaleString()}</p>
+                                                <p className="text-xl font-black text-[#1E293B]">₹{(selectedOrder.total * 0.95).toLocaleString()}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -216,14 +254,14 @@ export default function DealerOrderManagement() {
                                     <div className="flex items-center gap-4">
                                         <button
                                             onClick={handleDispatch}
-                                            disabled={selectedOrder.status !== 'Pending'}
-                                            className={`flex-1 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 ${selectedOrder.status === 'Pending'
+                                            disabled={selectedOrder.rawStatus !== 'PAID'}
+                                            className={`flex-1 py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 ${selectedOrder.rawStatus === 'PAID'
                                                 ? 'bg-[#10367D] text-white shadow-[#10367D]/20 hover:scale-105 cursor-pointer'
                                                 : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                                 }`}
                                         >
                                             <FaTruck className="w-3 h-3" />
-                                            {selectedOrder.status === 'Pending' ? 'Initialize Dispatch' : 'Dispatch Initiated'}
+                                            {selectedOrder.rawStatus === 'PAID' ? 'Initialize Dispatch' : 'Dispatch Initiated'}
                                         </button>
                                         <button className="p-5 bg-slate-50 text-slate-400 rounded-2xl hover:text-rose-500 transition-all border border-slate-100">
                                             <FaExclamationCircle className="w-5 h-5" />

@@ -4,6 +4,7 @@
  */
 
 import prisma from '../lib/prisma.js';
+import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 
 class EscrowService {
     /**
@@ -141,6 +142,13 @@ class EscrowService {
                 });
             }).catch(err => console.error('Background Audit Log Failed:', err));
 
+            // Emit System Event
+            systemEvents.emit(EVENTS.ESCROW.RELEASE, {
+                orderId,
+                dealerId: escrow.order.dealerId,
+                amount: dealerPayout
+            });
+
             return { updatedEscrow, distribution: { mfgPayout, dealerPayout, platformCommission } };
         });
     }
@@ -194,6 +202,14 @@ class EscrowService {
             await tx.order.update({
                 where: { id: orderId },
                 data: { status: 'CANCELLED' } // Or REFUNDED status if added
+            });
+
+            // Emit System Event
+            const order = await tx.order.findUnique({ where: { id: orderId } });
+            systemEvents.emit(EVENTS.ESCROW.REFUND, {
+                orderId,
+                userId: order.customerId,
+                amount: updatedEscrow.amount
             });
 
             return updatedEscrow;

@@ -4,7 +4,7 @@ import React from 'react';
 import Navbar from '../../client/components/layout/Navbar';
 import Footer from '../../client/components/layout/Footer';
 import { SidebarProvider } from '../../client/context/SidebarContext';
-import HomeCategorySidebar from '../../client/components/home/HomeCategorySidebar';
+import HomeCategorySidebar from '../../client/components/features/home/HomeCategorySidebar';
 
 export default function PublicLayout({
     children,

@@ -13,10 +13,13 @@ import {
 } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
-import OptimizedImage from '../common/OptimizedImage';
+import { useCart } from '../../context/CartContext';
+import { useSnackbar } from '../../context/SnackbarContext';
+import OptimizedImage from './OptimizedImage';
 
 interface ProductCardProps {
-    id: string;
+    id: string; // Product ID
+    inventoryId?: string; // Inventory ID for cart (optional for previews)
     name: string;
     price: number;
     originalPrice?: number;
@@ -27,6 +30,7 @@ interface ProductCardProps {
     brand: string;
     spec?: string;
     seller: {
+        id?: string;
         name: string;
         isVerified: boolean;
         isTopSeller?: boolean;
@@ -40,6 +44,7 @@ interface ProductCardProps {
 
 export default function CustomerProductCard({
     id,
+    inventoryId,
     name,
     price,
     originalPrice = price * 1.2,
@@ -53,6 +58,8 @@ export default function CustomerProductCard({
 }: ProductCardProps) {
     const router = useRouter();
     const { isAuthenticated } = useAuth();
+    const { addToCart } = useCart();
+    const { showSnackbar } = useSnackbar();
     const [isWishlisted, setIsWishlisted] = React.useState(false);
 
     const handleWishlist = (e: React.MouseEvent) => {
@@ -61,7 +68,9 @@ export default function CustomerProductCard({
             router.push(`/auth/login?redirect=/products`);
             return;
         }
-        setIsWishlisted(!isWishlisted);
+        const newState = !isWishlisted;
+        setIsWishlisted(newState);
+        showSnackbar(newState ? 'Added to wishlist' : 'Removed from wishlist', 'success');
     };
 
     return (
@@ -84,16 +93,6 @@ export default function CustomerProductCard({
                     className="w-full h-full object-contain p-8 transform group-hover:scale-110 transition-transform duration-700"
                 />
 
-                {/* Badges Overlay */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-none">
-                    {seller.isVerified && (
-                        <div className="bg-primary text-background px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-primary/20">
-                            <ShieldCheck className="w-2.5 h-2.5" />
-                            Verified Seller
-                        </div>
-                    )}
-                </div>
-
                 <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
                     <button
                         onClick={handleWishlist}
@@ -110,13 +109,6 @@ export default function CustomerProductCard({
             </div>
 
             <div className="p-6 flex flex-col flex-1 bg-surface">
-                {/* 3️⃣ Brand & Spec Row */}
-                <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest">{brand}</span>
-                    <span className="text-foreground/20">•</span>
-                    <span className="text-[10px] font-black text-foreground/40 uppercase tracking-widest">{spec}</span>
-                </div>
-
                 {/* 4️⃣ Product Name */}
                 <h3
                     className="font-black text-foreground text-base leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[2.5rem] cursor-pointer"
@@ -147,31 +139,32 @@ export default function CustomerProductCard({
                     </div>
                 </div>
 
-                {/* 7️⃣ Feature Icons */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6 border-t border-foreground/5 pt-5">
-                    <div className="flex items-center gap-1.5 text-[9px] font-black text-foreground/60 uppercase tracking-wider">
-                        <Truck className="w-3.5 h-3.5 text-primary" />
-                        Free Delivery
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[9px] font-black text-foreground/60 uppercase tracking-wider">
-                        <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                        2 Yr Warranty
-                    </div>
-                    {highlights.installation && (
-                        <div className="flex items-center gap-1.5 text-[9px] font-black text-foreground/60 uppercase tracking-wider">
-                            <Tools className="w-3.5 h-3.5 text-primary" />
-                            Install Incl.
-                        </div>
-                    )}
-                </div>
-
                 {/* 8️⃣ Primary CTA */}
-                <button
-                    onClick={() => router.push(`/products/${id}`)}
-                    className="mt-auto w-full py-4 bg-primary text-background font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/10 hover:shadow-primary/25 transform active:scale-95 transition-all duration-300"
-                >
-                    View Details
-                </button>
+                <div className="mt-auto">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!inventoryId || !seller.id) {
+                                alert('This product is currently out of stock or unavailable for purchase.');
+                                return;
+                            }
+                            addToCart({
+                                inventoryId,
+                                productId: id,
+                                name,
+                                price,
+                                image,
+                                quantity: 1,
+                                sellerId: seller.id,
+                                sellerName: seller.name,
+                                region: 'West'
+                            });
+                        }}
+                        className="w-full py-4 bg-primary text-background font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-primary/10 hover:shadow-primary/25 transform active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                        Add to Cart
+                    </button>
+                </div>
             </div>
         </motion.div>
     );

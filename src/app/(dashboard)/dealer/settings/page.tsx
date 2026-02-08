@@ -19,6 +19,7 @@ import {
 import Link from 'next/link';
 import { CldUploadWidget } from 'next-cloudinary';
 import { useProfile } from '../../../../client/hooks/useProfile';
+import { useSnackbar } from '../../../../client/context/SnackbarContext';
 
 interface DealerProfile {
     name: string;
@@ -30,6 +31,7 @@ interface DealerProfile {
 
 export default function DealerSettings() {
     const [isSaving, setIsSaving] = useState(false);
+    const { showSnackbar } = useSnackbar();
 
     // Dealer Profile Persistence
     const { profile, saveProfile, isLoaded } = useProfile<DealerProfile>('dealer_profile', {
@@ -44,7 +46,7 @@ export default function DealerSettings() {
         setIsSaving(true);
         setTimeout(() => {
             setIsSaving(false);
-            alert('Dealer Profile Updated Successfully!');
+            showSnackbar('Dealer Profile Updated Successfully!', 'success');
         }, 1500);
     };
 

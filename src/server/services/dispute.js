@@ -4,6 +4,7 @@
  */
 
 import prisma from '../lib/prisma.js';
+import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import EscrowService from './escrow.js';
 
 class DisputeService {
@@ -37,6 +38,14 @@ class DisputeService {
                     reason: `[${triggerType}] ${reason}`
                 });
             }).catch(err => console.error('Background Audit Log Failed:', err));
+
+            // Emit System Event
+            systemEvents.emit('DISPUTE.RAISED', {
+                disputeId: dispute.id,
+                orderId,
+                raisedByUserId,
+                reason: `[${triggerType}] ${reason}`
+            });
 
             return dispute;
         });
@@ -147,6 +156,14 @@ class DisputeService {
             await tx.order.update({
                 where: { id: dispute.orderId },
                 data: { status: resolution === 'REFUND' ? 'CANCELLED' : 'DELIVERED' }
+            });
+
+            // Emit System Event
+            systemEvents.emit('DISPUTE.RESOLVED', {
+                disputeId,
+                orderId: dispute.orderId,
+                resolution,
+                reviewerId
             });
 
             return { disputeId, resolution, status: 'SUCCESS' };

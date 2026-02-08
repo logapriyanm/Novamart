@@ -84,5 +84,16 @@ export const authenticateOptional = async (req, res, next) => {
     next();
 };
 
+export const authenticateUser = authenticate;
+
+export const authorizeRoles = (...roles) => {
+    return (req, res, next) => {
+        if (!req.user || !roles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'FORBIDDEN', message: 'Access denied' });
+        }
+        next();
+    };
+};
+
 export default authenticate;
 

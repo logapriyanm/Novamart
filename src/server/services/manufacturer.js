@@ -105,6 +105,73 @@ class ManufacturerService {
             frozenCount: escrows.filter(e => e.status === 'FROZEN').length
         };
     }
+
+    /**
+     * Get full Manufacturer Profile.
+     */
+    async getProfile(mfgId) {
+        return await prisma.manufacturer.findUnique({
+            where: { id: mfgId },
+            include: { user: { select: { email: true, status: true, mfaEnabled: true } }, dealersApproved: true }
+        });
+    }
+
+    /**
+     * Update Manufacturer Profile Sections.
+     */
+    async updateProfile(mfgId, section, data) {
+        const updateData = {};
+
+        switch (section) {
+            case 'account':
+                return await prisma.$transaction(async (tx) => {
+                    const mfg = await tx.manufacturer.findUnique({ where: { id: mfgId } });
+                    await tx.user.update({
+                        where: { id: mfg.userId },
+                        data: {
+                            email: data.email,
+                            phone: data.phone,
+                            avatar: data.avatar
+                        }
+                    });
+                    return await tx.manufacturer.findUnique({
+                        where: { id: mfgId },
+                        include: { user: true }
+                    });
+                });
+            case 'company':
+                updateData.companyName = data.companyName;
+                updateData.registrationNo = data.registrationNo;
+                updateData.businessType = data.businessType;
+                updateData.officialEmail = data.officialEmail;
+                updateData.phone = data.phone;
+                break;
+            case 'factory':
+                updateData.factoryAddress = data.factoryAddress;
+                updateData.capacity = data.capacity;
+                updateData.categoriesProduced = data.categoriesProduced;
+                break;
+            case 'compliance':
+                updateData.gstNumber = data.gstNumber;
+                updateData.certifications = data.certifications;
+                break;
+            case 'assets':
+                updateData.logo = data.logo;
+                updateData.brandDescription = data.brandDescription;
+                updateData.marketingMaterials = data.marketingMaterials;
+                break;
+            case 'bank':
+                updateData.bankDetails = data.bankDetails;
+                break;
+            default:
+                throw new Error('INVALID_PROFILE_SECTION');
+        }
+
+        return await prisma.manufacturer.update({
+            where: { id: mfgId },
+            data: updateData
+        });
+    }
 }
 
 export default new ManufacturerService();

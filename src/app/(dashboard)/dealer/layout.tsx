@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Sidebar from '../../../client/components/admin/Sidebar';
+import Sidebar from '../../../client/components/layout/Sidebar';
 import { FaBell as Bell, FaSearch as Search, FaShieldAlt as ShieldCheck, FaBars as Menu, FaQuestionCircle } from 'react-icons/fa';
-import RoleGuard from '../../../client/components/auth/RoleGuard';
+import RoleGuard from '../../../client/components/features/auth/RoleGuard';
 import { Role } from '../../../lib/api/contract';
 
 export default function DealerLayout({
@@ -16,7 +16,7 @@ export default function DealerLayout({
 
     return (
         <RoleGuard allowedRoles={[Role.DEALER]}>
-            <div className="flex min-h-screen bg-secondary text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
+            <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
                 <Sidebar
                     isOpen={isSidebarOpen}
                     onClose={() => setIsSidebarOpen(false)}

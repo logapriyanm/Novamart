@@ -16,6 +16,7 @@ import {
     FaBan
 } from 'react-icons/fa';
 import io from 'socket.io-client';
+import { useSnackbar } from '../../../../client/context/SnackbarContext';
 
 const socket = io('http://localhost:5000');
 
@@ -28,6 +29,7 @@ export default function AdminEscalationMonitor() {
     const [selectedEscalation, setSelectedEscalation] = useState<any>(null);
     const [chatHistory, setChatHistory] = useState<any[]>([]);
     const [isFrozen, setIsFrozen] = useState(false);
+    const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         if (selectedEscalation) {
@@ -43,7 +45,7 @@ export default function AdminEscalationMonitor() {
 
     const resolveDispute = () => {
         // Resolve logic...
-        alert('Dispute Resolved: Refund initiated to Customer');
+        showSnackbar('Dispute Resolved: Refund initiated to Customer', 'success');
     };
 
     const freezeChat = () => {

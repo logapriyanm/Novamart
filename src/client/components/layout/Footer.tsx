@@ -34,7 +34,7 @@ const footerLinks = {
         { name: 'Escrow Ledger', href: '/guides/escrow' },
     ],
     support: [
-        { name: 'Help Center', key: 'help-center' },
+        { name: 'Help Center', href: '/support' },
         { name: 'Contact Us', key: 'contact-us' },
         { name: 'Report an Issue', key: 'report-an-issue' },
         { name: 'Dispute Resolution', key: 'dispute-resolution' },
@@ -75,13 +75,16 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-20">
                     {/* Brand Section */}
                     <div className="lg:col-span-4 space-y-8">
-                        <Link href="/" className="flex items-center gap-3 group">
-                            <div className="w-12 h-12 bg-surface rounded-2xl flex items-center justify-center p-2.5 shadow-xl shadow-primary/5 group-hover:scale-110 transition-transform border border-foreground/5">
+                        <Link href="/" className="flex items-center gap-4 group">
+                            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center p-2 shadow-2xl shadow-primary/10 group-hover:scale-105 transition-all duration-500 border border-foreground/[0.03]">
                                 <img src="/logo.png" alt="Novamart" className="w-full h-full object-contain" />
                             </div>
-                            <span className="text-3xl font-black tracking-tighter text-foreground">
-                                Novamart<span className="text-primary text-[10px] align-top ml-1">®</span>
-                            </span>
+                            <div className="flex flex-col">
+                                <span className="text-3xl font-black tracking-tighter text-foreground leading-none">
+                                    Novamart
+                                </span>
+                                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mt-1">Enterprise Hub</span>
+                            </div>
                         </Link>
 
                         <p className="text-foreground/50 text-sm font-medium leading-relaxed max-w-sm">
@@ -117,10 +120,10 @@ export default function Footer() {
                     </div>
 
                     {/* Links Sections */}
-                    <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8">
                         <div>
-                            <h3 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-8">Platform</h3>
-                            <ul className="space-y-4">
+                            <h3 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-4 md:mb-8">Platform</h3>
+                            <ul className="space-y-3 md:space-y-4">
                                 {footerLinks.platform.map((link: any) => (
                                     <li key={link.name}>
                                         <Link href={link.href} className="text-sm font-bold text-foreground/40 hover:text-primary transition-colors">
@@ -131,8 +134,8 @@ export default function Footer() {
                             </ul>
                         </div>
                         <div>
-                            <h3 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-8">Business</h3>
-                            <ul className="space-y-4">
+                            <h3 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-4 md:mb-8">Business</h3>
+                            <ul className="space-y-3 md:space-y-4">
                                 {footerLinks.business.map((link: any) => (
                                     <li key={link.name}>
                                         <Link href={link.href} className="text-sm font-bold text-foreground/40 hover:text-primary transition-colors">
@@ -143,23 +146,29 @@ export default function Footer() {
                             </ul>
                         </div>
                         <div>
-                            <h3 className="text-xs font-black text-foreground/70 uppercase tracking-[0.2em] mb-8">Support</h3>
-                            <ul className="space-y-4">
+                            <h3 className="text-xs font-black text-foreground/70 uppercase tracking-[0.2em] mb-4 md:mb-8">Support</h3>
+                            <ul className="space-y-3 md:space-y-4">
                                 {footerLinks.support.map((link: any) => (
                                     <li key={link.name}>
-                                        <button
-                                            onClick={() => handlePolicyClick(link.key)}
-                                            className="text-sm font-bold text-foreground/40 hover:text-primary transition-colors text-left"
-                                        >
-                                            {link.name}
-                                        </button>
+                                        {link.href ? (
+                                            <Link href={link.href} className="text-sm font-bold text-foreground/40 hover:text-primary transition-colors">
+                                                {link.name}
+                                            </Link>
+                                        ) : (
+                                            <button
+                                                onClick={() => handlePolicyClick(link.key)}
+                                                className="text-sm font-bold text-foreground/40 hover:text-primary transition-colors text-left"
+                                            >
+                                                {link.name}
+                                            </button>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
                         </div>
                         <div>
-                            <h3 className="text-xs font-black text-foreground/70 uppercase tracking-[0.2em] mb-8">Legal</h3>
-                            <ul className="space-y-4">
+                            <h3 className="text-xs font-black text-foreground/70 uppercase tracking-[0.2em] mb-4 md:mb-8">Legal</h3>
+                            <ul className="space-y-3 md:space-y-4">
                                 {footerLinks.legal.map((link: any) => (
                                     <li key={link.name}>
                                         <button

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import CategoryLayout from '../../../../../client/components/products/CategoryLayout';
+import CategoryLayout from '../../../../../client/components/layout/CategoryLayout';
 
 export default function CategoryPage() {
     const params = useParams();

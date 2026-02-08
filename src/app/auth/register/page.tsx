@@ -9,12 +9,15 @@ import {
     FaArrowRight as ArrowRight,
     FaArrowLeft as ArrowLeft,
     FaShieldAlt as ShieldCheck,
-    FaCheckCircle as CheckCircle2
+    FaCheckCircle as CheckCircle2,
+    FaEye,
+    FaEyeSlash
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { useAuth } from '../../../client/hooks/useAuth';
+import { useSnackbar } from '../../../client/context/SnackbarContext';
 import { useRouter } from 'next/navigation';
-import { api } from '../../../client/lib/api';
+import { apiClient } from '../../../lib/api/client';
 import { FaSpinner as Loader2 } from 'react-icons/fa';
 
 type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';
@@ -22,8 +25,10 @@ type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';
 export default function Register({ initialRole }: { initialRole?: Role | null }) {
     const router = useRouter();
     const { login } = useAuth();
+    const { showSnackbar } = useSnackbar();
     const [step, setStep] = useState(initialRole ? 2 : 1);
     const [role, setRole] = useState<Role | null>(initialRole || null);
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -104,21 +109,30 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 bankDetails: {} // Placeholder
             };
 
-            const res = await api.post('/auth/register', payload);
+            const res = await apiClient.post<any>('/auth/register', payload);
 
             if (role === 'CUSTOMER') {
-                login(res.token || 'awaiting-login', {
-                    id: res.user.id,
-                    name: formData.name,
-                    email: formData.email,
-                    role: 'CUSTOMER',
-                    status: 'ACTIVE'
-                });
+                if (res.token) {
+                    apiClient.setToken(res.token);
+                    // Force a session refresh
+                    window.location.href = '/customer/profile';
+                    return;
+                }
             }
 
             setStep(s => s + 1);
         } catch (error: any) {
-            if (error.details && typeof error.details === 'object') {
+            console.error('Registration Error:', error);
+            if (error.message === 'DUPLICATE_ENTRY' || error.error === 'DUPLICATE_ENTRY') {
+                showSnackbar('Account already exists with this Email or Phone', 'error');
+                if (error.details) {
+                    const fieldErrors: Record<string, string> = {};
+                    Object.keys(error.details).forEach(field => {
+                        fieldErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} already registered`;
+                    });
+                    setErrors(fieldErrors);
+                }
+            } else if (error.details && typeof error.details === 'object') {
                 const backendErrors: Record<string, string> = {};
                 Object.entries(error.details).forEach(([field, code]) => {
                     switch (code) {
@@ -127,16 +141,19 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                         case 'INVALID_PHONE': backendErrors[field] = 'Invalid mobile number format'; break;
                         case 'NAME_REQUIRED': backendErrors[field] = 'Display name is required'; break;
                         case 'GST_REQUIRED': backendErrors[field] = 'Valid GST number is required for B2B'; break;
-                        default: backendErrors[field] = typeof code === 'string' ? code.replace(/_/g, ' ') : 'Required';
+                        default: backendErrors[field] = typeof code === 'string' ? (code as string).replace(/_/g, ' ') : 'Required';
                     }
                 });
                 setErrors(backendErrors);
                 // If there are field errors but we are on step 3 and they are step 2 errors, go back
                 if (step === 3 && (backendErrors.email || backendErrors.password || backendErrors.phone)) {
                     setStep(2);
+                    showSnackbar('Please fix the errors in Step 2', 'error');
                 }
             } else {
-                setErrors({ general: error.message || 'Registration failed. Please try again.' });
+                const msg = error.message || 'Registration failed. Please try again.';
+                setErrors({ general: msg });
+                showSnackbar(msg, 'error');
             }
         } finally {
             setIsLoading(false);
@@ -200,13 +217,22 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                 />
                                 {errors.email && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.email}</p>}
-                                <input
-                                    type="password"
-                                    placeholder="Password "
-                                    className={`w-full bg-white/60 border ${errors.password ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-5 text-sm font-bold focus:outline-none focus:border-[#10367D] transition-all`}
-                                    value={formData.password}
-                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                />
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Password "
+                                        className={`w-full bg-white/60 border ${errors.password ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-5 pr-12 text-sm font-bold focus:outline-none focus:border-[#10367D] transition-all`}
+                                        value={formData.password}
+                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#10367D]/40 hover:text-[#10367D] transition-colors"
+                                    >
+                                        {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                                    </button>
+                                </div>
                                 {errors.password && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.password}</p>}
                                 <div className="flex flex-col gap-1">
                                     <div className="flex gap-4">
@@ -331,18 +357,18 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
     };
 
     return (
-        <div className="min-h-screen bg-[#EBEBEB] flex flex-col items-center justify-center p-8 pt-32 relative overflow-hidden">
+        <div className="min-h-screen bg-[#EBEBEB] flex flex-col items-center justify-center p-4 md:p-8 pt-24 md:pt-32 relative overflow-hidden">
             {/* Ambient Background Glows */}
             <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#10367D]/10 blur-[150px] rounded-full pointer-events-none" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#10367D]/5 blur-[150px] rounded-full pointer-events-none" />
 
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-2 mb-8 shadow-xl shadow-[#10367D]/10 overflow-hidden border border-[#10367D]/5 relative z-10">
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center p-2 mb-6 md:mb-8 shadow-xl shadow-[#10367D]/10 overflow-hidden border border-[#10367D]/5 relative z-10">
                 <img src="/logo.png" alt="Novamart" className="w-full h-full object-contain" />
             </div>
 
             {/* Progress Bar */}
             {step < 4 && (
-                <div className="w-full max-w-2xl bg-white/40 h-1.5 rounded-full mb-12 overflow-hidden relative z-10">
+                <div className="w-full max-w-xl md:max-w-2xl bg-white/40 h-1.5 rounded-full mb-8 md:mb-12 overflow-hidden relative z-10">
                     <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${(step / 3) * 100}%` }}
@@ -368,7 +394,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
             {step > 1 && step < 4 && (
                 <button
                     onClick={prevStep}
-                    className="mt-8 flex items-center gap-2 text-[#10367D]/60 font-bold hover:text-[#10367D] transition-colors relative z-10 uppercase tracking-widest text-[10px]"
+                    className="mt-6 md:mt-8 flex items-center gap-2 text-[#10367D]/60 font-bold hover:text-[#10367D] transition-colors relative z-10 uppercase tracking-widest text-[10px]"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Back

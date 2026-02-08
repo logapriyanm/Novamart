@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
-import CustomerProductCard from '../../../client/components/ui/CustomerProductCard';
-import { ProductFilterSidebar, FilterState } from '../../../client/components/ui/ProductFilterSidebar';
-import Breadcrumb from '../../../client/components/ui/Breadcrumb';
+import React, { useState, useEffect, Suspense } from 'react';
+import CustomerProductCard from '@/client/components/ui/CustomerProductCard';
+import { ProductFilterSidebar, FilterState } from '@/client/components/features/products/ProductFilterSidebar';
+import ChatWidget from '@/client/components/features/chat/ChatWidget';
+import Breadcrumb from '@/client/components/ui/Breadcrumb';
+import { productService } from '@/lib/api/services/product.service';
 import {
     FaSearch as Search,
     FaFilter,
@@ -13,65 +15,16 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const allProducts = [
-    {
-        id: '1',
-        name: 'LG V6 Series Front Load Washing Machine with AI DD™',
-        price: 34990,
-        originalPrice: 42990,
-        image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800&auto=format&fit=crop',
-        brand: 'LG',
-        spec: '8.0 KG LOAD',
-        rating: 4.8,
-        reviewsCount: 1242,
-        seller: { name: 'LG Official Store', isVerified: true, isTopSeller: true },
-        highlights: { freeDelivery: true, installation: true, warranty: '2 Yr Warranty' }
-    },
-    {
-        id: '2',
-        name: 'Samsung Ecobubble™ Top Load with Hygiene Steam',
-        price: 21490,
-        originalPrice: 26000,
-        image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800&auto=format&fit=crop',
-        brand: 'SAMSUNG',
-        spec: '7.0 KG LOAD',
-        rating: 4.6,
-        reviewsCount: 856,
-        seller: { name: 'Samsung Plaza', isVerified: true, isTopSeller: false },
-        highlights: { freeDelivery: true, installation: true, warranty: '2 Yr Warranty' }
-    },
-    {
-        id: '3',
-        name: 'Bosch Series 6 Fully Automatic Front Load with i-DOS',
-        price: 48990,
-        originalPrice: 59990,
-        image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800&auto=format&fit=crop',
-        brand: 'BOSCH',
-        spec: '9.0 KG LOAD',
-        rating: 4.9,
-        reviewsCount: 422,
-        seller: { name: 'Bosch Home India', isVerified: true, isTopSeller: true },
-        highlights: { freeDelivery: true, installation: true, warranty: '3 Yr Warranty' }
-    },
-    {
-        id: '4',
-        name: 'Haier 7.5kg Semi Automatic Top Load Washer',
-        price: 12499,
-        originalPrice: 15999,
-        image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800&auto=format&fit=crop',
-        brand: 'HAIER',
-        spec: '7.5 KG LOAD',
-        rating: 4.4,
-        reviewsCount: 567,
-        seller: { name: 'Nova Express', isVerified: true },
-        highlights: { freeDelivery: true, installation: false, warranty: '2 Yr Warranty' }
-    }
-];
+
 
 function ProductsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const currentCategory = searchParams.get('cat') || '';
+    const currentCategory = searchParams.get('cat') || 'home-appliances';
+    const searchQuery = searchParams.get('q') || '';
+
+    const [products, setProducts] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
@@ -84,8 +37,64 @@ function ProductsContent() {
         brands: [],
         rating: null,
         availability: [],
-        verifiedOnly: false
+        verifiedOnly: false,
+        powerConsumption: [],
+        capacity: [],
+        energyRating: [],
+        installationType: [],
+        usageType: [],
+        warranty: [],
+        isSmart: false
     });
+
+    useEffect(() => {
+        fetchProducts();
+    }, [currentCategory, searchQuery, sortBy, filters.priceRange[0], filters.priceRange[1]]);
+
+    const fetchProducts = async () => {
+        setIsLoading(true);
+        try {
+            const params: any = {
+                status: 'APPROVED',
+                category: currentCategory,
+                q: searchQuery,
+                sortBy: sortBy,
+                minPrice: filters.priceRange[0],
+                maxPrice: filters.priceRange[1]
+            };
+
+            const data = await productService.getAllProducts(params);
+            // Adapt real product data to the UI format if needed
+            // The API returns products with inventory included
+            const adapted = data.map(p => ({
+                id: p.id,
+                inventoryId: p.inventory?.[0]?.id, // Dynamic ID
+                name: p.name,
+                price: p.inventory?.[0]?.price || p.basePrice,
+                originalPrice: p.inventory?.[0]?.originalPrice || p.basePrice,
+                image: p.images?.[0] || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800',
+                brand: p.manufacturer?.companyName || 'NovaMart',
+                spec: p.category,
+                rating: p.averageRating || 4.2 + (Math.random() * 0.6),
+                reviewsCount: p.reviewCount || 0,
+                seller: {
+                    id: p.inventory?.[0]?.dealer?.id, // Dynamic Dealer ID
+                    name: p.inventory?.[0]?.dealer?.businessName || 'Verified Seller',
+                    isVerified: true
+                },
+                highlights: {
+                    freeDelivery: p.basePrice > 2000,
+                    installation: p.category?.toLowerCase() === 'machinery',
+                    warranty: (p as any).specifications?.warranty || '1 Year'
+                }
+            }));
+            setProducts(adapted);
+        } catch (error) {
+            console.error('Failed to fetch products:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleCategoryChange = (slug: string) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -107,27 +116,40 @@ function ProductsContent() {
             brands: [],
             rating: null,
             availability: [],
-            verifiedOnly: false
+            verifiedOnly: false,
+            powerConsumption: [],
+            capacity: [],
+            energyRating: [],
+            installationType: [],
+            usageType: [],
+            warranty: [],
+            isSmart: false
         });
         router.push('/products');
     };
 
     // Derived State: Filtered & Sorted Products
-    const filteredProducts = allProducts.filter(product => {
-        // 1. Category Filter (Mock logic as products don't have category field in this snippet, assuming all match for now or add mock logic)
-        // In real app, product.category === currentCategory
-
-        // 2. Price Filter
+    const filteredProducts = products.filter(product => {
+        // 1. Price Filter
         if (product.price < filters.priceRange[0] || product.price > filters.priceRange[1]) return false;
 
-        // 3. Brand Filter
+        // 2. Brand Filter
         if (filters.brands.length > 0 && !filters.brands.includes(product.brand)) return false;
 
-        // 4. Rating Filter
+        // 3. Rating Filter
         if (filters.rating && product.rating < filters.rating) return false;
 
-        // 5. Verified Seller Filter
-        if (filters.verifiedOnly && !product.seller.isVerified) return false;
+        // 4. Power Consumption Filter (Mock Logic - in real app, this would be DB query)
+        if (filters.powerConsumption?.length > 0 && !filters.powerConsumption.includes(product.spec?.powerConsumption)) return false;
+
+        // 5. Capacity Filter
+        if (filters.capacity?.length > 0 && !filters.capacity.includes(product.spec?.capacity)) return false;
+
+        // 6. Energy Rating Filter
+        if (filters.energyRating?.length > 0 && !filters.energyRating.includes(product.spec?.energyRating)) return false;
+
+        // 7. Smart Filter
+        if (filters.isSmart && !product.spec?.isSmart) return false;
 
         return true;
     }).sort((a, b) => {
@@ -198,6 +220,15 @@ function ProductsContent() {
                                     {isDesktopSidebarOpen ? <FaChevronLeft className="w-4 h-4" /> : <FaFilter className="w-4 h-4" />}
                                 </button>
 
+                                {/* Mobile Filter Toggle */}
+                                <button
+                                    onClick={() => setIsMobileFilterOpen(true)}
+                                    className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 transition-all shadow-sm text-sm font-bold text-[#1E293B]"
+                                >
+                                    <FaFilter className="w-3.5 h-3.5 text-[#10367D]" />
+                                    Filters
+                                </button>
+
                                 <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide pb-2 sm:pb-0 w-full">
                                     <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest shrink-0">Active Filters:</span>
                                     <div className="flex items-center gap-3">
@@ -247,7 +278,16 @@ function ProductsContent() {
                         </div>
 
                         {/* 5️⃣ PRODUCT GRID */}
-                        {filteredProducts.length > 0 ? (
+                        {isLoading ? (
+                            <div className={isDesktopSidebarOpen
+                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+                            }>
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <div key={i} className="bg-white rounded-[2.5rem] p-4 border border-slate-100 animate-pulse h-96"></div>
+                                ))}
+                            </div>
+                        ) : filteredProducts.length > 0 ? (
                             <div className={isDesktopSidebarOpen
                                 ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                                 : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"

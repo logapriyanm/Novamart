@@ -24,6 +24,11 @@ export interface User {
     status: AccountStatus;
     avatar?: string;
     createdAt: string;
+    phone?: string;
+    address?: string;
+    companyName?: string;
+    businessName?: string;
+    gstNumber?: string;
 }
 
 // --- Auth Payloads ---
@@ -52,6 +57,7 @@ export interface ApiResponse<T = any> {
     success: boolean;
     data?: T;
     error?: string;
+    details?: any;
     meta?: {
         page?: number;
         limit?: number;
@@ -84,6 +90,11 @@ export const ENDPOINTS = {
     ADMIN: {
         DASHBOARD: '/admin/dashboard',
         USERS: '/admin/users',
+    },
+    CUSTOMER: {
+        ORDERS: '/customer/orders',
+        STATS: '/customer/stats',
+        PRODUCTS: '/customer/products',
     },
     PUBLIC: {
         PRODUCTS: '/products',

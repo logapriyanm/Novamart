@@ -6,7 +6,7 @@
  */
 const authorize = (allowedRoles = [], allowedAdminRoles = [], requiredStatus = 'ACTIVE') => {
     return (req, res, next) => {
-        // user is attached to req by auth middleware (to be implemented)
+        // user is attached to req by auth middleware
         const { role, adminRole, status } = req.user || {};
 
         if (!allowedRoles.includes(role)) {
@@ -20,11 +20,14 @@ const authorize = (allowedRoles = [], allowedAdminRoles = [], requiredStatus = '
             }
         }
 
-        if (status !== requiredStatus) {
+        // Check status - supports single string or array of allowed statuses
+        const statuses = Array.isArray(requiredStatus) ? requiredStatus : [requiredStatus];
+        if (!statuses.includes(status)) {
             return res.status(403).json({
                 error: 'FORBIDDEN',
                 message: 'You do not have permission to perform this action.',
-                code: 'INSUFFICIENT_PERMISSIONS'
+                code: 'INSUFFICIENT_PERMISSIONS',
+                currentStatus: status
             });
         }
 

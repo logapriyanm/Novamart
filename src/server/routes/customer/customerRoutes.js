@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import customerController from './customerController.js';
+import customerController from '../../controllers/customerController.js';
 import authorize from '../../middleware/rbac.js';
 import authenticate from '../../middleware/auth.js';
 
@@ -22,10 +22,18 @@ router.use(authenticate);
 router.use(authorize(['CUSTOMER']));
 
 router.post('/orders', customerController.placeOrder);
+router.get('/orders', customerController.getOrders);
+router.get('/stats', customerController.getStats);
 router.post('/orders/:orderId/pay', customerController.payOrder);
 router.get('/orders/:id', customerController.getOrderDetails);
 router.post('/ratings', customerController.rateService);
 router.post('/orders/:orderId/dispute', customerController.raiseOrderDispute);
+
+/**
+ * Profile Management
+ */
+router.get('/profile', customerController.getProfile);
+router.put('/profile', customerController.updateProfile);
 
 export default router;
 
