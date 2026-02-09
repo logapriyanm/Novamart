@@ -20,8 +20,8 @@ import {
     FaUnlink
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { adminService } from '../../../../lib/api/services/admin.service';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { adminService } from '@/lib/api/services/admin.service';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 export default function DealerApprovalPanel() {
     const [dealers, setDealers] = useState<any[]>([]);

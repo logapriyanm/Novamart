@@ -4,8 +4,12 @@
  */
 
 import prisma from '../lib/prisma.js';
+import userService from './userService.js';
 
 class ManufacturerService {
+    /**
+     * Approve or Reject a Dealer's request to join the network.
+     */
     /**
      * Approve or Reject a Dealer's request to join the network.
      */
@@ -13,24 +17,43 @@ class ManufacturerService {
         return await prisma.$transaction(async (tx) => {
             const requestStatus = status === 'APPROVED' ? 'APPROVED' : 'REJECTED';
 
-            // 1. Update the DealerRequest record
-            await tx.dealerRequest.update({
+            // 1. Upsert the DealerRequest record (Create if handling an implicit request)
+            const request = await tx.dealerRequest.upsert({
                 where: {
                     dealerId_manufacturerId: {
                         dealerId,
                         manufacturerId: mfgId
                     }
                 },
-                data: { status: requestStatus }
+                update: { status: requestStatus },
+                create: {
+                    dealerId,
+                    manufacturerId: mfgId,
+                    status: requestStatus,
+                    message: 'Auto-created upon approval'
+                }
             });
 
-            // 2. If approved, connect in the many-to-many relation
+            // 2. If approved, connect in the many-to-many relation AND verify the dealer globally if needed
             if (status === 'APPROVED') {
                 await tx.manufacturer.update({
                     where: { id: mfgId },
                     data: {
                         dealersApproved: { connect: { id: dealerId } }
                     }
+                });
+
+                // Optionally mark dealer as verified globally if this is the main authority
+                const dealer = await tx.dealer.update({
+                    where: { id: dealerId },
+                    data: { isVerified: true },
+                    select: { userId: true }
+                });
+
+                // Ensure the User is ACTIVE so they can access the platform
+                await tx.user.update({
+                    where: { id: dealer.userId },
+                    data: { status: 'ACTIVE' }
                 });
             } else {
                 await tx.manufacturer.update({
@@ -47,9 +70,10 @@ class ManufacturerService {
 
     /**
      * Get pending or processed dealer requests for a manufacturer.
+     * INCLUDES: Explicit requests AND Orphaned unverified dealers (Implicit Requests)
      */
     async getDealerRequests(mfgId, statusFilter = 'PENDING') {
-        return await prisma.dealerRequest.findMany({
+        const requests = await prisma.dealerRequest.findMany({
             where: {
                 manufacturerId: mfgId,
                 status: statusFilter
@@ -57,54 +81,41 @@ class ManufacturerService {
             include: {
                 dealer: {
                     include: {
-                        user: {
-                            select: {
-                                email: true,
-                                phone: true
-                            }
-                        }
+                        user: { select: { email: true, phone: true } }
                     }
                 }
             },
             orderBy: { createdAt: 'desc' }
         });
-    }
 
-    /**
-     * Allocate product stock to a specific dealer/region.
-     */
-    async allocateStock(mfgId, productId, dealerId, region, quantity, price) {
-        // 1. Verify Product Ownership
-        const product = await prisma.product.findUnique({
-            where: { id: productId }
-        });
+        // If filtering for PENDING, also fetch dealers who have NO requests and are unverified
+        if (statusFilter === 'PENDING') {
+            const implicitDealers = await prisma.dealer.findMany({
+                where: {
+                    isVerified: false,
+                    partnershipRequests: { none: { manufacturerId: mfgId } } // Not already requested/handled
+                },
+                include: {
+                    user: { select: { email: true, phone: true } }
+                }
+            });
 
-        if (!product || product.manufacturerId !== mfgId) {
-            throw new Error('UNAUTHORIZED_PRODUCT_ALLOCATION');
+            const implicitRequests = implicitDealers.map(dealer => ({
+                id: `temp-${dealer.id}`,
+                dealerId: dealer.id,
+                manufacturerId: mfgId,
+                status: 'PENDING',
+                message: 'New Registration (Pending Verification)',
+                createdAt: dealer.user?.createdAt || new Date(), // Fallback to now if user relation issue, but strictly dealer should have created at
+                dealer: dealer
+            }));
+
+            return [...requests, ...implicitRequests];
         }
 
-        // 2. Verify Dealer is in network
-        const manufacturer = await prisma.manufacturer.findUnique({
-            where: { id: mfgId },
-            include: { dealersApproved: true }
-        });
-
-        const isApproved = manufacturer.dealersApproved.some(d => d.id === dealerId);
-        if (!isApproved) {
-            throw new Error('DEALER_NOT_IN_NETWORK');
-        }
-
-        return await prisma.inventory.upsert({
-            where: {
-                // Using findFirst to avoid composite key complexity if not defined
-                id: (await prisma.inventory.findFirst({
-                    where: { productId, dealerId, region }
-                }))?.id || 'temp-id'
-            },
-            update: { stock: { increment: quantity }, price },
-            create: { productId, dealerId, region, stock: quantity, price }
-        });
+        return requests;
     }
+
 
     /**
      * Get Sales Analytics for Manufacturer.
@@ -202,57 +213,10 @@ class ManufacturerService {
      * Update Manufacturer Profile Sections.
      */
     async updateProfile(mfgId, section, data) {
-        const updateData = {};
+        const mfg = await prisma.manufacturer.findUnique({ where: { id: mfgId } });
+        if (!mfg) throw new Error('MANUFACTURER_NOT_FOUND');
 
-        switch (section) {
-            case 'account':
-                return await prisma.$transaction(async (tx) => {
-                    const mfg = await tx.manufacturer.findUnique({ where: { id: mfgId } });
-                    await tx.user.update({
-                        where: { id: mfg.userId },
-                        data: {
-                            email: data.email,
-                            phone: data.phone,
-                            avatar: data.avatar
-                        }
-                    });
-                    return await tx.manufacturer.findUnique({
-                        where: { id: mfgId },
-                        include: { user: true }
-                    });
-                });
-            case 'company':
-                updateData.companyName = data.companyName;
-                updateData.registrationNo = data.registrationNo;
-                updateData.businessType = data.businessType;
-                updateData.officialEmail = data.officialEmail;
-                updateData.phone = data.phone;
-                break;
-            case 'factory':
-                updateData.factoryAddress = data.factoryAddress;
-                updateData.capacity = data.capacity;
-                updateData.categoriesProduced = data.categoriesProduced;
-                break;
-            case 'compliance':
-                updateData.gstNumber = data.gstNumber;
-                updateData.certifications = data.certifications;
-                break;
-            case 'assets':
-                updateData.logo = data.logo;
-                updateData.brandDescription = data.brandDescription;
-                updateData.marketingMaterials = data.marketingMaterials;
-                break;
-            case 'bank':
-                updateData.bankDetails = data.bankDetails;
-                break;
-            default:
-                throw new Error('INVALID_PROFILE_SECTION');
-        }
-
-        return await prisma.manufacturer.update({
-            where: { id: mfgId },
-            data: updateData
-        });
+        return await userService.updateFullProfile(mfg.userId, 'MANUFACTURER', section, data);
     }
 }
 

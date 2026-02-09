@@ -14,10 +14,10 @@ import {
     FaEyeSlash
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { useAuth } from '../../../client/hooks/useAuth';
-import { useSnackbar } from '../../../client/context/SnackbarContext';
+import { useAuth } from '@/client/hooks/useAuth';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 import { useRouter } from 'next/navigation';
-import { apiClient } from '../../../lib/api/client';
+import { apiClient } from '@/lib/api/client';
 import { FaSpinner as Loader2 } from 'react-icons/fa';
 
 type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';

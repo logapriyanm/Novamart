@@ -43,6 +43,24 @@ export const createNegotiation = async (req, res) => {
             }
         });
 
+        // Notify manufacturer of new negotiation
+        const manufacturer = await prisma.manufacturer.findUnique({
+            where: { id: product.manufacturerId },
+            include: { user: true }
+        });
+
+        if (manufacturer?.user) {
+            await prisma.notification.create({
+                data: {
+                    userId: manufacturer.user.id,
+                    type: 'NEGOTIATION_STARTED',
+                    title: 'New Price Negotiation Request',
+                    message: `${dealer.businessName} wants to negotiate pricing for ${product.name}. Initial offer: ₹${initialOffer} for ${quantity} units.`,
+                    link: `/manufacturer/negotiations`
+                }
+            });
+        }
+
         res.status(201).json({ success: true, data: negotiation });
     } catch (error) {
         console.error(error);
@@ -125,8 +143,107 @@ export const updateNegotiation = async (req, res) => {
             data: updateData
         });
 
+        // Send notification to the other party
+        const recipientUserId = role === 'DEALER' ? negotiation.manufacturer.userId : negotiation.dealer.userId;
+        const senderName = role === 'DEALER' ? negotiation.dealer.businessName : negotiation.manufacturer.companyName;
+
+        if (status) {
+            // Notify about status change (approval/rejection)
+            await prisma.notification.create({
+                data: {
+                    userId: recipientUserId,
+                    type: status === 'ACCEPTED' ? 'NEGOTIATION_ACCEPTED' : 'NEGOTIATION_REJECTED',
+                    title: `Negotiation ${status}`,
+                    message: status === 'ACCEPTED'
+                        ? `${senderName} has accepted the negotiation terms. Stock will be allocated soon.`
+                        : `${senderName} has declined the negotiation. You can start a new negotiation with different terms.`,
+                    link: role === 'DEALER' ? '/dealer/negotiations' : '/manufacturer/negotiations'
+                }
+            });
+        } else if (message || newOffer) {
+            // Notify about new message/offer
+            await prisma.notification.create({
+                data: {
+                    userId: recipientUserId,
+                    type: 'NEGOTIATION_MESSAGE',
+                    title: 'New Negotiation Message',
+                    message: newOffer
+                        ? `${senderName} sent a new offer: ₹${newOffer}`
+                        : `${senderName}: ${message?.substring(0, 50)}${message?.length > 50 ? '...' : ''}`,
+                    link: role === 'DEALER' ? '/dealer/negotiations' : '/manufacturer/negotiations'
+                }
+            });
+        }
+
         res.json({ success: true, data: updatedNegotiation });
     } catch (error) {
         res.status(500).json({ message: 'Update failed' });
     }
 };
+
+export const getSingleNegotiation = async (req, res) => {
+    try {
+        const { negotiationId } = req.params;
+        const userId = req.user.id;
+        const role = req.user.role;
+
+        const negotiation = await prisma.negotiation.findUnique({
+            where: { id: negotiationId },
+            include: {
+                product: {
+                    select: {
+                        id: true,
+                        name: true,
+                        images: true,
+                        basePrice: true,
+                        moq: true,
+                        category: true
+                    }
+                },
+                dealer: {
+                    select: {
+                        id: true,
+                        businessName: true,
+                        city: true,
+                        state: true
+                    }
+                },
+                manufacturer: {
+                    select: {
+                        id: true,
+                        companyName: true,
+                        factoryAddress: true
+                    }
+                }
+            }
+        });
+
+        if (!negotiation) {
+            return res.status(404).json({ success: false, message: 'Negotiation not found' });
+        }
+
+        // Verify access - only participants can view
+        const isParticipant = (role === 'DEALER' && negotiation.dealer.id === await getUserDealerId(userId)) ||
+            (role === 'MANUFACTURER' && negotiation.manufacturer.id === await getUserManufacturerId(userId));
+
+        if (!isParticipant) {
+            return res.status(403).json({ success: false, message: 'Access denied' });
+        }
+
+        res.json({ success: true, data: negotiation });
+    } catch (error) {
+        console.error('Get negotiation error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch negotiation' });
+    }
+};
+
+// Helper functions
+async function getUserDealerId(userId) {
+    const dealer = await prisma.dealer.findUnique({ where: { userId } });
+    return dealer?.id;
+}
+
+async function getUserManufacturerId(userId) {
+    const manufacturer = await prisma.manufacturer.findUnique({ where: { userId } });
+    return manufacturer?.id;
+}

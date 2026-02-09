@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import Sidebar from '../../../client/components/layout/Sidebar';
-import Navbar from '../../../client/components/layout/Navbar';
+import Sidebar from '@/client/components/layout/Sidebar';
+import Navbar from '@/client/components/layout/Navbar';
 import { FaBell as Bell, FaSearch as Search, FaShieldAlt as ShieldCheck, FaBars as Menu } from 'react-icons/fa';
-import { useAuth } from '../../../client/context/AuthContext';
-import RoleGuard from '../../../client/components/features/auth/RoleGuard';
-import { Role } from '../../../lib/api/contract';
+import { useAuth } from '@/client/context/AuthContext';
+import RoleGuard from '@/client/components/features/auth/RoleGuard';
+import { Role } from '@/lib/api/contract';
 
 export default function CustomerLayout({
     children,

@@ -25,7 +25,7 @@ import {
     FaRocket
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { useRealProfile } from '../../../../client/hooks/useRealProfile';
+import { useRealProfile } from '@/client/hooks/useRealProfile';
 
 export default function ManufacturerProfilePage() {
     const { profile, isLoading, error, updateProfile, refetch } = useRealProfile<any>('manufacturer');

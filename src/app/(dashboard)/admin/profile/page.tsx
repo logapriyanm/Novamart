@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useAuth } from '../../../../client/hooks/useAuth';
+import { useAuth } from '@/client/hooks/useAuth';
 import { FaUserShield, FaEnvelope, FaIdBadge } from 'react-icons/fa';
 
 export default function AdminProfilePage() {

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import Sidebar from '../../../client/components/layout/Sidebar';
+import Sidebar from '@/client/components/layout/Sidebar';
 import { FaBell as Bell, FaSearch as Search, FaShieldAlt as ShieldCheck, FaBars as Menu } from 'react-icons/fa';
-import RoleGuard from '../../../client/components/features/auth/RoleGuard';
-import UserDropdown from '../../../client/components/layout/UserDropdown';
-import { Role } from '../../../lib/api/contract';
+import RoleGuard from '@/client/components/features/auth/RoleGuard';
+import UserDropdown from '@/client/components/layout/UserDropdown';
+import { Role } from '@/lib/api/contract';
 
 export default function ManufacturerLayout({
     children,

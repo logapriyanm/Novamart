@@ -19,6 +19,7 @@ router.post('/', createOrder);
 router.get('/', getOrders);
 router.get('/my', getMyOrders);
 router.get('/:id', getOrderById);
+router.get('/:id/payment', getOrderById); // Reusing getOrderById for now, or create dedicated controller
 router.patch('/:id/status', updateOrderStatus);
 
 export default router;

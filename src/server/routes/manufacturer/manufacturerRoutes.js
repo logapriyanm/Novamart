@@ -23,11 +23,16 @@ router.get('/dealers/requests', manufacturerController.getDealerRequests);
 router.post('/network/handle', manufacturerController.handleDealerNetwork);
 router.post('/dealers/handle', manufacturerController.handleDealerNetwork); // Alias
 router.get('/products', productController.getMyProducts);
+router.get('/orders', manufacturerController.getOrders);
 
 /**
  * Inventory & Allocation
  */
 router.post('/inventory/allocate', manufacturerController.allocateInventory);
+router.get('/allocations', manufacturerController.getAllocations);
+router.put('/allocations/:allocationId', manufacturerController.updateAllocation);
+router.delete('/allocations/:allocationId', manufacturerController.revokeAllocation);
+
 
 /**
  * Performance & Financials
@@ -40,6 +45,11 @@ router.get('/stats', manufacturerController.getManufacturerStats); // Alias
  */
 router.get('/profile', manufacturerController.getProfile);
 router.put('/profile', manufacturerController.updateProfile);
+
+/**
+ * Public Manufacturer List (For Dealer Marketplace)
+ */
+router.get('/all', manufacturerController.getAllManufacturers);
 
 export default router;
 

@@ -15,7 +15,7 @@ import {
 } from 'react-icons/hi';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { orderService } from '../../../../lib/api/services/order.service';
+import { orderService } from '@/lib/api/services/order.service';
 
 export default function OrderSuccessPage() {
     const searchParams = useSearchParams();

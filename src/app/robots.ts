@@ -9,10 +9,12 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: [
                     '/dashboard/',
                     '/api/',
-                    '/account/settings',
+                    '/account/',
                     '/admin/',
                     '/manufacturer/',
                     '/dealer/',
+                    '/checkout/',
+                    '/cart/',
                 ],
             },
         ],

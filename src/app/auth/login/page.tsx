@@ -1,5 +1,5 @@
 import React from 'react';
-import LoginForm from '../../../client/components/features/auth/LoginForm';
+import LoginForm from '@/client/components/features/auth/LoginForm';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8">
             <div className="w-full max-w-md">
-               
+
 
                 <LoginForm />
             </div>

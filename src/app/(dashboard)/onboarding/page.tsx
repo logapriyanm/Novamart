@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../../client/hooks/useAuth';
-import DocumentUpload from '../../../client/components/features/verification/DocumentUpload';
-import { apiClient } from '../../../lib/api/client';
+import { useAuth } from '@/client/hooks/useAuth';
+import DocumentUpload from '@/client/components/features/verification/DocumentUpload';
+import { apiClient } from '@/lib/api/client';
 import { FaShieldAlt, FaLock } from 'react-icons/fa';
 
 export default function OnboardingPage() {

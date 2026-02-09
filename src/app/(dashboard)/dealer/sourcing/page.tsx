@@ -14,9 +14,10 @@ import {
     FaInfoCircle,
     FaSpinner as Loader2
 } from 'react-icons/fa';
-import { apiClient } from '../../../../lib/api/client';
+import { apiClient } from '@/lib/api/client';
 import { useRouter } from 'next/navigation';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { useSnackbar } from '@/client/context/SnackbarContext';
+import { useAuth } from '@/client/hooks/useAuth';
 
 export default function SourcingTerminal() {
     const router = useRouter();

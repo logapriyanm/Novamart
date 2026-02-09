@@ -5,6 +5,7 @@
 
 import prisma from '../lib/prisma.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
+import { isValidTransition } from '../lib/stateMachine.js';
 
 class OrderService {
     /**
@@ -16,17 +17,29 @@ class OrderService {
 
             // 1. Calculate base total and validate regional inventory
             for (const item of items) {
+                const where = {
+                    dealerId,
+                    stock: { gte: item.quantity }
+                };
+
+                if (item.inventoryId) {
+                    where.id = item.inventoryId;
+                } else if (item.productId) {
+                    where.productId = item.productId;
+                } else {
+                    throw new Error('Each item must have a productId or inventoryId.');
+                }
+
                 const inventory = await tx.inventory.findFirst({
-                    where: {
-                        productId: item.productId,
-                        dealerId,
-                        // Region check: Ensure dealer inventory is in the right location
-                        stock: { gte: item.quantity }
-                    },
+                    where,
                     include: { product: true }
                 });
 
-                if (!inventory) throw new Error(`Insufficient stock for ${item.productId} at this dealer.`);
+                if (!inventory) throw new Error(`Insufficient stock for item at this dealer.`);
+
+                // Update item with resolved values for DB creation later
+                item.productId = inventory.productId;
+                item.price = inventory.price;
 
                 await tx.inventory.update({
                     where: { id: inventory.id },
@@ -218,8 +231,12 @@ class OrderService {
 
             // 1. Restore Inventory
             for (const item of order.items) {
+                const inventoryWhere = item.inventoryId
+                    ? { id: item.inventoryId }
+                    : { productId: item.productId, dealerId: order.dealerId };
+
                 await tx.inventory.updateMany({
-                    where: { productId: item.productId, dealerId: order.dealerId },
+                    where: inventoryWhere,
                     data: {
                         stock: { increment: item.quantity },
                         locked: { decrement: item.quantity }
@@ -243,18 +260,137 @@ class OrderService {
     }
 
     /**
-     * Logistics Hook: Update Tracking Information
+     * Get orders for a specific user role with filters.
      */
-    async updateTracking(orderId, trackingNumber, carrier) {
-        return await prisma.orderTimeline.create({
-            data: {
-                orderId,
-                fromState: 'SHIPPED',
-                toState: 'SHIPPED',
-                reason: `Shipping update: ${carrier} (${trackingNumber}) - In Transit`
-            }
+    async getOrders(role, userId, filters = {}) {
+        const { status, dealerId } = filters;
+        const where = {};
+
+        if (role === 'DEALER') {
+            const dealer = await prisma.dealer.findUnique({ where: { userId } });
+            if (!dealer) throw new Error('DEALER_PROFILE_NOT_FOUND');
+            where.dealerId = dealer.id;
+        } else if (role === 'CUSTOMER') {
+            const customer = await prisma.customer.findUnique({ where: { userId } });
+            if (!customer) throw new Error('CUSTOMER_PROFILE_NOT_FOUND');
+            where.customerId = customer.id;
+        } else if (role === 'ADMIN' && dealerId) {
+            where.dealerId = dealerId;
+        }
+
+        if (status && status !== 'All') {
+            where.status = status.toUpperCase();
+        }
+
+        return await prisma.order.findMany({
+            where,
+            include: {
+                customer: {
+                    select: {
+                        name: true,
+                        user: { select: { email: true } }
+                    }
+                },
+                items: { include: { linkedProduct: { select: { name: true, images: true } } } },
+                dealer: { select: { businessName: true } }
+            },
+            orderBy: { createdAt: 'desc' }
         });
     }
+
+    /**
+     * Get Order by ID with security and full relations.
+     */
+    async getOrderById(orderId, userId, role) {
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                items: { include: { linkedProduct: true } },
+                customer: { include: { user: true } },
+                dealer: { include: { user: true } },
+                timeline: true,
+                escrow: true
+            }
+        });
+
+        if (!order) throw new Error('ORDER_NOT_FOUND');
+
+        // Security Checks
+        if (role === 'CUSTOMER' && order.customer.userId !== userId) throw new Error('UNAUTHORIZED_ACCESS');
+        if (role === 'DEALER' && order.dealer.userId !== userId) throw new Error('UNAUTHORIZED_ACCESS');
+        if (role === 'MANUFACTURER') {
+            const mfg = await prisma.manufacturer.findUnique({ where: { userId } });
+            const hasProduct = await prisma.orderItem.findFirst({
+                where: { orderId, linkedProduct: { manufacturerId: mfg.id } }
+            });
+            if (!hasProduct) throw new Error('UNAUTHORIZED_ACCESS');
+        }
+
+        return order;
+    }
+
+    /**
+     * Unified Status Update with State Machine and Rules.
+     */
+    async updateStatus(orderId, status, { reason, metadata } = {}) {
+        return await prisma.$transaction(async (tx) => {
+            const current = await tx.order.findUnique({
+                where: { id: orderId },
+                include: { items: true, escrow: true }
+            });
+
+            if (!current) throw new Error('ORDER_NOT_FOUND');
+            if (!isValidTransition(current.status, status)) {
+                throw new Error(`INVALID_TRANSITION: ${current.status} -> ${status}`);
+            }
+
+            // Side Effects
+            if (status === 'DELIVERED') {
+                // Unlock inventory
+                for (const item of current.items) {
+                    if (item.inventoryId) {
+                        await tx.inventory.update({
+                            where: { id: item.inventoryId },
+                            data: { locked: { decrement: item.quantity } }
+                        });
+                    }
+                }
+            } else if (status === 'CANCELLED') {
+                // Revert stock
+                for (const item of current.items) {
+                    if (item.inventoryId) {
+                        await tx.inventory.update({
+                            where: { id: item.inventoryId },
+                            data: { stock: { increment: item.quantity }, locked: { decrement: item.quantity } }
+                        });
+                    }
+                }
+                // Handle Escrow Refund
+                if (current.escrow && current.escrow.status === 'HOLD') {
+                    await tx.escrow.update({
+                        where: { id: current.escrow.id },
+                        data: { status: 'REFUNDED', refundedAt: new Date() }
+                    });
+                }
+            }
+
+            return await tx.order.update({
+                where: { id: orderId },
+                data: {
+                    status,
+                    timeline: {
+                        create: {
+                            fromState: current.status,
+                            toState: status,
+                            reason: reason || 'Status updated by system',
+                            metadata: metadata || {}
+                        }
+                    }
+                }
+            });
+        });
+    }
+
     /**
      * Audit Stock: Re-calculate 'locked' counts based on active orders.
      * Identifies discrepancies between physical stock and DB records.

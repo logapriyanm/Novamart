@@ -17,9 +17,9 @@ import {
     FaCheckCircle
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { adminService } from '../../../../lib/api/services/admin.service';
-import UserVerificationModal from '../../../../client/components/features/admin/UserVerificationModal';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { adminService } from '@/lib/api/services/admin.service';
+import UserVerificationModal from '@/client/components/features/admin/UserVerificationModal';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 export default function UserManagementPortal() {
     const [selectedRole, setSelectedRole] = useState('ALL');

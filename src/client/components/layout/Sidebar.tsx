@@ -69,7 +69,7 @@ const manufacturerMenuItems = [
     { name: 'Dashboard', icon: DashboardIcon, path: '/manufacturer' },
     { name: 'Products', icon: ProductsIcon, path: '/manufacturer/products' },
     { name: 'Dealer Requests', icon: FaUserCheck, path: '/manufacturer/dealers/requests' },
-    { name: 'Approved Dealers', icon: DealersIcon, path: '/manufacturer/dealers/approved' },
+    { name: 'Approved Dealers', icon: DealersIcon, path: '/manufacturer/dealers' },
     { name: 'Orders Overview', icon: LogisticsIcon, path: '/manufacturer/orders' },
     { name: 'Pricing Rules', icon: FaTag, path: '/manufacturer/pricing' },
     { name: 'Inventory Insights', icon: FaBox, path: '/manufacturer/inventory' },

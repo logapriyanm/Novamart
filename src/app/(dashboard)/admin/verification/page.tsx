@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { apiClient } from '../../../../lib/api/client';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { apiClient } from '@/lib/api/client';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 import { FaCheck, FaTimes, FaFilePdf, FaFileImage, FaExternalLinkAlt } from 'react-icons/fa';
 
 export default function VerificationCenter() {

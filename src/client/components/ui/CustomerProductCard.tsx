@@ -49,6 +49,7 @@ export default function CustomerProductCard({
     price,
     originalPrice = price * 1.2,
     image,
+    hoverImage,
     rating,
     reviewsCount = 124,
     brand,
@@ -85,18 +86,43 @@ export default function CustomerProductCard({
                 className="aspect-square relative overflow-hidden bg-background/50 cursor-pointer group-hover:bg-background transition-colors duration-500"
                 onClick={() => router.push(`/products/${id}`)}
             >
-                <OptimizedImage
-                    src={image}
-                    alt={name}
-                    width={400}
-                    height={400}
-                    className="w-full h-full object-contain p-8 transform group-hover:scale-110 transition-transform duration-700"
-                />
+                <div className="w-full h-full relative p-8">
+                    <OptimizedImage
+                        src={image}
+                        alt={name}
+                        width={400}
+                        height={400}
+                        className={`w-full h-full object-contain transition-all duration-700 ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
+                    />
+                    {hoverImage && (
+                        <OptimizedImage
+                            src={hoverImage}
+                            alt={`${name} hover`}
+                            width={400}
+                            height={400}
+                            className="absolute inset-0 w-full h-full object-contain p-8 opacity-0 group-hover:opacity-100 transition-all duration-700 scale-105"
+                        />
+                    )}
+                </div>
+
+                {/* Quick Actions Overlay */}
+                <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-center gap-2 bg-gradient-to-t from-black/10 to-transparent">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            // Trigger Quick View (Future Implementation)
+                            console.log('Quick View Triggered');
+                        }}
+                        className="bg-white text-black text-[10px] font-bold px-4 py-2 rounded-full shadow-lg hover:bg-black hover:text-white transition-colors uppercase tracking-widest"
+                    >
+                        Quick View
+                    </button>
+                </div>
 
                 <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
                     <button
                         onClick={handleWishlist}
-                        className={`w-9 h-9 rounded-[10px] flex items-center justify-center transition-all ${isWishlisted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-background text-foreground/40 border border-foreground/10 hover:text-foreground'}`}
+                        className={`w-9 h-9 rounded-[10px] flex items-center justify-center transition-all ${isWishlisted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-white/80 text-foreground/40 border border-foreground/10 hover:text-foreground backdrop-blur-sm'}`}
                     >
                         <FaHeart className={`w-3.5 h-3.5 ${isWishlisted ? 'fill-current' : ''}`} />
                     </button>

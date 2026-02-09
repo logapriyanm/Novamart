@@ -3,16 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import {
     FaBox, FaUsers, FaChartLine, FaClipboardList,
-    FaCalendarAlt, FaPlus, FaGlobeAmericas, FaCheckCircle,
-    FaArrowUp, FaEllipsisH, FaShieldAlt, FaMoneyBillWave,
-    FaCreditCard
+    FaArrowUp, FaShieldAlt, FaWarehouse, FaHandshake
 } from 'react-icons/fa';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { manufacturerService } from '@/lib/api/services/manufacturer.service';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import EmptyState from '@/client/components/ui/EmptyState';
+
+const mockChartData = [
+    { name: 'Jan', value: 4000 },
+    { name: 'Feb', value: 3000 },
+    { name: 'Mar', value: 5000 },
+    { name: 'Apr', value: 4500 },
+    { name: 'May', value: 6000 },
+    { name: 'Jun', value: 5500 },
+];
 
 export default function ManufacturerDashboard() {
     const [profile, setProfile] = useState<any>(null);
@@ -43,173 +51,193 @@ export default function ManufacturerDashboard() {
 
     if (isLoading) {
         return (
-            <div className="min-h-[400px] flex items-center justify-center">
+            <div className="min-h-[600px] flex items-center justify-center">
                 <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="text-primary"
+                    className="text-slate-800"
                 >
-                    <HiOutlineRefresh className="w-12 h-12" />
+                    <HiOutlineRefresh className="w-8 h-8 opacity-50" />
                 </motion.div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
+        <div className="space-y-8 animate-fade-in pb-12 font-sans text-slate-800">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-foreground/5 pb-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1E293B]">Manufacturer Overview</h1>
-                    <p className="text-sm font-medium text-slate-400 mt-1">Real-time pulse of your production and distribution.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
+                    <p className="text-sm font-medium text-slate-400 mt-2">Manufacturer Overview & Production Analytics</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Link href="/manufacturer/products/add" className="px-8 py-3 bg-black text-white rounded-[12px] hover:bg-black/90 transition-all shadow-xl shadow-black/10 text-xs font-black uppercase tracking-widest">
-                        Add New SKU
+                    <Link href="/manufacturer/products/add" className="px-6 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all text-xs font-semibold tracking-wide shadow-lg shadow-slate-200">
+                        + New SKU
                     </Link>
                 </div>
             </div>
 
-            {/* Core KPIs - Limited to 4 */}
+            {/* Core KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard
                     icon={FaChartLine}
-                    label="Volume"
+                    label="Revenue"
                     value={`₹${((stats?.sales?.totalRevenue || 0) / 100000).toFixed(1)}L`}
-                    trend="Revenue"
+                    trend="+12%"
                     color="text-emerald-600"
-                    bgColor="bg-emerald-50"
+                    bgColor="bg-emerald-50/50"
                 />
                 <StatsCard
                     icon={FaBox}
-                    label="Products"
+                    label="Active Products"
                     value={stats?.productsCount?.toString() || '0'}
-                    trend="Active"
+                    trend="Stable"
                     color="text-blue-600"
-                    bgColor="bg-blue-50"
+                    bgColor="bg-blue-50/50"
                 />
                 <StatsCard
                     icon={FaUsers}
-                    label="Dealers"
+                    label="Dealer Network"
                     value={profile?.dealersApproved?.length?.toString() || '0'}
-                    trend="Network"
+                    trend="Growing"
                     color="text-indigo-600"
-                    bgColor="bg-indigo-50"
+                    bgColor="bg-indigo-50/50"
                 />
                 <StatsCard
                     icon={FaClipboardList}
-                    label="Requests"
+                    label="Pending Requests"
                     value={stats?.pendingDealerRequests?.toString() || '0'}
-                    trend="Pending"
+                    trend={stats?.pendingDealerRequests > 0 ? "Action Required" : "All Clear"}
                     color="text-amber-600"
-                    bgColor="bg-amber-50"
+                    bgColor="bg-amber-50/50"
                 />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Operations */}
+                {/* Main Operations & Chart */}
                 <div className="lg:col-span-2 space-y-8">
-                    {/* Inventory Health */}
-                    <div className="bg-white rounded-[20px] border border-slate-100 shadow-sm p-8">
+                    {/* Revenue Chart */}
+                    <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-8">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Inventory Health</h3>
-                            <Link href="/manufacturer/inventory" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-black transition-colors">View Detailed Analytics</Link>
+                            <h3 className="text-sm font-bold text-slate-800">Production Volume</h3>
+                            <select className="bg-slate-50 border border-slate-200 text-xs font-medium text-slate-600 rounded-md px-3 py-1.5 focus:outline-none">
+                                <option>This Year</option>
+                                <option>Last Year</option>
+                            </select>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-6 bg-slate-50 rounded-[15px] border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-md transition-all">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
-                                        <FaBox className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Low Stock</p>
-                                        <p className="text-sm font-black text-slate-800">Critical Units</p>
-                                    </div>
-                                </div>
-                                <span className="text-lg font-black text-amber-600">3</span>
-                            </div>
-                            <div className="p-6 bg-slate-50 rounded-[15px] border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-md transition-all">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
-                                        <FaGlobeAmericas className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Regions</p>
-                                        <p className="text-sm font-black text-slate-800">Active Supply</p>
-                                    </div>
-                                </div>
-                                <span className="text-lg font-black text-blue-600">12</span>
-                            </div>
+                        <div className="h-[300px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={mockChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} dy={10} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                        itemStyle={{ color: '#1e293b', fontSize: '12px', fontWeight: 600 }}
+                                        cursor={{ stroke: '#bfdbfe', strokeWidth: 2 }}
+                                    />
+                                    <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
 
-                    {/* Dealer Requests with Empty State */}
-                    <div className="bg-white rounded-[20px] border border-slate-100 shadow-sm p-8">
+                    {/* Inventory Health */}
+                    <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-8">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Dealer Engagement</h3>
+                            <h3 className="text-sm font-bold text-slate-800">Inventory Status</h3>
+                            <Link href="/manufacturer/inventory" className="text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors">View All Inventory</Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="p-6 bg-amber-50/30 rounded-lg border border-amber-100/50 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 bg-white text-amber-500 rounded-full flex items-center justify-center shadow-sm border border-amber-100">
+                                        <FaWarehouse className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Low Stock</p>
+                                        <p className="text-base font-bold text-slate-800">3 Items</p>
+                                    </div>
+                                </div>
+                                <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-1 rounded">Action Needed</span>
+                            </div>
+                            <div className="p-6 bg-blue-50/30 rounded-lg border border-blue-100/50 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 bg-white text-blue-500 rounded-full flex items-center justify-center shadow-sm border border-blue-100">
+                                        <FaBox className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Stock</p>
+                                        <p className="text-base font-bold text-slate-800">1,240 Units</p>
+                                    </div>
+                                </div>
+                                <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">Healthy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Side Status Column */}
+                <div className="space-y-8">
+                    {/* Dealer Requests */}
+                    <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-sm font-bold text-slate-800">Dealer Requests</h3>
                         </div>
 
                         {!stats?.pendingDealerRequests || stats.pendingDealerRequests === 0 ? (
                             <EmptyState
                                 icon={FaUsers}
-                                title="No Pending Requests"
-                                description="Your network is currently stable. Grow your reach by inviting new partners."
+                                title="No New Requests"
+                                description="Your dealer network is up to date."
                                 actionLabel="Grow Network"
-                                actionPath="/manufacturer/dealers/approved"
+                                actionPath="/manufacturer/dealers"
                             />
                         ) : (
-                            <div className="text-center py-6">
-                                <Link href="/manufacturer/dealers/requests" className="text-sm font-bold text-primary hover:underline">
-                                    You have {stats.pendingDealerRequests} new requests to review.
+                            <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-slate-400">
+                                    <FaHandshake className="w-5 h-5" />
+                                </div>
+                                <p className="text-sm font-medium text-slate-600 mb-4">
+                                    You have <span className="font-bold text-slate-900">{stats.pendingDealerRequests}</span> pending approval.
+                                </p>
+                                <Link href="/manufacturer/dealers/requests" className="inline-block px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-md hover:bg-slate-800 transition-colors">
+                                    Review Requests
                                 </Link>
                             </div>
                         )}
                     </div>
-                </div>
 
-                {/* Status Column */}
-                <div className="space-y-8">
                     {/* Compliance Status */}
-                    <div className="bg-white rounded-[20px] border border-slate-100 shadow-sm p-8">
-                        <div className="mb-8">
-                            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Account Trust</h3>
-                            <h4 className="text-lg font-black text-slate-800 tracking-tight italic uppercase">Compliance</h4>
+                    <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-8">
+                        <div className="mb-6">
+                            <h3 className="text-sm font-bold text-slate-800">Compliance</h3>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className={`${isVerified ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100'} rounded-[15px] p-5 border flex items-center justify-between`}>
-                                <div className="flex items-center gap-4">
-                                    <FaShieldAlt className={`w-5 h-5 ${isVerified ? 'text-emerald-500' : 'text-amber-500'}`} />
-                                    <span className={`text-[10px] font-black ${isVerified ? 'text-emerald-800' : 'text-amber-800'} uppercase tracking-widest`}>
-                                        {isVerified ? 'Identity Verified' : 'Under Review'}
-                                    </span>
-                                </div>
-                                {isVerified && <FaCheckCircle className="w-4 h-4 text-emerald-500" />}
+                        <div className={`p-5 rounded-lg border flex items-center gap-4 ${isVerified ? 'bg-emerald-50/50 border-emerald-100' : 'bg-amber-50/50 border-amber-100'}`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isVerified ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+                                <FaShieldAlt className="w-5 h-5" />
                             </div>
-
-                            <div className="bg-slate-50 rounded-[15px] p-5 border border-slate-100 flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <FaClipboardList className="w-5 h-5 text-slate-300" />
-                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tax Documents</span>
-                                </div>
-                                <FaCheckCircle className="w-4 h-4 text-emerald-500" />
+                            <div>
+                                <p className={`text-sm font-bold ${isVerified ? 'text-emerald-800' : 'text-amber-800'}`}>
+                                    {isVerified ? 'Verified Manufacturer' : 'Verification Pending'}
+                                </p>
+                                <p className="text-xs text-slate-500 mt-0.5">
+                                    {isVerified ? 'Your account is fully operational.' : 'Please submit required documents.'}
+                                </p>
                             </div>
                         </div>
 
-                        <Link href="/manufacturer/profile" className="w-full block text-center mt-8 py-4 border-2 border-slate-100 rounded-[15px] text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 hover:border-slate-200 transition-all">
-                            Manage Credentials
+                        <Link href="/manufacturer/profile" className="mt-4 block w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-900 py-2">
+                            View Compliance Details &rarr;
                         </Link>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-slate-900 to-black rounded-[20px] p-8 text-white relative overflow-hidden shadow-2xl">
-                        <div className="relative z-10">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-3">Partnerships</p>
-                            <h4 className="text-xl font-black italic tracking-tight mb-6">Scale Network</h4>
-                            <button className="w-full py-4 bg-white text-black rounded-[12px] text-[10px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] transition-all active:scale-[0.98]">
-                                Get Invite Link
-                            </button>
-                        </div>
-                        <FaArrowUp className="absolute -top-4 -right-4 w-32 h-32 text-white/5 rotate-45" />
                     </div>
                 </div>
             </div>
@@ -219,18 +247,21 @@ export default function ManufacturerDashboard() {
 
 function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
     return (
-        <div className="bg-white rounded-[10px] p-7 border border-foreground/10 shadow-sm transition-all group overflow-hidden relative">
-            <div className="flex items-center justify-between mb-6">
-                <div className={`w-12 h-12 ${bgColor} ${color} rounded-[10px] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform`}>
+        <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+            <div className="flex items-start justify-between">
+                <div>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">{label}</p>
+                    <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
+                </div>
+                <div className={`w-10 h-10 ${bgColor} ${color} rounded-lg flex items-center justify-center transition-transform group-hover:scale-110`}>
                     <Icon className="w-5 h-5" />
                 </div>
-                <div className="text-right">
-                    <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{trend}</span>
-                </div>
             </div>
-            <div>
-                <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-[0.2em] mb-1">{label}</p>
-                <h3 className="text-2xl font-black text-black italic tracking-tight uppercase">{value}</h3>
+            <div className="mt-4 flex items-center gap-2">
+                <span className={`text-xs font-medium ${color} bg-white px-1.5 py-0.5 rounded border border-slate-100`}>
+                    {trend}
+                </span>
+                <span className="text-xs text-slate-400">vs last month</span>
             </div>
         </div>
     );

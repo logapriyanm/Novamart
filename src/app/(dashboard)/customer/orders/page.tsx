@@ -14,10 +14,10 @@ import {
     FaHeadset as Support,
     FaArrowRight as ArrowRight,
 } from 'react-icons/fa';
-import { WhiteCard, TrackingBadge, StatusBadge, Stepper } from '../../../../client/components/features/dashboard/DashboardUI';
+import { WhiteCard, TrackingBadge, StatusBadge, Stepper } from '@/client/components/features/dashboard/DashboardUI';
 
-import { apiClient } from '../../../../lib/api/client';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { apiClient } from '@/lib/api/client';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 export default function MyOrders() {
     const [orders, setOrders] = useState<any[]>([]);

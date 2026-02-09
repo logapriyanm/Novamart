@@ -26,7 +26,8 @@ sidebarCategories.forEach(cat => {
     subCategoriesMapFallback[cat.id] = cat.subsections.flatMap(sub => sub.items.map(i => i.name));
 });
 
-const brands = ['Samsung', 'LG', 'Bosch', 'IFB', 'Haier', 'Whirlpool', 'Panasonic', 'Sony'];
+// Brands is now dynamic
+// const brands = ['Samsung', 'LG', 'Bosch', 'IFB', 'Haier', 'Whirlpool', 'Panasonic', 'Sony'];
 
 export interface FilterState {
     priceRange: [number, number];
@@ -54,23 +55,40 @@ interface ProductFilterSidebarProps {
 export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filters, onFilterChange }: ProductFilterSidebarProps) => {
     const [openSections, setOpenSections] = React.useState<string[]>(['categories', 'price', 'verified', 'availability']);
     const [brandSearch, setBrandSearch] = React.useState('');
-    const [mainCategories, setMainCategories] = React.useState<{ name: string, slug: string }[]>([]);
+    const [mainCategories, setMainCategories] = React.useState<{ name: string, slug: string, count?: number }[]>([]);
+    const [availableBrands, setAvailableBrands] = React.useState<string[]>([]);
+    const [priceLimits, setPriceLimits] = React.useState({ min: 0, max: 100000 });
 
     React.useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchFilters = async () => {
             try {
-                const cats = await productService.getCategories();
-                const mapped = cats.map(c => ({
-                    name: categoryMap[c] || c.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-                    slug: c
-                }));
-                setMainCategories(mapped);
+                // Fetch aggregated filters based on current category context if needed, or global
+                const response = await productService.getFilters({ category: currentCategory || 'all' });
+                if (response.data) {
+                    const { categories, brands, minPrice, maxPrice } = response.data;
+
+                    // Map categories
+                    const mappedCats = categories.map((c: any) => ({
+                        name: categoryMap[c.name] || c.name.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                        slug: c.name,
+                        count: c.count
+                    }));
+                    setMainCategories(mappedCats);
+
+                    // Set Brands
+                    setAvailableBrands(brands || []);
+
+                    // Set Price Limits
+                    setPriceLimits({ min: minPrice, max: maxPrice });
+                    // Only update selected price range if it's currently at default/extreme values? 
+                    // Better to leave user selection alone unless it's out of bounds.
+                }
             } catch (error) {
-                console.error('Failed to fetch categories:', error);
+                console.error('Failed to fetch filters:', error);
             }
         };
-        fetchCategories();
-    }, []);
+        fetchFilters();
+    }, [currentCategory]);
 
     const toggleSection = (section: string) => {
         setOpenSections(prev =>
@@ -78,7 +96,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
         );
     };
 
-    const filteredBrands = brands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
+    const filteredBrands = availableBrands.filter(b => b.toLowerCase().includes(brandSearch.toLowerCase()));
 
     return (
         <aside className="w-full lg:w-80 bg-surface border border-foreground/10 rounded-[10px] p-6 lg:sticky lg:top-32 h-fit self-start shadow-sm flex flex-col gap-6 text-foreground">
@@ -89,7 +107,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                 </h3>
                 <button
                     onClick={() => {
-                        onFilterChange('priceRange', [0, 100000]);
+                        onFilterChange('priceRange', [priceLimits.min, priceLimits.max]); // Reset to actual limits
                         onFilterChange('brands', []);
                         onFilterChange('rating', null);
                         onFilterChange('availability', []);
@@ -293,6 +311,8 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-foreground/40">₹</span>
                                         <input
                                             type="number"
+                                            min={priceLimits.min}
+                                            max={priceLimits.max}
                                             value={filters.priceRange[0]}
                                             onChange={(e) => onFilterChange('priceRange', [Number(e.target.value), filters.priceRange[1]])}
                                             className="w-full bg-background border border-foreground/5 rounded-[5px] pl-6 pr-2 py-2 text-xs font-bold text-foreground outline-none focus:border-black/20"
@@ -305,12 +325,19 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-foreground/40">₹</span>
                                         <input
                                             type="number"
+                                            min={priceLimits.min}
+                                            max={priceLimits.max}
                                             value={filters.priceRange[1]}
                                             onChange={(e) => onFilterChange('priceRange', [filters.priceRange[0], Number(e.target.value)])}
                                             className="w-full bg-background border border-foreground/5 rounded-[5px] pl-6 pr-2 py-2 text-xs font-bold text-foreground outline-none focus:border-black/20"
                                         />
                                     </div>
                                 </div>
+                            </div>
+                            <div className="px-1">
+                                <p className="text-[10px] text-foreground/40 text-center">
+                                    Price Range: ₹{priceLimits.min} - ₹{priceLimits.max}
+                                </p>
                             </div>
                         </div>
                     )}

@@ -3,7 +3,7 @@ import KYCDocument from './KYCDocument.js';
 import TrustBadge from './TrustBadge.js';
 import ProductMaster from './ProductMaster.js';
 import ProductVersion from './ProductVersion.js';
-import DealerProduct from './DealerProduct.js';
+
 import CategoryTaxonomy from './CategoryTaxonomy.js';
 import SearchIndex from './SearchIndex.js';
 import FilterMetadata from './FilterMetadata.js';
@@ -30,7 +30,7 @@ export {
     TrustBadge,
     ProductMaster,
     ProductVersion,
-    DealerProduct,
+
     CategoryTaxonomy,
     SearchIndex,
     FilterMetadata,
@@ -57,7 +57,7 @@ export default {
     TrustBadge,
     ProductMaster,
     ProductVersion,
-    DealerProduct,
+
     CategoryTaxonomy,
     SearchIndex,
     FilterMetadata,

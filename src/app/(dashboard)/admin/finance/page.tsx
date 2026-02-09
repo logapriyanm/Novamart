@@ -11,8 +11,8 @@ import {
     FaHistory
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { apiClient } from '../../../../lib/api/client';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { apiClient } from '@/lib/api/client';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 export default function FinanceDashboard() {
     const [orders, setOrders] = useState<any[]>([]);

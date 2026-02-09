@@ -3,17 +3,18 @@ import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import emailService from './emailService.js';
 import firebaseAdmin from '../lib/firebaseAdmin.js';
 import prisma from '../lib/prisma.js';
+import logger from '../lib/logger.js';
 
 class NotificationService {
     constructor() {
         this.io = null;
         this.initListeners();
-        console.log('Notification Service Initialized');
+        logger.info('Notification Service Initialized');
     }
 
     setIO(io) {
         this.io = io;
-        console.log('Socket.IO instance injected into NotificationService');
+        logger.info('Socket.IO instance injected into NotificationService');
     }
 
     initListeners() {
@@ -45,7 +46,7 @@ class NotificationService {
      * Centralized Sending Logic
      */
     async sendNotification({ userId, type, title, message, metadata = {}, channels = ['IN_APP', 'EMAIL', 'PUSH'] }) {
-        console.log(`[NotificationService] Processing ${type} for ${userId}`);
+        logger.info(`[NotificationService] Processing ${type} for ${userId}`);
         const results = {};
 
         // Fetch User to get FCM token and Contact Info
@@ -70,7 +71,7 @@ class NotificationService {
                     this.io.to(userId).emit('notification:new', notify);
                 }
             } catch (error) {
-                console.error('In-App Notification DB Error:', error);
+                logger.error('In-App Notification DB Error:', error);
             }
         }
 
@@ -84,7 +85,7 @@ class NotificationService {
                 });
                 results.push = { success: true, messageId: pushResult.messageId };
             } catch (error) {
-                console.error('Push Notification Error:', error);
+                logger.error('Push Notification Error:', error);
                 results.push = { success: false, error: error.message };
             }
         }
@@ -98,7 +99,7 @@ class NotificationService {
                 });
                 results.email = emailResult;
             } catch (error) {
-                console.error('Email Notification Error:', error);
+                logger.error('Email Notification Error:', error);
                 results.email = { success: false, error: error.message };
             }
         }
@@ -108,10 +109,10 @@ class NotificationService {
             // Restriction check: Only for high-trust transaction alerts
             const allowedTypes = ['OTP', 'ORDER', 'PAYMENT', 'SECURITY'];
             if (allowedTypes.includes(type)) {
-                console.log(`--- [WHATSAPP OUTGOING] ---`);
-                console.log(`To: ${user.phone}`);
-                console.log(`Msg: ${message}`);
-                console.log('---------------------------');
+                logger.info('--- [WHATSAPP OUTGOING] ---');
+                logger.info(`To: ${user.phone}`);
+                logger.info(`Msg: ${message}`);
+                logger.info('---------------------------');
                 results.whatsapp = { success: true };
             } else {
                 console.warn(`[NotificationService] WhatsApp blocked for type: ${type}`);
@@ -124,7 +125,7 @@ class NotificationService {
     // --- Specific Event Handlers ---
 
     async handleOrderPlaced({ order, customerId, dealerId }) {
-        console.log('[NotificationService] handleOrderPlaced triggered', { orderId: order?.id, customerId, dealerId });
+        logger.info('[NotificationService] handleOrderPlaced triggered', { orderId: order?.id, customerId, dealerId });
 
         // Notify Customer (Priority: WhatsApp + Email + Push)
         await this.sendNotification({
@@ -221,7 +222,7 @@ class NotificationService {
 
     async handleDisputeResolved({ disputeId, orderId, resolution }) {
         // This would ideally notify all parties, for now just generic
-        console.log(`[NotificationService] Dispute ${disputeId} resolved: ${resolution}`);
+        logger.info(`[NotificationService] Dispute ${disputeId} resolved: ${resolution}`);
     }
 }
 

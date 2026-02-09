@@ -14,35 +14,36 @@ import {
     FaHistory
 } from 'react-icons/fa';
 import Link from 'next/link';
-
-const [approvedDealers, setApprovedDealers] = React.useState<any[]>([]);
-const [isLoading, setIsLoading] = React.useState(true);
-
-React.useEffect(() => {
-    const fetchDealers = async () => {
-        try {
-            // Endpoint confirmed in manufacturerRoutes.js: router.get('/network', ...)
-            const data = await import('../../../../lib/api/client').then(m => m.apiClient.get<any[]>('/manufacturer/network'));
-            const mapped = data.map(d => ({
-                id: d.id,
-                name: d.businessName,
-                location: `${d.city || 'Unknown'}, ${d.state || ''}`,
-                volume: '₹0.0L', // Placeholder
-                returns: '0%', // Placeholder
-                rating: d.averageRating || 5.0,
-                status: d.isVerified ? 'Active' : 'Pending'
-            }));
-            setApprovedDealers(mapped);
-        } catch (error) {
-            console.error('Failed to fetch dealers', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    fetchDealers();
-}, []);
+import { apiClient } from '@/lib/api/client';
 
 export default function DealerRelationshipPortal() {
+    const [approvedDealers, setApprovedDealers] = React.useState<any[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        const fetchDealers = async () => {
+            try {
+                // Endpoint confirmed in manufacturerRoutes.js: router.get('/network', ...)
+                const data = await apiClient.get<any[]>('/manufacturer/network');
+                const mapped = data.map(d => ({
+                    id: d.id,
+                    name: d.businessName,
+                    location: `${d.city || 'Unknown'}, ${d.state || ''}`,
+                    volume: '₹0.0L', // Placeholder
+                    returns: '0%', // Placeholder
+                    rating: d.averageRating || 5.0,
+                    status: d.isVerified ? 'Active' : 'Pending'
+                }));
+                setApprovedDealers(mapped);
+            } catch (error) {
+                console.error('Failed to fetch dealers', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchDealers();
+    }, []);
+
     return (
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
@@ -161,4 +162,3 @@ export default function DealerRelationshipPortal() {
         </div>
     );
 }
-

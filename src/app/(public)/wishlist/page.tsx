@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { FaHeart, FaBookmark, FaPlus, FaFilter, FaLaptopHouse, FaUtensils, FaTools, FaThLarge } from 'react-icons/fa';
-import WishlistCard from '../../../client/components/features/wishlist/WishlistCard';
-import WishlistSidebar from '../../../client/components/features/wishlist/WishlistSidebar';
-import { wishlistService } from '../../../lib/api/services/wishlist.service';
+import WishlistCard from '@/client/components/features/wishlist/WishlistCard';
+import WishlistSidebar from '@/client/components/features/wishlist/WishlistSidebar';
+import { wishlistService } from '@/lib/api/services/wishlist.service';
 import { useEffect } from 'react';
-import RecentlySaved from '../../../client/components/features/wishlist/RecentlySaved';
+import RecentlySaved from '@/client/components/features/wishlist/RecentlySaved';
 
 
 

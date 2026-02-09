@@ -17,10 +17,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 
-function ProductsContent() {
+interface ProductsContentProps {
+    forcedCategory?: string;
+}
+
+export function ProductsContent({ forcedCategory }: ProductsContentProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const currentCategory = searchParams.get('cat') || '';
+    const paramCategory = searchParams.get('cat');
+
+    // If forcedCategory is provided (e.g. from /categories/[slug]), use it.
+    // Otherwise fall back to URL param.
+    const currentCategory = forcedCategory || paramCategory || '';
+
     const searchQuery = searchParams.get('q') || '';
 
     const [products, setProducts] = useState<any[]>([]);

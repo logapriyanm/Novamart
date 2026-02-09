@@ -4,6 +4,7 @@
  */
 
 import prisma from '../lib/prisma.js';
+import logger from '../lib/logger.js';
 
 class ReviewService {
     /**
@@ -28,7 +29,7 @@ class ReviewService {
 
             return review;
         } catch (error) {
-            console.error('Submit Product Review Error:', error);
+            logger.error('Submit Product Review Error:', error);
             throw new Error('Failed to submit product review');
         }
     }
@@ -57,7 +58,7 @@ class ReviewService {
 
             return review;
         } catch (error) {
-            console.error('Submit Seller Review Error:', error);
+            logger.error('Submit Seller Review Error:', error);
             throw new Error('Failed to submit seller review');
         }
     }
@@ -129,7 +130,7 @@ class ReviewService {
             }
             return review;
         } catch (error) {
-            console.error('Moderate Review Error:', error);
+            logger.error('Moderate Review Error:', error);
             throw new Error('Failed to moderate review');
         }
     }
@@ -149,7 +150,7 @@ class ReviewService {
             });
             return { productReviews, sellerReviews };
         } catch (error) {
-            console.error('Get Pending Reviews Error:', error);
+            logger.error('Get Pending Reviews Error:', error);
             throw new Error('Failed to fetch pending reviews');
         }
     }
@@ -174,7 +175,7 @@ class ReviewService {
             });
             return reviews;
         } catch (error) {
-            console.error('Get Customer Reviews Error:', error);
+            logger.error('Get Customer Reviews Error:', error);
             throw new Error('Failed to fetch customer reviews');
         }
     }

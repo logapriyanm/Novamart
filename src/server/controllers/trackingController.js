@@ -1,27 +1,18 @@
-/**
- * Tracking Controller
- * Low-latency endpoints for behavioral data collection.
- */
-
+import behaviorService from '../services/behaviorService.js';
 import auditService from '../services/audit.js';
 import { DemandHeatmap } from '../models/index.js';
 
-/**
- * Capture Silent Tracking Event
- */
 export const captureEvent = async (req, res) => {
-    const { eventType, metadata } = req.body;
+    const { eventType, targetId, metadata } = req.body;
     const userId = req.user?.id;
-    const sessionId = req.headers['x-session-id'];
 
     try {
-        await auditService.trackEvent(eventType, {
+        await behaviorService.trackEvent(userId, eventType, targetId, {
             ...metadata,
             ip: req.ip,
-            device: req.headers['user-agent']
-        }, userId, sessionId);
-
-        res.status(202).json({ success: true }); // Accepted (Fire and forget)
+            userAgent: req.headers['user-agent']
+        });
+        res.status(202).json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'TRACKING_FAILED' });
     }

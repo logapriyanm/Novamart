@@ -4,12 +4,14 @@
  */
 
 import dealerService from '../services/dealer.js';
+import stockAllocationService from '../services/stockAllocationService.js';
 import orderService from '../services/order.js';
 import auditService from '../services/audit.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
+import prisma from '../lib/prisma.js';
 
 /**
- * Get Local Inventory
+ * Get Local Inventory (Retail Listings)
  */
 export const getMyInventory = async (req, res) => {
     const dealerId = req.user.dealer.id;
@@ -21,6 +23,19 @@ export const getMyInventory = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_INVENTORY' });
+    }
+};
+
+/**
+ * Get Allocated Products from Manufacturers (Phase 4)
+ */
+export const getMyAllocations = async (req, res) => {
+    const dealerId = req.user.dealer.id;
+    try {
+        const allocations = await stockAllocationService.getDealerAllocations(dealerId);
+        res.json({ success: true, data: allocations });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_ALLOCATIONS' });
     }
 };
 
@@ -275,17 +290,55 @@ export const getPublicDealerProfile = async (req, res) => {
     }
 };
 
+export const getManufacturers = async (req, res) => {
+    try {
+        const manufacturers = await dealerService.getManufacturersForDiscovery();
+        res.json({ success: true, data: manufacturers });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Failed to fetch manufacturers' });
+    }
+};
+
+export const requestManufacturerAccess = async (req, res) => {
+    const dealerId = req.user.dealer.id;
+    const { manufacturerId, ...metadata } = req.body;
+    try {
+        const request = await dealerService.requestAccess(dealerId, manufacturerId, metadata);
+        res.status(201).json({
+            success: true,
+            message: 'Access request sent successfully',
+            data: request
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+};
+
+export const getMyRequests = async (req, res) => {
+    const dealerId = req.user.dealer.id;
+    try {
+        const requests = await dealerService.getMyAccessRequests(dealerId);
+        res.json({ success: true, data: requests });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Failed to fetch requests' });
+    }
+};
+
 export default {
     getMyInventory,
+    getMyAllocations,
     updatePrice,
     updateStock,
     getDealerStats,
-    sourceProduct,
-    requestSettlement,
     confirmOrder,
     shipOrder,
+    sourceProduct,
+    requestSettlement,
     getMyProfile,
     updateProfile,
-    getPublicDealerProfile
+    getPublicDealerProfile,
+    getManufacturers,
+    requestManufacturerAccess,
+    getMyRequests
 };
 

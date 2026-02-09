@@ -13,16 +13,19 @@ const router = express.Router();
 // Public Routes
 router.get('/public/:id', dealerController.getPublicDealerProfile);
 
+// Allow PENDING status so new dealers can see their "Application Pending" dashboard state
 router.use(authenticate);
-router.use(authorize(['DEALER']));
+router.use(authorize(['DEALER'], [], ['ACTIVE', 'UNDER_VERIFICATION', 'PENDING']));
 
 /**
  * Inventory & Pricing
  */
 router.get('/inventory', dealerController.getMyInventory);
+router.get('/allocations', dealerController.getMyAllocations);
 router.post('/source', dealerController.sourceProduct);
 router.put('/inventory/price', dealerController.updatePrice);
 router.put('/inventory/stock', dealerController.updateStock);
+
 
 /**
  * Performance
@@ -41,6 +44,13 @@ router.get('/orders/:orderId/payout', dealerController.requestSettlement);
  */
 router.get('/profile', dealerController.getMyProfile);
 router.put('/profile', dealerController.updateProfile);
+
+/**
+ * Manufacturer Discovery & Access Requests
+ */
+router.get('/manufacturers', dealerController.getManufacturers);
+router.post('/request-access', dealerController.requestManufacturerAccess);
+router.get('/my-requests', dealerController.getMyRequests);
 
 export default router;
 

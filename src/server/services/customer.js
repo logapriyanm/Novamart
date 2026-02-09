@@ -4,6 +4,7 @@
  */
 
 import prisma from '../lib/prisma.js';
+import userService from './userService.js';
 
 class CustomerService {
     /**
@@ -69,26 +70,10 @@ class CustomerService {
      * Update Customer Profile.
      */
     async updateProfile(customerId, data) {
-        const { name, email, phone, avatar } = data;
+        const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+        if (!customer) throw new Error('CUSTOMER_NOT_FOUND');
 
-        return await prisma.$transaction(async (tx) => {
-            // Update Customer record
-            const customer = await tx.customer.update({
-                where: { id: customerId },
-                data: { name }
-            });
-
-            // Update linked User record
-            await tx.user.update({
-                where: { id: customer.userId },
-                data: { email, phone, avatar }
-            });
-
-            return await tx.customer.findUnique({
-                where: { id: customerId },
-                include: { user: true }
-            });
-        });
+        return await userService.updateFullProfile(customer.userId, 'CUSTOMER', 'account', data);
     }
 
     /**

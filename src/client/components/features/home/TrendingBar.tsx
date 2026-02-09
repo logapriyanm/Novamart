@@ -6,7 +6,6 @@ const categories = [
     { name: 'Air Conditioners', image: '/assets/trendingAppliance/Air-Conditionar.jpeg' },
     { name: 'Mixer Grinders', image: '/assets/trendingAppliance/Mixe.jpeg' },
     { name: 'Microwave Ovens', image: '/assets/trendingAppliance/Owen.jpeg' },
-    { name: 'Smart TVs', image: '/assets/trendingAppliance/TV.jpeg' },
     { name: 'Water Purifiers', image: '/assets/trendingAppliance/W-Purifier.jpeg' },
     { name: 'Vacuum Cleaners', image: '/assets/trendingAppliance/W-cleaner.jpeg' },
     { name: 'Washing Machines', image: '/assets/trendingAppliance/Wash-mach.png' },

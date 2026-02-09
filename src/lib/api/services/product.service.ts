@@ -41,6 +41,10 @@ export const productService = {
         return apiClient.get<Product[]>(ENDPOINTS.MANUFACTURER.PRODUCTS);
     },
 
+    async getFilters(params?: any): Promise<any> {
+        return apiClient.get(ENDPOINTS.PUBLIC.PRODUCTS + '/filters', { params });
+    },
+
     async createProduct(data: any): Promise<Product> {
         return apiClient.post<Product>(ENDPOINTS.MANUFACTURER.PRODUCTS, data);
     }

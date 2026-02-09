@@ -4,6 +4,7 @@
  */
 
 import prisma from '../lib/prisma.js';
+import userService from './userService.js';
 
 class DealerService {
     /**
@@ -18,7 +19,7 @@ class DealerService {
 
     /**
      * Update Retail Price (Margin Control).
-     * Ensures price fits within platform's margin rules.
+     * Ensures price fits within manufacturer constraints or platform rules.
      */
     async updateRetailPrice(inventoryId, dealerId, newPrice) {
         const inv = await prisma.inventory.findUnique({
@@ -30,25 +31,51 @@ class DealerService {
             throw new Error('UNAUTHORIZED_INVENTORY_ACCESS');
         }
 
-        // Fetch Margin Rule for the category
+        const requestedPrice = Number(newPrice);
+        const wholesalePrice = Number(inv.dealerBasePrice || inv.product.basePrice);
+
+        // Fetch Dealer's active subscription for benefits
+        const dealer = await prisma.dealer.findUnique({
+            where: { id: dealerId },
+            include: {
+                subscriptions: {
+                    where: { status: 'ACTIVE' },
+                    include: { plan: true },
+                    take: 1
+                }
+            }
+        });
+
+        const activeSub = dealer?.subscriptions[0];
+        const boost = Number(activeSub?.plan?.marginBoost || 0);
+
+        // 1. Check Manufacturer's Max Margin (Phase 4 & 5)
+        if (inv.isAllocated && inv.maxMargin) {
+            const maxAllowed = wholesalePrice * (1 + (Number(inv.maxMargin) + boost) / 100);
+            if (requestedPrice > maxAllowed) {
+                throw new Error(`MANUFACTURER_MARGIN_LIMIT: Max allowed price is ₹${maxAllowed.toFixed(2)} (${Number(inv.maxMargin) + boost}% margin with ${boost}% boost)`);
+            }
+        }
+
+        // 2. Check Platform Margin Rule (Fallback)
         const rule = await prisma.marginRule.findFirst({
             where: { category: inv.product.category, isActive: true }
         });
 
         if (rule) {
-            const basePrice = Number(inv.product.basePrice);
-            const maxRetail = basePrice * (1 + Number(rule.maxCap) / 100);
-
-            if (Number(newPrice) > maxRetail) {
-                throw new Error(`PRICE_EXCEEDS_MARGIN_CAP: Max allowed is ₹${maxRetail.toFixed(2)}`);
+            const maxRetail = wholesalePrice * (1 + (Number(rule.maxCap) + boost) / 100);
+            if (requestedPrice > maxRetail) {
+                throw new Error(`PLATFORM_MARGIN_CAP: Max allowed is ₹${maxRetail.toFixed(2)} (${Number(rule.maxCap) + boost}% limit with boost)`);
             }
         }
 
+
         return await prisma.inventory.update({
             where: { id: inventoryId },
-            data: { price: newPrice }
+            data: { price: requestedPrice }
         });
     }
+
 
     /**
      * Update Stock Levels.
@@ -70,11 +97,14 @@ class DealerService {
 
     /**
      * Source a product from a manufacturer.
-     * Creates an inventory record for the dealer.
+     * Enforces Phase 4 allocation limits and applies Phase 6 subscription benefits.
      */
-    async sourceProduct(dealerId, productId, region, stock, initialPrice) {
+    async sourceProduct(dealerId, productId, region, quantity, initialPrice) {
         // 0. Profile Completion Gating
-        const dealer = await prisma.dealer.findUnique({ where: { id: dealerId } });
+        const dealer = await prisma.dealer.findUnique({
+            where: { id: dealerId },
+            include: { subscriptions: { where: { status: 'ACTIVE' }, include: { plan: true } } }
+        });
         const isComplete = dealer?.businessName &&
             dealer?.gstNumber &&
             dealer?.businessAddress &&
@@ -84,36 +114,52 @@ class DealerService {
             throw new Error('PROFILE_INCOMPLETE: Please complete your Business Info, GST, Address, and Bank sections before sourcing products.');
         }
 
-        // 1. Verify product exists and is approved
-        const product = await prisma.product.findUnique({
-            where: { id: productId }
-        });
-
-        if (!product || product.status !== 'APPROVED') {
-            throw new Error('PRODUCT_NOT_AVAILABLE_FOR_SOURCING');
-        }
-
-        // 2. Check if already sourced
-        const existing = await prisma.inventory.findFirst({
-            where: { dealerId, productId }
-        });
-
-        if (existing) {
-            throw new Error('PRODUCT_ALREADY_SOURCED');
-        }
-
-        // 3. Create inventory entry
-        return await prisma.inventory.create({
-            data: {
+        // 1. Verify allocation exists (Phase 4 & 5 Requirement)
+        const allocation = await prisma.inventory.findFirst({
+            where: {
                 dealerId,
                 productId,
                 region,
-                stock: Number(stock),
-                price: Number(initialPrice),
-                originalPrice: Number(initialPrice)
+                isAllocated: true
+            },
+            include: { product: true }
+        });
+
+        if (!allocation) {
+            throw new Error('PRODUCT_NOT_ALLOCATED: This product has not been allocated to you by the manufacturer.');
+        }
+
+        // 2. Validate allocation limits
+        const requestedQty = Number(quantity);
+        if (requestedQty > allocation.allocatedStock) {
+            throw new Error(`EXCEEDS_ALLOCATION: You are only allocated ${allocation.allocatedStock} units of this product.`);
+        }
+
+        if (requestedQty < (allocation.dealerMoq || 1)) {
+            throw new Error(`BELOW_MOQ: Minimum order quantity is ${allocation.dealerMoq} units.`);
+        }
+
+        // 3. Apply Phase 6 Subscription Benefits (Wholesale Discount)
+        let finalPrice = Number(allocation.dealerBasePrice || allocation.product.basePrice);
+        const activeSub = dealer.subscriptions[0];
+        if (activeSub && activeSub.plan?.wholesaleDiscount > 0) {
+            const discount = Number(activeSub.plan.wholesaleDiscount);
+            finalPrice = finalPrice * (1 - discount / 100);
+        }
+
+        // 4. Update the existing allocation record with physical stock and retail price
+        return await prisma.inventory.update({
+            where: { id: allocation.id },
+            data: {
+                stock: { increment: requestedQty },
+                price: Number(initialPrice) || finalPrice, // Initial retail price
+                originalPrice: finalPrice, // Wholesale price paid by dealer (after discount)
+                isListed: true,
+                listedAt: new Date()
             }
         });
     }
+
 
     /**
      * Get Dealer Sales Report.
@@ -154,58 +200,116 @@ class DealerService {
      * Update Dealer Profile Sections.
      */
     async updateProfile(dealerId, section, data) {
-        const updateData = {};
+        const dealer = await prisma.dealer.findUnique({ where: { id: dealerId } });
+        if (!dealer) throw new Error('DEALER_NOT_FOUND');
 
-        switch (section) {
-            case 'account':
-                return await prisma.$transaction(async (tx) => {
-                    const dealer = await tx.dealer.findUnique({ where: { id: dealerId } });
-                    await tx.user.update({
-                        where: { id: dealer.userId },
-                        data: {
-                            email: data.email,
-                            phone: data.phone,
-                            avatar: data.avatar
-                        }
-                    });
-                    return await tx.dealer.findUnique({
-                        where: { id: dealerId },
-                        include: { user: true }
-                    });
+        return await userService.updateFullProfile(dealer.userId, 'DEALER', section, data);
+    }
+
+    /**
+     * Discovery: Fetch manufacturers and their top products.
+     */
+    async getManufacturersForDiscovery() {
+        return await prisma.manufacturer.findMany({
+            where: {
+                user: { status: { not: 'SUSPENDED' } }
+            },
+            include: {
+                user: { select: { email: true, status: true } },
+                products: {
+                    where: { status: 'APPROVED' },
+                    select: {
+                        id: true,
+                        name: true,
+                        basePrice: true,
+                        images: true,
+                        category: true,
+                        moq: true
+                    },
+                    take: 6,
+                    orderBy: { createdAt: 'desc' }
+                },
+                _count: {
+                    select: {
+                        products: { where: { status: 'APPROVED' } }
+                    }
+                }
+            },
+            orderBy: { companyName: 'asc' }
+        });
+    }
+
+    /**
+     * Request access to a manufacturer's product line.
+     */
+    async requestAccess(dealerId, manufacturerId, metadata = {}) {
+        const { message, expectedQuantity, region, priceExpectation } = metadata;
+
+        // Check for existing request
+        const existing = await prisma.dealerRequest.findFirst({
+            where: {
+                dealerId,
+                manufacturerId,
+                status: 'PENDING'
+            }
+        });
+
+        if (existing) throw new Error('PENDING_REQUEST_EXISTS');
+
+        return await prisma.$transaction(async (tx) => {
+            const request = await tx.dealerRequest.create({
+                data: {
+                    dealerId,
+                    manufacturerId,
+                    message: message || '',
+                    status: 'PENDING',
+                    metadata: {
+                        expectedQuantity,
+                        region,
+                        priceExpectation
+                    }
+                },
+                include: {
+                    manufacturer: { select: { companyName: true, user: true } }
+                }
+            });
+
+            // Create notification for manufacturer
+            if (request.manufacturer.user) {
+                const dealer = await tx.dealer.findUnique({ where: { id: dealerId } });
+                await tx.notification.create({
+                    data: {
+                        userId: request.manufacturer.user.id,
+                        type: 'DEALER_REQUEST',
+                        title: 'New Dealer Partnership Request',
+                        message: `${dealer.businessName} has requested access to your products.`,
+                        link: '/manufacturer/dealers/requests'
+                    }
                 });
-            case 'business':
-                updateData.businessName = data.businessName;
-                updateData.ownerName = data.ownerName;
-                updateData.businessType = data.businessType;
-                updateData.contactEmail = data.contactEmail;
-                updateData.phone = data.phone;
-                break;
-            case 'compliance':
-                updateData.gstNumber = data.gstNumber;
-                updateData.gstCertificate = data.gstCertificate;
-                updateData.businessRegDoc = data.businessRegDoc;
-                break;
-            case 'address':
-                updateData.businessAddress = data.businessAddress;
-                updateData.city = data.city;
-                updateData.state = data.state;
-                updateData.pincode = data.pincode;
-                updateData.serviceRegions = data.serviceRegions;
-                break;
-            case 'bank':
-                updateData.bankDetails = data.bankDetails;
-                updateData.payoutBlocked = true; // Rule: Changing bank pauses payouts
-                break;
-            default:
-                throw new Error('INVALID_PROFILE_SECTION');
-        }
+            }
 
-        return await prisma.dealer.update({
-            where: { id: dealerId },
-            data: updateData
+            return request;
+        });
+    }
+
+    /**
+     * Get Dealer's own requests.
+     */
+    async getMyAccessRequests(dealerId) {
+        return await prisma.dealerRequest.findMany({
+            where: { dealerId },
+            include: {
+                manufacturer: {
+                    select: {
+                        companyName: true,
+                        factoryAddress: true,
+                        logo: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
         });
     }
 }
 
 export default new DealerService();
-

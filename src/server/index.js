@@ -145,6 +145,7 @@ io.on('connection', (socket) => {
 });
 
 // API Routes
+
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/manufacturer', manufacturerRoutes);
@@ -156,6 +157,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/mongodb', mongodbRoutes);
+
 app.use('/api/home', homeRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/orders', ordersRouter);

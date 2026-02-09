@@ -100,4 +100,27 @@ export const ENDPOINTS = {
         PRODUCTS: '/products',
         CATEGORIES: '/products/categories',
     },
+    ESCROW: {
+        GET: (orderId: string) => `/escrow/${orderId}`,
+        CONFIRM_DELIVERY: '/escrow/confirm-delivery',
+        REQUEST_REFUND: '/escrow/request-refund',
+    },
+    NEGOTIATION: {
+        CREATE: '/negotiation/create',
+        LIST: '/negotiation',
+        UPDATE: (id: string) => `/negotiation/${id}`,
+    },
+    MEDIA: {
+        UPLOAD: '/media/upload',
+    },
+    VERIFICATION: {
+        UPLOAD: '/verification/upload',
+        MY_DOCUMENTS: '/verification/my-documents',
+    },
+    CHAT: {
+        CREATE: '/chat/create',
+        LIST: '/chat/list',
+        MESSAGES: (chatId: string) => `/chat/${chatId}/messages`,
+        CLOSE: (chatId: string) => `/chat/${chatId}/close`,
+    }
 } as const;

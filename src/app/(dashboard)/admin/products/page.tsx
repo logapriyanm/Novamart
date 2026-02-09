@@ -15,8 +15,8 @@ import {
     FaGavel
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { adminService } from '../../../../lib/api/services/admin.service';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { adminService } from '@/lib/api/services/admin.service';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 export default function AdminProductApproval() {
     const [products, setProducts] = useState<any[]>([]);

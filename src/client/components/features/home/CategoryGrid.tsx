@@ -6,15 +6,17 @@ import {
     FaBlender,
     FaTshirt,
     FaSnowflake,
-    FaTv
+    FaTv,
+    FaWind
 } from 'react-icons/fa';
 import { apiClient } from '../../../../lib/api/client';
 
 const iconMap: Record<string, any> = {
-    kitchen: FaBlender,
-    laundry: FaTshirt,
-    cooling: FaSnowflake,
-    entertainment: FaTv
+    'refrigerators': FaSnowflake,
+    'washing-machines': FaTshirt,
+    'air-conditioners': FaSnowflake,
+    'kitchen-appliances': FaBlender,
+    'home-comfort': FaWind,
 };
 
 export default function CategoryGrid() {
@@ -110,4 +112,3 @@ export default function CategoryGrid() {
         </div>
     );
 }
-

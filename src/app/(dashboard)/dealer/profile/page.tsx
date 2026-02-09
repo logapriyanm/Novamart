@@ -22,7 +22,7 @@ import {
     FaLock
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { useRealProfile } from '../../../../client/hooks/useRealProfile';
+import { useRealProfile } from '@/client/hooks/useRealProfile';
 
 export default function DealerProfilePage() {
     const { profile, isLoading, error, updateProfile, refetch } = useRealProfile<any>('dealer');

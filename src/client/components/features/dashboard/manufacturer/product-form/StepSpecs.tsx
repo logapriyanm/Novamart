@@ -10,6 +10,7 @@ import { IoIosArrowDropdown } from 'react-icons/io';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProductForm } from '../../../../../context/ProductFormContext';
 import { useSnackbar } from '@/client/context/SnackbarContext';
+import { CATEGORY_CONFIG, CategoryKey } from '@/lib/constants';
 
 export default function StepSpecs() {
     const { productData, updateProductData } = useProductForm();
@@ -17,6 +18,12 @@ export default function StepSpecs() {
     const [newKey, setNewKey] = useState('');
     const [newValue, setNewValue] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+
+    const selectedCategoryConfig = (productData.category && CATEGORY_CONFIG[productData.category as CategoryKey])
+        ? CATEGORY_CONFIG[productData.category as CategoryKey]
+        : null;
+
+    const categorySpecs = selectedCategoryConfig?.specs || [];
 
     const addSpec = () => {
         if (newKey && newValue) {
@@ -47,125 +54,63 @@ export default function StepSpecs() {
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Provide precise technical data to help buyers find your products through filtered searches and technical comparisons.</p>
                 </div>
 
-                {/* Structured Specifications (New) */}
+                {/* Structured Specifications (Dynamic based on Category) */}
                 <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="w-8 h-8 bg-[#0F6CBD] text-white rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
                             <FaBolt className="w-4 h-4" />
                         </div>
                         <h3 className="text-lg font-black text-[#1E293B]">Key Specifications</h3>
+                        {selectedCategoryConfig && (
+                            <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded font-bold uppercase">
+                                For {selectedCategoryConfig.label}
+                            </span>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Power Consumption */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Power Consumption</label>
-                            <div className="relative">
-                                <select
-                                    value={productData.powerConsumption || ''}
-                                    onChange={(e) => updateProductData({ powerConsumption: e.target.value })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
-                                >
-                                    <option value="">Select Power</option>
-                                    <option value="Less than 1000W">Less than 1000W</option>
-                                    <option value="1000W - 1500W">1000W - 1500W</option>
-                                    <option value="1500W - 2000W">1500W - 2000W</option>
-                                    <option value="Above 2000W">Above 2000W</option>
-                                    <option value="Battery Operated">Battery Operated</option>
-                                </select>
-                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                        {categorySpecs.map((spec) => (
+                            <div key={spec.name} className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    {spec.label} {spec.required && <span className="text-rose-500">*</span>}
+                                </label>
+                                {spec.type === 'select' && spec.options ? (
+                                    <div className="relative">
+                                        <select
+                                            value={productData.specifications[spec.name] || ''}
+                                            onChange={(e) => updateProductData({
+                                                specifications: { ...productData.specifications, [spec.name]: e.target.value }
+                                            })}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
+                                        >
+                                            <option value="">Select {spec.label}</option>
+                                            {spec.options.map(opt => (
+                                                <option key={opt} value={opt}>{opt}</option>
+                                            ))}
+                                        </select>
+                                        <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                    </div>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        placeholder={`Enter ${spec.label}`}
+                                        value={productData.specifications[spec.name] || ''}
+                                        onChange={(e) => updateProductData({
+                                            specifications: { ...productData.specifications, [spec.name]: e.target.value }
+                                        })}
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all"
+                                    />
+                                )}
                             </div>
-                        </div>
-
-                        {/* Capacity */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Capacity</label>
-                            <input
-                                type="text"
-                                placeholder="e.g. 250L or 7kg"
-                                value={productData.capacity || ''}
-                                onChange={(e) => updateProductData({ capacity: e.target.value })}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all"
-                            />
-                        </div>
-
-                        {/* Energy Rating */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Energy Rating</label>
-                            <div className="relative">
-                                <select
-                                    value={productData.energyRating || ''}
-                                    onChange={(e) => updateProductData({ energyRating: e.target.value })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
-                                >
-                                    <option value="">Select Rating</option>
-                                    <option value="5 Star">5 Star</option>
-                                    <option value="4 Star">4 Star</option>
-                                    <option value="3 Star">3 Star</option>
-                                    <option value="2 Star">2 Star</option>
-                                    <option value="1 Star">1 Star</option>
-                                </select>
-                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                            </div>
-                        </div>
-
-                        {/* Installation Type */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Installation Type</label>
-                            <div className="relative">
-                                <select
-                                    value={productData.installationType || ''}
-                                    onChange={(e) => updateProductData({ installationType: e.target.value })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
-                                >
-                                    <option value="">Select Type</option>
-                                    <option value="Freestanding">Freestanding</option>
-                                    <option value="Built-in">Built-in</option>
-                                    <option value="Wall Mounted">Wall Mounted</option>
-                                    <option value="Table Top">Table Top</option>
-                                </select>
-                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                            </div>
-                        </div>
-
-                        {/* Usage Type */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Usage Type</label>
-                            <div className="relative">
-                                <select
-                                    value={productData.usageType || ''}
-                                    onChange={(e) => updateProductData({ usageType: e.target.value })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
-                                >
-                                    <option value="">Select Usage</option>
-                                    <option value="Home">Home</option>
-                                    <option value="Commercial">Commercial</option>
-                                    <option value="Industrial">Industrial</option>
-                                </select>
-                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                            </div>
-                        </div>
-
-                        {/* Warranty */}
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Warranty</label>
-                            <div className="relative">
-                                <select
-                                    value={productData.warranty || ''}
-                                    onChange={(e) => updateProductData({ warranty: e.target.value })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
-                                >
-                                    <option value="">Select Period</option>
-                                    <option value="1 Year">1 Year</option>
-                                    <option value="2 Years">2 Years</option>
-                                    <option value="3 Years+">3 Years+</option>
-                                    <option value="Compressor Warranty">Compressor Warranty</option>
-                                    <option value="No Warranty">No Warranty</option>
-                                </select>
-                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                            </div>
-                        </div>
+                        ))}
                     </div>
+
+                    {categorySpecs.length === 0 && (
+                        <p className="text-sm text-slate-400 italic text-center py-8">
+                            Please select a category in the General step to see specific fields.
+                        </p>
+                    )}
+
 
                     {/* Smart Feature Toggle */}
                     <div className="mt-8 p-4 bg-slate-50 rounded-xl flex items-center justify-between border border-slate-200 cursor-pointer hover:border-[#0F6CBD] transition-all" onClick={() => updateProductData({ isSmart: !productData.isSmart })}>

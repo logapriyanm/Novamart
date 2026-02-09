@@ -9,6 +9,7 @@ import {
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProductForm } from '../../../../../context/ProductFormContext';
+import { CATEGORY_CONFIG, CategoryKey } from '@/lib/constants';
 
 export default function StepReview() {
     const { productData, updateProductData } = useProductForm();
@@ -33,11 +34,17 @@ export default function StepReview() {
                     <div className="flex gap-12">
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Brand</p>
-                            <p className="text-xs font-bold text-[#1E293B]">My Brand (Manufacturer)</p>
+                            <p className="text-xs font-bold text-[#1E293B]">My Brand</p>
                         </div>
                         <div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Category</p>
-                            <p className="text-xs font-bold text-[#1E293B]">{productData.category || 'Uncategorized'}</p>
+                            <p className="text-xs font-bold text-[#1E293B]">
+                                {(productData.category && CATEGORY_CONFIG[productData.category as CategoryKey]?.label) || productData.category || 'Uncategorized'}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sub-Category</p>
+                            <p className="text-xs font-bold text-[#1E293B]">{productData.subCategory || 'N/A'}</p>
                         </div>
                     </div>
                 </div>

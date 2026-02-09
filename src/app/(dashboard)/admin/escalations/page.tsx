@@ -16,7 +16,7 @@ import {
     FaBan
 } from 'react-icons/fa';
 import io from 'socket.io-client';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 const socket = io('http://localhost:5000');
 

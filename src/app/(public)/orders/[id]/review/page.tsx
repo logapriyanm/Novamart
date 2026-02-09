@@ -10,10 +10,10 @@ import {
     FaBox
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { apiClient } from '../../../../../lib/api/client';
-import MediaUpload from '../../../../../client/components/ui/MediaUpload';
-import OptimizedImage from '../../../../../client/components/ui/OptimizedImage';
-import { useSnackbar } from '../../../../../client/context/SnackbarContext';
+import { apiClient } from '@/lib/api/client';
+import MediaUpload from '@/client/components/ui/MediaUpload';
+import OptimizedImage from '@/client/components/ui/OptimizedImage';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 export default function CustomerReviewPortal() {
     const params = useParams();

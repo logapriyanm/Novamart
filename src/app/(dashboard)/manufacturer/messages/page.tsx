@@ -1,0 +1,214 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    FaSearch,
+    FaFilter,
+    FaCommentDots,
+    FaPaperPlane,
+    FaClock,
+    FaUserCircle,
+    FaBox,
+    FaShieldAlt,
+    FaRegClock,
+    FaCheckCircle,
+    FaInfoCircle,
+    FaBuilding
+} from 'react-icons/fa';
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
+
+const mockChats = [
+    { id: 'chat_3', type: 'NEGOTIATION', contextId: 'NEG-882', user: 'Dealer: TechGiant Retail', lastMsg: 'Can we discuss the bulk rate for 500 units?', time: '5m ago', status: 'OPEN', unread: true },
+    { id: 'chat_4', type: 'INVENTORY', contextId: 'INV-102', user: 'Dealer: HomeStyle Goods', lastMsg: 'When will the AC units be back in stock?', time: '2h ago', status: 'OPEN', unread: false },
+];
+
+export default function ManufacturerMessagingCenter() {
+    const [selectedChat, setSelectedChat] = useState<any>(null);
+    const [messages, setMessages] = useState<any[]>([]);
+    const [input, setInput] = useState('');
+
+    useEffect(() => {
+        if (selectedChat) {
+            socket.emit('join-room', selectedChat.id);
+            // In a real app, fetch messages from API here
+            setMessages([
+                { senderRole: 'DEALER', message: selectedChat.lastMsg, createdAt: new Date().toISOString() }
+            ]);
+        }
+    }, [selectedChat]);
+
+    useEffect(() => {
+        socket.on('chat:message', (msg: any) => {
+            if (selectedChat && msg.chatId === selectedChat.id) {
+                setMessages(prev => [...prev, msg]);
+            }
+        });
+        return () => { socket.off('chat:message'); };
+    }, [selectedChat]);
+
+    const sendMessage = () => {
+        if (!input.trim() || !selectedChat) return;
+
+        const payload = {
+            chatId: selectedChat.id,
+            message: input,
+            senderId: 'manufacturer-id', // Replace with actual auth user ID
+            senderRole: 'MANUFACTURER'
+        };
+
+        socket.emit('chat:message', payload);
+        setInput('');
+    };
+
+    return (
+        <div className="h-[calc(100vh-180px)] flex flex-col gap-8 animate-fade-in text-[#1E293B]">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-black tracking-tight italic">Partner <span className="text-[#10367D]">Communications</span></h1>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Direct Dealer & Distributor Channels</p>
+                </div>
+                <div className="flex items-center gap-4 py-3 px-6 bg-emerald-50/50 border border-emerald-100 rounded-2xl">
+                    <FaRegClock className="text-emerald-600 w-4 h-4" />
+                    <span className="text-[10px] font-black uppercase text-[#1E293B]">Response Rate: <span className="text-emerald-600">98%</span></span>
+                </div>
+            </div>
+
+            <div className="flex-1 grid grid-cols-12 gap-12 overflow-hidden">
+                {/* Chat List */}
+                <div className="col-span-4 bg-white rounded-[3.5rem] border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+                    <div className="p-8 border-b border-slate-50 bg-slate-50/50 flex items-center gap-4">
+                        <div className="flex-1 relative">
+                            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
+                            <input type="text" placeholder="SEARCH DEALERS..." className="w-full bg-white border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-[9px] font-black uppercase tracking-widest focus:border-[#10367D] transition-colors" />
+                        </div>
+                        <button className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-[#10367D] transition-colors"><FaFilter className="w-4 h-4" /></button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
+                        {mockChats.map((chat) => (
+                            <div
+                                key={chat.id}
+                                onClick={() => setSelectedChat(chat)}
+                                className={`p-8 hover:bg-slate-50 transition-all cursor-pointer group flex items-start gap-6 relative ${selectedChat?.id === chat.id ? 'bg-indigo-50/30' : ''}`}
+                            >
+                                <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-400 group-hover:bg-[#10367D] group-hover:text-white transition-all shadow-sm">
+                                    <FaBuilding className="w-6 h-6" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h4 className="text-sm font-black text-[#1E293B] italic leading-tight">{chat.user}</h4>
+                                        <span className="text-[8px] font-bold text-slate-400 uppercase">{chat.time}</span>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-slate-500 truncate mb-2 uppercase">{chat.lastMsg}</p>
+                                    <div className="flex items-center gap-3">
+                                        <span className={`text-[8px] font-black px-2 py-0.5 rounded border ${chat.type === 'NEGOTIATION' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                                            }`}>{chat.type}</span>
+                                        <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">{chat.contextId}</span>
+                                    </div>
+                                </div>
+                                {chat.unread && <div className="absolute top-8 right-8 w-2 h-2 rounded-full bg-indigo-600 shadow-sm" />}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Chat Window */}
+                <div className="col-span-8 bg-white rounded-[3.5rem] border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+                    <AnimatePresence mode="wait">
+                        {selectedChat ? (
+                            <motion.div
+                                key={selectedChat.id}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className="h-full flex flex-col"
+                            >
+                                {/* Active Header */}
+                                <div className="p-8 border-b border-slate-50 bg-[#1E293B] text-white flex items-center justify-between">
+                                    <div className="flex items-center gap-6">
+                                        <div className="w-14 h-14 rounded-full bg-indigo-600 flex items-center justify-center border-2 border-white/10 shadow-xl">
+                                            <FaBuilding className="w-7 h-7" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black italic tracking-tight">{selectedChat.user}</h3>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest italic">{selectedChat.type} CHANNEL</span>
+                                                <div className="w-1 h-1 rounded-full bg-slate-600" />
+                                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Context: <span className="text-white">{selectedChat.contextId}</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <button className="py-2.5 px-6 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
+                                            <FaBox className="w-3 h-3" /> View Stock
+                                        </button>
+                                        <button className="py-2.5 px-6 bg-transparent border border-white/20 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-[#1E293B] transition-all">
+                                            Partner Profile
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Messages */}
+                                <div className="flex-1 overflow-y-auto p-12 space-y-8 custom-scrollbar bg-slate-50/30">
+                                    {messages.map((m, i) => (
+                                        <div key={i} className={`flex ${m.senderRole === 'MANUFACTURER' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-[70%] p-6 rounded-[2rem] text-[11px] font-medium leading-relaxed shadow-sm ${m.senderRole === 'MANUFACTURER' ? 'bg-[#10367D] text-white' : 'bg-white text-[#1E293B] border border-slate-100'
+                                                }`}>
+                                                {m.message}
+                                                <div className={`text-[8px] mt-2 font-bold uppercase opacity-50 ${m.senderRole === 'MANUFACTURER' ? 'text-right' : 'text-left'}`}>
+                                                    Just Now
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Actions & Input */}
+                                <div className="p-10 border-t border-slate-50 space-y-8">
+                                    <div className="flex items-center gap-4">
+                                        {['Approved', 'Please send revised PO', 'Stock allocated'].map((q) => (
+                                            <button key={q} className="px-5 py-2.5 bg-slate-50 border border-slate-100 text-[9px] font-black text-slate-500 uppercase tracking-widest rounded-xl hover:border-[#10367D] hover:text-[#10367D] transition-all">
+                                                {q}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="flex items-center gap-6 bg-slate-50 border border-slate-200 rounded-[2rem] p-3 pl-8">
+                                        <input
+                                            value={input}
+                                            onChange={(e) => setInput(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                                            type="text"
+                                            placeholder="Type your response to dealer..."
+                                            className="flex-1 bg-transparent text-[11px] font-black uppercase tracking-widest focus:outline-none"
+                                        />
+                                        <button
+                                            onClick={sendMessage}
+                                            className="py-4 px-10 bg-[#10367D] text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-[#10367D]/20 hover:scale-[1.05] active:scale-95 transition-all flex items-center gap-3"
+                                        >
+                                            Send <FaPaperPlane className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center p-12 text-center bg-slate-50/50 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent pointer-events-none" />
+                                <div className="w-32 h-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-200 mb-8 shadow-sm">
+                                    <FaBuilding className="w-12 h-12" />
+                                </div>
+                                <h3 className="text-xl font-black text-slate-400 uppercase tracking-[0.2em] italic">Dealer Communications</h3>
+                                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-4 max-w-[300px] leading-relaxed">
+                                    Select a dealer conversation to view inquiries, negotiate pricing, or manage order logistics.
+                                </p>
+                            </div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </div>
+        </div>
+    );
+}

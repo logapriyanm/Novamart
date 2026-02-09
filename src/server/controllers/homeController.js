@@ -4,7 +4,7 @@
  */
 
 import recommendationService from '../services/recommendation.js';
-import trackingService from '../services/tracking.js';
+import behaviorService from '../services/behaviorService.js';
 import prisma from '../lib/prisma.js';
 import logger from '../lib/logger.js';
 
@@ -91,7 +91,7 @@ export const trackUserEvent = async (req, res) => {
 
     try {
         // Fire and forget (don't wait for await if high volume, but here we await for safety)
-        await trackingService.trackEvent(userId, type, targetId, metadata);
+        await behaviorService.trackEvent(userId, type, targetId, metadata);
         res.json({ success: true, message: 'Event recorded' });
     } catch (error) {
         res.status(500).json({ success: false, error: 'TRACKING_FAILED' });

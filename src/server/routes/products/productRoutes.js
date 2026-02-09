@@ -8,8 +8,9 @@ import { validateProduct } from '../../middleware/validate.js';
 const router = express.Router();
 
 // Public Routes
-router.get('/', productController.getAllProducts);
+router.get('/', authenticateOptional, productController.getAllProducts);
 router.get('/categories', productController.getCategories);
+router.get('/filters', productController.getDiscoveryFilters);
 router.get('/:id', authenticateOptional, productController.getProductById);
 
 // Protected Manufacturer Routes
@@ -39,13 +40,11 @@ router.delete('/:id',
     productController.deleteProduct
 );
 
-/*
 router.post('/bulk',
     authenticate,
     authorize(['MANUFACTURER'], [], ['ACTIVE', 'UNDER_VERIFICATION']),
     productController.bulkImportProducts
 );
-*/
 
 // Admin: Manage Products (Approve/Reject)
 

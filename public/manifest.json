@@ -1,0 +1,9 @@
+{
+    "name": "Novamart",
+    "short_name": "Novamart",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0F6CBD",
+    "gcm_sender_id": "433067419137"
+}

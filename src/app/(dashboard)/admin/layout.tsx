@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import Sidebar from '../../../client/components/layout/Sidebar';
-import AdminHeader from '../../../client/components/layout/AdminHeader';
+import Sidebar from '@/client/components/layout/Sidebar';
+import AdminHeader from '@/client/components/layout/AdminHeader';
 import { FaBars as Menu } from 'react-icons/fa';
-import RoleGuard from '../../../client/components/features/auth/RoleGuard';
-import { Role } from '../../../lib/api/contract';
+import RoleGuard from '@/client/components/features/auth/RoleGuard';
+import { Role } from '@/lib/api/contract';
 
 export default function AdminLayout({
     children,

@@ -1,51 +1,52 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useProductForm } from '../../../../../context/ProductFormContext';
 import { FaTag, FaLayerGroup, FaAlignLeft, FaCheckSquare } from 'react-icons/fa';
 import { IoIosArrowDropdown } from 'react-icons/io';
-import { selectableCategories } from '../../../../../data/categoryData';
+import { CATEGORY_CONFIG, CategoryKey } from '@/lib/constants';
 
 export default function StepGeneral() {
     const { productData, updateProductData } = useProductForm();
 
     // Local state for cascading dropdowns
-    const [selectedMainCategory, setSelectedMainCategory] = useState('');
-    const [selectedSubCategory, setSelectedSubCategory] = useState('');
-    const [customMainCategory, setCustomMainCategory] = useState('');
-    const [customSubCategory, setCustomSubCategory] = useState('');
-    const [customCategory, setCustomCategory] = useState('');
+    // Initialize from existing productData if available
+    const [selectedMainCategory, setSelectedMainCategory] = useState<CategoryKey | ''>(
+        (productData.category && Object.keys(CATEGORY_CONFIG).includes(productData.category)) ? productData.category as CategoryKey : ''
+    );
+    const [selectedSubCategory, setSelectedSubCategory] = useState<string>(productData.subCategory || '');
+
+    // Effects to sync local state with context if it changes externally (e.g. edit mode load)
+    useEffect(() => {
+        if (productData.category && Object.keys(CATEGORY_CONFIG).includes(productData.category)) {
+            setSelectedMainCategory(productData.category as CategoryKey);
+        }
+        if (productData.subCategory) {
+            setSelectedSubCategory(productData.subCategory);
+        }
+    }, [productData.category, productData.subCategory]);
+
 
     // Derived states
     const availableSubCategories = useMemo(() => {
-        const main = selectableCategories.find(c => c.id === selectedMainCategory);
-        return main?.subsections || [];
+        if (!selectedMainCategory) return [];
+        return CATEGORY_CONFIG[selectedMainCategory]?.subCategories || [];
     }, [selectedMainCategory]);
 
-    const availableLeafCategories = useMemo(() => {
-        const sub = availableSubCategories.find(s => s.label === selectedSubCategory);
-        return sub?.items || [];
-    }, [availableSubCategories, selectedSubCategory]);
-
     const handleMainCategoryChange = (val: string) => {
-        setSelectedMainCategory(val);
+        const key = val as CategoryKey;
+        setSelectedMainCategory(key);
         setSelectedSubCategory('');
-        setCustomMainCategory('');
-        setCustomSubCategory('');
-        setCustomCategory('');
-        updateProductData({ mainCategory: val, category: '', subCategory: '' });
+        updateProductData({
+            category: key,
+            subCategory: '',
+            specifications: {} // Reset specs when category changes as they are category-specific
+        });
     };
 
     const handleSubCategoryChange = (val: string) => {
         setSelectedSubCategory(val);
-        setCustomSubCategory('');
-        setCustomCategory('');
-        updateProductData({ subCategory: val, category: '' });
-    };
-
-    const handleLeafCategoryChange = (val: string) => {
-        updateProductData({ category: val });
-        setCustomCategory('');
+        updateProductData({ subCategory: val });
     };
 
     return (
@@ -76,38 +77,26 @@ export default function StepGeneral() {
                     <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                         <FaLayerGroup className="w-3 h-3 text-[#0F6CBD]" /> Categorization <span className="text-rose-500">*</span>
                     </label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* 1. Main Category */}
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-bold text-slate-400 uppercase">Department</label>
+                            <label className="text-[9px] font-bold text-slate-400 uppercase">Category</label>
                             <div className="relative">
                                 <select
                                     value={selectedMainCategory}
                                     onChange={(e) => handleMainCategoryChange(e.target.value)}
                                     className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none"
                                 >
-                                    <option value="">Select Department</option>
-                                    {selectableCategories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>{cat.label}</option>
+                                    <option value="">Select Category</option>
+                                    {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
+                                        <option key={key} value={key}>{config.label}</option>
                                     ))}
                                 </select>
                                 <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                             </div>
-                            {selectedMainCategory === 'others' && (
-                                <input
-                                    type="text"
-                                    placeholder="Enter Department Name"
-                                    value={customMainCategory}
-                                    onChange={(e) => {
-                                        setCustomMainCategory(e.target.value);
-                                        // We might store this in specifications or just use as placeholder
-                                    }}
-                                    className="w-full mt-2 bg-white border border-slate-200 rounded-lg px-3 py-2 text-[11px] font-bold focus:outline-none focus:border-[#0F6CBD]"
-                                />
-                            )}
                         </div>
 
-                        {/* 2. Sub Category (Subsection) */}
+                        {/* 2. Sub Category */}
                         <div className="space-y-1.5">
                             <label className="text-[9px] font-bold text-slate-400 uppercase">Sub-Category</label>
                             <div className="relative">
@@ -119,64 +108,13 @@ export default function StepGeneral() {
                                 >
                                     <option value="">Select Sub-Category</option>
                                     {availableSubCategories.map(sub => (
-                                        <option key={sub.label} value={sub.label}>{sub.label}</option>
+                                        <option key={sub} value={sub}>{sub}</option>
                                     ))}
                                 </select>
                                 <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                             </div>
-                            {selectedSubCategory === 'Others' && (
-                                <input
-                                    type="text"
-                                    placeholder="Enter Sub-Category Name"
-                                    value={customSubCategory}
-                                    onChange={(e) => {
-                                        setCustomSubCategory(e.target.value);
-                                        updateProductData({ subCategory: e.target.value });
-                                    }}
-                                    className="w-full mt-2 bg-white border border-slate-200 rounded-lg px-3 py-2 text-[11px] font-bold focus:outline-none focus:border-[#0F6CBD]"
-                                />
-                            )}
-                        </div>
-
-                        {/* 3. Product Type (Leaf Item) - saved as 'category' */}
-                        <div className="space-y-1.5">
-                            <label className="text-[9px] font-bold text-slate-400 uppercase">Product Type</label>
-                            <div className="relative">
-                                <select
-                                    value={productData.category}
-                                    onChange={(e) => handleLeafCategoryChange(e.target.value)}
-                                    disabled={!selectedSubCategory}
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
-                                >
-                                    <option value="">Select Product Type</option>
-                                    {availableLeafCategories.map(item => (
-                                        <option key={item.href} value={item.href.split('/').pop()}>{item.name}</option>
-                                    ))}
-                                </select>
-                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                            </div>
-                            {(productData.category === 'others' || productData.category.includes('others')) && (
-                                <input
-                                    type="text"
-                                    placeholder="Enter Product Type Name"
-                                    value={customCategory}
-                                    onChange={(e) => {
-                                        setCustomCategory(e.target.value);
-                                        // Still keep category as 'others' for filtering but store custom in name if needed?
-                                        // Or just override category. Let's override category for now.
-                                        updateProductData({ category: e.target.value });
-                                    }}
-                                    className="w-full mt-2 bg-white border border-slate-200 rounded-lg px-3 py-2 text-[11px] font-bold focus:outline-none focus:border-[#0F6CBD]"
-                                />
-                            )}
                         </div>
                     </div>
-                    {productData.category && !customCategory && (
-                        <div className="flex items-center gap-2 text-[10px] text-emerald-600 font-bold bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">
-                            <FaCheckSquare className="w-3 h-3" />
-                            Selected: {availableLeafCategories.find(i => i.href.split('/').pop() === productData.category)?.name}
-                        </div>
-                    )}
                 </div>
 
                 {/* Description */}

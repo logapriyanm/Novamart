@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { apiClient } from '../../../../../lib/api/client';
-import { useSnackbar } from '../../../../../client/context/SnackbarContext';
+import { apiClient } from '@/lib/api/client';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 import { motion } from 'framer-motion';
 import { FaArrowLeft, FaBox, FaStore, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaTruck, FaStar } from 'react-icons/fa';
-import ChatWidget from '../../../../../client/components/features/chat/ChatWidget';
+import ChatWidget from '@/client/components/features/chat/ChatWidget';
 
 export default function OrderDetailsPage() {
     const params = useParams();

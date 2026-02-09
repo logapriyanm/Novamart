@@ -18,8 +18,8 @@ import {
     FaBell,
     FaBars
 } from 'react-icons/fa';
-import { Card, WhiteCard, StatusBadge } from '../../../../client/components/features/dashboard/DashboardUI';
-import { useAuth } from '../../../../client/hooks/useAuth';
+import { Card, WhiteCard, StatusBadge } from '@/client/components/features/dashboard/DashboardUI';
+import { useAuth } from '@/client/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 function ProfileContent() {

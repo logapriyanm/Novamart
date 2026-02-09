@@ -38,8 +38,8 @@ export default function FeaturedProducts() {
                         },
                         highlights: {
                             freeDelivery: price > 1000,
-                            installation: p.category?.toLowerCase().includes('machinery'),
-                            warranty: p.specifications?.warranty || '6 Months'
+                            installation: ['air-conditioners', 'washing-machines', 'refrigerators', 'dishwashers'].some(c => p.category?.toLowerCase().includes(c)),
+                            warranty: p.specifications?.warranty || '1 Year'
                         }
                     };
                 });

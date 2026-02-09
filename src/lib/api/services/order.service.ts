@@ -22,7 +22,7 @@ export const orderService = {
     },
 
     async getCustomerOrders(): Promise<any[]> {
-        return apiClient.get<any[]>('/orders/customer');
+        return apiClient.get<any[]>('/orders/my');
     },
 
     async updateStatus(orderId: string, status: string): Promise<ApiResponse<any>> {

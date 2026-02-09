@@ -9,8 +9,8 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { apiClient } from '../../../../../lib/api/client';
-import { useSnackbar } from '../../../../../client/context/SnackbarContext';
+import { apiClient } from '@/lib/api/client';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 export default function DealerRequests() {
     const [activeTab, setActiveTab] = useState('PENDING');

@@ -32,6 +32,9 @@ class RecommendationService {
             const categoryScores = {};
 
             // 1. Fetch Data Signals
+            // First get customer to ensure we have ID for cart
+            const customer = await prisma.customer.findUnique({ where: { userId } });
+
             const [recentOrders, cart, behaviors] = await Promise.all([
                 // ORDERS: Last 10 orders
                 prisma.order.findMany({
@@ -40,11 +43,11 @@ class RecommendationService {
                     take: 10,
                     include: { items: { include: { linkedProduct: true } } }
                 }),
-                // CART: Current cart items
-                prisma.cart.findUnique({
-                    where: { customerId: (await prisma.customer.findUnique({ where: { userId } }))?.id },
+                // CART: Current cart items (only if customer exists)
+                customer ? prisma.cart.findUnique({
+                    where: { customerId: customer.id },
                     include: { items: { include: { linkedProduct: true } } }
-                }),
+                }) : Promise.resolve(null),
                 // BEHAVIORS: Last 50 actions (View/Search)
                 prisma.userBehavior.findMany({
                     where: { userId, type: { in: ['VIEW', 'SEARCH'] } },

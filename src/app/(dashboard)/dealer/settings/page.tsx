@@ -18,8 +18,8 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { CldUploadWidget } from 'next-cloudinary';
-import { useProfile } from '../../../../client/hooks/useProfile';
-import { useSnackbar } from '../../../../client/context/SnackbarContext';
+import { useProfile } from '@/client/hooks/useProfile';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 interface DealerProfile {
     name: string;
