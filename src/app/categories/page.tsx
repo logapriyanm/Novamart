@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { FaFilter as Filter, FaTh as Grid, FaList as ListIcon, FaChevronDown as ChevronDown, FaPlus as Plus } from 'react-icons/fa';
 
 export const metadata: Metadata = {
-    title: 'Industrial Categories | Novamart B2B2C',
+    title: 'Industrial Categories | NovaMart B2B2C',
     description: 'Browse our extensive range of industrial products from verified manufacturers.',
 };
 

@@ -32,23 +32,22 @@ export const ProductManagementCard = ({
 }: ProductCardProps) => {
     return (
         <motion.div
-            whileHover={{ y: -5 }}
-            className="bg-surface/40 backdrop-blur-md border border-primary/10 rounded-[2rem] p-5 flex flex-col group"
+            className="bg-surface border border-foreground/10 rounded-[10px] p-5 flex flex-col group"
         >
             {/* Header: Discount & Menu */}
             <div className="flex items-center justify-between mb-4">
                 {discount ? (
-                    <span className="bg-primary text-background text-[10px] font-black px-2 py-1 rounded-full shadow-lg shadow-primary/20">
+                    <span className="bg-black text-white text-[10px] font-bold px-2 py-1 rounded-[10px]">
                         {discount}%
                     </span>
                 ) : <div />}
-                <button className="w-8 h-8 flex items-center justify-center rounded-xl bg-surface/40 border border-foreground/5 text-foreground/40 hover:text-primary transition-colors">
+                <button className="w-8 h-8 flex items-center justify-center rounded-[10px] bg-background border border-foreground/10 text-foreground/40 hover:text-black transition-colors">
                     <MoreHorizontal className="w-4 h-4" />
                 </button>
             </div>
 
             {/* Product Image */}
-            <div className="aspect-square rounded-2xl bg-background/50 mb-6 p-4 flex items-center justify-center overflow-hidden border border-foreground/5 transition-transform group-hover:scale-[1.02]">
+            <div className="aspect-square rounded-[10px] bg-background mb-6 p-4 flex items-center justify-center overflow-hidden border border-foreground/10 transition-transform group-hover:scale-105">
                 <OptimizedImage src={image} alt={name} width={300} height={300} className="w-full h-full object-contain" />
             </div>
 
@@ -56,9 +55,9 @@ export const ProductManagementCard = ({
             <div className="space-y-2 mb-6">
                 <div className="flex items-baseline justify-between">
                     <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-black text-primary">${price}</span>
+                        <span className="text-lg font-black text-primary">₹{price}</span>
                         {originalPrice && (
-                            <span className="text-xs text-foreground/30 font-bold line-through">${originalPrice}</span>
+                            <span className="text-xs text-foreground/30 font-bold line-through">₹{originalPrice}</span>
                         )}
                     </div>
                     <div className="flex items-center gap-1">

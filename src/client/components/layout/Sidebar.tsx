@@ -9,6 +9,7 @@ import {
     FaThLarge as DashboardIcon,
     FaUsers as DealersIcon,
     FaUsers,
+    FaIndustry,
     FaCube as ProductsIcon,
     FaGavel as DisputesIcon,
     FaTruck as LogisticsIcon,
@@ -37,6 +38,7 @@ const adminMenuItems = [
     { name: 'Dashboard', icon: DashboardIcon, path: '/admin' },
     { name: 'Verification', icon: FaShieldAlt, path: '/admin/verification' },
     { name: 'Users', icon: FaUsers, path: '/admin/users' },
+    { name: 'Manufacturers', icon: FaIndustry, path: '/admin/manufacturers' },
     { name: 'Dealers', icon: DealersIcon, path: '/admin/dealers' },
     { name: 'Products', icon: ProductsIcon, path: '/admin/products' },
     { name: 'Orders', icon: LogisticsIcon, path: '/admin/orders' },
@@ -104,7 +106,10 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 customerMenuItems;
 
     const NavItem = ({ item }: { item: any }) => {
-        const isActive = pathname === item.path;
+        const isDashboard = ['/admin', '/dealer', '/manufacturer', '/customer'].includes(item.path);
+        const isActive = isDashboard
+            ? pathname === item.path
+            : pathname === item.path || pathname?.startsWith(`${item.path}/`);
         const isLogout = item.name === 'Logout';
 
         if (isLogout) {
@@ -115,7 +120,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                         onClose();
                     }}
                     title={isCollapsed ? item.name : ''}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group text-foreground/50 hover:bg-rose-500/10 hover:text-rose-500 ${isCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : 'w-full'}`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-[10px] transition-all group text-foreground/50 hover:bg-rose-500/5 hover:text-rose-500 ${isCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : 'w-full'}`}
                 >
                     <item.icon className={`w-5 h-5 flex-shrink-0 text-foreground/40 group-hover:text-rose-500`} />
                     {!isCollapsed && <span className="text-sm font-bold tracking-tight whitespace-nowrap">{item.name}</span>}
@@ -128,12 +133,12 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 href={item.path}
                 onClick={onClose}
                 title={isCollapsed ? item.name : ''}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${isActive
-                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' // Image 1 active state is blue bg
+                className={`flex items-center gap-3 px-4 py-3 rounded-[10px] transition-all group ${isActive
+                    ? 'bg-black text-white'
                     : 'text-foreground/50 hover:bg-muted hover:text-foreground'
                     } ${isCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : ''}`}
             >
-                <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-primary-foreground' : 'text-foreground/40 group-hover:text-foreground/60'}`} />
+                <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-foreground/40 group-hover:text-foreground/60'}`} />
                 {!isCollapsed && <span className="text-sm font-bold tracking-tight whitespace-nowrap">{item.name}</span>}
             </Link>
         );
@@ -165,8 +170,8 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
             >
                 {/* Logo Section */}
                 <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center p-4' : 'gap-3'}`}>
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-xl shadow-primary/10 flex-shrink-0 border border-foreground/[0.03]">
-                        <img src="/logo.png" alt="N" className="w-full h-full object-contain" />
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-sm flex-shrink-0 border border-foreground/10">
+                        <img src="/assets/Novamart.png" alt="N" className="w-full h-full object-contain" />
                     </div>
                     {!isCollapsed && (
                         <div className="overflow-hidden whitespace-nowrap flex flex-col">
@@ -187,9 +192,9 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto custom-scrollbar overflow-x-hidden">
                     {/* Customer Profile Section (Keep existing logic for Customer role) */}
                     {role === 'CUSTOMER' && !isCollapsed && (
-                        <div className="mb-6 p-4 bg-muted/30 rounded-3xl border border-border shadow-sm">
+                        <div className="mb-6 p-4 bg-muted/30 rounded-[10px] border border-border">
                             <div className="flex items-center gap-4 p-2">
-                                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-primary-foreground font-black text-lg shadow-lg shadow-primary/20">
+                                <div className="w-12 h-12 bg-black rounded-[10px] flex items-center justify-center text-white font-black text-lg">
                                     {user?.name?.charAt(0) || 'R'}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -211,7 +216,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: user?.status === 'ACTIVE' ? '100%' : '50%' }}
-                                        className="h-full bg-primary"
+                                        className="h-full bg-black"
                                     />
                                 </div>
                             </div>
@@ -229,15 +234,15 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 <div className="p-4 space-y-1">
                     {/* Image 1 shows "Used Storage" widget at bottom for Dealer */}
                     {role === 'DEALER' && !isCollapsed && (
-                        <div className="mt-4 mb-4 p-4 bg-muted/20 rounded-2xl border border-border/50">
+                        <div className="mt-4 mb-4 p-4 bg-muted/20 rounded-[10px] border border-border/50">
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-[10px] font-bold text-muted-foreground">Platform Activity</span>
                                 <span className="text-[10px] font-bold text-foreground">Active</span>
                             </div>
                             <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mb-3">
-                                <div className="h-full bg-primary w-full rounded-full opacity-50"></div>
+                                <div className="h-full bg-black w-full rounded-full opacity-50"></div>
                             </div>
-                            <Link href="/dealer/subscription" className="block text-center w-full py-2 bg-background border border-border text-foreground text-[10px] font-bold rounded-lg hover:bg-muted transition-colors">
+                            <Link href="/dealer/subscription" className="block text-center w-full py-2 bg-background border border-border text-foreground text-[10px] font-bold rounded-[10px] hover:bg-muted transition-colors">
                                 View Subscription
                             </Link>
                         </div>

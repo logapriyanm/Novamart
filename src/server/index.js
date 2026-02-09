@@ -1,11 +1,15 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import prisma from './lib/prisma.js';
+import logger from './lib/logger.js';
+import { authRateLimiter } from './middleware/rateLimiter.js';
 
 // Route Imports
 import authRoutes from './routes/auth/authRoutes.js';
@@ -29,8 +33,9 @@ import escrowRoutes from './routes/escrow/escrowRoutes.js';
 import verificationRoutes from './routes/verification/verificationRoutes.js';
 import subscriptionRoutes from './routes/subscription/subscriptionRoutes.js';
 import negotiationRoutes from './routes/negotiation/negotiationRoutes.js';
-
-dotenv.config();
+import userRoutes from './routes/users/index.js';
+import mediaRoutes from './routes/media/mediaRoutes.js';
+import poolingRoutes from './routes/pooling/poolingRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -47,8 +52,10 @@ notificationService.setIO(io);
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+app.set('trust proxy', 1); // Trust first proxy for rate limiting (fixes IPv6 issues)
 app.use(cors());
 app.use(express.json());
+app.use('/api/', authRateLimiter); // Apply standard rate limit to all API routes
 
 // Socket.IO Logic
 io.use(async (socket, next) => {
@@ -72,25 +79,25 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    console.log(`🔌 New Connection: ${socket.id} (User: ${socket.user.email})`);
+    logger.info(`🔌 New Connection: ${socket.id} (User: ${socket.user.email})`);
 
     // Join personal room for notifications
     socket.join(socket.user.id);
-    console.log(`👤 User joined personal room: ${socket.user.id}`);
+    logger.info(`👤 User joined personal room: ${socket.user.id}`);
 
     socket.on('join-room', async (roomId) => {
         // Verify user is participant in this chat
         try {
             const chat = await Chat.findById(roomId);
-            if (!chat) return console.error(`Room ${roomId} not found`);
+            if (!chat) return logger.error(`Room ${roomId} not found`);
 
             const isParticipant = chat.participants.some(p => p.userId === socket.user.id);
-            if (!isParticipant) return console.error(`User ${socket.user.id} is not a participant in chat ${roomId}`);
+            if (!isParticipant) return logger.error(`User ${socket.user.id} is not a participant in chat ${roomId}`);
 
             socket.join(roomId);
-            console.log(`👤 User joined room: ${roomId}`);
+            logger.info(`👤 User joined room: ${roomId}`);
         } catch (err) {
-            console.error('Join Room Error:', err);
+            logger.error('Join Room Error:', err);
         }
     });
 
@@ -125,12 +132,15 @@ io.on('connection', (socket) => {
             // 4. Broadcast to Room
             io.to(chatId).emit('chat:message', newMessage);
         } catch (err) {
-            console.error('Chat Error:', err);
+            logger.error('Chat Error:', err);
         }
     });
 
     socket.on('disconnect', () => {
-        console.log(`🚫 Disconnected: ${socket.id}`);
+        logger.info(`🚫 Disconnected: ${socket.id}`);
+        // CRITICAL: Clean up all listeners to prevent memory leaks
+        socket.removeAllListeners('join-room');
+        socket.removeAllListeners('chat:message');
     });
 });
 
@@ -154,33 +164,53 @@ app.use('/api/escrow', escrowRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/negotiation', negotiationRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/media', mediaRoutes);
+app.use('/api/pooling', poolingRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
-        message: 'Novamart API v1.0.1 (Flow 10 active)',
+        message: 'NovaMart API v1.0.1 (Flow 10 active)',
         db: 'PostgreSQL Connected (Prisma)'
     });
 });
 
 // Database Connections (Non-blocking MongoDB)
+// Global Error Handler
+app.use((err, req, res, next) => {
+    logger.error('Unhandled Exception:', {
+        message: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+        path: req.path,
+        method: req.method
+    });
+
+    res.status(err.status || 500).json({
+        success: false,
+        error: err.code || 'INTERNAL_SERVER_ERROR',
+        message: process.env.NODE_ENV === 'production'
+            ? 'An unexpected error occurred. Please contact support.'
+            : err.message
+    });
+});
+
 const startServer = async () => {
     try {
         if (process.env.MONGODB_URI) {
             mongoose.connect(process.env.MONGODB_URI, {
-                serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of hanging
+                serverSelectionTimeoutMS: 5000,
             })
-                .then(() => console.log('✅ Connected to MongoDB (Chat & Tracking)'))
-                .catch(err => console.error('⚠️ MongoDB Connection Failed:', err.message));
+                .then(() => logger.info('✅ Connected to MongoDB (Chat & Tracking)'))
+                .catch(err => logger.error('⚠️ MongoDB Connection Failed:', err.message));
         }
 
         httpServer.listen(PORT, () => {
-            console.log(`🚀 Server running on http://localhost:${PORT}`);
+            logger.info(`🚀 Server running on http://localhost:${PORT}`);
         });
     } catch (error) {
-        console.error('❌ Server startup failed:', error);
+        logger.error('❌ Server startup failed:', error);
     }
 };
 
 startServer();
-

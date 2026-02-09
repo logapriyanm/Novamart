@@ -7,6 +7,19 @@ const PROTECTED_PATHS = ['/admin', '/manufacturer', '/dealer', '/customer', '/ac
 // Routes that are ONLY for guest users
 const GUEST_ONLY_PATHS = ['/auth/login', '/auth/register'];
 
+function decodeJwt(token: string) {
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        // Use atob which is available in Edge Runtime
+        const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = atob(base64);
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        return null;
+    }
+}
+
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const token = request.cookies.get('auth_token')?.value;
@@ -19,17 +32,35 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
-    // 2. If already logged in and trying to access guest paths
-    const isGuestOnly = GUEST_ONLY_PATHS.some(path => pathname.startsWith(path));
+    // 2. If already logged in and trying to access guest paths (login/register)
+    const isGuestOnly = GUEST_ONLY_PATHS.some(path => pathname === path || pathname.startsWith(path + '/'));
     if (isGuestOnly && token) {
-        // Ideally we'd decode the JWT to redirect to the correct dashboard,
-        // but for now redirecting to home is safer.
+        // Redirect logged-in users based on their role for a better experience
+        const payload = decodeJwt(token);
+        if (payload?.role) {
+            if (payload.role === 'ADMIN') return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+            if (payload.role === 'MANUFACTURER') return NextResponse.redirect(new URL('/manufacturer/dashboard', request.url));
+            if (payload.role === 'DEALER') return NextResponse.redirect(new URL('/dealer/dashboard', request.url));
+        }
         return NextResponse.redirect(new URL('/', request.url));
     }
 
-    // 3. Role-based check (Rough check via path prefix)
-    // In a real app, you'd decode the JWT here (using jose library)
-    // or rely on a checkAuth call on the client/Server Component.
+    // 3. Strict Role-based check
+    if (token) {
+        const payload = decodeJwt(token);
+        const role = payload?.role;
+
+        if (pathname.startsWith('/admin') && role !== 'ADMIN') {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+        if (pathname.startsWith('/manufacturer') && role !== 'MANUFACTURER') {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+        if (pathname.startsWith('/dealer') && role !== 'DEALER') {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+        // CUSTOMER role is allowed to access root and customer specific paths (if any)
+    }
 
     return NextResponse.next();
 }

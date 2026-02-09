@@ -15,7 +15,7 @@ import {
     FaGavel
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { apiClient } from '../../../../lib/api/client';
+import { adminService } from '../../../../lib/api/services/admin.service';
 import { useSnackbar } from '../../../../client/context/SnackbarContext';
 
 export default function AdminProductApproval() {
@@ -33,7 +33,7 @@ export default function AdminProductApproval() {
 
     const fetchPendingProducts = async () => {
         try {
-            const data = await apiClient.get<any[]>('/products?status=PENDING');
+            const data = await adminService.getPendingProducts();
             setProducts(data);
         } catch (error) {
             console.error('Failed to fetch products', error);
@@ -52,10 +52,7 @@ export default function AdminProductApproval() {
 
         try {
             // Admin endpoint for formal approval audit
-            await apiClient.put(`/admin/products/${selectedProduct.id}/approve`, {
-                isApproved: status === 'APPROVED',
-                rejectionReason: status === 'REJECTED' ? rejectionReason : undefined
-            });
+            await adminService.approveProduct(selectedProduct.id, status === 'APPROVED', rejectionReason || undefined);
 
             setAuditStatus(status);
             setTimeout(() => {
@@ -74,73 +71,57 @@ export default function AdminProductApproval() {
     return (
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
             {/* Header */}
-            <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
+            <div className="flex flex-col gap-1 border-b border-foreground/5 pb-8">
+                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest hover:translate-x-[-4px] transition-transform mb-4">
                     <FaArrowLeft className="w-3 h-3" />
-                    Back to Mission Control
+                    Back to Console
                 </Link>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-black tracking-tight italic">Governance <span className="text-[#10367D]">Queue</span></h1>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Product Verification & Compliance Terminal</p>
-                    </div>
-                </div>
+                <h1 className="text-2xl font-bold text-[#1E293B]">Product Verification</h1>
+                <p className="text-sm text-slate-400 font-medium">Review and audit pending catalog submissions.</p>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
                 {/* List View */}
-                <div className="xl:col-span-7 space-y-8">
-                    <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
-                        <div className="p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
-                            <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-[0.2em] italic">Awaiting Platform Audit</h2>
+                <div className="xl:col-span-7 space-y-6">
+                    <div className="bg-white rounded-[20px] border border-slate-100 shadow-sm overflow-hidden">
+                        <div className="p-6 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                            <h2 className="text-xs font-bold text-[#1E293B] uppercase tracking-widest">Pending Audit</h2>
                             <div className="relative">
-                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
-                                <input type="text" placeholder="Search Filter..." className="bg-white border border-slate-100 rounded-xl py-2 pl-10 pr-4 text-[9px] font-black uppercase tracking-widest focus:outline-none focus:border-[#10367D]/30" />
+                                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
+                                <input type="text" placeholder="Filter..." className="bg-white border border-slate-100 rounded-lg py-1.5 pl-9 pr-4 text-[10px] font-medium focus:outline-none focus:border-primary/30" />
                             </div>
                         </div>
-                        <div className="divide-y divide-slate-50 min-h-[300px]">
+                        <div className="divide-y divide-slate-50 min-h-[400px]">
                             {isLoading ? (
-                                <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold uppercase tracking-widest">Loading Pipeline...</div>
+                                <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold py-20 uppercase tracking-widest">Loading...</div>
                             ) : products.length === 0 ? (
-                                <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold uppercase tracking-widest">No Pending Audits</div>
+                                <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold py-20 uppercase tracking-widest">No Pendings</div>
                             ) : (
                                 products.map((item) => (
                                     <div
                                         key={item.id}
                                         onClick={() => setSelectedProduct(item)}
-                                        className={`p-10 hover:bg-slate-50/50 transition-all cursor-pointer group flex items-center justify-between ${selectedProduct?.id === item.id ? 'bg-blue-50/30 border-l-4 border-l-[#10367D]' : ''}`}
+                                        className={`p-6 hover:bg-slate-50 transition-all cursor-pointer group flex items-center justify-between ${selectedProduct?.id === item.id ? 'bg-blue-50/30 border-l-4 border-l-primary' : ''}`}
                                     >
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 text-[#10367D] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                                                <FaBox className="w-6 h-6" />
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 text-primary flex items-center justify-center shadow-sm">
+                                                <FaBox className="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <h4 className="text-sm font-black text-[#1E293B]">{item.name}</h4>
-                                                <div className="flex items-center gap-2 mt-1 italic">
-                                                    <FaIndustry className="w-2.5 h-2.5 text-slate-400" />
-                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.manufacturer?.companyName || 'Unknown Corp'}</span>
-                                                </div>
+                                                <h4 className="text-sm font-bold text-[#1E293B]">{item.name}</h4>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{item.manufacturer?.companyName || 'Unknown Corp'}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
                                                 {new Date(item.updatedAt).toLocaleDateString()}
                                             </span>
-                                            <span className="text-[8px] font-black uppercase px-3 py-1 bg-amber-50 text-amber-600 rounded-full border border-amber-100">Pending Review</span>
+                                            <span className="text-[8px] font-bold uppercase px-3 py-1 bg-amber-50 text-amber-600 rounded-full border border-amber-100">Review Required</span>
                                         </div>
                                     </div>
                                 ))
                             )}
                         </div>
-                    </div>
-
-                    <div className="p-10 bg-blue-50/50 border border-[#10367D]/10 rounded-[3rem] flex items-center gap-8">
-                        <div className="w-16 h-16 rounded-[1.8rem] bg-white text-[#10367D] border border-blue-100 flex items-center justify-center shrink-0 shadow-sm">
-                            <FaShieldAlt className="w-8 h-8" />
-                        </div>
-                        <p className="text-[10px] font-bold text-[#1E293B] uppercase tracking-widest leading-relaxed">
-                            Audit Protocol: Verify Tax slabs, ISO certifications, and technical safety specs. Verified items become visible to the **Dealer Distribution Network** immediately.
-                        </p>
                     </div>
                 </div>
 
@@ -150,60 +131,57 @@ export default function AdminProductApproval() {
                         {selectedProduct ? (
                             <motion.div
                                 key={selectedProduct.id}
-                                initial={{ opacity: 0, scale: 0.95 }}
+                                initial={{ opacity: 0, scale: 0.98 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="h-full bg-white rounded-[3.5rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col"
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                className="h-full bg-white rounded-[20px] border border-slate-100 shadow-xl overflow-hidden flex flex-col"
                             >
-                                <div className="p-10 bg-[#1E293B] text-white">
-                                    <h3 className="text-2xl font-black tracking-tight">{selectedProduct.name}</h3>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mt-2 italic">Product Verification Sheet • {selectedProduct.id.slice(0, 8)}</p>
+                                <div className="p-8 bg-black text-white">
+                                    <h3 className="text-xl font-bold tracking-tight">{selectedProduct.name}</h3>
+                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Verification Record • {selectedProduct.id.slice(0, 8)}</p>
                                 </div>
 
-                                <div className="flex-1 p-10 space-y-10 overflow-y-auto custom-scrollbar">
-                                    <div className="grid grid-cols-2 gap-8">
-                                        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Proposed Price</p>
-                                            <p className="text-lg font-black text-[#1E293B]">₹{selectedProduct.basePrice}</p>
+                                <div className="flex-1 p-8 space-y-8 overflow-y-auto">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Base Price</p>
+                                            <p className="text-base font-bold text-[#1E293B]">₹{selectedProduct.basePrice}</p>
                                         </div>
-                                        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                            <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Category</p>
-                                            <p className="text-lg font-black text-[#1E293B]">{selectedProduct.category}</p>
+                                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Category</p>
+                                            <p className="text-base font-bold text-[#1E293B]">{selectedProduct.category}</p>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                            <FaInfoCircle className="text-[#10367D]" /> Description
-                                        </h4>
-                                        <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 text-sm font-bold text-[#1E293B] italic leading-relaxed">
+                                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Specification</h4>
+                                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 text-xs font-medium text-slate-600 leading-relaxed">
                                             {selectedProduct.description}
                                         </div>
                                     </div>
 
                                     {auditStatus && (
                                         <motion.div
-                                            initial={{ opacity: 0, y: 20 }}
+                                            initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className={`p-10 rounded-[2.5rem] text-center ${auditStatus === 'APPROVED' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}
+                                            className={`p-6 rounded-xl text-center ${auditStatus === 'APPROVED' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}
                                         >
-                                            <FaGavel className="w-8 h-8 mx-auto mb-4" />
-                                            <p className="text-lg font-black uppercase tracking-widest italic">{auditStatus} Protocol Initiated</p>
+                                            <p className="text-sm font-bold uppercase tracking-widest">{auditStatus} Processed</p>
                                         </motion.div>
                                     )}
 
                                     {showRejectModal && (
-                                        <div className="space-y-4 bg-rose-50 p-6 rounded-3xl border border-rose-100">
-                                            <h4 className="text-xs font-black text-rose-500 uppercase tracking-widest">Reason for Rejection</h4>
+                                        <div className="space-y-3 bg-rose-50 p-5 rounded-xl border border-rose-100">
+                                            <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Rejection Reason</h4>
                                             <textarea
-                                                className="w-full h-24 rounded-xl border border-rose-200 p-3 text-xs font-bold text-rose-800"
-                                                placeholder="Enter conformance violation details..."
+                                                className="w-full h-20 rounded-lg border border-rose-200 p-2 text-xs font-medium"
+                                                placeholder="Compliance violation details..."
                                                 value={rejectionReason}
                                                 onChange={e => setRejectionReason(e.target.value)}
                                             />
                                             <button
                                                 onClick={() => handleAudit('REJECTED')}
-                                                className="w-full py-3 bg-rose-500 text-white rounded-xl text-xs font-black uppercase tracking-widest"
+                                                className="w-full py-2.5 bg-rose-500 text-white rounded-lg text-xs font-bold uppercase tracking-widest"
                                             >
                                                 Confirm Rejection
                                             </button>
@@ -211,33 +189,30 @@ export default function AdminProductApproval() {
                                     )}
                                 </div>
 
-                                <div className="p-10 border-t border-slate-50 space-y-4">
-                                    <div className="flex items-center gap-4">
+                                <div className="p-8 border-t border-slate-50 space-y-3">
+                                    <div className="flex items-center gap-3">
                                         <button
                                             onClick={() => handleAudit('APPROVED')}
                                             disabled={!!auditStatus}
-                                            className="flex-1 py-5 bg-[#10367D] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                            className="flex-1 py-4 bg-black text-white rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
                                         >
-                                            <FaCheckCircle className="w-3 h-3" />
                                             Approve Asset
                                         </button>
                                         <button
                                             onClick={() => handleAudit('REJECTED')}
                                             disabled={!!auditStatus}
-                                            className="flex-1 py-5 bg-white border border-rose-100 text-rose-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                            className="flex-1 py-4 bg-white border border-rose-100 text-rose-500 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-rose-50 transition-all disabled:opacity-50"
                                         >
-                                            <FaTimesCircle className="w-3 h-3" />
                                             Reject with Reason
                                         </button>
                                     </div>
-                                    <p className="text-[8px] font-black text-slate-400 text-center uppercase tracking-widest">Decision triggers immediate automated email notification to manufacturer.</p>
+                                    <p className="text-[8px] font-medium text-slate-400 text-center uppercase tracking-widest">This action notifies the manufacturer immediately.</p>
                                 </div>
                             </motion.div>
                         ) : (
-                            <div className="h-full bg-slate-50/30 rounded-[3.5rem] border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-center p-12">
-                                <FaExclamationCircle className="w-16 h-16 text-slate-200 mb-6" />
-                                <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest italic">Select Entity for Audit</h3>
-                                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-2 max-w-[200px]">Commence governance review by choosing a pending submission.</p>
+                            <div className="h-full bg-slate-50/50 rounded-[20px] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center p-12">
+                                <FaExclamationCircle className="w-12 h-12 text-slate-200 mb-4" />
+                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Select Item to Audit</h3>
                             </div>
                         )}
                     </AnimatePresence>

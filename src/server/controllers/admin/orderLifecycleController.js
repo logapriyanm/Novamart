@@ -1,3 +1,4 @@
+import prisma from '../../lib/prisma.js';
 import orderService from '../../services/order.js';
 
 /**
@@ -38,7 +39,27 @@ export const auditInventory = async (req, res) => {
     }
 };
 
+/**
+ * Global Order View
+ */
+export const getAllOrders = async (req, res) => {
+    try {
+        const orders = await prisma.order.findMany({
+            include: {
+                customer: { select: { name: true, email: true } },
+                dealer: { select: { businessName: true } },
+                items: { include: { linkedProduct: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_ORDERS' });
+    }
+};
+
 export default {
     updateOrderStatus,
-    auditInventory
+    auditInventory,
+    getAllOrders
 };

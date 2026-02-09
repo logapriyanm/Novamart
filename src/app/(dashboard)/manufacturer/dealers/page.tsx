@@ -15,11 +15,32 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 
-const approvedDealers = [
-    { id: 'DLR-8801', name: 'Elite Electronics Mumbai', location: 'Andheri, Mumbai', volume: '₹12.4L', returns: '0.2%', rating: 4.8, status: 'Active' },
-    { id: 'DLR-8802', name: 'South Tech Solutions', location: 'Bangalore, KA', volume: '₹8.1L', returns: '1.5%', rating: 4.5, status: 'Under Review' },
-    { id: 'DLR-8803', name: 'Capital Appliance Hub', location: 'New Delhi', volume: '₹15.2L', returns: '0.5%', rating: 4.9, status: 'Active' },
-];
+const [approvedDealers, setApprovedDealers] = React.useState<any[]>([]);
+const [isLoading, setIsLoading] = React.useState(true);
+
+React.useEffect(() => {
+    const fetchDealers = async () => {
+        try {
+            // Endpoint confirmed in manufacturerRoutes.js: router.get('/network', ...)
+            const data = await import('../../../../lib/api/client').then(m => m.apiClient.get<any[]>('/manufacturer/network'));
+            const mapped = data.map(d => ({
+                id: d.id,
+                name: d.businessName,
+                location: `${d.city || 'Unknown'}, ${d.state || ''}`,
+                volume: '₹0.0L', // Placeholder
+                returns: '0%', // Placeholder
+                rating: d.averageRating || 5.0,
+                status: d.isVerified ? 'Active' : 'Pending'
+            }));
+            setApprovedDealers(mapped);
+        } catch (error) {
+            console.error('Failed to fetch dealers', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchDealers();
+}, []);
 
 export default function DealerRelationshipPortal() {
     return (

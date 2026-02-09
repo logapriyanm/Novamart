@@ -3,7 +3,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 export const Card = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => (
-    <div className={`bg-surface border border-primary/5 rounded-3xl p-6 shadow-xl shadow-primary/5 ${className}`}>
+    <div className={`bg-surface border border-foreground/10 rounded-[10px] p-6 shadow-sm ${className}`}>
         {children}
     </div>
 );
@@ -33,14 +33,14 @@ export const StatusBadge = ({ status }: { status: string }) => {
     };
 
     return (
-        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border uppercase tracking-wider ${getStyles()}`}>
+        <span className={`px-2.5 py-1 rounded-[10px] text-[10px] font-bold border uppercase tracking-wider ${getStyles()}`}>
             {status.replace(/_/g, ' ')}
         </span>
     );
 };
 
 export const WhiteCard = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => (
-    <div className={`bg-surface rounded-[2.5rem] border border-foreground/5 shadow-sm shadow-primary/5 ${className}`}>
+    <div className={`bg-white rounded-[10px] border border-foreground/10 shadow-sm ${className}`}>
         {children}
     </div>
 );
@@ -48,7 +48,7 @@ export const WhiteCard = ({ children, className = '' }: { children: React.ReactN
 export const StatsCard = ({ icon: Icon, label, value, colorClass }: { icon: any, label: string, value: string | number, colorClass: string }) => (
     <WhiteCard className="p-6">
         <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${colorClass} bg-opacity-10 shadow-sm`}>
+            <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${colorClass} bg-opacity-10 shadow-sm`}>
                 <Icon className={`w-5 h-5 ${colorClass.replace('bg-', 'text-')}`} />
             </div>
             <div>
@@ -71,7 +71,7 @@ export const TrackingBadge = ({ status }: { status: string }) => {
         }
     };
     return (
-        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getColors()}`}>
+        <span className={`px-4 py-1.5 rounded-[10px] text-[9px] font-bold uppercase tracking-widest ${getColors()}`}>
             {status}
         </span>
     );
@@ -87,7 +87,7 @@ export const Stepper = ({ currentStep }: { currentStep: number }) => {
             <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-                className="absolute top-1/2 left-0 h-0.5 bg-primary -translate-y-1/2"
+                className="absolute top-1/2 left-0 h-0.5 bg-black -translate-y-1/2"
             />
 
             {steps.map((step, idx) => {
@@ -98,14 +98,14 @@ export const Stepper = ({ currentStep }: { currentStep: number }) => {
                         <motion.div
                             initial={false}
                             animate={{
-                                backgroundColor: isCompleted || isActive ? 'var(--primary)' : 'var(--surface)',
-                                scale: isActive ? 1.2 : 1
+                                backgroundColor: isCompleted || isActive ? '#000000' : '#F8FAFC',
+                                scale: isActive ? 1.1 : 1
                             }}
-                            className={`w-4 h-4 rounded-full flex items-center justify-center border-4 border-background shadow-sm`}
+                            className={`w-3 h-3 rounded-[10px] flex items-center justify-center border-2 border-white shadow-sm`}
                         >
-                            {isCompleted && <FaCheckCircle className="text-background w-2 h-2" />}
+                            {isCompleted && <FaCheckCircle className="text-white w-2 h-2" />}
                         </motion.div>
-                        <span className={`text-[9px] font-black uppercase tracking-widest ${isActive ? 'text-primary' : 'text-foreground/40'}`}>
+                        <span className={`text-[9px] font-bold uppercase tracking-widest ${isActive ? 'text-black' : 'text-foreground/40'}`}>
                             {step}
                         </span>
                     </div>

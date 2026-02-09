@@ -26,14 +26,14 @@ const features = [
 
 export default function WhyNovaMart() {
     return (
-        <section className="py-20 bg-background rounded-[3rem] border border-primary/5 shadow-sm overflow-hidden">
+        <section className="py-20 bg-white rounded-[10px] border border-foreground/10 overflow-hidden">
             <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
                 <div className="text-center max-w-3xl mx-auto mb-16">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-[10px] font-black uppercase tracking-widest text-primary mb-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/5 border border-foreground/10 text-[10px] font-black uppercase tracking-widest text-black mb-4">
                         Platform Governance
                     </div>
-                    <h2 className="text-4xl lg:text-5xl font-black text-foreground tracking-tight mb-6">
-                        Why the world trusts <span className="text-primary">NovaMart</span>
+                    <h2 className="text-4xl lg:text-5xl font-black text-black tracking-tight mb-6 uppercase italic">
+                        Why the world trusts <span className="text-black/40">NovaMart</span>
                     </h2>
                     <p className="text-foreground/60 font-medium italic">
                         "Building India's most secure digital bridge between manufacturers and global consumers."
@@ -42,8 +42,8 @@ export default function WhyNovaMart() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {features.map((feature, idx) => (
-                        <div key={idx} className="p-8 rounded-[2rem] bg-surface border border-foreground/5 hover:border-primary/20 transition-all duration-300 group">
-                            <div className="w-14 h-14 rounded-2xl bg-background shadow-sm flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-background transition-all duration-300">
+                        <div key={idx} className="p-8 rounded-[10px] bg-white border border-foreground/10 hover:border-black/20 transition-all duration-300 group">
+                            <div className="w-14 h-14 rounded-[10px] bg-black/5 flex items-center justify-center text-black mb-6 group-hover:bg-black group-hover:text-white transition-all duration-300">
                                 <feature.icon className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-black text-foreground mb-4">{feature.title}</h3>

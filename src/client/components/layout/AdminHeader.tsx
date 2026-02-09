@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { FaBell, FaSearch } from 'react-icons/fa';
+import UserDropdown from './UserDropdown';
 
 export default function AdminHeader() {
     return (
@@ -10,7 +11,7 @@ export default function AdminHeader() {
                 {/* Left: Branding (Mobile mostly) */}
                 <div className="lg:hidden flex items-center gap-3">
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1 shadow-md border border-foreground/[0.03]">
-                        <img src="/logo.png" alt="N" className="w-full h-full object-contain" />
+                        <img src="/assets/Novamart.png" alt="N" className="w-full h-full object-contain" />
                     </div>
                     <span className="text-sm font-black text-foreground tracking-tighter">NovaMart</span>
                 </div>
@@ -35,20 +36,7 @@ export default function AdminHeader() {
                         <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full border-2 border-surface"></span>
                     </button>
 
-                    {/* User Profile */}
-                    <div className="flex items-center gap-3 pl-4 border-l border-foreground/5">
-                        <div className="text-right hidden sm:block">
-                            <p className="text-sm font-bold text-foreground leading-none">Sarah Connor</p>
-                            <p className="text-[10px] text-foreground/40 font-black uppercase tracking-widest mt-1">Super Admin</p>
-                        </div>
-                        <div className="w-10 h-10 rounded-xl bg-background flex items-center justify-center overflow-hidden border border-foreground/5">
-                            <img
-                                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150"
-                                alt="Sarah Connor"
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                    </div>
+                    <UserDropdown />
                 </div>
             </div>
         </div>

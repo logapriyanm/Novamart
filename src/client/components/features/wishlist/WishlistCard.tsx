@@ -33,17 +33,17 @@ export default function WishlistCard({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="group bg-white rounded-3xl p-4 border border-slate-100 hover:border-blue-100 hover:shadow-xl transition-all duration-300 relative flex flex-col h-full"
+            className="group bg-white rounded-[10px] p-4 border border-foreground/5 hover:border-black/10 hover:shadow-xl transition-all duration-300 relative flex flex-col h-full"
         >
             {/* Badges */}
             <div className="absolute top-4 left-4 z-10 flex gap-2">
                 {status === 'Price Dropped' && (
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-[9px] font-black uppercase tracking-widest rounded-lg">
+                    <span className="px-2 py-1 bg-green-500/10 text-green-600 text-[9px] font-black uppercase tracking-widest rounded-[5px]">
                         Price Dropped
                     </span>
                 )}
                 {status === 'Low Stock' && (
-                    <span className="px-2 py-1 bg-amber-100 text-amber-700 text-[9px] font-black uppercase tracking-widest rounded-lg">
+                    <span className="px-2 py-1 bg-amber-500/10 text-amber-600 text-[9px] font-black uppercase tracking-widest rounded-[5px]">
                         Low Stock
                     </span>
                 )}
@@ -55,7 +55,7 @@ export default function WishlistCard({
             </button>
 
             {/* Image */}
-            <div className="aspect-[4/3] mb-4 relative flex items-center justify-center bg-slate-50/50 rounded-2xl overflow-hidden p-4">
+            <div className="aspect-[4/3] mb-4 relative flex items-center justify-center bg-background rounded-[10px] overflow-hidden p-4">
                 <OptimizedImage
                     src={image}
                     alt={name}
@@ -70,19 +70,19 @@ export default function WishlistCard({
                 <div className="mb-2">
                     <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{brand}</div>
                     <Link href={`/products/${id}`} className="block">
-                        <h3 className="text-sm font-black text-slate-800 leading-snug hover:text-blue-600 transition-colors line-clamp-2">
+                        <h3 className="text-sm font-black text-black leading-snug hover:text-black/60 transition-colors line-clamp-2 italic uppercase">
                             {name}
                         </h3>
                     </Link>
                 </div>
 
-                <div className="mt-auto pt-4 border-t border-slate-100">
+                <div className="mt-auto pt-4 border-t border-foreground/5">
                     <div className="flex items-center gap-2 mb-4">
-                        <span className="text-xs font-bold text-slate-400">Starting at</span>
-                        <span className="text-lg font-black text-blue-600">₹{price.toLocaleString()}</span>
+                        <span className="text-[10px] font-black text-foreground/20 uppercase tracking-widest">Starting at</span>
+                        <span className="text-lg font-black text-black italic">₹{price.toLocaleString()}</span>
                     </div>
 
-                    <button className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <button className="w-full py-3 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-black/20 active:scale-95 transition-all flex items-center justify-center gap-2 italic">
                         <FaShoppingCart className="w-3.5 h-3.5" />
                         Buy Now
                     </button>

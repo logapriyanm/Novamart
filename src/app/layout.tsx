@@ -10,11 +10,12 @@ import { CartProvider } from '../client/context/CartContext';
 import { SnackbarProvider } from '../client/context/SnackbarContext';
 import { NotificationProvider } from '../client/context/NotificationContext';
 import { TrackingProvider } from '../client/context/TrackingContext';
+import FCMHandler from '../client/components/utils/FCMHandler';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'Novamart | B2B2C E-commerce Platform',
+    title: 'NovaMart | B2B2C E-commerce Platform',
     description: 'Enterprise-grade B2B2C connection platform with escrow and dispute resolution.',
 };
 

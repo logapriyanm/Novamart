@@ -1,5 +1,8 @@
 import { Notification } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
+import emailService from './emailService.js';
+import firebaseAdmin from '../lib/firebaseAdmin.js';
+import prisma from '../lib/prisma.js';
 
 class NotificationService {
     constructor() {
@@ -42,8 +45,14 @@ class NotificationService {
      * Centralized Sending Logic
      */
     async sendNotification({ userId, type, title, message, metadata = {}, channels = ['IN_APP', 'EMAIL', 'PUSH'] }) {
-        console.log(`[NotificationService] Sending ${type} to ${userId}: ${title}`);
+        console.log(`[NotificationService] Processing ${type} for ${userId}`);
         const results = {};
+
+        // Fetch User to get FCM token and Contact Info
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { fcmToken: true, email: true, phone: true }
+        });
 
         // 1. Mandatory In-App Log (MongoDB)
         if (channels.includes('IN_APP')) {
@@ -57,32 +66,56 @@ class NotificationService {
                 });
                 results.inApp = { success: true, id: notify.id };
 
-                // Real-time Socket Emitting
                 if (this.io) {
-                    // Emit to specific user room (assuming room name is userId as standard practice)
-                    // Or iterate sockets. For scalability we should have user rooms.
-                    // In index.js we didn't explicitly join user room yet, checking...
-                    // "socket.join(roomId)" is for chat.
-                    // We need to ensure users join a room named with their userID on connection.
-                    // I will update index.js later to user logic: socket.join(socket.user.id);
                     this.io.to(userId).emit('notification:new', notify);
                 }
-
             } catch (error) {
                 console.error('In-App Notification DB Error:', error);
             }
         }
 
-        // 2. Email (Mock AWS SES)
-        if (channels.includes('EMAIL')) {
-            console.log(`[SIMULATED EMAIL] To: ${userId} | Sub: ${title} | Body: ${message}`);
-            results.email = { success: true };
+        // 2. Push Notification (Firebase) - PRIORITY 1
+        if (channels.includes('PUSH') && user?.fcmToken) {
+            try {
+                const pushResult = await firebaseAdmin.messaging().send({
+                    token: user.fcmToken,
+                    notification: { title, body: message },
+                    data: { ...metadata, type }
+                });
+                results.push = { success: true, messageId: pushResult.messageId };
+            } catch (error) {
+                console.error('Push Notification Error:', error);
+                results.push = { success: false, error: error.message };
+            }
         }
 
-        // 3. Push (Mock Firebase)
-        if (channels.includes('PUSH')) {
-            console.log(`[SIMULATED PUSH] To: ${userId} | Title: ${title} | Msg: ${message}`);
-            results.push = { success: true };
+        // 3. Email (AWS SES / SMTP) - PRIORITY 2
+        if (channels.includes('EMAIL') && user?.email) {
+            try {
+                const emailResult = await emailService.sendEmail(user.email, {
+                    subject: title,
+                    html: `<h3>${title}</h3><p>${message}</p>`
+                });
+                results.email = emailResult;
+            } catch (error) {
+                console.error('Email Notification Error:', error);
+                results.email = { success: false, error: error.message };
+            }
+        }
+
+        // 4. WhatsApp (Restricted Priority) - PRIORITY 3
+        if (channels.includes('WHATSAPP') && user?.phone) {
+            // Restriction check: Only for high-trust transaction alerts
+            const allowedTypes = ['OTP', 'ORDER', 'PAYMENT', 'SECURITY'];
+            if (allowedTypes.includes(type)) {
+                console.log(`--- [WHATSAPP OUTGOING] ---`);
+                console.log(`To: ${user.phone}`);
+                console.log(`Msg: ${message}`);
+                console.log('---------------------------');
+                results.whatsapp = { success: true };
+            } else {
+                console.warn(`[NotificationService] WhatsApp blocked for type: ${type}`);
+            }
         }
 
         return results;
@@ -92,22 +125,25 @@ class NotificationService {
 
     async handleOrderPlaced({ order, customerId, dealerId }) {
         console.log('[NotificationService] handleOrderPlaced triggered', { orderId: order?.id, customerId, dealerId });
-        // Notify Customer
+
+        // Notify Customer (Priority: WhatsApp + Email + Push)
         await this.sendNotification({
             userId: customerId,
             type: 'ORDER',
-            title: 'Order Placed',
-            message: `Your order #${order.id.slice(-8)} has been placed successfully and is in escrow.`,
-            metadata: { orderId: order.id }
+            title: 'Order Confirmed - NovaMart',
+            message: `Order #${order.id.slice(-8)} placed! Secured by NovaEscrow.`,
+            metadata: { orderId: order.id },
+            channels: ['WHATSAPP', 'EMAIL', 'PUSH', 'IN_APP']
         });
 
-        // Notify Dealer
+        // Notify Dealer (Priority: Push + In-App)
         await this.sendNotification({
             userId: dealerId,
             type: 'ORDER',
             title: 'New Incoming Order',
             message: `A new order #${order.id.slice(-8)} is awaiting fulfillment.`,
-            metadata: { orderId: order.id }
+            metadata: { orderId: order.id },
+            channels: ['PUSH', 'IN_APP']
         });
     }
 
@@ -137,7 +173,8 @@ class NotificationService {
             type: 'DELIVERY',
             title: 'Order Delivered',
             message: `Your order #${orderId.slice(-8)} has been delivered. Please verify to release funds.`,
-            metadata: { orderId }
+            metadata: { orderId },
+            channels: ['IN_APP', 'PUSH'] // Delivered is already high visible via push
         });
     }
 

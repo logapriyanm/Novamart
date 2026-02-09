@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Sidebar from '../../../client/components/layout/Sidebar';
 import { FaBell as Bell, FaSearch as Search, FaShieldAlt as ShieldCheck, FaBars as Menu, FaQuestionCircle } from 'react-icons/fa';
 import RoleGuard from '../../../client/components/features/auth/RoleGuard';
+import UserDropdown from '../../../client/components/layout/UserDropdown';
 import { Role } from '../../../lib/api/contract';
 
 export default function DealerLayout({
@@ -72,15 +73,7 @@ export default function DealerLayout({
                                 <FaQuestionCircle className="w-5 h-5 text-foreground/60" />
                             </button>
 
-                            <div className="flex items-center gap-3 pl-4 border-l border-foreground/5">
-                                <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-black text-foreground">Apex Distributors</p>
-                                    <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Premium Dealer</p>
-                                </div>
-                                <button className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-foreground/5 hover:ring-primary transition-all">
-                                    <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?q=80&w=100&auto=format&fit=crop" alt="Merchant" className="w-full h-full object-cover" />
-                                </button>
-                            </div>
+                            <UserDropdown />
                         </div>
                     </header>
 

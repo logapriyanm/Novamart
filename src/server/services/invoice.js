@@ -15,7 +15,7 @@ class InvoiceService {
             include: {
                 customer: { include: { user: true } },
                 dealer: { include: { user: true } },
-                items: { include: { product: true } }
+                items: { include: { linkedProduct: true } }
             }
         });
 
@@ -37,7 +37,7 @@ class InvoiceService {
                 dealerAddress: order.dealer.businessAddress
             },
             items: order.items.map(item => ({
-                name: item.product.name,
+                name: item.linkedProduct.name,
                 hsn: "8481", // Mock HSN code
                 quantity: item.quantity,
                 unitPrice: Number(item.price),

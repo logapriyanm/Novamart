@@ -14,6 +14,7 @@ import DeliveryPartners from '@/client/components/features/home/DeliveryPartners
 import OccasionBanner from '@/client/components/features/home/OccasionBanner';
 import RecommendedProducts from '@/client/components/features/home/RecommendedProducts';
 import PromotionStrip from '@/client/components/features/home/PromotionStrip';
+import BestsellerSlider from '@/client/components/features/home/BestsellerSlider';
 import { useAuth } from '@/client/hooks/useAuth';
 
 export default function Home() {
@@ -23,12 +24,18 @@ export default function Home() {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch personalized data (will work if logged in, otherwise might return default/empty)
-                // We can check auth token presence or just try fetching.
-                if (localStorage.getItem('token')) {
-                    const res = await import('@/lib/api/client').then(m => m.apiClient.get('/home/personalized')) as any;
-                    if (res.success) {
-                        setPersonalizedData(res.data);
+                const token = localStorage.getItem('token');
+
+                if (token && user) {
+                    // Fetch personalized data for logged-in users
+                    try {
+                        const res = await import('@/lib/api/client').then(m => m.apiClient.get('/home/personalized')) as any;
+                        if (res.success || res.data) {
+                            setPersonalizedData(res.data || res);
+                        }
+                    } catch (error: any) {
+                        // If personalized fails, silently continue (user will see default content)
+                        console.log('Personalized data not available, showing default content');
                     }
                 }
             } catch (error) {
@@ -36,7 +43,7 @@ export default function Home() {
             }
         };
         fetchData();
-    }, []);
+    }, [user]);
 
     return (
         <div className="min-h-screen bg-[#F1F5F9]/50 pt-40 pb-20">
@@ -44,46 +51,60 @@ export default function Home() {
                 {/* Main Content */}
                 <main className="space-y-12">
                     <HeroSection />
+                    <BrandSpotlight />
 
-                    {personalizedData?.specialDay && (
-                        <OccasionBanner
-                            type={personalizedData.specialDay.type}
-                            discount={personalizedData.specialDay.discount}
-                            userName={user?.name || 'User'}
-                        />
+                    <TrendingBar />
+                    <BestsellerSlider />
+
+
+                    {user && (
+                        <>
+                            {personalizedData?.specialDay && (
+                                <OccasionBanner
+                                    type={personalizedData.specialDay.type}
+                                    discount={personalizedData.specialDay.discount}
+                                    userName={user?.name || 'User'}
+                                />
+                            )}
+
+                            {personalizedData?.hero && personalizedData.hero.product && (
+                                <RecommendedProducts
+                                    title={`Top Pick for You: ${personalizedData.hero.category}`}
+                                    products={[personalizedData.hero.product]}
+                                />
+                            )}
+
+                            {personalizedData?.continueViewing && personalizedData.continueViewing.length > 0 && (
+                                <RecommendedProducts
+                                    title="Continue Where You Left Off"
+                                    products={personalizedData.continueViewing}
+                                />
+                            )}
+
+                            {personalizedData?.recommended && personalizedData.recommended.length > 0 && (
+                                <RecommendedProducts
+                                    title="Recommended for You"
+                                    products={personalizedData.recommended}
+                                />
+                            )}
+
+
+                        </>
                     )}
 
                     <TrustStrip />
-                    <TrendingBar />
-
-                    {personalizedData?.hero && personalizedData.hero.product && (
-                        <RecommendedProducts
-                            title={`Top Pick for You: ${personalizedData.hero.category}`}
-                            products={[personalizedData.hero.product]}
-                        />
-                    )}
-
-                    {personalizedData?.continueViewing && personalizedData.continueViewing.length > 0 && (
-                        <RecommendedProducts
-                            title="Continue Where You Left Off"
-                            products={personalizedData.continueViewing}
-                        />
-                    )}
-
-                    <BrandSpotlight />
-
-                    {personalizedData?.recommended && personalizedData.recommended.length > 0 && (
-                        <RecommendedProducts
-                            title="Recommended for You"
-                            products={personalizedData.recommended}
-                        />
-                    )}
-
                     <FeaturedProducts />
                     <CategoryGrid />
-                    <WhyNovaMart />
-                    <ManufacturersGrid />
-                    <Testimonials />
+
+                    {/* Guest-only Trust Components */}
+                    {!user && (
+                        <>
+                            <WhyNovaMart />
+                            <ManufacturersGrid />
+                            <Testimonials />
+                        </>
+                    )}
+
                 </main>
             </div>
             <DeliveryPartners />

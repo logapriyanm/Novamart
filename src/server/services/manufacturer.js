@@ -11,6 +11,20 @@ class ManufacturerService {
      */
     async handleDealerRequest(mfgId, dealerId, status) {
         return await prisma.$transaction(async (tx) => {
+            const requestStatus = status === 'APPROVED' ? 'APPROVED' : 'REJECTED';
+
+            // 1. Update the DealerRequest record
+            await tx.dealerRequest.update({
+                where: {
+                    dealerId_manufacturerId: {
+                        dealerId,
+                        manufacturerId: mfgId
+                    }
+                },
+                data: { status: requestStatus }
+            });
+
+            // 2. If approved, connect in the many-to-many relation
             if (status === 'APPROVED') {
                 await tx.manufacturer.update({
                     where: { id: mfgId },
@@ -27,19 +41,62 @@ class ManufacturerService {
                 });
             }
 
-            return { mfgId, dealerId, status };
+            return { mfgId, dealerId, status: requestStatus };
+        });
+    }
+
+    /**
+     * Get pending or processed dealer requests for a manufacturer.
+     */
+    async getDealerRequests(mfgId, statusFilter = 'PENDING') {
+        return await prisma.dealerRequest.findMany({
+            where: {
+                manufacturerId: mfgId,
+                status: statusFilter
+            },
+            include: {
+                dealer: {
+                    include: {
+                        user: {
+                            select: {
+                                email: true,
+                                phone: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
         });
     }
 
     /**
      * Allocate product stock to a specific dealer/region.
      */
-    async allocateStock(productId, dealerId, region, quantity, price) {
+    async allocateStock(mfgId, productId, dealerId, region, quantity, price) {
+        // 1. Verify Product Ownership
+        const product = await prisma.product.findUnique({
+            where: { id: productId }
+        });
+
+        if (!product || product.manufacturerId !== mfgId) {
+            throw new Error('UNAUTHORIZED_PRODUCT_ALLOCATION');
+        }
+
+        // 2. Verify Dealer is in network
+        const manufacturer = await prisma.manufacturer.findUnique({
+            where: { id: mfgId },
+            include: { dealersApproved: true }
+        });
+
+        const isApproved = manufacturer.dealersApproved.some(d => d.id === dealerId);
+        if (!isApproved) {
+            throw new Error('DEALER_NOT_IN_NETWORK');
+        }
+
         return await prisma.inventory.upsert({
             where: {
-                // Since productId + dealerId + region is a logical unique constraint for supply chain
-                // We'll use a findFirst or handle via composite key if schema allows.
-                // For now, looking for existing record.
+                // Using findFirst to avoid composite key complexity if not defined
                 id: (await prisma.inventory.findFirst({
                     where: { productId, dealerId, region }
                 }))?.id || 'temp-id'
@@ -59,7 +116,7 @@ class ManufacturerService {
                 dealer: { approvedBy: { some: { id: mfgId } } },
                 status: 'SETTLED'
             },
-            include: { items: { include: { product: true } } }
+            include: { items: { include: { linkedProduct: true } } }
         });
 
         // Calculate Revenue, Volumes, and Regional distribution
@@ -68,11 +125,16 @@ class ManufacturerService {
         const productStats = {};
 
         for (const order of orders) {
-            totalRevenue += Number(order.totalAmount);
             for (const item of order.items) {
-                const region = order.items[0]?.product?.category; // Simplified regional proxy for now
-                regionalSales[region] = (regionalSales[region] || 0) + Number(item.price) * item.quantity;
-                productStats[item.productId] = (productStats[item.productId] || 0) + item.quantity;
+                // Only count items belonging to this manufacturer
+                if (item.linkedProduct.manufacturerId === mfgId) {
+                    const lineTotal = Number(item.price) * item.quantity;
+                    totalRevenue += lineTotal;
+
+                    const region = item.linkedProduct.category; // Using category as proxy for region
+                    regionalSales[region] = (regionalSales[region] || 0) + lineTotal;
+                    productStats[item.productId] = (productStats[item.productId] || 0) + item.quantity;
+                }
             }
         }
 
@@ -92,17 +154,37 @@ class ManufacturerService {
     async getCreditStatus(mfgId) {
         const escrows = await prisma.escrow.findMany({
             where: {
-                order: { items: { some: { product: { manufacturerId: mfgId } } } },
+                order: { items: { some: { linkedProduct: { manufacturerId: mfgId } } } },
                 status: { in: ['HOLD', 'FROZEN'] }
+            },
+            include: {
+                order: {
+                    include: {
+                        items: {
+                            where: { linkedProduct: { manufacturerId: mfgId } }
+                        }
+                    }
+                }
             }
         });
 
-        const pendingSettle = escrows.reduce((sum, e) => sum + Number(e.amount), 0);
+        // Sum up only the portions of these escrows belonging to the manufacturer
+        let pendingSettle = 0;
+        let frozenCount = 0;
+
+        for (const escrow of escrows) {
+            for (const item of escrow.order.items) {
+                pendingSettle += Number(item.price) * item.quantity;
+            }
+            if (escrow.status === 'FROZEN') {
+                frozenCount++;
+            }
+        }
 
         return {
             pendingSettlement: pendingSettle,
             activeHoldRecords: escrows.length,
-            frozenCount: escrows.filter(e => e.status === 'FROZEN').length
+            frozenCount
         };
     }
 

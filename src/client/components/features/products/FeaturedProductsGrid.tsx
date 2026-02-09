@@ -42,7 +42,12 @@ export default function FeaturedProductsGrid({ columns = 4, filters }: FeaturedP
                     if (filters.usageType?.length) params.usageType = filters.usageType.join(',');
                     if (filters.warranty?.length) params.warranty = filters.warranty.join(',');
                     if (filters.isSmart) params.isSmart = 'true';
+                    if (filters.subCategory) params.subCategory = filters.subCategory;
+                    // Note: Category slug is usually handled by the parent layout or route
                 }
+
+                // If on a category page, we might have categorySlug prop, but here it's implicit in filters or passed via useParams in parent
+                // For global products page, it uses query params.
 
                 const data = await apiClient.get<any[]>('/products', { params });
 

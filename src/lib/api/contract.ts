@@ -98,6 +98,6 @@ export const ENDPOINTS = {
     },
     PUBLIC: {
         PRODUCTS: '/products',
-        CATEGORIES: '/categories',
+        CATEGORIES: '/products/categories',
     },
 } as const;

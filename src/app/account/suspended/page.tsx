@@ -14,7 +14,7 @@ export default function SuspendedPage() {
 
                 <h1 className="text-3xl font-bold text-[#1E293B] mb-2">Account Suspended</h1>
                 <p className="text-[#1E293B]/60 text-sm font-medium mb-8 leading-relaxed">
-                    Your access to Novamart has been restricted due to a policy violation or governance audit. Please contact our support team to appeal this decision.
+                    Your access to NovaMart has been restricted due to a policy violation or governance audit. Please contact our support team to appeal this decision.
                 </p>
 
                 <div className="grid grid-cols-1 gap-3">

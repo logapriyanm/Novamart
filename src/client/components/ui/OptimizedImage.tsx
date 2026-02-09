@@ -13,6 +13,21 @@ interface OptimizedImageProps extends Omit<CldImageProps, 'src'> {
  * Falls back to standard img if src is not a Cloudinary ID (optional logic can be added).
  */
 const OptimizedImage: React.FC<OptimizedImageProps> = (props) => {
+    const isExternal = props.src?.startsWith('http');
+
+    if (isExternal) {
+        return (
+            <img
+                src={props.src}
+                alt={props.alt}
+                width={props.width as number}
+                height={props.height as number}
+                loading="lazy"
+                className={props.className}
+            />
+        );
+    }
+
     return (
         <CldImage
             {...props}

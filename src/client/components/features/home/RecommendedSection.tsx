@@ -5,10 +5,6 @@ import { motion } from 'framer-motion';
 import { FaHeart, FaShoppingCart } from 'react-icons/fa';
 import Link from 'next/link';
 
-interface RecommendedSectionProps {
-    data: any[];
-}
-
 import CustomerProductCard from '../../ui/CustomerProductCard';
 
 interface RecommendedSectionProps {
@@ -30,20 +26,34 @@ export default function RecommendedSection({ data }: RecommendedSectionProps) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {data.map((product) => (
-                    <CustomerProductCard
-                        key={product.id}
-                        {...product}
-                        // Adapter for mismatched property names if necessary
-                        image={product.images?.[0] || 'https://via.placeholder.com/300'}
-                        price={parseFloat(product.basePrice)}
-                        rating={4.5} // Placeholder
-                        reviewsCount={120} // Placeholder
-                        brand={product.manufacturer?.companyName || 'NovaMart'}
-                        seller={{ name: 'Verified Seller', isVerified: true }}
-                        highlights={{ freeDelivery: true, installation: false, warranty: '1 Year' }}
-                    />
-                ))}
+                {data.map((product) => {
+                    const bestInventory = product.inventory?.[0];
+                    const displayPrice = bestInventory?.price ? parseFloat(bestInventory.price) : parseFloat(product.basePrice);
+
+                    return (
+                        <CustomerProductCard
+                            key={product.id}
+                            id={product.id}
+                            inventoryId={bestInventory?.id} // Critical for Add to Cart
+                            name={product.name}
+                            image={product.images?.[0] || '/assets/Novamart.png'} // Fallback to logo
+                            price={displayPrice}
+                            rating={product.averageRating || 4.5}
+                            reviewsCount={product.reviewCount || 120}
+                            brand={product.manufacturer?.companyName || 'NovaMart'}
+                            seller={{
+                                id: bestInventory?.dealerId, // Critical for Add to Cart
+                                name: bestInventory?.dealer?.businessName || 'NovaMart Official',
+                                isVerified: product.manufacturer?.isVerified || true
+                            }}
+                            highlights={{
+                                freeDelivery: true,
+                                installation: product.category === 'Appliances',
+                                warranty: product.specifications?.warranty || '1 Year Manufacturer Warranty'
+                            }}
+                        />
+                    );
+                })}
             </div>
         </section>
     );

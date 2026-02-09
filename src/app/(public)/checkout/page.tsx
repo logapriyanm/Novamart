@@ -119,17 +119,17 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between max-w-4xl mx-auto mb-12 relative">
                     <div className="absolute top-1/2 left-0 w-full h-0.5 bg-foreground/5 -translate-y-1/2" />
                     <div
-                        className="absolute top-1/2 left-0 h-0.5 bg-primary -translate-y-1/2 transition-all duration-500"
+                        className="absolute top-1/2 left-0 h-0.5 bg-black -translate-y-1/2 transition-all duration-500"
                         style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
                     />
 
                     {steps.map((s) => (
                         <div key={s.id} className="relative z-10 flex flex-col items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-300 border-2 ${step >= s.id ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-white border-foreground/10 text-foreground/20'
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-300 border-2 ${step >= s.id ? 'bg-black border-black text-white shadow-lg shadow-black/20' : 'bg-white border-foreground/10 text-foreground/20'
                                 }`}>
                                 {step > s.id ? <HiOutlineCheckCircle className="w-6 h-6" /> : s.id}
                             </div>
-                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${step >= s.id ? 'text-primary' : 'text-foreground/20'}`}>
+                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${step >= s.id ? 'text-black' : 'text-foreground/20'}`}>
                                 {s.label}
                             </span>
                         </div>
@@ -140,20 +140,20 @@ export default function CheckoutPage() {
                     {/* Left Side: Checkout Form */}
                     <div className="lg:col-span-8 space-y-10">
                         <header>
-                            <h1 className="text-5xl font-black text-foreground tracking-tight mb-4 italic">Secure <span className="text-primary">Escrow Checkout</span></h1>
+                            <h1 className="text-5xl font-black text-foreground tracking-tight mb-4 italic uppercase">Secure <span className="text-black">Escrow Checkout</span></h1>
                             <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">Review your shipping details and proceed to secure escrow payment.</p>
                         </header>
 
                         {/* Buyer Protection Banner */}
-                        <div className="bg-primary/[0.03] border border-primary/5 rounded-[2rem] p-8 flex items-center gap-6 shadow-sm overflow-hidden relative group">
-                            <div className="absolute right-0 top-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
-                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shrink-0">
+                        <div className="bg-black/5 border border-foreground/10 rounded-[10px] p-8 flex items-center gap-6 shadow-sm overflow-hidden relative group">
+                            <div className="absolute right-0 top-0 w-32 h-32 bg-black/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
+                            <div className="w-14 h-14 bg-black/10 rounded-[10px] flex items-center justify-center text-black shrink-0">
                                 <HiOutlineShieldCheck className="w-8 h-8" />
                             </div>
                             <div className="space-y-1">
-                                <h4 className="text-[11px] font-black text-primary uppercase tracking-[0.2em]">Buyer Protection Enabled</h4>
+                                <h4 className="text-[11px] font-black text-black uppercase tracking-[0.2em] italic">Buyer Protection Enabled</h4>
                                 <p className="text-[10px] font-bold text-foreground/60 uppercase tracking-widest leading-relaxed">
-                                    Your payment is held in a <span className="text-primary font-black">Secure Escrow Account</span>. Funds are only released to the seller after you confirm receipt and inspection of your items.
+                                    Your payment is held in a <span className="text-black font-black">Secure Escrow Account</span>. Funds are only released to the seller after you confirm receipt and inspection of your items.
                                 </p>
                             </div>
                         </div>
@@ -161,12 +161,12 @@ export default function CheckoutPage() {
                         {/* Step 2: Shipping Address */}
                         <section className="space-y-6">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-2xl font-black text-foreground flex items-center gap-3">
-                                    <span className="text-primary text-3xl italic">1.</span> Shipping Address
+                                <h3 className="text-2xl font-black text-foreground flex items-center gap-3 italic uppercase">
+                                    <span className="text-black text-3xl italic">1.</span> Shipping Address
                                 </h3>
                                 <button
                                     onClick={() => setShowAddressForm(true)}
-                                    className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2 hover:opacity-70 transition-opacity"
+                                    className="text-[10px] font-black text-black uppercase tracking-[0.2em] flex items-center gap-2 hover:opacity-70 transition-opacity"
                                 >
                                     <HiOutlinePlus className="w-4 h-4" /> Add New
                                 </button>
@@ -177,17 +177,17 @@ export default function CheckoutPage() {
                                     <div
                                         key={addr.id}
                                         onClick={() => setSelectedAddressId(addr.id)}
-                                        className={`p-8 rounded-[2.5rem] border-2 transition-all cursor-pointer relative group ${selectedAddressId === addr.id ? 'border-primary bg-white shadow-xl shadow-primary/5' : 'border-foreground/5 bg-white/50 hover:border-primary/20'
+                                        className={`p-8 rounded-[10px] border-2 transition-all cursor-pointer relative group ${selectedAddressId === addr.id ? 'border-black bg-white shadow-xl shadow-black/5' : 'border-foreground/5 bg-white/50 hover:border-black/20'
                                             }`}
                                     >
                                         <div className="flex items-start justify-between mb-6">
                                             <div className="flex items-center gap-4">
-                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${selectedAddressId === addr.id ? 'bg-primary text-white' : 'bg-surface text-foreground/20'}`}>
+                                                <div className={`w-12 h-12 rounded-[5px] flex items-center justify-center ${selectedAddressId === addr.id ? 'bg-black text-white' : 'bg-surface text-foreground/20'}`}>
                                                     {addr.type === 'office' ? <HiOutlineOfficeBuilding className="w-6 h-6" /> : <HiOutlineHome className="w-6 h-6" />}
                                                 </div>
                                                 <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{addr.label}</span>
                                             </div>
-                                            {selectedAddressId === addr.id && <HiOutlineCheckCircle className="text-primary w-6 h-6" />}
+                                            {selectedAddressId === addr.id && <HiOutlineCheckCircle className="text-black w-6 h-6" />}
                                         </div>
                                         <div className="space-y-1.5 opacity-60">
                                             <p className="text-xs font-black text-foreground">{addr.name}</p>
@@ -197,7 +197,7 @@ export default function CheckoutPage() {
                                             </p>
                                         </div>
                                         <div className="mt-8 flex gap-4">
-                                            <button className="text-[9px] font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-primary transition-colors">Edit</button>
+                                            <button className="text-[9px] font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-black transition-colors">Edit</button>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -213,14 +213,14 @@ export default function CheckoutPage() {
 
                         {/* Step 3: Payment Method (Placeholder) */}
                         <section className="space-y-6">
-                            <h3 className="text-2xl font-black text-foreground flex items-center gap-3">
-                                <span className="text-primary text-3xl italic">2.</span> Payment Method
+                            <h3 className="text-2xl font-black text-foreground flex items-center gap-3 italic uppercase">
+                                <span className="text-black text-3xl italic">2.</span> Payment Method
                             </h3>
-                            <div className="bg-surface rounded-3xl p-10 border border-foreground/5">
+                            <div className="bg-surface rounded-[10px] p-10 border border-foreground/5">
                                 <p className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em] mb-4">Secure Payment Options</p>
                                 <div className="flex items-center gap-4">
-                                    <div className="bg-white p-4 rounded-xl border-2 border-primary/20 flex items-center gap-3">
-                                        <HiOutlineCreditCard className="text-primary w-5 h-5" />
+                                    <div className="bg-white p-4 rounded-[5px] border-2 border-black/20 flex items-center gap-3">
+                                        <HiOutlineCreditCard className="text-black w-5 h-5" />
                                         <span className="text-[10px] font-black uppercase tracking-widest">Razorpay Checkout</span>
                                     </div>
                                     <div className="opacity-30 grayscale pointer-events-none p-4 flex items-center gap-3">
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
                             <button
                                 onClick={handleCreateOrder}
                                 disabled={isProcessing || cart.length === 0}
-                                className="bg-primary text-white py-5 px-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-[1.05] transition-all flex items-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-black text-white py-5 px-12 rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 hover:scale-[1.05] transition-all flex items-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isProcessing ? 'Processing...' : 'Continue to Payment'}
                                 <HiOutlineArrowRight className="w-4 h-4" />
@@ -248,16 +248,16 @@ export default function CheckoutPage() {
 
                     {/* Right Side: Order Summary Sidebar */}
                     <aside className="lg:col-span-4 space-y-8">
-                        <div className="bg-white rounded-[3rem] border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02] overflow-hidden">
+                        <div className="bg-white rounded-[10px] border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02] overflow-hidden">
                             <div className="p-10 border-b border-foreground/[0.03]">
-                                <h3 className="text-xl font-black text-foreground italic uppercase tracking-tight">Order <span className="text-primary">Summary</span></h3>
+                                <h3 className="text-xl font-black text-foreground italic uppercase tracking-tight">Order <span className="text-black">Summary</span></h3>
                             </div>
 
                             <div className="p-10 space-y-8">
                                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                     {cart.map((item) => (
                                         <div key={item.id} className="flex items-center gap-6 group">
-                                            <div className="w-20 h-20 bg-background rounded-2xl p-2 flex-shrink-0 flex items-center justify-center border border-foreground/5 group-hover:border-primary/20 transition-all">
+                                            <div className="w-20 h-20 bg-background rounded-[10px] p-2 flex-shrink-0 flex items-center justify-center border border-foreground/5 group-hover:border-black/20 transition-all">
                                                 <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
                                             </div>
                                             <div className="flex-1 space-y-1">
@@ -288,9 +288,9 @@ export default function CheckoutPage() {
                                     <div className="pt-8 border-t border-foreground/[0.03] flex justify-between items-end">
                                         <div className="space-y-1">
                                             <p className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] leading-none">Total Secure Payment</p>
-                                            <p className="text-[8px] font-bold text-primary italic uppercase leading-none">Includes buyer protection</p>
+                                            <p className="text-[8px] font-bold text-black italic uppercase leading-none">Includes buyer protection</p>
                                         </div>
-                                        <p className="text-3xl font-black text-primary tracking-tight leading-none">
+                                        <p className="text-3xl font-black text-black tracking-tight leading-none">
                                             ₹{(total * 1.08).toLocaleString()}.00
                                         </p>
                                     </div>
@@ -322,14 +322,14 @@ export default function CheckoutPage() {
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative w-full max-w-xl bg-white rounded-[3rem] p-10 shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-xl bg-white rounded-[20px] p-10 shadow-2xl overflow-hidden"
                         >
                             <div className="flex justify-between items-center mb-10">
                                 <div>
-                                    <h2 className="text-2xl font-black text-foreground italic uppercase">Add New <span className="text-primary">Address</span></h2>
+                                    <h2 className="text-2xl font-black text-foreground italic uppercase">Add New <span className="text-black">Address</span></h2>
                                     <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">Shipping destination details</p>
                                 </div>
-                                <button onClick={() => setShowAddressForm(false)} className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-foreground hover:bg-primary hover:text-white transition-all">
+                                <button onClick={() => setShowAddressForm(false)} className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-foreground hover:bg-black hover:text-white transition-all">
                                     <HiOutlineX className="w-5 h-5" />
                                 </button>
                             </div>
@@ -343,7 +343,7 @@ export default function CheckoutPage() {
                                             value={newAddress.label}
                                             onChange={e => setNewAddress({ ...newAddress, label: e.target.value })}
                                             placeholder="Home / Office / Warehouse"
-                                            className="w-full bg-surface border border-foreground/5 rounded-2xl px-6 py-4 text-xs font-bold focus:outline-none focus:border-primary transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[5px] px-6 py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -353,7 +353,7 @@ export default function CheckoutPage() {
                                             value={newAddress.name}
                                             onChange={e => setNewAddress({ ...newAddress, name: e.target.value })}
                                             placeholder="Full Name"
-                                            className="w-full bg-surface border border-foreground/5 rounded-2xl px-6 py-4 text-xs font-bold focus:outline-none focus:border-primary transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[5px] px-6 py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                 </div>
@@ -365,7 +365,7 @@ export default function CheckoutPage() {
                                         value={newAddress.line1}
                                         onChange={e => setNewAddress({ ...newAddress, line1: e.target.value })}
                                         placeholder="123 Street name, suite..."
-                                        className="w-full bg-surface border border-foreground/5 rounded-2xl px-6 py-4 text-xs font-bold focus:outline-none focus:border-primary transition-all"
+                                        className="w-full bg-surface border border-foreground/5 rounded-[5px] px-6 py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
                                     />
                                 </div>
 
@@ -377,7 +377,7 @@ export default function CheckoutPage() {
                                             value={newAddress.city}
                                             onChange={e => setNewAddress({ ...newAddress, city: e.target.value })}
                                             placeholder="City"
-                                            className="w-full bg-surface border border-foreground/5 rounded-2xl px-6 py-4 text-xs font-bold focus:outline-none focus:border-primary transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[5px] px-6 py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -387,7 +387,7 @@ export default function CheckoutPage() {
                                             value={newAddress.state}
                                             onChange={e => setNewAddress({ ...newAddress, state: e.target.value })}
                                             placeholder="State"
-                                            className="w-full bg-surface border border-foreground/5 rounded-2xl px-6 py-4 text-xs font-bold focus:outline-none focus:border-primary transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[5px] px-6 py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -397,14 +397,14 @@ export default function CheckoutPage() {
                                             value={newAddress.zip}
                                             onChange={e => setNewAddress({ ...newAddress, zip: e.target.value })}
                                             placeholder="123456"
-                                            className="w-full bg-surface border border-foreground/5 rounded-2xl px-6 py-4 text-xs font-bold focus:outline-none focus:border-primary transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[5px] px-6 py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 <button
                                     type="submit"
-                                    className="w-full bg-primary text-white py-5 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all mt-4"
+                                    className="w-full bg-black text-white py-5 rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/20 hover:scale-[1.02] transition-all mt-4"
                                 >
                                     Save Address
                                 </button>
@@ -422,11 +422,11 @@ export default function CheckoutPage() {
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: rgba(16, 54, 125, 0.1);
-                    border-radius: 20px;
+                    background: rgba(0, 0, 0, 0.1);
+                    border-radius: 10px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: rgba(16, 54, 125, 0.2);
+                    background: rgba(0, 0, 0, 0.2);
                 }
             `}</style>
         </div>

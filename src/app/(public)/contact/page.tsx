@@ -33,11 +33,11 @@ const contactMethods = [
 
 export default function ContactPage() {
     return (
-        <div className="min-h-screen bg-[#EBEBEB] pt-24 pb-20 overflow-hidden">
+        <div className="min-h-screen bg-background pt-24 pb-20 overflow-hidden">
             {/* Ambient Background */}
             <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#10367D]/5 blur-[120px] rounded-full" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#10367D]/5 blur-[120px] rounded-full" />
+                <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-black/5 blur-[120px] rounded-full" />
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -45,7 +45,7 @@ export default function ContactPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#10367D]/10 border border-[#10367D]/20 text-[10px] font-black uppercase tracking-widest text-[#10367D] mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black uppercase tracking-widest text-black mb-6"
                     >
                         <Globe className="w-3 h-3" />
                         Global Support
@@ -54,15 +54,15 @@ export default function ContactPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl lg:text-7xl font-black text-[#1E293B] mb-6 tracking-tight leading-tight"
+                        className="text-5xl lg:text-7xl font-black text-foreground mb-6 tracking-tight leading-tight italic uppercase"
                     >
-                        Let's Talk <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10367D] to-[#1E5F86]">Growth</span>
+                        Let's Talk <span className="text-transparent bg-clip-text bg-gradient-to-r from-black to-foreground/60">Growth</span>
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="max-w-2xl mx-auto text-lg text-[#1E293B]/60 font-medium italic"
+                        className="max-w-2xl mx-auto text-lg text-foreground/60 font-medium italic"
                     >
                         Have questions about our zero-trust platform? Our specialists are ready to help you navigate the future of commerce.
                     </motion.p>
@@ -78,25 +78,25 @@ export default function ContactPage() {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.3 + (i * 0.1) }}
-                                    className="bg-white/60 backdrop-blur-md p-8 rounded-[2.5rem] border border-[#10367D]/10 group hover:border-[#10367D]/30 transition-all"
+                                    className="bg-white/60 backdrop-blur-md p-8 rounded-[10px] border border-black/10 group hover:border-black/30 transition-all"
                                 >
-                                    <div className={`w-12 h-12 rounded-2xl ${method.bg} ${method.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                                    <div className={`w-12 h-12 rounded-[5px] ${method.bg} ${method.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                                         <method.icon className="w-6 h-6" />
                                     </div>
-                                    <h3 className="text-sm font-black text-[#1E293B] uppercase tracking-wider mb-2">{method.title}</h3>
-                                    <p className="text-lg font-black text-[#10367D] mb-2">{method.value}</p>
-                                    <p className="text-xs text-[#1E293B]/40 font-bold">{method.description}</p>
+                                    <h3 className="text-[10px] font-black text-foreground/40 uppercase tracking-widest mb-2">{method.title}</h3>
+                                    <p className="text-lg font-black text-black mb-2 italic">{method.value}</p>
+                                    <p className="text-xs text-foreground/40 font-bold uppercase tracking-widest">{method.description}</p>
                                 </motion.div>
                             ))}
                         </div>
 
                         {/* Social Links */}
-                        <div className="bg-[#10367D] p-10 rounded-[2.5rem] text-white overflow-hidden relative group">
+                        <div className="bg-black p-10 rounded-[10px] text-white overflow-hidden relative group">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform" />
-                            <h3 className="text-sm font-black uppercase tracking-widest mb-8 relative z-10 opacity-70">Follow Progress</h3>
+                            <h3 className="text-[10px] font-black uppercase tracking-widest mb-8 relative z-10 opacity-40 italic">Follow Progress</h3>
                             <div className="flex gap-4 relative z-10">
                                 {[Twitter, Github, Globe].map((Icon, i) => (
-                                    <button key={i} className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center hover:bg-white text-white hover:text-[#10367D] transition-all">
+                                    <button key={i} className="w-12 h-12 rounded-[5px] bg-white/10 flex items-center justify-center hover:bg-white text-white hover:text-black transition-all">
                                         <Icon className="w-6 h-6" />
                                     </button>
                                 ))}
@@ -109,31 +109,31 @@ export default function ContactPage() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.4 }}
-                        className="lg:col-span-7 bg-white/80 backdrop-blur-2xl p-10 lg:p-14 rounded-[3.5rem] border border-[#10367D]/10 shadow-2xl shadow-[#10367D]/5"
+                        className="lg:col-span-7 bg-white/80 backdrop-blur-2xl p-10 lg:p-14 rounded-[10px] border border-black/10 shadow-2xl shadow-black/5"
                     >
                         <form className="space-y-8">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-[#10367D]/60 uppercase tracking-widest ml-1">Full Name</label>
+                                    <label className="text-[10px] font-black text-black/40 uppercase tracking-widest ml-1">Full Name</label>
                                     <input
                                         type="text"
                                         placeholder="John Doe"
-                                        className="w-full bg-white/40 border border-[#10367D]/10 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#10367D]/50 transition-all"
+                                        className="w-full bg-white/40 border border-black/10 rounded-[10px] px-6 py-4 text-sm font-bold focus:outline-none focus:border-black/50 transition-all"
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-[#10367D]/60 uppercase tracking-widest ml-1">Email Address</label>
+                                    <label className="text-[10px] font-black text-black/40 uppercase tracking-widest ml-1">Email Address</label>
                                     <input
                                         type="email"
                                         placeholder="john@company.com"
-                                        className="w-full bg-white/40 border border-[#10367D]/10 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#10367D]/50 transition-all"
+                                        className="w-full bg-white/40 border border-black/10 rounded-[10px] px-6 py-4 text-sm font-bold focus:outline-none focus:border-black/50 transition-all"
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-[#10367D]/60 uppercase tracking-widest ml-1">Subject</label>
-                                <select className="w-full bg-white/40 border border-[#10367D]/10 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#10367D]/50 transition-all appearance-none">
+                                <label className="text-[10px] font-black text-black/40 uppercase tracking-widest ml-1">Subject</label>
+                                <select className="w-full bg-white/40 border border-black/10 rounded-[10px] px-6 py-4 text-sm font-bold focus:outline-none focus:border-black/50 transition-all appearance-none">
                                     <option>Partnership Inquiry</option>
                                     <option>Support Request</option>
                                     <option>Manufacturer Verification</option>
@@ -142,15 +142,15 @@ export default function ContactPage() {
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-[#10367D]/60 uppercase tracking-widest ml-1">Your Message</label>
+                                <label className="text-[10px] font-black text-black/40 uppercase tracking-widest ml-1">Your Message</label>
                                 <textarea
                                     rows={5}
                                     placeholder="How can our specialists assist you today?"
-                                    className="w-full bg-white/40 border border-[#10367D]/10 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-[#10367D]/50 transition-all"
+                                    className="w-full bg-white/40 border border-black/10 rounded-[10px] px-6 py-4 text-sm font-bold focus:outline-none focus:border-black/50 transition-all"
                                 ></textarea>
                             </div>
 
-                            <button className="w-full py-5 bg-[#10367D] text-white font-black text-sm rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-[#10367D]/20 flex items-center justify-center gap-3 uppercase tracking-widest">
+                            <button className="w-full py-5 bg-black text-white font-black text-sm rounded-[10px] hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-black/20 flex items-center justify-center gap-3 uppercase tracking-widest">
                                 <Send className="w-4 h-4" />
                                 Deploy Inquiry
                             </button>

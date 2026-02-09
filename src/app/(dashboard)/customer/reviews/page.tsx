@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     FaFilter,
     FaSortAmountDown,
@@ -11,7 +11,8 @@ import {
     FaCheckCircle,
     FaThumbsUp,
     FaComment,
-    FaBox
+    FaBox,
+    FaEllipsisH
 } from 'react-icons/fa';
 import { apiClient } from '@/lib/api/client';
 import OptimizedImage from '@/client/components/ui/OptimizedImage';
@@ -59,7 +60,7 @@ export default function MyReviewsPage() {
 
     const displayReviews = filteredReviews;
 
-    if (isLoading) return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
+    if (isLoading) return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10367D]"></div></div>;
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-10 px-6">
@@ -69,29 +70,29 @@ export default function MyReviewsPage() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-black text-slate-800 tracking-tight">My Reviews History</h1>
-                        <p className="text-slate-500 font-medium mt-1">Manage your feedback and review your community contributions.</p>
+                        <p className="text-slate-400 font-medium mt-1">Manage your feedback and review your community contributions.</p>
                     </div>
                     <div className="flex gap-3">
-                        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
-                            <FaFilter /> Filter
+                        <button className="flex items-center gap-2 px-5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
+                            <FaFilter className="text-slate-400" /> Filter
                         </button>
-                        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
-                            <FaSortAmountDown /> Sort: Most Recent
+                        <button className="flex items-center gap-2 px-5 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
+                            <FaSortAmountDown className="text-slate-400" /> Sort: Most Recent
                         </button>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-8 border-b border-slate-200">
+                <div className="flex gap-8 border-b border-slate-200/60">
                     {[
-                        { id: 'ALL', label: `All Reviews (${displayReviews.length})` },
-                        { id: 'PHOTOS', label: `With Photos (${displayReviews.filter(r => r.images?.length > 0).length})` },
-                        { id: 'VERIFIED', label: `Verified Only (${displayReviews.length})` }
+                        { id: 'ALL', label: `All Reviews (${reviews.length})` },
+                        { id: 'PHOTOS', label: `With Photos (${reviews.filter(r => r.images?.length > 0).length})` },
+                        { id: 'VERIFIED', label: `Verified Only (${reviews.length})` }
                     ].map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`pb-4 text-xs font-bold relative transition-colors ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             {tab.label}
                             {activeTab === tab.id && (
@@ -102,88 +103,90 @@ export default function MyReviewsPage() {
                 </div>
 
                 {/* Reviews List */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {displayReviews.length > 0 ? (
                         displayReviews.map((review) => (
                             <motion.div
                                 key={review.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+                                className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
                             >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex gap-6">
-                                        {/* Product Thumb */}
-                                        <div className="w-20 h-20 bg-slate-50 rounded-xl overflow-hidden border border-slate-100 shrink-0">
+                                {/* Top Row: Product & Actions */}
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="flex gap-4">
+                                        <div className="w-12 h-12 bg-slate-50 rounded-lg overflow-hidden border border-slate-100 shrink-0">
                                             {review.product?.images?.[0] ? (
                                                 <OptimizedImage
                                                     src={review.product.images[0]}
                                                     alt={review.product.name}
-                                                    width={80}
-                                                    height={80}
-                                                    className="w-full h-full object-contain"
+                                                    width={48}
+                                                    height={48}
+                                                    className="w-full h-full object-contain mix-blend-multiply"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-slate-300"><FaBox /></div>
                                             )}
                                         </div>
-
-                                        <div className="flex-1">
-                                            <h3 className="font-bold text-slate-800 text-lg mb-1">{review.product?.name || 'Unknown Product'}</h3>
-
-                                            <div className="flex flex-wrap items-center gap-4 mb-4">
-                                                <div className="flex items-center gap-1">
+                                        <div>
+                                            <h3 className="font-bold text-slate-800 text-sm leading-tight">{review.product?.name || 'Unknown Product'}</h3>
+                                            <div className="flex items-center gap-3 mt-1.5">
+                                                <div className="flex items-center gap-0.5">
                                                     {[1, 2, 3, 4, 5].map(s => (
-                                                        <FaStar key={s} className={`w-4 h-4 ${review.rating >= s ? 'text-amber-400' : 'text-slate-200'}`} />
+                                                        <FaStar key={s} className={`w-3 h-3 ${review.rating >= s ? 'text-amber-400' : 'text-slate-200'}`} />
                                                     ))}
                                                 </div>
-                                                <span className="text-xs font-bold text-slate-400">Reviewed on {new Date(review.createdAt).toLocaleDateString()}</span>
-                                                {review.isVerified && (
-                                                    <div className="flex items-center gap-1 px-3 py-1 bg-blue-50 rounded-full">
-                                                        <FaCheckCircle className="text-blue-500 w-3 h-3" />
-                                                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Verified Purchase</span>
-                                                    </div>
-                                                )}
+                                                <span className="text-[10px] font-bold text-slate-400">Reviewed on {new Date(review.createdAt).toLocaleDateString()}</span>
                                             </div>
-
-                                            <p className="text-slate-600 leading-relaxed mb-6">
-                                                {review.comment}
-                                            </p>
-
-                                            {review.images && review.images.length > 0 && (
-                                                <div className="flex gap-3 mb-6">
-                                                    {review.images.map((img: string, idx: number) => (
-                                                        <div key={idx} className="w-16 h-16 rounded-xl overflow-hidden border border-slate-100">
-                                                            <OptimizedImage src={img} alt="Review attachment" width={64} height={64} className="w-full h-full object-cover" />
-                                                        </div>
-                                                    ))}
+                                            {review.isVerified && (
+                                                <div className="flex items-center gap-1 mt-2">
+                                                    <FaCheckCircle className="text-blue-500 w-3 h-3" />
+                                                    <span className="text-[9px] font-black text-blue-500 uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-full">Verified Purchase</span>
                                                 </div>
                                             )}
-
-                                            <div className="flex items-center gap-6 text-slate-400 text-xs font-bold">
-                                                <div className="flex items-center gap-2 hover:text-blue-600 transition-colors cursor-pointer">
-                                                    <FaThumbsUp />
-                                                    <span>{review.helpfulCount || 0} people found this helpful</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 hover:text-blue-600 transition-colors cursor-pointer">
-                                                    <FaComment />
-                                                    <span>{review.commentCount || 0} comments</span>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Actions */}
                                     <div className="flex items-center gap-2">
-                                        <button className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-colors">
-                                            <FaEdit /> Edit
+                                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-500 rounded-lg text-[10px] font-bold hover:bg-slate-100 transition-colors">
+                                            <FaEdit className="w-3 h-3" /> Edit
                                         </button>
                                         <button
                                             onClick={() => handleDelete(review.id)}
-                                            className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 transition-colors"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-500 rounded-lg text-[10px] font-bold hover:bg-rose-100 transition-colors"
                                         >
-                                            <FaTrashAlt /> Delete
+                                            <FaTrashAlt className="w-3 h-3" /> Delete
                                         </button>
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="mb-4">
+                                    <p className="text-slate-600 text-sm leading-relaxed">
+                                        {review.comment}
+                                    </p>
+                                </div>
+
+                                {/* Images */}
+                                {review.images && review.images.length > 0 && (
+                                    <div className="flex gap-2 mb-4">
+                                        {review.images.map((img: string, idx: number) => (
+                                            <div key={idx} className="w-12 h-12 rounded-lg overflow-hidden border border-slate-100 cursor-pointer hover:opacity-90 transition-opacity">
+                                                <OptimizedImage src={img} alt="Review attachment" width={48} height={48} className="w-full h-full object-cover" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Footer Stats */}
+                                <div className="flex items-center gap-6 pt-4 border-t border-slate-50">
+                                    <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold hover:text-blue-600 transition-colors cursor-pointer">
+                                        <FaThumbsUp className="w-3.5 h-3.5" />
+                                        <span>{review.helpfulCount || 0} people found this helpful</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-slate-400 text-xs font-bold hover:text-blue-600 transition-colors cursor-pointer">
+                                        <FaComment className="w-3.5 h-3.5" />
+                                        <span>{review.commentCount || 0} comments</span>
                                     </div>
                                 </div>
                             </motion.div>
@@ -198,7 +201,7 @@ export default function MyReviewsPage() {
                 </div>
 
                 {/* Pagination */}
-                <button className="w-full py-5 bg-slate-50 text-slate-500 rounded-2xl border border-dashed border-slate-200 text-xs font-black uppercase tracking-widest hover:bg-white hover:border-slate-300 hover:text-slate-800 transition-all">
+                <button className="w-full py-4 bg-white text-slate-500 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-50 hover:text-slate-800 transition-all shadow-sm">
                     Load More Reviews
                 </button>
             </div>

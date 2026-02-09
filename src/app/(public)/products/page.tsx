@@ -20,7 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 function ProductsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const currentCategory = searchParams.get('cat') || 'home-appliances';
+    const currentCategory = searchParams.get('cat') || '';
     const searchQuery = searchParams.get('q') || '';
 
     const [products, setProducts] = useState<any[]>([]);
@@ -38,6 +38,7 @@ function ProductsContent() {
         rating: null,
         availability: [],
         verifiedOnly: false,
+        subCategory: null,
         powerConsumption: [],
         capacity: [],
         energyRating: [],
@@ -49,7 +50,7 @@ function ProductsContent() {
 
     useEffect(() => {
         fetchProducts();
-    }, [currentCategory, searchQuery, sortBy, filters.priceRange[0], filters.priceRange[1]]);
+    }, [currentCategory, searchQuery, sortBy, filters.priceRange[0], filters.priceRange[1], filters.subCategory]);
 
     const fetchProducts = async () => {
         setIsLoading(true);
@@ -60,7 +61,8 @@ function ProductsContent() {
                 q: searchQuery,
                 sortBy: sortBy,
                 minPrice: filters.priceRange[0],
-                maxPrice: filters.priceRange[1]
+                maxPrice: filters.priceRange[1],
+                subCategory: filters.subCategory
             };
 
             const data = await productService.getAllProducts(params);
@@ -72,20 +74,21 @@ function ProductsContent() {
                 name: p.name,
                 price: p.inventory?.[0]?.price || p.basePrice,
                 originalPrice: p.inventory?.[0]?.originalPrice || p.basePrice,
-                image: p.images?.[0] || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800',
+                image: p.images?.[0] || '/assets/placeholder-product.png',
                 brand: p.manufacturer?.companyName || 'NovaMart',
                 spec: p.category,
-                rating: p.averageRating || 4.2 + (Math.random() * 0.6),
+                subCategory: p.specifications?.subCategory,
+                rating: p.averageRating || 0,
                 reviewsCount: p.reviewCount || 0,
                 seller: {
-                    id: p.inventory?.[0]?.dealer?.id, // Dynamic Dealer ID
-                    name: p.inventory?.[0]?.dealer?.businessName || 'Verified Seller',
-                    isVerified: true
+                    id: p.inventory?.[0]?.dealer?.id,
+                    name: p.inventory?.[0]?.dealer?.businessName || p.manufacturer?.companyName || 'Verified Seller',
+                    isVerified: p.manufacturer?.isVerified || false
                 },
                 highlights: {
                     freeDelivery: p.basePrice > 2000,
                     installation: p.category?.toLowerCase() === 'machinery',
-                    warranty: (p as any).specifications?.warranty || '1 Year'
+                    warranty: p.specifications?.warranty || '1 Year'
                 }
             }));
             setProducts(adapted);
@@ -103,6 +106,7 @@ function ProductsContent() {
         } else {
             params.delete('cat');
         }
+        params.delete('sub'); // Clear subcategory on main category change
         router.push(`/products?${params.toString()}`);
     };
 
@@ -117,6 +121,7 @@ function ProductsContent() {
             rating: null,
             availability: [],
             verifiedOnly: false,
+            subCategory: null,
             powerConsumption: [],
             capacity: [],
             energyRating: [],
@@ -138,6 +143,9 @@ function ProductsContent() {
 
         // 3. Rating Filter
         if (filters.rating && product.rating < filters.rating) return false;
+
+        // 3.5 SubCategory Filter (Client side fallback)
+        if (filters.subCategory && product.subCategory !== filters.subCategory) return false;
 
         // 4. Power Consumption Filter (Mock Logic - in real app, this would be DB query)
         if (filters.powerConsumption?.length > 0 && !filters.powerConsumption.includes(product.spec?.powerConsumption)) return false;
@@ -214,7 +222,7 @@ function ProductsContent() {
                                 {/* Desktop Sidebar Toggle */}
                                 <button
                                     onClick={() => setIsDesktopSidebarOpen(!isDesktopSidebarOpen)}
-                                    className="hidden lg:flex p-2 bg-white hover:bg-[#10367D] hover:text-white rounded-xl border border-slate-200 transition-all shadow-sm items-center justify-center"
+                                    className="hidden lg:flex p-2 bg-white hover:bg-black hover:text-white rounded-[10px] border border-slate-200 transition-all shadow-sm items-center justify-center"
                                     title={isDesktopSidebarOpen ? "Close Filters" : "Open Filters"}
                                 >
                                     {isDesktopSidebarOpen ? <FaChevronLeft className="w-4 h-4" /> : <FaFilter className="w-4 h-4" />}
@@ -223,9 +231,9 @@ function ProductsContent() {
                                 {/* Mobile Filter Toggle */}
                                 <button
                                     onClick={() => setIsMobileFilterOpen(true)}
-                                    className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 transition-all shadow-sm text-sm font-bold text-[#1E293B]"
+                                    className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 rounded-[10px] border border-slate-200 transition-all shadow-sm text-sm font-bold text-black"
                                 >
-                                    <FaFilter className="w-3.5 h-3.5 text-[#10367D]" />
+                                    <FaFilter className="w-3.5 h-3.5 text-black" />
                                     Filters
                                 </button>
 
@@ -233,15 +241,15 @@ function ProductsContent() {
                                     <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest shrink-0">Active Filters:</span>
                                     <div className="flex items-center gap-3">
                                         {(filters.priceRange[0] > 0 || filters.priceRange[1] < 100000) && (
-                                            <div className="bg-[#10367D]/10 px-4 py-2 rounded-full flex items-center gap-2 border border-[#10367D]/5 hover:bg-[#10367D]/15 transition-colors group cursor-pointer" onClick={() => handleFilterChange('priceRange', [0, 100000])}>
-                                                <span className="text-[11px] font-bold text-[#10367D]">Price: ₹{filters.priceRange[0]} - ₹{filters.priceRange[1]}</span>
-                                                <FaTimes className="w-2.5 h-2.5 text-[#10367D]/40 group-hover:text-[#10367D]" />
+                                            <div className="bg-black/5 px-4 py-2 rounded-[5px] flex items-center gap-2 border border-foreground/5 hover:bg-black/10 transition-colors group cursor-pointer" onClick={() => handleFilterChange('priceRange', [0, 100000])}>
+                                                <span className="text-[11px] font-bold text-black">Price: ₹{filters.priceRange[0]} - ₹{filters.priceRange[1]}</span>
+                                                <FaTimes className="w-2.5 h-2.5 text-black/40 group-hover:text-black" />
                                             </div>
                                         )}
                                         {filters.brands.map(brand => (
-                                            <div key={brand} className="bg-[#10367D]/10 px-4 py-2 rounded-full flex items-center gap-2 border border-[#10367D]/5 hover:bg-[#10367D]/15 transition-colors group cursor-pointer" onClick={() => handleFilterChange('brands', filters.brands.filter(b => b !== brand))}>
-                                                <span className="text-[11px] font-bold text-[#10367D]">{brand}</span>
-                                                <FaTimes className="w-2.5 h-2.5 text-[#10367D]/40 group-hover:text-[#10367D]" />
+                                            <div key={brand} className="bg-black/5 px-4 py-2 rounded-[5px] flex items-center gap-2 border border-foreground/5 hover:bg-black/10 transition-colors group cursor-pointer" onClick={() => handleFilterChange('brands', filters.brands.filter(b => b !== brand))}>
+                                                <span className="text-[11px] font-bold text-black">{brand}</span>
+                                                <FaTimes className="w-2.5 h-2.5 text-black/40 group-hover:text-black" />
                                             </div>
                                         ))}
                                         {(filters.priceRange[0] === 0 && filters.priceRange[1] === 100000 && filters.brands.length === 0) && (
@@ -249,7 +257,7 @@ function ProductsContent() {
                                         )}
                                         {/* Clear All Button */}
                                         {(filters.priceRange[0] > 0 || filters.priceRange[1] < 100000 || filters.brands.length > 0) && (
-                                            <button onClick={clearAllFilters} className="text-[11px] font-black text-[#10367D] uppercase tracking-widest ml-2 px-2 py-2 hover:bg-[#10367D]/5 rounded-lg transition-colors">Clear All</button>
+                                            <button onClick={clearAllFilters} className="text-[11px] font-black text-black uppercase tracking-widest ml-2 px-2 py-2 hover:bg-black/5 rounded-[10px] transition-colors">Clear All</button>
                                         )}
                                     </div>
                                 </div>
@@ -261,7 +269,7 @@ function ProductsContent() {
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
-                                        className="appearance-none bg-white border border-slate-200 rounded-2xl px-6 py-3 pr-12 text-[11px] font-black text-[#1E293B] uppercase tracking-widest focus:outline-none focus:border-[#10367D] transition-all cursor-pointer shadow-sm"
+                                        className="appearance-none bg-white border border-slate-200 rounded-[10px] px-6 py-3 pr-12 text-[11px] font-black text-black uppercase tracking-widest focus:outline-none focus:border-black transition-all cursor-pointer shadow-sm"
                                     >
                                         <option value="relevance">Relevance</option>
                                         <option value="price-low">Price: Low to High</option>
@@ -280,17 +288,17 @@ function ProductsContent() {
                         {/* 5️⃣ PRODUCT GRID */}
                         {isLoading ? (
                             <div className={isDesktopSidebarOpen
-                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+                                ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+                                : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
                             }>
                                 {Array.from({ length: 8 }).map((_, i) => (
-                                    <div key={i} className="bg-white rounded-[2.5rem] p-4 border border-slate-100 animate-pulse h-96"></div>
+                                    <div key={i} className="bg-white rounded-[10px] p-4 border border-slate-100 animate-pulse h-64 md:h-96"></div>
                                 ))}
                             </div>
                         ) : filteredProducts.length > 0 ? (
                             <div className={isDesktopSidebarOpen
-                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+                                ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+                                : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6"
                             }>
                                 {filteredProducts.map((product) => (
                                     <CustomerProductCard key={product.id} {...product} />
@@ -298,15 +306,15 @@ function ProductsContent() {
                             </div>
                         ) : (
                             /* 9️⃣ EMPTY STATE UX */
-                            <div className="bg-white border-2 border-dashed border-slate-200 rounded-[2.5rem] p-20 text-center">
-                                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <Search className="w-8 h-8 text-slate-300" />
+                            <div className="bg-white border-2 border-dashed border-slate-200 rounded-[10px] p-10 md:p-20 text-center">
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 rounded-[10px] flex items-center justify-center mx-auto mb-6">
+                                    <Search className="w-6 h-6 md:w-8 md:h-8 text-slate-300" />
                                 </div>
-                                <h3 className="text-2xl font-black text-[#1E293B] mb-2">No products found</h3>
+                                <h3 className="text-xl md:text-2xl font-black text-black mb-2 uppercase italic">No products found</h3>
                                 <p className="text-slate-500 font-medium mb-8 italic">Try adjusting your filters or clearing all to see more options.</p>
                                 <button
                                     onClick={clearAllFilters}
-                                    className="px-8 py-4 bg-[#10367D] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all"
+                                    className="px-6 py-3 md:px-8 md:py-4 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-xl shadow-black/20 hover:scale-105 transition-all"
                                 >
                                     Clear All Filters
                                 </button>
@@ -332,12 +340,12 @@ function ProductsContent() {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                            className="lg:hidden fixed bottom-0 left-0 right-0 h-[85vh] bg-white z-[201] rounded-t-[2.5rem] shadow-2xl flex flex-col"
+                            className="lg:hidden fixed bottom-0 left-0 right-0 h-[85vh] bg-white z-[201] rounded-t-[20px] shadow-2xl flex flex-col"
                         >
                             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-base font-black text-[#1E293B] uppercase tracking-wider">Refine Inventory</h3>
-                                    <p className="text-[10px] font-bold text-[#10367D]">NovaMart Trust Certifications</p>
+                                    <h3 className="text-base font-black text-black uppercase tracking-wider">Refine Inventory</h3>
+                                    <p className="text-[10px] font-bold text-black opacity-40">NovaMart Trust Certifications</p>
                                 </div>
                                 <button
                                     onClick={() => setIsMobileFilterOpen(false)}
@@ -360,8 +368,8 @@ function ProductsContent() {
                             </div>
 
                             <div className="p-6 border-t border-slate-100 grid grid-cols-2 gap-4">
-                                <button onClick={clearAllFilters} className="py-4 border border-slate-200 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Clear All</button>
-                                <button onClick={() => setIsMobileFilterOpen(false)} className="py-4 bg-[#10367D] text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-[#10367D]/20">Apply Filters</button>
+                                <button onClick={clearAllFilters} className="py-4 border border-slate-200 rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Clear All</button>
+                                <button onClick={() => setIsMobileFilterOpen(false)} className="py-4 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/20">Apply Filters</button>
                             </div>
                         </motion.div>
                     </>
@@ -375,7 +383,7 @@ export default function ProductsPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen pt-40 flex items-center justify-center">
-                <div className="w-12 h-12 border-4 border-[#10367D] border-t-transparent rounded-full animate-spin" />
+                <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin" />
             </div>
         }>
             <ProductsContent />

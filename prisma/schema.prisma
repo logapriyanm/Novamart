@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -9,6 +6,484 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DB_URL")
+}
+
+model OrderTimeline {
+  id        String      @id @default(uuid())
+  orderId   String
+  fromState OrderStatus
+  toState   OrderStatus
+  reason    String?
+  metadata  Json?
+  createdAt DateTime    @default(now())
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_timelines")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String?        @unique
+  phone         String?        @unique
+  password      String?
+  role          Role
+  adminRole     AdminRole?
+  status        AccountStatus  @default(PENDING)
+  mfaEnabled    Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  avatar        String?
+  dob           DateTime?
+  fcmToken      String?
+  interests     UserInterest[]
+  customer      Customer?
+  dealer        Dealer?
+  documents     Document[]
+  manufacturer  Manufacturer?
+  notifications Notification[]
+  sessions      Session[]
+  refreshToken  String?
+  userBadges    UserBadge[]
+  behaviors     UserBehavior[]
+
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  ipAddress String?
+  device    String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model Manufacturer {
+  id                 String          @id @default(uuid())
+  userId             String          @unique
+  companyName        String
+  registrationNo     String          @unique
+  businessType       String?
+  officialEmail      String?
+  phone              String?
+  factoryAddress     String
+  capacity           String?
+  categoriesProduced String[]
+  gstNumber          String          @unique
+  certifications     String[]
+  isVerified         Boolean         @default(false)
+  logo               String?
+  brandDescription   String?
+  marketingMaterials String[]
+  bankDetails        Json
+  user               User            @relation(fields: [userId], references: [id])
+  negotiations       Negotiation[]
+  products           Product[]
+  dealersApproved    Dealer[]        @relation("ApprovedDealers")
+  dealerRequests     DealerRequest[]
+  pooledDemands      PooledDemand[]
+
+  @@map("manufacturers")
+}
+
+model Dealer {
+  id                  String               @id @default(uuid())
+  userId              String               @unique
+  businessName        String
+  ownerName           String?
+  businessType        String?
+  contactEmail        String?
+  phone               String?
+  gstNumber           String               @unique
+  gstCertificate      String?
+  businessRegDoc      String?
+  businessAddress     String
+  city                String?
+  state               String?
+  pincode             String?
+  serviceRegions      String[]
+  bankDetails         Json
+  payoutBlocked       Boolean              @default(false)
+  averageRating       Float                @default(0)
+  reviewCount         Int                  @default(0)
+  isVerified          Boolean              @default(false)
+  subscriptions       DealerSubscription[]
+  user                User                 @relation(fields: [userId], references: [id])
+  inventory           Inventory[]
+  negotiations        Negotiation[]
+  orders              Order[]              @relation("DealerOrders")
+  customerRatings     Rating[]
+  sellerReviews       SellerReview[]
+  approvedBy          Manufacturer[]       @relation("ApprovedDealers")
+  partnershipRequests DealerRequest[]
+  PoolParticipant     PoolParticipant[]
+
+  @@map("dealers")
+}
+
+model Customer {
+  id             String          @id @default(uuid())
+  userId         String          @unique
+  name           String
+  cart           Cart?
+  user           User            @relation(fields: [userId], references: [id])
+  orders         Order[]
+  productReviews ProductReview[]
+  ratings        Rating[]
+  sellerReviews  SellerReview[]
+
+  @@map("customers")
+}
+
+model Cart {
+  id         String     @id @default(uuid())
+  customerId String     @unique
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  items      CartItem[]
+  customer   Customer   @relation(fields: [customerId], references: [id])
+
+  @@map("carts")
+}
+
+model CartItem {
+  id          String   @id @default(uuid())
+  cartId      String
+  inventoryId String?
+  productId   String
+  quantity    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  cart        Cart     @relation(fields: [cartId], references: [id])
+
+  @@map("cart_items")
+}
+
+model Product {
+  id              String          @id @default(uuid())
+  manufacturerId  String
+  name            String
+  description     String
+  basePrice       Decimal         @db.Decimal(12, 2)
+  moq             Int             @default(1)
+  category        String
+  colors          String[]
+  sizes           String[]
+  images          String[]
+  video           String?
+  specifications  Json?
+  status          ProductStatus   @default(DRAFT)
+  isApproved      Boolean         @default(false)
+  rejectionReason String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  averageRating   Float           @default(0)
+  reviewCount     Int             @default(0)
+  isFeatured      Boolean         @default(false)
+  showOnHome      Boolean         @default(true)
+  taxCategory     String?
+  wholesalePrice  Decimal?        @db.Decimal(12, 2)
+  inventory       Inventory[]
+  negotiations    Negotiation[]
+  reviews         ProductReview[]
+  orderItems      OrderItem[]
+  manufacturer    Manufacturer    @relation(fields: [manufacturerId], references: [id])
+  pooledDemands   PooledDemand[]
+
+  @@map("products")
+}
+
+model Inventory {
+  id            String   @id @default(uuid())
+  productId     String
+  dealerId      String
+  region        String
+  stock         Int      @default(0)
+  locked        Int      @default(0)
+  price         Decimal  @db.Decimal(12, 2)
+  originalPrice Decimal? @db.Decimal(12, 2)
+  discount      Int?
+  orderCount    Int      @default(0)
+  dealer        Dealer   @relation(fields: [dealerId], references: [id])
+  product       Product  @relation(fields: [productId], references: [id])
+
+  @@map("inventories")
+}
+
+model Order {
+  id               String          @id @default(uuid())
+  customerId       String
+  dealerId         String
+  status           OrderStatus     @default(CREATED)
+  totalAmount      Decimal         @db.Decimal(12, 2)
+  taxAmount        Decimal         @db.Decimal(12, 2)
+  commissionAmount Decimal         @db.Decimal(12, 2)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  billingAddress   String?
+  shippingAddress  String
+  disputes         Dispute[]
+  escrow           Escrow?
+  items            OrderItem[]
+  timeline         OrderTimeline[]
+  customer         Customer        @relation(fields: [customerId], references: [id])
+  dealer           Dealer          @relation("DealerOrders", fields: [dealerId], references: [id])
+  payment          Payment?
+  sellerReview     SellerReview?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String         @id @default(uuid())
+  orderId       String
+  productId     String
+  quantity      Int
+  price         Decimal        @db.Decimal(12, 2)
+  inventoryId   String?
+  order         Order          @relation(fields: [orderId], references: [id])
+  linkedProduct Product        @relation(fields: [productId], references: [id])
+  review        ProductReview?
+
+  @@map("order_items")
+}
+
+model Escrow {
+  id         String       @id @default(uuid())
+  orderId    String       @unique
+  status     EscrowStatus @default(HOLD)
+  amount     Decimal      @db.Decimal(12, 2)
+  releasedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  order      Order        @relation(fields: [orderId], references: [id])
+
+  @@map("escrows")
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  orderId           String   @unique
+  razorpayOrderId   String?  @unique
+  razorpayPaymentId String?  @unique
+  amount            Decimal  @db.Decimal(12, 2)
+  status            String   @default("PENDING")
+  method            String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  order             Order    @relation(fields: [orderId], references: [id])
+
+  @@map("payments")
+}
+
+model Rating {
+  id         String   @id @default(uuid())
+  customerId String
+  dealerId   String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  customer   Customer @relation(fields: [customerId], references: [id])
+  dealer     Dealer   @relation(fields: [dealerId], references: [id])
+
+  @@map("ratings")
+}
+
+model Dispute {
+  id                 String        @id @default(uuid())
+  orderId            String
+  reason             String
+  status             DisputeStatus @default(OPEN)
+  createdAt          DateTime      @default(now())
+  adminNotes         String?
+  compensationAmount Decimal?      @db.Decimal(12, 2)
+  description        String
+  evidenceFiles      String[]
+  raisedBy           String
+  resolutionDate     DateTime?
+  updatedAt          DateTime      @updatedAt
+  order              Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("disputes")
+}
+
+model Badge {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  icon        String?
+  description String
+  users       UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(uuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  createdAt DateTime @default(now())
+  link      String?
+  read      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model UserBehavior {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  targetId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("user_behaviors")
+}
+
+model UserInterest {
+  id         String   @id @default(uuid())
+  userId     String
+  category   String
+  weight     Int      @default(0)
+  isExplicit Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([weight])
+}
+
+model ProductReview {
+  id         String       @id @default(uuid())
+  orderItem  String       @unique
+  productId  String
+  customerId String
+  rating     Int
+  comment    String?
+  images     String[]
+  createdAt  DateTime     @default(now())
+  status     ReviewStatus @default(PENDING)
+  customer   Customer     @relation(fields: [customerId], references: [id])
+  item       OrderItem    @relation(fields: [orderItem], references: [id])
+  product    Product      @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([status])
+  @@map("product_reviews")
+}
+
+model SellerReview {
+  id                  String       @id @default(uuid())
+  orderId             String       @unique
+  dealerId            String
+  customerId          String
+  rating              Int
+  deliveryRating      Int?
+  packagingRating     Int?
+  communicationRating Int?
+  comment             String?
+  createdAt           DateTime     @default(now())
+  status              ReviewStatus @default(PENDING)
+  customer            Customer     @relation(fields: [customerId], references: [id])
+  dealer              Dealer       @relation(fields: [dealerId], references: [id])
+  order               Order        @relation(fields: [orderId], references: [id])
+
+  @@index([dealerId])
+  @@index([status])
+  @@map("seller_reviews")
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  url       String
+  status    String   @default("PENDING")
+  feedback  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("documents")
+}
+
+model SubscriptionPlan {
+  id            String               @id @default(uuid())
+  name          String
+  price         Decimal              @db.Decimal(10, 2)
+  duration      Int
+  features      Json
+  margin        Decimal
+  rank          Int
+  createdAt     DateTime             @default(now())
+  subscriptions DealerSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model DealerSubscription {
+  id        String           @id @default(uuid())
+  dealerId  String
+  planId    String
+  startDate DateTime         @default(now())
+  endDate   DateTime
+  status    String           @default("ACTIVE")
+  paymentId String?
+  createdAt DateTime         @default(now())
+  dealer    Dealer           @relation(fields: [dealerId], references: [id])
+  plan      SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@index([dealerId])
+  @@index([status])
+  @@map("dealer_subscriptions")
+}
+
+model Negotiation {
+  id             String       @id @default(uuid())
+  dealerId       String
+  manufacturerId String
+  productId      String
+  status         String       @default("OPEN")
+  currentOffer   Decimal      @db.Decimal(12, 2)
+  quantity       Int
+  chatLog        Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  dealer         Dealer       @relation(fields: [dealerId], references: [id])
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  product        Product      @relation(fields: [productId], references: [id])
+
+  @@index([dealerId])
+  @@index([manufacturerId])
+  @@index([status])
+  @@map("negotiations")
 }
 
 enum Role {
@@ -30,11 +505,11 @@ enum OrderStatus {
   PAID
   CONFIRMED
   SHIPPED
-  OUT_FOR_DELIVERY
   DELIVERED
   SETTLED
   CANCELLED
   DISPUTED
+  OUT_FOR_DELIVERY
 }
 
 enum EscrowStatus {
@@ -42,19 +517,6 @@ enum EscrowStatus {
   FROZEN
   RELEASED
   REFUNDED
-}
-
-model OrderTimeline {
-  id        String      @id @default(uuid())
-  orderId   String
-  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  fromState OrderStatus
-  toState   OrderStatus
-  reason    String?
-  metadata  Json?       // Carrier info, location, etc.
-  createdAt DateTime    @default(now())
-
-  @@map("order_timelines")
 }
 
 enum DisputeStatus {
@@ -72,383 +534,11 @@ enum AdminRole {
   SUPPORT_ADMIN
 }
 
-model User {
-  id         String        @id @default(uuid())
-  email      String?       @unique
-  phone      String?       @unique
-  password   String?
-  role       Role
-  adminRole  AdminRole? // Only for role=ADMIN
-  status     AccountStatus @default(PENDING)
-  avatar     String?       // Profile picture URL
-  dob        DateTime?     // Date of birth
-  mfaEnabled Boolean       @default(false)
-
-  // Specific Role Relations
-  manufacturer Manufacturer?
-  dealer       Dealer?
-  customer     Customer?
-
-  // Audit and Auth
-  sessions   Session[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  userBadges UserBadge[]
-  notifications Notification[]
-  behaviors    UserBehavior[]
-  interests    UserInterest[]
-  documents    Document[]
-
-  @@map("users")
-  @@index([role])
-  @@index([status])
-}
-
-model Session {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  token     String   @unique
-  ipAddress String?
-  device    String?
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@map("sessions")
-}
-
-model Manufacturer {
-  id                 String    @id @default(uuid())
-  userId             String    @unique
-  user               User      @relation(fields: [userId], references: [id])
-  companyName        String
-  registrationNo     String    @unique // CIN or equivalent
-  businessType       String?   // Private Ltd, Partnership, etc.
-  officialEmail      String?
-  phone              String?
-  
-  // Factory & Operations
-  factoryAddress     String
-  capacity           String?   // Units per month
-  categoriesProduced String[]
-  
-  // Compliance & Registration
-  gstNumber          String    @unique
-  certifications     String[]  // ISO, Quality, etc.
-  isVerified         Boolean   @default(false)
-  
-  // Brand Assets
-  logo               String?
-  brandDescription   String?
-  marketingMaterials String[]  // PDF or image URLs
-  
-  // Banking (Mostly for refunds/penalties)
-  bankDetails        Json      // Encrypted or structured JSON
-  
-  products           Product[]
-  dealersApproved    Dealer[]  @relation("ApprovedDealers")
-  negotiations       Negotiation[]
-
-  @@map("manufacturers")
-}
-
-model Dealer {
-  id              String         @id @default(uuid())
-  userId          String         @unique
-  user            User           @relation(fields: [userId], references: [id])
-  businessName    String
-  ownerName       String?
-  businessType    String?
-  contactEmail    String?
-  phone           String?
-  
-  // Compliance
-  gstNumber       String         @unique
-  gstCertificate  String?        // URL
-  businessRegDoc  String?        // URL
-  
-  // Address & Logistics
-  businessAddress String
-  city            String?
-  state           String?
-  pincode         String?
-  serviceRegions  String[]
-  
-  // Financials
-  bankDetails     Json
-  payoutBlocked   Boolean        @default(false)
-  
-  inventory       Inventory[]
-  orders          Order[]        @relation("DealerOrders")
-  customerRatings Rating[] // Deprecated, migrate to sellerReviews
-  sellerReviews   SellerReview[]
-  averageRating   Float          @default(0)
-  reviewCount     Int            @default(0)
-  approvedBy      Manufacturer[] @relation("ApprovedDealers")
-  
-  // Master Workflow Relations
-  negotiations    Negotiation[]
-  subscriptions   DealerSubscription[]
-
-  @@map("dealers")
-}
-
-model Customer {
-  id      String   @id @default(uuid())
-  userId  String   @unique
-  user    User     @relation(fields: [userId], references: [id])
-  name    String
-  cart    Cart?
-  orders  Order[]
-  ratings Rating[] // Deprecated
-  productReviews ProductReview[]
-  sellerReviews  SellerReview[]
-
-  @@map("customers")
-}
-model Cart {
-  id         String     @id @default(uuid())
-  customerId String     @unique
-  customer   Customer   @relation(fields: [customerId], references: [id])
-  items      CartItem[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-
-  @@map("carts")
-}
-
-model CartItem {
-  id          String   @id @default(uuid())
-  cartId      String
-  cart        Cart     @relation(fields: [cartId], references: [id])
-  productId   String
-  inventoryId String?
-  quantity    Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("cart_items")
-}
-
 enum ProductStatus {
   DRAFT
   PENDING
   APPROVED
   REJECTED
-}
-
-model Product {
-  id              String        @id @default(uuid())
-  manufacturerId  String
-  manufacturer    Manufacturer  @relation(fields: [manufacturerId], references: [id])
-  name            String
-  description     String
-  basePrice       Decimal       @db.Decimal(12, 2)
-  
-  // Master Workflow Fields
-  wholesalePrice  Decimal?      @db.Decimal(12, 2)
-  moq             Int           @default(1)
-  taxCategory     String?
-
-  category        String
-  colors          String[]      // Hex codes for swatches
-  sizes           String[]      // e.g., ["XS", "S", "M"]
-  images          String[]      // Product image URLs
-  video           String?       // 360 view or demo video URL
-  specifications  Json?         // Flexible key-value pairs for technical specs
-  status          ProductStatus @default(DRAFT)
-  isApproved      Boolean       @default(false) // Deprecated in favor of status, kept for backward compat
-  isFeatured      Boolean       @default(false)
-  showOnHome      Boolean       @default(true)
-  rejectionReason String?       // For Admin feedback
-  inventory       Inventory[]
-  reviews         ProductReview[]
-  negotiations    Negotiation[]
-  averageRating   Float         @default(0)
-  reviewCount     Int           @default(0)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-
-  @@map("products")
-}
-
-model Inventory {
-  id            String   @id @default(uuid())
-  productId     String
-  product       Product  @relation(fields: [productId], references: [id])
-  dealerId      String
-  dealer        Dealer   @relation(fields: [dealerId], references: [id])
-  region        String
-  stock         Int      @default(0)
-  locked        Int      @default(0) // Quantity currently in pending orders
-  price         Decimal  @db.Decimal(12, 2) // Retail price set by dealer
-  originalPrice Decimal? @db.Decimal(12, 2) // For strike-through pricing
-  discount      Int? // Percentage
-  orderCount    Int      @default(0) // Total orders for this dealer's listing
-
-  @@map("inventories")
-}
-
-model Order {
-  id               String      @id @default(uuid())
-  customerId       String
-  customer         Customer    @relation(fields: [customerId], references: [id])
-  dealerId         String
-  dealer           Dealer      @relation(fields: [dealerId], references: [id], name: "DealerOrders")
-  status           OrderStatus @default(CREATED)
-  totalAmount      Decimal     @db.Decimal(12, 2)
-  taxAmount        Decimal     @db.Decimal(12, 2)
-  commissionAmount Decimal     @db.Decimal(12, 2)
-  items            OrderItem[]
-  escrow           Escrow?
-  payment          Payment?
-  disputes         Dispute[]
-  sellerReview     SellerReview?
-  shippingAddress  String
-  billingAddress   String?
-  timeline         OrderTimeline[]
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id          String   @id @default(uuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id])
-  productId   String
-  inventoryId String?  // Direct link to dealer's inventory for stock management
-  quantity    Int
-  price       Decimal  @db.Decimal(12, 2)
-  review      ProductReview?
-
-  @@map("order_items")
-}
-
-model Escrow {
-  id        String       @id @default(uuid())
-  orderId   String       @unique
-  order     Order        @relation(fields: [orderId], references: [id])
-  amount    Decimal      @db.Decimal(12, 2)
-  status    EscrowStatus @default(HOLD)
-  releasedAt DateTime?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
-  @@map("escrows")
-}
-
-model Payment {
-  id                String   @id @default(uuid())
-  orderId           String   @unique
-  order             Order    @relation(fields: [orderId], references: [id])
-  razorpayOrderId   String?  @unique
-  razorpayPaymentId String?  @unique
-  amount            Decimal  @db.Decimal(12, 2)
-  status            String   @default("PENDING") // PENDING, SUCCESS, FAILED
-  method            String?  // UPI, Card, Net Banking
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@map("payments")
-}
-
-// Legacy: Deprecated in favor of SellerReview for dealers and ProductReview for products
-model Rating {
-  id         String   @id @default(uuid())
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-  dealerId   String
-  dealer     Dealer   @relation(fields: [dealerId], references: [id])
-  rating     Int
-  comment    String?
-  createdAt  DateTime @default(now())
-
-  @@map("ratings")
-}
-
-model Dispute {
-  id                  String        @id @default(uuid())
-  orderId             String
-  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  raisedBy            String        // Customer or Dealer ID
-  reason              String
-  description         String
-  evidenceFiles       String[]
-  status              DisputeStatus @default(OPEN)
-  adminNotes          String?
-  resolutionDate      DateTime?
-  compensationAmount  Decimal?      @db.Decimal(12, 2)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-
-  @@map("disputes")
-}
-
-model Badge {
-  id          String      @id @default(uuid())
-  name        String      @unique
-  description String
-  icon        String?
-  users       UserBadge[]
-
-  @@map("badges")
-}
-
-model UserBadge {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  badgeId   String
-  badge     Badge    @relation(fields: [badgeId], references: [id])
-  earnedAt  DateTime @default(now())
-
-  @@map("user_badges")
-  @@unique([userId, badgeId])
-}
-
-model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  title     String
-  message   String
-  type      String   // ORDER_UPDATE, PAYMENT_SUCCESS, etc.
-  link      String?
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  @@map("notifications")
-  @@index([userId])
-  @@index([createdAt])
-}
-
-model UserBehavior {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  type      String   // VIEW_PRODUCT, SEARCH, VIEW_CATEGORY, ADD_TO_CART
-  targetId  String?  // Product ID or Category Name
-  metadata  Json?    // e.g., search query, time spent
-  createdAt DateTime @default(now())
-
-  @@map("user_behaviors")
-  @@index([userId])
-  @@index([createdAt])
-}
-
-model UserInterest {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  category  String
-  weight    Int      @default(0) // 1-100, calculated based on behavior
-  isExplicit Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([weight])
 }
 
 enum ReviewStatus {
@@ -458,114 +548,62 @@ enum ReviewStatus {
   HIDDEN
 }
 
-model ProductReview {
-  id        String   @id @default(uuid())
-  orderItem String   @unique // Link to specific item in order to prevent duplicates
-  item      OrderItem @relation(fields: [orderItem], references: [id])
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-  rating     Int      // 1-5
-  comment    String?
-  images     String[]
-  status     ReviewStatus @default(PENDING)
-  createdAt  DateTime @default(now())
-
-  @@map("product_reviews")
-  @@index([productId])
-  @@index([status])
-}
-
-model SellerReview {
-  id        String   @id @default(uuid())
-  orderId   String   @unique // One review per order for the seller
-  order     Order    @relation(fields: [orderId], references: [id])
-  dealerId  String
-  dealer    Dealer   @relation(fields: [dealerId], references: [id])
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-  rating     Int      // Overall 1-5
-  deliveryRating Int?
-  packagingRating Int?
-  communicationRating Int?
-  comment    String?
-  status     ReviewStatus @default(PENDING)
-  createdAt  DateTime @default(now())
-
-  @@map("seller_reviews")
-  @@index([dealerId])
-  @@index([status])
-}
-
-// --- MASTER WORKFLOW ADDITIONS ---
-
-model Document {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  type      String   // GST, PAN, CHEQUE, REGISTRATION, ADDRESS_PROOF
-  url       String
-  status    String   @default("PENDING") // PENDING, VERIFIED, REJECTED
-  feedback  String?  // Admin rejection reason
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("documents")
-  @@index([userId])
-  @@index([status])
-}
-
-model SubscriptionPlan {
-  id          String   @id @default(uuid())
-  name        String   // BASIC, PRO, ENTERPRISE
-  price       Decimal  @db.Decimal(10, 2)
-  duration    Int      // Days (e.g., 30, 365)
-  features    Json     // Array of strings or object
-  margin      Decimal  // Default margin percentage allowed
-  rank        Int      // 1, 2, 3 for hierarchy
-  createdAt   DateTime @default(now())
-  subscriptions DealerSubscription[]
-
-  @@map("subscription_plans")
-}
-
-model DealerSubscription {
-  id             String           @id @default(uuid())
+model DealerRequest {
+  id             String        @id @default(uuid())
   dealerId       String
-  dealer         Dealer           @relation(fields: [dealerId], references: [id])
-  planId         String
-  plan           SubscriptionPlan @relation(fields: [planId], references: [id])
-  startDate      DateTime         @default(now())
-  endDate        DateTime
-  status         String           @default("ACTIVE")
-  paymentId      String?
-  createdAt      DateTime         @default(now())
-
-  @@map("dealer_subscriptions")
-  @@index([dealerId])
-  @@index([status])
-}
-
-model Negotiation {
-  id             String   @id @default(uuid())
-  dealerId       String
-  dealer         Dealer   @relation(fields: [dealerId], references: [id])
   manufacturerId String
-  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
-  productId      String
-  product        Product  @relation(fields: [productId], references: [id])
-  
-  status         String   @default("OPEN") // OPEN, ACCEPTED, REJECTED, EXPIRED
-  currentOffer   Decimal  @db.Decimal(12, 2)
-  quantity       Int
-  chatLog        Json?    // Array of messages { sender, message, time }
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  status         RequestStatus @default(PENDING)
+  message        String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  dealer         Dealer        @relation(fields: [dealerId], references: [id])
+  manufacturer   Manufacturer  @relation(fields: [manufacturerId], references: [id])
 
-  @@map("negotiations")
-  @@index([dealerId])
-  @@index([manufacturerId])
-  @@index([status])
+  @@unique([dealerId, manufacturerId])
+  @@map("dealer_requests")
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PooledDemand {
+  id              String            @id @default(uuid())
+  manufacturerId  String
+  productId       String
+  targetQuantity  Int
+  currentQuantity Int               @default(0)
+  status          PoolStatus        @default(OPEN)
+  expiresAt       DateTime
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  participants    PoolParticipant[]
+  manufacturer    Manufacturer      @relation(fields: [manufacturerId], references: [id])
+  product         Product           @relation(fields: [productId], references: [id])
+
+  @@map("pooled_demands")
+}
+
+model PoolParticipant {
+  id        String       @id @default(uuid())
+  poolId    String
+  dealerId  String
+  quantity  Int
+  status    String       @default("COMMITTED")
+  createdAt DateTime     @default(now())
+  pool      PooledDemand @relation(fields: [poolId], references: [id])
+  dealer    Dealer       @relation(fields: [dealerId], references: [id])
+
+  @@unique([poolId, dealerId])
+  @@map("pool_participants")
+}
+
+enum PoolStatus {
+  OPEN
+  LOCKED
+  FULFILLED
+  EXPIRED
+  CANCELLED
 }

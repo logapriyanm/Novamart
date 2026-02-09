@@ -20,6 +20,8 @@ export interface Product {
     manufacturer?: any;
     averageRating?: number;
     reviewCount?: number;
+    specifications?: any;
+    subCategory?: string;
 }
 
 export const productService = {

@@ -24,7 +24,8 @@ export const navbarCategories = [
     { name: 'Cleaning Appliances', href: '/products/category/cleaning-appliances' },
     { name: 'Personal Care Appliances', href: '/products/category/personal-care' },
     { name: 'Smart-Enabled Appliances', href: '/products/category/smart-appliances' },
-    { name: 'Today\'s Deals', href: '/products?sort=deals' }
+    { name: 'Today\'s Deals', href: '/products?sort=deals' },
+    { name: 'Others', href: '/products?cat=others' }
 ];
 
 export const sidebarCategories: MainCategory[] = [
@@ -73,6 +74,12 @@ export const sidebarCategories: MainCategory[] = [
                     { name: 'Coffee Maker', href: '/products/category/coffee-maker' },
                     { name: 'Tea Maker', href: '/products/category/tea-maker' }
                 ]
+            },
+            {
+                label: 'Others',
+                items: [
+                    { name: 'Other Kitchen Appliances', href: '/products/category/kitchen-others' }
+                ]
             }
         ]
     },
@@ -106,6 +113,12 @@ export const sidebarCategories: MainCategory[] = [
                 items: [
                     { name: 'Dishwasher', href: '/products/category/dishwasher' },
                     { name: 'Built-in Dishwasher', href: '/products/category/builtin-dishwasher' }
+                ]
+            },
+            {
+                label: 'Others',
+                items: [
+                    { name: 'Other Large Appliances', href: '/products/category/large-others' }
                 ]
             }
         ]
@@ -257,6 +270,19 @@ export const sidebarCategories: MainCategory[] = [
                 ]
             }
         ]
+    },
+    {
+        id: 'others',
+        label: 'Others',
+        icon: 'FaEllipsisH',
+        subsections: [
+            {
+                label: 'Miscellaneous',
+                items: [
+                    { name: 'Other Products', href: '/products/category/others' }
+                ]
+            }
+        ]
     }
 ];
 
@@ -273,8 +299,18 @@ export const mainCategories = navbarCategories.map(cat => ({
     href: cat.href
 }));
 
+// Categories selectable in the Add Product form
+export const selectableCategories = sidebarCategories;
+
 // Legacy map for compatibility if needed
 export const categorySubcategories: Record<string, string[]> = {
-    'home-appliances': ['Air Conditioners', 'Refrigerators', 'Washing Machines'],
-    // ... populated from above logic if needed, but we should migrate to sidebarCategories
+    'kitchen-appliances': ['Small Kitchen Appliances', 'Cooking Appliances', 'Breakfast Appliances', 'Beverage Appliances', 'Others'],
+    'large-home-appliances': ['Refrigeration', 'Washing & Drying', 'Dish & Cleaning', 'Others'],
+    'heating-cooling': ['Cooling Appliances', 'Air Conditioning', 'Heating Appliances', 'Air Quality', 'Others'],
+    'cleaning-appliances': ['Floor Cleaning', 'Fabric Care', 'Others'],
+    'personal-care': ['Grooming', 'Oral & Health', 'Others'],
+    'smart-appliances': ['Smart Devices', 'Others'],
+    'commercial-appliances': ['Commercial Kitchen', 'Commercial Cleaning', 'Others'],
+    'accessories': ['Spares', 'Others'],
+    'others': ['Miscellaneous']
 };

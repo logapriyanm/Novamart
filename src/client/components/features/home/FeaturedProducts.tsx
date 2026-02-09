@@ -11,25 +11,38 @@ export default function FeaturedProducts() {
     useEffect(() => {
         const fetchFeaturedProducts = async () => {
             try {
-                const data = await productService.getAllProducts({
+                // Fetch products with proper API response handling
+                const response = await productService.getAllProducts({
                     status: 'APPROVED'
                 });
 
-                // Map to UI format - take first 4 products
-                const featured = data.slice(0, 4).map((p: any) => ({
-                    id: p.id,
-                    name: p.name,
-                    price: p.basePrice,
-                    image: p.images?.[0] || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=600&auto=format&fit=crop',
-                    rating: p.rating || 4.2 + (Math.random() * 0.5), // Fallback for aesthetic
-                    brand: p.manufacturer?.companyName || 'NovaMart',
-                    seller: { name: p.manufacturer?.companyName || 'Verified Seller', isVerified: true },
-                    highlights: {
-                        freeDelivery: p.basePrice > 1000,
-                        installation: p.category?.toLowerCase() === 'machinery',
-                        warranty: p.warranty || '6 Months'
-                    }
-                }));
+                // Handle response - check if it's wrapped in ApiResponse or direct array
+                const productsData = Array.isArray(response) ? response : (response as any)?.data || [];
+
+                // Map to UI format - take first 8 products
+                const featured = productsData.slice(0, 8).map((p: any) => {
+                    // Get first inventory item for pricing
+                    const firstInventory = p.inventory?.[0];
+                    const price = firstInventory?.price || p.basePrice || 0;
+
+                    return {
+                        id: p.id,
+                        name: p.name,
+                        price: price,
+                        image: p.images?.[0] || '/assets/placeholder-product.png',
+                        rating: p.averageRating || 0,
+                        brand: p.manufacturer?.companyName || 'NovaMart',
+                        seller: {
+                            name: p.manufacturer?.companyName || 'Verified Seller',
+                            isVerified: p.manufacturer?.isVerified || false
+                        },
+                        highlights: {
+                            freeDelivery: price > 1000,
+                            installation: p.category?.toLowerCase().includes('machinery'),
+                            warranty: p.specifications?.warranty || '6 Months'
+                        }
+                    };
+                });
 
                 setProducts(featured);
             } catch (error) {
@@ -51,7 +64,7 @@ export default function FeaturedProducts() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="bg-white rounded-[2.5rem] p-4 border border-slate-100 animate-pulse h-96"></div>
+                        <div key={i} className="bg-white rounded-[10px] p-4 border border-foreground/5 animate-pulse h-96"></div>
                     ))}
                 </div>
             </div>

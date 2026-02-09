@@ -100,8 +100,16 @@ export default function OrderDetailsPage() {
                                         <h3 className="font-bold text-slate-800">{item.product?.name || 'Product Name'}</h3>
                                         <p className="text-sm text-slate-500 mt-1">Qty: {item.quantity} × ₹{item.price}</p>
                                     </div>
-                                    <div className="text-right font-black text-slate-800">
-                                        ₹{(item.price * item.quantity).toLocaleString()}
+                                    <div className="text-right">
+                                        <p className="font-black text-slate-800 mb-2">₹{(item.price * item.quantity).toLocaleString()}</p>
+                                        {order.status === 'DELIVERED' && (
+                                            <button
+                                                onClick={() => router.push(`/orders/${order.id}/review?productId=${item.product?.id}`)}
+                                                className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 hover:underline"
+                                            >
+                                                Rate & Review
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -129,8 +137,8 @@ export default function OrderDetailsPage() {
                             <div className="relative z-10">
                                 <div className="flex items-center gap-4 mb-6">
                                     <div className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border ${order.escrow.status === 'RELEASED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                            order.escrow.status === 'FROZEN' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                                'bg-blue-50 text-blue-600 border-blue-100'
+                                        order.escrow.status === 'FROZEN' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                            'bg-blue-50 text-blue-600 border-blue-100'
                                         }`}>
                                         Status: {order.escrow.status}
                                     </div>

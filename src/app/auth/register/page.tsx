@@ -24,8 +24,14 @@ type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';
 
 export default function Register({ initialRole }: { initialRole?: Role | null }) {
     const router = useRouter();
-    const { login } = useAuth();
+    const { login, isAuthenticated, isLoading: authLoading } = useAuth();
     const { showSnackbar } = useSnackbar();
+
+    React.useEffect(() => {
+        if (isAuthenticated && !authLoading) {
+            router.replace('/');
+        }
+    }, [isAuthenticated, authLoading, router]);
     const [step, setStep] = useState(initialRole ? 2 : 1);
     const [role, setRole] = useState<Role | null>(initialRole || null);
     const [showPassword, setShowPassword] = useState(false);
@@ -115,7 +121,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 if (res.token) {
                     apiClient.setToken(res.token);
                     // Force a session refresh
-                    window.location.href = '/customer/profile';
+                    window.location.href = '/profile';
                     return;
                 }
             }
@@ -166,8 +172,8 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 return (
                     <div className="space-y-8 animate-fade-in">
                         <div className="text-center space-y-2">
-                            <h2 className="text-3xl font-black text-[#10367D]">Choose Your Identity</h2>
-                            <p className="text-[#1E293B]/60 text-[10px] font-bold uppercase tracking-[0.2em]">Select your role in the Novamart Ecosystem</p>
+                            <h2 className="text-3xl font-black text-black italic uppercase">Choose Your Identity</h2>
+                            <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-[0.3em]">Select your role in the NovaMart Ecosystem</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {[
@@ -178,14 +184,14 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                                 <button
                                     key={r.id}
                                     onClick={() => handleRoleSelect(r.id as Role)}
-                                    className="p-8 rounded-[2.5rem] bg-white border border-[#10367D]/5 hover:border-[#10367D] hover:shadow-xl hover:shadow-[#10367D]/10 transition-all group flex flex-col items-center text-center gap-6"
+                                    className="p-8 rounded-[10px] bg-white border border-black/5 hover:border-black hover:shadow-xl hover:shadow-black/10 transition-all group flex flex-col items-center text-center gap-6"
                                 >
-                                    <div className="w-20 h-20 rounded-3xl bg-[#10367D]/5 flex items-center justify-center text-[#10367D] group-hover:bg-[#10367D] group-hover:text-white transition-all">
+                                    <div className="w-20 h-20 rounded-[10px] bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all">
                                         <r.icon className="w-10 h-10" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black text-[#1E293B] mb-2">{r.label}</h3>
-                                        <p className="text-xs text-slate-400 font-bold">{r.desc}</p>
+                                        <h3 className="text-xl font-black text-black mb-2 uppercase italic">{r.label}</h3>
+                                        <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest">{r.desc}</p>
                                     </div>
                                 </button>
                             ))}
@@ -196,15 +202,15 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 return (
                     <div className="space-y-8 max-w-lg mx-auto">
                         <div className="text-center space-y-2">
-                            <h2 className="text-3xl font-black text-[#10367D]">Fast Onboarding</h2>
-                            <p className="text-[#1E293B]/60 text-[10px] font-bold uppercase tracking-widest italic tracking-tight">Enter your official details to proceed</p>
+                            <h2 className="text-3xl font-black text-black italic uppercase">Fast Onboarding</h2>
+                            <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-[0.3em]">Enter your official details to proceed</p>
                         </div>
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 gap-4">
                                 <input
                                     type="text"
                                     placeholder=" Name"
-                                    className={`w-full bg-white/60 border ${errors.name ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-5 text-sm font-bold focus:outline-none focus:border-[#10367D] transition-all`}
+                                    className={`w-full bg-white/60 border ${errors.name ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-5 text-sm font-bold focus:outline-none focus:border-black transition-all`}
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 />
@@ -212,7 +218,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                                 <input
                                     type="email"
                                     placeholder="Email"
-                                    className={`w-full bg-white/60 border ${errors.email ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-5 text-sm font-bold focus:outline-none focus:border-[#10367D] transition-all`}
+                                    className={`w-full bg-white/60 border ${errors.email ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-5 text-sm font-bold focus:outline-none focus:border-black transition-all`}
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
                                 />
@@ -221,14 +227,14 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="Password "
-                                        className={`w-full bg-white/60 border ${errors.password ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-5 pr-12 text-sm font-bold focus:outline-none focus:border-[#10367D] transition-all`}
+                                        className={`w-full bg-white/60 border ${errors.password ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-5 pr-12 text-sm font-bold focus:outline-none focus:border-black transition-all`}
                                         value={formData.password}
                                         onChange={e => setFormData({ ...formData, password: e.target.value })}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#10367D]/40 hover:text-[#10367D] transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-black/20 hover:text-black transition-colors"
                                     >
                                         {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
                                     </button>
@@ -239,14 +245,14 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                                         <input
                                             type="tel"
                                             placeholder="Mobile Number"
-                                            className={`flex-1 bg-white/60 border ${errors.phone ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-5 text-sm font-bold focus:outline-none focus:border-[#10367D] transition-all`}
+                                            className={`flex-1 bg-white/60 border ${errors.phone ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-5 text-sm font-bold focus:outline-none focus:border-black transition-all`}
                                             value={formData.phone}
                                             onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                         />
                                         {!otpSent && (
                                             <button
                                                 onClick={() => setOtpSent(true)}
-                                                className="px-6 bg-[#10367D] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#1E5F86] transition-all"
+                                                className="px-6 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-black/80 transition-all font-black"
                                             >
                                                 Get OTP
                                             </button>
@@ -258,7 +264,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                                     <input
                                         type="text"
                                         placeholder="0 0 0 0 0 0"
-                                        className="w-full bg-white border-2 border-[#10367D] rounded-2xl p-5 text-center text-sm font-black tracking-[1em] focus:outline-none"
+                                        className="w-full bg-white border-2 border-black rounded-[10px] p-5 text-center text-sm font-black tracking-[1em] focus:outline-none"
                                         value={formData.otp}
                                         onChange={e => setFormData({ ...formData, otp: e.target.value })}
                                     />
@@ -268,7 +274,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                         <button
                             onClick={nextStep}
                             disabled={isLoading}
-                            className="w-full bg-[#10367D] text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl transition-all hover:scale-[1.02] uppercase tracking-widest text-sm disabled:opacity-50"
+                            className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 transition-all hover:scale-[1.02] uppercase tracking-[0.3em] text-[10px] disabled:opacity-50"
                         >
                             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                                 <>
@@ -286,7 +292,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                         <div className="w-20 h-20 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
                             <CheckCircle2 className="w-10 h-10" />
                         </div>
-                        <h2 className="text-3xl font-black text-[#10367D]">Welcome to Novamart</h2>
+                        <h2 className="text-3xl font-black text-[#10367D]">Welcome to NovaMart</h2>
                         <p className="text-[#1E293B]/70 font-medium">Your account has been activated. You can now browse products and purchase securely with escrow.</p>
                         <Link href="/profile">
                             <button className="w-full bg-[#10367D] text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-xs">Go to Profile</button>
@@ -295,15 +301,15 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 ) : (
                     <div className="space-y-6 max-md mx-auto">
                         <div className="text-center space-y-2">
-                            <h2 className="text-3xl font-black text-[#10367D]">Business Verification</h2>
-                            <p className="text-[#1E293B]/60 text-sm font-bold uppercase tracking-widest italic">Mandatory checks for {role?.toLowerCase()}s</p>
+                            <h2 className="text-3xl font-black text-black italic uppercase">Business Verification</h2>
+                            <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-[0.3em]">Mandatory checks for {role?.toLowerCase()}s</p>
                         </div>
                         <div className="space-y-4">
                             <div className="flex flex-col gap-1">
                                 <input
                                     type="text"
                                     placeholder={role === 'MANUFACTURER' ? "Company Name" : "Business Name"}
-                                    className={`w-full bg-white/60 border ${errors.companyName || errors.businessName ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-4 font-bold focus:outline-none focus:border-[#10367D] transition-all text-sm`}
+                                    className={`w-full bg-white/60 border ${errors.companyName || errors.businessName ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-4 font-bold focus:outline-none focus:border-black transition-all text-sm`}
                                     value={role === 'MANUFACTURER' ? formData.companyName : formData.businessName}
                                     onChange={e => setFormData({ ...formData, [role === 'MANUFACTURER' ? 'companyName' : 'businessName']: e.target.value })}
                                 />
@@ -313,7 +319,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                                 <input
                                     type="text"
                                     placeholder="GST Number"
-                                    className={`w-full bg-white/60 border ${errors.gstNumber ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-4 font-bold focus:outline-none focus:border-[#10367D] transition-all text-sm`}
+                                    className={`w-full bg-white/60 border ${errors.gstNumber ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-4 font-bold focus:outline-none focus:border-black transition-all text-sm`}
                                     value={formData.gstNumber}
                                     onChange={e => setFormData({ ...formData, gstNumber: e.target.value })}
                                 />
@@ -322,7 +328,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                             <div className="flex flex-col gap-1">
                                 <textarea
                                     placeholder="Business Address"
-                                    className={`w-full bg-white/60 border ${errors.address ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl p-4 font-bold focus:outline-none focus:border-[#10367D] transition-all h-32 text-sm`}
+                                    className={`w-full bg-white/60 border ${errors.address ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-4 font-bold focus:outline-none focus:border-black transition-all h-32 text-sm`}
                                     value={formData.address}
                                     onChange={e => setFormData({ ...formData, address: e.target.value })}
                                 />
@@ -331,7 +337,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                         </div>
                         <button
                             onClick={nextStep}
-                            className="w-full bg-[#10367D] text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-[#1E5F86] transition-all uppercase tracking-widest text-xs"
+                            className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 hover:bg-black/80 transition-all uppercase tracking-[0.3em] text-[10px]"
                         >
                             Finalize Application
                             <ArrowRight className="w-5 h-5" />
@@ -357,22 +363,22 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
     };
 
     return (
-        <div className="min-h-screen bg-[#EBEBEB] flex flex-col items-center justify-center p-4 md:p-8 pt-24 md:pt-32 relative overflow-hidden">
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 md:p-8 pt-24 md:pt-32 relative overflow-hidden text-black">
             {/* Ambient Background Glows */}
-            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#10367D]/10 blur-[150px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#10367D]/5 blur-[150px] rounded-full pointer-events-none" />
+            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-black/5 blur-[150px] rounded-full pointer-events-none" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-black/5 blur-[150px] rounded-full pointer-events-none" />
 
-            <div className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center p-2 mb-6 md:mb-8 shadow-xl shadow-[#10367D]/10 overflow-hidden border border-[#10367D]/5 relative z-10">
-                <img src="/logo.png" alt="Novamart" className="w-full h-full object-contain" />
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-[10px] flex items-center justify-center p-2 mb-6 md:mb-8 shadow-xl shadow-black/10 overflow-hidden border border-black/5 relative z-10">
+                <img src="/assets/Novamart.png" alt="NovaMart" className="w-full h-full object-contain" />
             </div>
 
             {/* Progress Bar */}
             {step < 4 && (
-                <div className="w-full max-w-xl md:max-w-2xl bg-white/40 h-1.5 rounded-full mb-8 md:mb-12 overflow-hidden relative z-10">
+                <div className="w-full max-w-xl md:max-w-2xl bg-black/10 h-1.5 rounded-full mb-8 md:mb-12 overflow-hidden relative z-10">
                     <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${(step / 3) * 100}%` }}
-                        className="h-full bg-[#10367D] shadow-lg shadow-[#10367D]/20"
+                        className="h-full bg-black shadow-lg shadow-black/20"
                     />
                 </div>
             )}
@@ -394,10 +400,10 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
             {step > 1 && step < 4 && (
                 <button
                     onClick={prevStep}
-                    className="mt-6 md:mt-8 flex items-center gap-2 text-[#10367D]/60 font-bold hover:text-[#10367D] transition-colors relative z-10 uppercase tracking-widest text-[10px]"
+                    className="mt-6 md:mt-8 flex items-center gap-2 text-black/40 font-black hover:text-black transition-colors relative z-10 uppercase tracking-widest text-[9px]"
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    Back
+                    Back Previous
                 </button>
             )}
         </div>

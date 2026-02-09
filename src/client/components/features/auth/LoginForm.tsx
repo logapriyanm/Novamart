@@ -21,8 +21,18 @@ import { useSnackbar } from '../../../context/SnackbarContext';
 
 export default function LoginForm() {
     const router = useRouter();
-    const { login, loginWithGoogle, loginWithPhone, sendOtp } = useAuth();
+    const { login, loginWithGoogle, loginWithPhone, sendOtp, isAuthenticated, isLoading: authLoading, user } = useAuth();
     const { showSnackbar } = useSnackbar();
+
+    React.useEffect(() => {
+        if (isAuthenticated && !authLoading && user) {
+            const role = user.role;
+            if (role === 'ADMIN') router.replace('/admin/dashboard');
+            else if (role === 'MANUFACTURER') router.replace('/manufacturer/dashboard');
+            else if (role === 'DEALER') router.replace('/dealer/dashboard');
+            else router.replace('/');
+        }
+    }, [isAuthenticated, authLoading, user, router]);
     const [loginMethod, setLoginMethod] = useState<'phone' | 'email'>('phone');
     const [authMode, setAuthMode] = useState<'otp' | 'password'>('password');
     const [showPassword, setShowPassword] = useState(false);
@@ -107,18 +117,26 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="bg-white/40 backdrop-blur-xl border border-[#10367D]/10 rounded-[2.5rem] p-8 lg:p-10 shadow-2xl shadow-[#10367D]/5">
+        <div className="bg-white/40 backdrop-blur-xl border border-black/10 rounded-[10px] p-8 lg:p-10 shadow-2xl shadow-black/5">
+            <div className="text-center flex mb-10">
+                <div className="w-20 h-15 bg-white rounded-4xl flex items-center justify-center p-2 mx-auto mb-6 shadow-xl shadow-black/10 overflow-hidden border border-black/5">
+                    <img src="/assets/Novamart.png" alt="NovaMart" className="w-full h-full object-contain" />
+                </div>
+                <h1 className="text-xl font-black text-black tracking-tight italic uppercase"> Continue your journey with NovaMart</h1>
+
+            </div>
+
             {/* Method Switcher */}
-            <div className="flex bg-[#10367D]/5 p-1.5 rounded-2xl mb-8">
+            <div className="flex bg-black/5 p-1.5 rounded-[10px] mb-8">
                 <button
                     onClick={() => { setLoginMethod('phone'); setOtpSent(false); }}
-                    className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${loginMethod === 'phone' ? 'bg-[#10367D] text-white shadow-lg shadow-[#10367D]/20' : 'text-[#10367D]/60 hover:text-[#10367D]'}`}
+                    className={`flex-1 py-3 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all ${loginMethod === 'phone' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-black/40 hover:text-black'}`}
                 >
                     Phone
                 </button>
                 <button
                     onClick={() => { setLoginMethod('email'); setOtpSent(false); setAuthMode('password'); }}
-                    className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${loginMethod === 'email' ? 'bg-[#10367D] text-white shadow-lg shadow-[#10367D]/20' : 'text-[#10367D]/60 hover:text-[#10367D]'}`}
+                    className={`flex-1 py-3 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all ${loginMethod === 'email' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-black/40 hover:text-black'}`}
                 >
                     Email
                 </button>
@@ -126,17 +144,19 @@ export default function LoginForm() {
 
             <form onSubmit={handleLogin} className="space-y-6">
                 <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[#10367D] uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">
                         {loginMethod === 'phone' ? 'Phone Number' : 'Email Address'}
                     </label>
                     <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#10367D]/60">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
                             {loginMethod === 'phone' ? <Phone className="w-5 h-5" /> : <Mail className="w-5 h-5" />}
                         </div>
                         <input
                             type="text"
+                            name="identifier"
+                            autoComplete={loginMethod === 'phone' ? "tel" : "email"}
                             placeholder={loginMethod === 'phone' ? "+91 00000 00000" : "name@company.com"}
-                            className={`w-full bg-white/60 border ${errors.identifier ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl py-4 pl-12 pr-4 text-sm font-bold focus:outline-none focus:border-[#10367D] transition-all`}
+                            className={`w-full bg-white/60 border ${errors.identifier ? 'border-rose-500' : 'border-black/10'} rounded-[10px] py-4 pl-12 pr-4 text-sm font-bold focus:outline-none focus:border-black transition-all`}
                             value={formData.identifier}
                             onChange={e => {
                                 setFormData({ ...formData, identifier: e.target.value });
@@ -157,15 +177,17 @@ export default function LoginForm() {
                             className="space-y-6"
                         >
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-[#10367D] uppercase tracking-widest ml-1">Secure Password</label>
+                                <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">Secure Password</label>
                                 <div className="relative">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#10367D]/60">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
                                         <Lock className="w-5 h-5" />
                                     </div>
                                     <input
                                         type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        autoComplete="current-password"
                                         placeholder="••••••••"
-                                        className={`w-full bg-white/60 border ${errors.password ? 'border-rose-500' : 'border-[#10367D]/10'} rounded-2xl py-4 pl-12 pr-12 text-sm focus:outline-none focus:border-[#10367D] transition-all`}
+                                        className={`w-full bg-white/60 border ${errors.password ? 'border-rose-500' : 'border-black/10'} rounded-[10px] py-4 pl-12 pr-12 text-sm focus:outline-none focus:border-black transition-all`}
                                         value={formData.password}
                                         onChange={e => {
                                             setFormData({ ...formData, password: e.target.value });
@@ -175,7 +197,7 @@ export default function LoginForm() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#10367D]/40 hover:text-[#10367D] transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-black/20 hover:text-black transition-colors"
                                     >
                                         {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
                                     </button>
@@ -184,12 +206,12 @@ export default function LoginForm() {
                             </div>
 
                             <div className="flex items-center justify-between px-2">
-                                <button type="button" className="text-[10px] font-black text-[#10367D] uppercase tracking-wider hover:underline underline-offset-4">Forgot Password?</button>
+                                <button type="button" className="text-[10px] font-black text-black uppercase tracking-wider hover:underline underline-offset-4">Forgot Password?</button>
                                 {loginMethod === 'phone' && (
                                     <button
                                         type="button"
                                         onClick={() => setAuthMode('otp')}
-                                        className="text-[10px] font-black text-[#10367D] uppercase tracking-wider hover:underline underline-offset-4 flex items-center gap-1.5"
+                                        className="text-[10px] font-black text-black uppercase tracking-wider hover:underline underline-offset-4 flex items-center gap-1.5"
                                     >
                                         <Smartphone className="w-3 h-3" />
                                         Login via OTP
@@ -200,7 +222,7 @@ export default function LoginForm() {
                             <button
                                 type="submit"
                                 disabled={isLoading || !formData.identifier || !formData.password}
-                                className="w-full bg-[#10367D] text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-xs"
+                                className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-[10px]"
                             >
                                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Enter Secure Portal'}
                                 {!isLoading && <ArrowRight className="w-5 h-5" />}
@@ -217,15 +239,15 @@ export default function LoginForm() {
                             {otpSent ? (
                                 <div className="space-y-4">
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-[#10367D] uppercase tracking-widest ml-1">One-Time Password</label>
+                                        <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">One-Time Password</label>
                                         <div className="relative">
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#10367D]/60">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
                                                 <Smartphone className="w-5 h-5" />
                                             </div>
                                             <input
                                                 type="text"
                                                 placeholder="0 0 0 0 0 0"
-                                                className="w-full bg-white/60 border border-[#10367D]/10 rounded-2xl py-4 pl-12 pr-4 text-sm tracking-[0.5em] font-black focus:outline-none focus:border-[#10367D] transition-all"
+                                                className="w-full bg-white/60 border border-black/10 rounded-[10px] py-4 pl-12 pr-4 text-sm tracking-[0.5em] font-black focus:outline-none focus:border-black transition-all"
                                                 value={formData.otp}
                                                 onChange={e => setFormData({ ...formData, otp: e.target.value })}
                                             />
@@ -234,7 +256,7 @@ export default function LoginForm() {
                                     <button
                                         type="submit"
                                         disabled={isLoading}
-                                        className="w-full bg-[#10367D] text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all uppercase tracking-widest text-xs"
+                                        className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all uppercase tracking-widest text-[10px]"
                                     >
                                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Log In Securely'}
                                     </button>
@@ -245,7 +267,7 @@ export default function LoginForm() {
                                         <button
                                             type="button"
                                             onClick={() => setAuthMode('password')}
-                                            className="text-[10px] font-black text-[#10367D] uppercase tracking-wider hover:underline underline-offset-4 flex items-center gap-1.5"
+                                            className="text-[10px] font-black text-black uppercase tracking-wider hover:underline underline-offset-4 flex items-center gap-1.5"
                                         >
                                             <FaKey className="w-3 h-3" />
                                             Use Password
@@ -255,7 +277,7 @@ export default function LoginForm() {
                                         type="button"
                                         onClick={handleSendOTP}
                                         disabled={!formData.identifier || isLoading}
-                                        className="w-full bg-[#10367D] text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-xs"
+                                        className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-[10px]"
                                     >
                                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send OTP Code'}
                                         {!isLoading && <ArrowRight className="w-5 h-5" />}
@@ -266,24 +288,24 @@ export default function LoginForm() {
                     )}
                 </AnimatePresence>
                 {errors.general && (
-                    <div className="bg-rose-50 border border-rose-200 p-4 rounded-2xl animate-shake">
+                    <div className="bg-rose-50 border border-rose-200 p-4 rounded-[10px] animate-shake">
                         <p className="text-rose-600 text-[10px] font-black uppercase text-center tracking-wider">{errors.general}</p>
                     </div>
                 )}
             </form>
 
-            <div className="mt-8 pt-8 border-t border-[#10367D]/10 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <div className="mt-2 pt-8 border-black/10 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 <div className="flex flex-col gap-6">
                     <div className="relative flex items-center gap-4">
-                        <div className="flex-1 h-px bg-[#10367D]/10" />
-                        <span className="text-[9px] font-black text-[#10367D]/40">OR SECURE SOCIAL ACCESS</span>
-                        <div className="flex-1 h-px bg-[#10367D]/10" />
+                        <div className="flex-1 h-px bg-black/10" />
+                        <span className="text-[9px] font-black text-black/40">OR SECURE SOCIAL ACCESS</span>
+                        <div className="flex-1 h-px bg-black/10" />
                     </div>
 
                     <div className="flex justify-center">
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
-                            onError={() => { }}
+                            onError={() => showSnackbar('Google authentication failed', 'error')}
                             useOneTap
                             theme="outline"
                             shape="pill"
@@ -293,8 +315,8 @@ export default function LoginForm() {
                     </div>
 
                     <div className="pt-2 flex items-center justify-center gap-2">
-                        <span>New to Novamart?</span>
-                        <Link href="/auth/register" className="text-[#10367D] font-black hover:underline">Register Now</Link>
+                        <span>New to NovaMart?</span>
+                        <Link href="/auth/register" className="text-black font-black hover:underline uppercase italic">Register Now</Link>
                     </div>
                 </div>
             </div>

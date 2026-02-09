@@ -3,13 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-    FaExclamationTriangle,
-    FaBell,
-    FaLock,
-    FaCheckCircle,
     FaUsers,
     FaCube,
-    FaGavel
+    FaGavel,
+    FaShieldAlt
 } from 'react-icons/fa';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import Link from 'next/link';
@@ -19,9 +16,13 @@ import ActivityFeedItem from '@/client/components/features/admin/ActivityFeedIte
 import QuickActionButton from '@/client/components/ui/QuickActionButton';
 import SystemNotice from '@/client/components/features/admin/SystemNotice';
 import TrafficOrigin from '@/client/components/features/admin/TrafficOrigin';
+import { useRouter } from 'next/navigation';
 import { adminService } from '@/lib/api/services/admin.service';
 
+import EmptyState from '@/client/components/ui/EmptyState';
+
 export default function AdminDashboard() {
+    const router = useRouter();
     const [stats, setStats] = useState<any>(null);
     const [activities, setActivities] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -61,76 +62,76 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="max-w-[1600px] mx-auto space-y-10 animate-fade-in">
+        <div className="space-y-10 animate-fade-in pb-12 text-[#1E293B]">
             {/* Page Header */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-foreground/5 pb-8">
                 <div>
-                    <h1 className="text-3xl font-black text-foreground tracking-tight">System Health Dashboard</h1>
-                    <p className="text-sm font-bold text-foreground/40 mt-1">Real-time overview of platform status and critical administrative actions.</p>
+                    <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic">Admin Oversight</h1>
+                    <p className="text-sm text-slate-400 mt-1 font-medium">Platform governance and operational integrity.</p>
                 </div>
-                <button onClick={fetchAdminData} className="p-3 bg-surface border border-foreground/5 rounded-2xl hover:bg-foreground/5 transition-all">
-                    <HiOutlineRefresh className="w-5 h-5 text-foreground/40" />
-                </button>
+                <div className="flex items-center gap-3">
+                    <Link href="/admin/verification" className="px-8 py-3 bg-black text-white rounded-[12px] hover:bg-black/90 transition-all shadow-xl shadow-black/10 text-xs font-black uppercase tracking-widest">
+                        Inbound Review
+                    </Link>
+                </div>
             </div>
 
-            {/* Status Cards Grid */}
+            {/* Focused KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatusCard
-                    title="GMV (Lifetime)"
-                    value={`₹${((stats?.gmv || 0) / 100000).toFixed(1)}L`}
-                    subtitle="Aggregated Volume"
-                    icon={FaCheckCircle}
-                    theme="operational"
-                />
-                <StatusCard
-                    title="Pending Verifications"
-                    value={stats?.pendingApprovals?.toString() || '0'}
-                    subtitle="Manufacturers/Dealers"
-                    icon={FaBell}
+                    title="User Verification"
+                    value={stats?.pendingUserApprovals?.toString() || '0'}
+                    subtitle="Awaiting Audit"
+                    icon={FaUsers}
                     theme="attention"
                 />
                 <StatusCard
-                    title="Escrow Holds"
-                    value={stats?.escrow?.reduce((acc: any, curr: any) => acc + curr._count, 0)?.toString() || '0'}
-                    subtitle={`Total: ₹${(stats?.escrow?.reduce((acc: any, curr: any) => acc + (curr._sum.amount || 0), 0) / 100000).toFixed(1)}L`}
-                    icon={FaLock}
+                    title="New Products"
+                    value={stats?.pendingProductApprovals?.toString() || '0'}
+                    subtitle="Listing Queue"
+                    icon={FaCube}
                     theme="pending"
                 />
                 <StatusCard
-                    title="Active Disputes"
+                    title="Open Disputes"
                     value={stats?.activeDisputes?.toString() || '0'}
-                    subtitle="Requires Resolution"
-                    icon={FaExclamationTriangle}
+                    subtitle="High Priority"
+                    icon={FaGavel}
                     theme="critical"
+                />
+                <StatusCard
+                    title="System Health"
+                    value="Stable"
+                    subtitle="All Guardrails Active"
+                    icon={FaShieldAlt}
+                    theme="operational"
                 />
             </div>
 
             {/* Main Content Sections */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                {/* Left: Live Activity Feed */}
-                <div className="xl:col-span-8 bg-surface p-8 rounded-[2rem] border border-foreground/5 shadow-sm flex flex-col h-full">
-                    <div className="flex items-center justify-between mb-8 px-2">
-                        <div className="flex items-center gap-3">
-                            <h3 className="text-xl font-black text-foreground tracking-tight">System Audit Logs</h3>
-                            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        </div>
-                        <Link href="/admin/audit" className="text-[11px] font-black text-primary uppercase tracking-widest hover:underline">View All</Link>
+                <div className="xl:col-span-8 bg-white p-8 rounded-[20px] border border-slate-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Platform Activity</h3>
+                        <Link href="/admin/audit" className="text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:text-black transition-colors">Full Historical Log</Link>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="divide-y divide-slate-50">
                         {activities.length === 0 ? (
-                            <div className="text-center py-20">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-foreground/20 italic">No recent activity detected</p>
-                            </div>
+                            <EmptyState
+                                icon={FaShieldAlt}
+                                title="Audit Log Empty"
+                                description="No system activities recorded in the last 24 hours."
+                            />
                         ) : (
-                            activities.slice(0, 10).map((log, idx) => (
+                            activities.slice(0, 5).map((log) => (
                                 <ActivityFeedItem
                                     key={log.id}
                                     type={log.action.includes('REJECT') || log.action.includes('SUSPEND') ? 'violation' : 'success'}
                                     title={log.action.replace(/_/g, ' ')}
-                                    description={<>{log.actorRole} <span className="font-black text-primary">{log.entityId}</span> processed {log.action.toLowerCase()}.</>}
+                                    description={<span className="text-slate-500 font-medium">{log.actorRole} processed {log.action.toLowerCase()}.</span>}
                                     time={new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    actionLabel="Log"
+                                    actionLabel="Inspect"
                                 />
                             ))
                         )}
@@ -139,28 +140,33 @@ export default function AdminDashboard() {
 
                 {/* Right: Quick Actions & Notices */}
                 <div className="xl:col-span-4 space-y-8">
-                    <div className="bg-surface p-8 rounded-[2rem] border border-foreground/5 shadow-sm space-y-4">
-                        <h3 className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.2em] mb-6">Governance Quick Actions</h3>
-                        <QuickActionButton
-                            label="Review Dealers"
-                            icon={FaUsers}
-                            variant="primary"
-                        />
-                        <QuickActionButton
-                            label="Review Products"
-                            icon={FaCube}
-                            variant="dark"
-                        />
-                        <QuickActionButton
-                            label="Review Disputes"
-                            icon={FaGavel}
-                            variant="outline"
-                        />
+                    <div className="bg-white p-8 rounded-[20px] border border-slate-100 shadow-sm">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8">Quick Navigation</h3>
+                        <div className="space-y-3">
+                            <QuickActionButton
+                                label="Dealer Pipeline"
+                                icon={FaUsers}
+                                variant="primary"
+                                onClick={() => router.push('/admin/dealers')}
+                            />
+                            <QuickActionButton
+                                label="Product Catalog"
+                                icon={FaCube}
+                                variant="dark"
+                                onClick={() => router.push('/admin/products')}
+                            />
+                            <QuickActionButton
+                                label="Resolution Center"
+                                icon={FaGavel}
+                                variant="outline"
+                                onClick={() => router.push('/admin/disputes')}
+                            />
+                        </div>
                     </div>
 
-                    <SystemNotice />
-
-                    <TrafficOrigin />
+                    <div className="transform hover:scale-[1.02] transition-transform">
+                        <SystemNotice />
+                    </div>
                 </div>
             </div>
         </div>

@@ -96,22 +96,22 @@ export default function Navbar() {
     return (
         <header className="fixed top-0 left-0 right-0 z-[100] bg-background border-b border-foreground/5">
             {/* Top Row: Logo, Search, User Actions */}
-            <div className="w-full mx-auto px-4 lg:px-8 py-2">
+            <div className="w-full mx-auto px-4 lg:px-12 py-2">
                 <div className="flex items-center justify-between gap-4 lg:gap-8">
                     {/* Brand & Mobile Toggle */}
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="lg:hidden p-2 hover:bg-foreground/5 rounded-lg"
+                            className="lg:hidden p-2 hover:bg-foreground/5 rounded-[10px]"
                         >
                             <Menu className="w-6 h-6 text-foreground/60" />
                         </button>
                         <Link href="/" className="flex items-center gap-2 group">
-                            <div className="relative w-12 h-12 rounded-full border-3 border-primary overflow-hidden">
-                                <img src="/assets/Novamart.png" alt="Novamart" className="w-full bg-white h-full object-cover" />
+                            <div className="relative w-12 h-12 p-2 rounded-full border-2 border-black overflow-hidden flex items-center justify-center bg-white shadow-sm group-hover:shadow-md transition-all">
+                                <img src="/assets/Novamart.png" alt="NovaMart" className="w-8 h-8 object-contain" />
                             </div>
                             <span className="text-2xl font-black text-foreground tracking-tighter hidden sm:block">
-                                Novamart
+                                NovaMart
                             </span>
                         </Link>
                     </div>
@@ -119,14 +119,14 @@ export default function Navbar() {
 
                     {/* Actions - Right */}
                     <div className="flex items-center gap-6 lg:gap-8">
-                        <Link href="/products" className="hidden lg:flex items-center gap-2 hover:bg-foreground/5 text-foreground/60 hover:text-primary px-5 py-2.5 rounded-full transition-all duration-300 group font-bold">
+                        <Link href="/products" className="btn-primary hidden lg:flex">
                             <FaBox className="w-4 h-4" />
-                            <span className="text-xs uppercase tracking-widest">Products</span>
+                            <span>Products</span>
                         </Link>
 
 
-                        <div className="flex-1 max-w-2xl hidden lg:flex items-center mr-8">
-                            <form onSubmit={handleSearch} className="flex w-full h-10 bg-surface border-2 border-primary/20 rounded-full overflow-hidden shadow-sm focus-within:border-primary transition-colors">
+                        <div className="flex-1 max-w-2xl hidden xl:flex items-center mr-8">
+                            <form onSubmit={handleSearch} className="flex w-full h-10 bg-surface border-2 border-black/10 rounded-[10px] overflow-hidden shadow-sm focus-within:border-black transition-colors">
 
                                 <input
                                     type="text"
@@ -136,7 +136,7 @@ export default function Navbar() {
                                     className="flex-1 px-4 text-sm focus:outline-none bg-surface text-foreground font-medium placeholder:text-foreground/30"
                                 />
 
-                                <button type="submit" className="bg-primary hover:bg-primary/90 text-background px-6 transition-colors flex items-center justify-center group relative overflow-hidden">
+                                <button type="submit" className="bg-black hover:bg-black/90 text-background px-6 transition-colors flex items-center justify-center group relative overflow-hidden">
                                     <div className="relative w-6 h-6 group-hover:scale-110 transition-transform">
                                         <img
                                             src="/assets/search-hover-spin.svg"
@@ -149,20 +149,33 @@ export default function Navbar() {
                         </div>
 
 
-                        <Link href="/contact" className="hidden lg:flex items-center gap-2 hover:bg-foreground/5 text-foreground/60 hover:text-primary px-5 py-2.5 rounded-full transition-all duration-300 group font-bold">
-                            <FaHeadset className="w-4 h-4" />
-                            <span className="text-xs uppercase tracking-widest">Support</span>
-                        </Link>
+
 
                         {user?.role === 'ADMIN' && (
-                            <Link href="/admin" className="hidden lg:flex items-center gap-2 bg-[#10367D] text-white px-5 py-2.5 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-[#10367D]/20 font-bold">
+                            <Link href="/admin" className="btn-primary">
                                 <FaShieldAlt className="w-4 h-4" />
-                                <span className="text-xs uppercase tracking-widest">Admin Panel</span>
+                                <span>Admin </span>
                             </Link>
                         )}
 
                         <div className="h-8 w-px bg-foreground/10 hidden lg:block" />
 
+                        <Link href="/contact" className="flex flex-col items-center group gap-1">
+                            <FaHeadset className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
+                            <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Support</span>
+                        </Link>
+
+                        {isAuthenticated && <NotificationBell />}
+
+                        <Link href="/cart" className="flex flex-col items-center group gap-1 relative">
+                            <div className="relative">
+                                <HiOutlineShoppingCart className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
+                                <span className="absolute -top-2 -right-2 bg-black text-background text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
+                                    {cart.length}
+                                </span>
+                            </div>
+                            <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Cart</span>
+                        </Link>
                         {/* Profile Section */}
                         <div
                             className="relative py-2"
@@ -170,23 +183,25 @@ export default function Navbar() {
                             onMouseEnter={() => setIsProfileDropdownOpen(true)}
                             onMouseLeave={() => setIsProfileDropdownOpen(false)}
                         >
-                            {isAuthenticated ? (
-                                <button
-                                    className="flex flex-col items-center group gap-0.5 min-w-[60px]"
-                                >
-                                    <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black text-[10px] border border-primary/20 group-hover:bg-primary group-hover:text-background transition-all">
-                                        {user?.name?.charAt(0).toUpperCase() || 'U'}
-                                    </div>
-                                    <span className="text-[9px] font-black text-primary uppercase tracking-tighter truncate max-w-[80px]">
-                                        {user?.name?.split(' ')[0] || 'User'}
-                                    </span>
-                                </button>
-                            ) : (
-                                <Link href="/auth/login" className="flex flex-col items-center group gap-1">
-                                    <HiOutlineUserCircle className="w-6 h-6 text-foreground/40 group-hover:text-primary transition-colors" />
-                                    <span className="text-[10px] font-bold text-foreground/60 group-hover:text-primary transition-colors">Sign In</span>
-                                </Link>
-                            )}
+                            <button
+                                className="flex flex-col items-center group gap-1 min-w-[60px]"
+                            >
+                                {isAuthenticated ? (
+                                    <>
+                                        <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black text-[10px] border border-primary/20 group-hover:bg-primary group-hover:text-background transition-all">
+                                            {user?.name?.charAt(0).toUpperCase() || 'U'}
+                                        </div>
+                                        <span className="text-[9px] font-black text-primary uppercase tracking-tighter truncate max-w-[80px]">
+                                            {user?.name?.split(' ')[0] || 'User'}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <HiOutlineUserCircle className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
+                                        <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Account</span>
+                                    </>
+                                )}
+                            </button>
                             {/* Dropdown Menu */}
                             <AnimatePresence>
                                 {isProfileDropdownOpen && (
@@ -196,12 +211,18 @@ export default function Navbar() {
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                         className="absolute right-0 mt-0 pt-2 w-64 z-50"
                                     >
-                                        <div className="bg-surface rounded-3xl shadow-2xl shadow-primary/20 border border-foreground/5 py-4 overflow-hidden">
-                                            <div className="px-6 py-4 border-b border-foreground/5 mb-2">
-
-                                                <p className="font-black text-foreground truncate">{user?.name}</p>
-                                                <p className="text-[11px] font-bold text-foreground/40 truncate">{user?.email}</p>
-                                            </div>
+                                        <div className="bg-surface rounded-[10px] border border-foreground/10 py-4 overflow-hidden shadow-sm">
+                                            {isAuthenticated ? (
+                                                <div className="px-6 py-4 border-b border-foreground/5 mb-2">
+                                                    <p className="font-black text-foreground truncate">{user?.name}</p>
+                                                    <p className="text-[11px] font-bold text-foreground/40 truncate">{user?.email}</p>
+                                                </div>
+                                            ) : (
+                                                <div className="px-6 py-4 border-b border-foreground/5 mb-2">
+                                                    <p className="font-black text-foreground truncate">Welcome to NovaMart</p>
+                                                    <p className="text-[11px] font-bold text-foreground/40 truncate">Login to access your features</p>
+                                                </div>
+                                            )}
 
                                             <div className="px-2 space-y-1">
                                                 <Link href={profilePath} onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
@@ -226,32 +247,33 @@ export default function Navbar() {
                                                 </Link>
                                             </div>
 
-                                            <div className="mt-4 pt-4 border-t border-foreground/5 px-2">
-                                                <button
-                                                    onClick={handleLogout}
-                                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-rose-500/10 text-rose-500 transition-all group"
-                                                >
-                                                    <FaSignOutAlt className="w-4 h-4" />
-                                                    <span className="text-xs font-black uppercase tracking-widest"> Sign Out</span>
-                                                </button>
+                                            <div className="mt-4 pt-4 border-t border-foreground/10 px-2">
+                                                {isAuthenticated ? (
+                                                    <button
+                                                        onClick={handleLogout}
+                                                        className="w-full flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-rose-500/5 text-rose-500 transition-all group"
+                                                    >
+                                                        <FaSignOutAlt className="w-4 h-4" />
+                                                        <span className="text-xs font-bold uppercase tracking-widest text-left"> Sign Out</span>
+                                                    </button>
+                                                ) : (
+                                                    <div className="space-y-1">
+                                                        <Link href="/auth/login" onClick={() => setIsProfileDropdownOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 rounded-[10px] bg-primary text-background transition-all group">
+                                                            <HiOutlineUserCircle className="w-4 h-4 text-background/80" />
+                                                            <span className="text-xs font-bold uppercase tracking-widest text-left">Sign In</span>
+                                                        </Link>
+                                                        <Link href="/auth/register" onClick={() => setIsProfileDropdownOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 rounded-[10px] border border-foreground/10 hover:bg-foreground/5 text-foreground transition-all group">
+                                                            <FaClipboardList className="w-4 h-4 text-foreground/20" />
+                                                            <span className="text-xs font-bold uppercase tracking-widest text-left">Register</span>
+                                                        </Link>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
-
-                        {isAuthenticated && <NotificationBell />}
-
-                        <Link href="/cart" className="flex flex-col items-center group gap-1 relative">
-                            <div className="relative">
-                                <HiOutlineShoppingCart className="w-6 h-6 text-foreground/40 group-hover:text-primary transition-colors" />
-                                <span className="absolute -top-2 -right-2 bg-primary text-background text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
-                                    {cart.length}
-                                </span>
-                            </div>
-                            <span className="text-[10px] font-bold text-foreground/60 group-hover:text-primary transition-colors">Cart</span>
-                        </Link>
                     </div>
                 </div>
             </div>
@@ -279,7 +301,7 @@ export default function Navbar() {
                                             style={{ width: 24, height: 24 }}
                                         />
                                     </div>
-                                    <span className="font-black text-[11px]">{sidebarContext.isCategorySidebarOpen ? 'Close' : 'All'}</span>
+                                    <span className="font-black text-[11px] uppercase italic">{sidebarContext.isCategorySidebarOpen ? 'Close' : 'Explore'}</span>
                                 </button>
                             )}
 
@@ -288,11 +310,12 @@ export default function Navbar() {
                                 <div className="flex items-center gap-1 py-2 overflow-x-auto no-scrollbar">
                                     {mainCategories.map((cat, i) => {
                                         const isActive = pathname === cat.href || (pathname === '/products' && searchParams?.get('cat') === cat.slug);
+
                                         return (
                                             <Link
                                                 key={i}
                                                 href={cat.href}
-                                                className={`px-4 py-2 text-xs font-bold whitespace-nowrap transition-all rounded-lg ${isActive
+                                                className={`px-4 py-2 text-xs font-bold whitespace-nowrap transition-all rounded-lg flex items-center gap-2 ${isActive
                                                     ? 'bg-primary text-background shadow-md shadow-primary/20'
                                                     : 'text-foreground/60 hover:text-primary hover:bg-background'
                                                     }`}
@@ -393,10 +416,10 @@ export default function Navbar() {
 
                                 {!isAuthenticated && (
                                     <div className="mt-12 pt-12 border-t border-foreground/5 space-y-4">
-                                        <Link href="/auth/login" className="w-full py-4 bg-primary text-background text-center rounded-2xl font-black text-xs uppercase tracking-widest block shadow-xl shadow-primary/20">
+                                        <Link href="/auth/login" className="btn-primary" onClick={() => setIsMobileMenuOpen(false)}>
                                             Sign In
                                         </Link>
-                                        <Link href="/auth/register" className="w-full py-4 border-2 border-primary text-primary text-center rounded-2xl font-black text-xs uppercase tracking-widest block hover:bg-primary hover:text-background transition-all">
+                                        <Link href="/auth/register" className="btn-secondary" onClick={() => setIsMobileMenuOpen(false)}>
                                             Register Now
                                         </Link>
                                     </div>

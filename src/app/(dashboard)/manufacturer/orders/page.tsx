@@ -36,7 +36,7 @@ export default function ManufacturerOrderControl() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 h-[calc(100vh-250px)]">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 xl:h-[calc(100vh-250px)]">
                 {/* Order Stream */}
                 <div className="xl:col-span-7 bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
                     <div className="p-10 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
@@ -78,7 +78,7 @@ export default function ManufacturerOrderControl() {
                 </div>
 
                 {/* Verification Control */}
-                <div className="xl:col-span-5 relative">
+                <div className={`xl:col-span-5 xl:relative transition-all ${selectedOrder ? 'fixed inset-0 z-50 bg-background xl:bg-transparent xl:z-auto' : 'hidden xl:block'}`}>
                     <AnimatePresence mode="wait">
                         {selectedOrder ? (
                             <motion.div
@@ -86,9 +86,17 @@ export default function ManufacturerOrderControl() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
-                                className="h-full bg-white rounded-[3.5rem] border border-slate-100 shadow-sm flex flex-col overflow-hidden"
+                                className="h-full bg-white xl:rounded-[3.5rem] xl:border border-slate-100 shadow-sm flex flex-col overflow-hidden"
                             >
-                                <div className="p-12 border-b border-slate-50 bg-[#1E293B] text-white space-y-8">
+                                <div className="p-8 md:p-12 border-b border-slate-50 bg-[#1E293B] text-white space-y-8 relative">
+                                    {/* Mobile Back Button */}
+                                    <button
+                                        onClick={() => setSelectedOrder(null)}
+                                        className="absolute top-6 right-6 p-2 bg-white/10 rounded-full text-white xl:hidden"
+                                    >
+                                        <FaTimesCircle className="w-6 h-6" />
+                                    </button>
+
                                     <div>
                                         <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2 italic">Finance Audit Mode</p>
                                         <h3 className="text-3xl font-black tracking-tight leading-none">{selectedOrder.id}</h3>
@@ -107,7 +115,7 @@ export default function ManufacturerOrderControl() {
                                     </div>
                                 </div>
 
-                                <div className="flex-1 p-12 space-y-12 overflow-y-auto custom-scrollbar">
+                                <div className="flex-1 p-8 md:p-12 space-y-12 overflow-y-auto custom-scrollbar">
                                     <div className="space-y-6">
                                         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-3 italic">
                                             <FaFileInvoiceDollar className="text-[#10367D]" /> B2B Payment Proof (Manual Audit)
@@ -132,7 +140,7 @@ export default function ManufacturerOrderControl() {
                                     </div>
                                 </div>
 
-                                <div className="p-12 border-t border-slate-50 flex items-center gap-6 bg-slate-50/30">
+                                <div className="p-8 md:p-12 border-t border-slate-50 flex items-center gap-6 bg-slate-50/30">
                                     <button className="flex-1 py-6 bg-[#10367D] text-white rounded-[2rem] font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-4 group">
                                         <FaCheckCircle className="w-4 h-4 group-hover:scale-125 transition-transform" />
                                         Confirm Fund Receipt

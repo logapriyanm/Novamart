@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #10367D;
-  --color-secondary: #74b4da;
-  --color-accent: #74b4da;
-  --color-background: #EBEBEB;
-  --color-foreground: #101527;
-  --color-surface: #EBEBEB;
+  --color-primary: #000000;
+  --color-secondary: #171717;
+  --color-accent: #171717;
+  --color-background: #FFFFFF;
+  --color-foreground: #000000;
+  --color-surface: #FAFAFA;
   --color-success: #10B981;
   --color-danger: #EF4444;
   --color-warning: #F59E0B;
@@ -14,15 +14,15 @@
 
 @layer base {
   :root {
-    --primary: #10367D;
-    --secondary: #74b4da;
-    --accent: #74b4da;
-    --background: #EBEBEB;
-    --foreground: #101527;
-    --surface: #EBEBEB;
-    --card: #EBEBEB;
-    --border: rgba(16, 54, 125, 0.1);
-    --glass: rgba(235, 235, 235, 0.5);
+    --primary: #000000;
+    --secondary: #171717;
+    --accent: #171717;
+    --background: #FFFFFF;
+    --foreground: #000000;
+    --surface: #FAFAFA;
+    --card: #FFFFFF;
+    --border: rgba(0, 0, 0, 0.1);
+    --glass: rgba(255, 255, 255, 0.5);
     --success: #10B981;
     --danger: #EF4444;
     --warning: #F59E0B;
@@ -34,16 +34,30 @@
 
   * {
     font-family: 'Inter', sans-serif !important;
+    @apply border-foreground/10;
   }
 }
 
 @layer components {
-  .glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+
+  /* Design System Standard: 10px rounded corners */
+  .rounded-ns {
+    border-radius: 10px !important;
   }
 
-  .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-br from-primary to-secondary;
+  /* Button Standard: Primary */
+  .btn-primary {
+    @apply bg-black text-white px-5 py-2.5 rounded-[10px] font-bold transition-all hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-widest flex items-center justify-center gap-2;
+  }
+
+  /* Button Standard: Secondary */
+  .btn-secondary {
+    @apply border-2 border-black text-black px-5 py-2.5 rounded-[10px] font-bold transition-all hover:bg-black hover:text-white disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-widest flex items-center justify-center gap-2;
+  }
+
+  /* Card Standard */
+  .card-flat {
+    @apply bg-surface border border-foreground/10 rounded-[10px] overflow-hidden;
   }
 }
 

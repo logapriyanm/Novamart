@@ -11,12 +11,10 @@ interface ProductData {
     category: string;
     basePrice: string;
     moq: string;
-    colors: string[];
-    sizes: string[];
     images: string[];
-    video: string;
     specifications: Record<string, string>;
     // New fields for appliances
+    mainCategory?: string;
     subCategory?: string;
     powerConsumption?: string;
     capacity?: string;
@@ -31,7 +29,7 @@ interface ProductData {
 interface ProductFormContextType {
     productData: ProductData;
     updateProductData: (updates: Partial<ProductData>) => void;
-    submitProduct: (overrides?: Partial<ProductData>) => Promise<void>;
+    submitProduct: (overrides?: Partial<ProductData>) => Promise<any>;
     isSubmitting: boolean;
 }
 
@@ -44,15 +42,19 @@ export function ProductFormProvider({ children }: { children: ReactNode }) {
         name: '',
         description: '',
         category: '',
+        mainCategory: '',
         subCategory: '',
         basePrice: '',
         moq: '1',
-        colors: [],
-        sizes: [],
         images: [],
-        video: '',
         specifications: {},
         // Defaults
+        powerConsumption: '',
+        capacity: '',
+        energyRating: '',
+        installationType: '',
+        usageType: '',
+        warranty: '',
         isSmart: false
     });
 
@@ -64,8 +66,9 @@ export function ProductFormProvider({ children }: { children: ReactNode }) {
         setIsSubmitting(true);
         try {
             const data = { ...productData, ...overrides };
-            await api.post('/products', data);
+            const response = await api.post<any>('/products', data);
             router.push('/manufacturer/products');
+            return response;
         } catch (error) {
             console.error('Failed to submit product:', error);
             throw error;

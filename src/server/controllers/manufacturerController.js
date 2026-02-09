@@ -25,9 +25,25 @@ export const handleDealerNetwork = async (req, res) => {
             req
         });
 
-        res.json({ success: true, message: `Dealer ${status}`, data: result });
+        res.json({ success: true, message: `Dealer request ${status}`, data: result });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
+    }
+};
+
+/**
+ * Get Dealer Requests
+ */
+export const getDealerRequests = async (req, res) => {
+    const mfgId = req.user.manufacturer?.id;
+    const { status } = req.query;
+    if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
+
+    try {
+        const requests = await manufacturerService.getDealerRequests(mfgId, status || 'PENDING');
+        res.json({ success: true, data: requests });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_REQUESTS' });
     }
 };
 
@@ -36,8 +52,11 @@ export const handleDealerNetwork = async (req, res) => {
  */
 export const allocateInventory = async (req, res) => {
     const { productId, dealerId, region, quantity, price } = req.body;
+    const mfgId = req.user.manufacturer?.id;
+    if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
+
     try {
-        const result = await manufacturerService.allocateStock(productId, dealerId, region, quantity, price);
+        const result = await manufacturerService.allocateStock(mfgId, productId, dealerId, region, quantity, price);
         res.status(201).json({ success: true, message: 'Stock allocated successfully', data: result });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
@@ -51,12 +70,23 @@ export const getManufacturerStats = async (req, res) => {
     const mfgId = req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
     try {
-        const [sales, credit] = await Promise.all([
+        const [sales, credit, productsCount] = await Promise.all([
             manufacturerService.getSalesAnalytics(mfgId),
-            manufacturerService.getCreditStatus(mfgId)
+            manufacturerService.getCreditStatus(mfgId),
+            prisma.product.count({ where: { manufacturerId: mfgId } })
         ]);
-        res.json({ success: true, data: { sales, credit } });
+
+        res.json({
+            success: true,
+            data: {
+                sales,
+                credit,
+                productsCount,
+                pendingDealerRequests: 0 // TODO: Implement dealer request logic when model is ready
+            }
+        });
     } catch (error) {
+        console.error('Stats Error:', error);
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_ANALYTICS' });
     }
 };
@@ -129,6 +159,7 @@ export const updateProfile = async (req, res) => {
 
 export default {
     handleDealerNetwork,
+    getDealerRequests,
     allocateInventory,
     getManufacturerStats,
     getMyDealers,

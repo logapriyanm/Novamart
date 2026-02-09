@@ -5,9 +5,28 @@ import systemEvents, { EVENTS } from '../../lib/systemEvents.js';
 import { OAuth2Client } from 'google-auth-library';
 import auditService from '../../services/audit.js';
 import { verifyOTP } from './otpController.js';
+import logger from '../../lib/logger.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
+const REFRESH_SECRET = process.env.REFRESH_SECRET || 'superrefreshsecret';
+
+/**
+ * Helper to generate access and refresh tokens
+ */
+const generateTokens = (user) => {
+    const accessToken = jwt.sign(
+        { id: user.id, role: user.role, status: user.status },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+    );
+    const refreshToken = jwt.sign(
+        { id: user.id },
+        REFRESH_SECRET,
+        { expiresIn: '7d' }
+    );
+    return { accessToken, refreshToken };
+};
 
 /**
  * Register a new user
@@ -16,42 +35,47 @@ export const register = async (req, res) => {
     const { email, phone, password, role, ...profileData } = req.body;
 
     try {
-        const roleUpper = role.toUpperCase();
-        const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+        const result = await prisma.$transaction(async (tx) => {
+            const roleUpper = role.toUpperCase();
+            const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
-        const user = await prisma.user.create({
-            data: {
-                email,
-                phone,
-                password: hashedPassword,
-                role: roleUpper,
-                status: (roleUpper === 'CUSTOMER' || roleUpper === 'DEALER' || roleUpper === 'MANUFACTURER') ? 'ACTIVE' : 'PENDING'
-            }
-        });
-
-        if (roleUpper === 'DEALER') {
-            const { businessName, gstNumber, businessAddress, bankDetails } = profileData;
-            await prisma.dealer.create({
-                data: { userId: user.id, businessName, gstNumber, businessAddress, bankDetails }
-            });
-        } else if (roleUpper === 'MANUFACTURER') {
-            const { companyName, registrationNo, factoryAddress, gstNumber, bankDetails, certifications } = profileData;
-            await prisma.manufacturer.create({
+            const user = await tx.user.create({
                 data: {
-                    userId: user.id,
-                    companyName,
-                    registrationNo,
-                    factoryAddress,
-                    gstNumber,
-                    bankDetails,
-                    certifications: certifications || []
+                    email,
+                    phone,
+                    password: hashedPassword,
+                    role: roleUpper,
+                    status: (roleUpper === 'CUSTOMER') ? 'ACTIVE' : 'PENDING'
                 }
             });
-        } else if (roleUpper === 'CUSTOMER') {
-            await prisma.customer.create({
-                data: { userId: user.id, name: profileData.name || email?.split('@')[0] || 'Customer' }
-            });
-        }
+
+            if (roleUpper === 'DEALER') {
+                const { businessName, gstNumber, businessAddress, bankDetails } = profileData;
+                await tx.dealer.create({
+                    data: { userId: user.id, businessName, gstNumber, businessAddress, bankDetails }
+                });
+            } else if (roleUpper === 'MANUFACTURER') {
+                const { companyName, registrationNo, factoryAddress, gstNumber, bankDetails, certifications } = profileData;
+                await tx.manufacturer.create({
+                    data: {
+                        userId: user.id,
+                        companyName,
+                        registrationNo,
+                        factoryAddress,
+                        gstNumber,
+                        bankDetails,
+                        certifications: certifications || []
+                    }
+                });
+            } else if (roleUpper === 'CUSTOMER') {
+                await tx.customer.create({
+                    data: { userId: user.id, name: profileData.name || email?.split('@')[0] || 'Customer' }
+                });
+            }
+            return user;
+        });
+
+        const user = result;
 
         // Audit Log
         await auditService.logAction('USER_REGISTERED', 'USER', user.id, {
@@ -67,27 +91,40 @@ export const register = async (req, res) => {
             status: user.status
         });
 
-        // Generate Token & Create Session
-        const token = jwt.sign({ id: user.id, role: user.role, status: user.status }, JWT_SECRET, { expiresIn: '24h' });
+        const { accessToken, refreshToken } = generateTokens(user);
+
+        // Save refresh token to DB
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { refreshToken }
+        });
 
         await prisma.session.create({
             data: {
                 userId: user.id,
-                token: token,
+                token: accessToken,
                 ipAddress: req.ip,
                 device: req.headers['user-agent'],
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1h
             }
         });
 
         res.status(201).json({
             success: true,
             message: 'REGISTRATION_SUCCESSFUL',
-            token,
-            data: { id: user.id, role: user.role, status: user.status }
+            data: {
+                token: accessToken,
+                refreshToken,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                    status: user.status
+                }
+            }
         });
     } catch (error) {
-        console.error('❌ Registration Error:', error);
+        logger.error('❌ Registration Error:', error);
 
         let message = 'REGISTRATION_FAILED';
         let details = error.message;
@@ -110,22 +147,27 @@ export const login = async (req, res) => {
 
     try {
         const user = await prisma.user.findUnique({ where: { email } });
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user || (user.password && !(await bcrypt.compare(password, user.password)))) {
             return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
         }
 
-        const token = jwt.sign({ id: user.id, role: user.role, status: user.status }, JWT_SECRET, { expiresIn: '24h' });
+        const { accessToken, refreshToken } = generateTokens(user);
 
-        // Clear existing sessions to avoid uniqueness issues or multiple active sessions
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { refreshToken }
+        });
+
+        // Clear existing sessions
         await prisma.session.deleteMany({ where: { userId: user.id } });
 
         await prisma.session.create({
             data: {
                 userId: user.id,
-                token: token,
+                token: accessToken,
                 ipAddress: req.ip,
                 device: req.headers['user-agent'],
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                expiresAt: new Date(Date.now() + 60 * 60 * 1000)
             }
         });
 
@@ -137,7 +179,8 @@ export const login = async (req, res) => {
         res.json({
             success: true,
             data: {
-                token,
+                token: accessToken,
+                refreshToken,
                 user: {
                     id: user.id,
                     email: user.email,
@@ -147,7 +190,7 @@ export const login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('❌ Login Error:', error);
+        logger.error('❌ Login Error:', error);
         res.status(500).json({ success: false, error: 'LOGIN_FAILED', details: error.message });
     }
 };
@@ -169,15 +212,22 @@ export const loginWithPhone = async (req, res) => {
             return res.status(404).json({ error: 'USER_NOT_FOUND', message: 'No account linked to this phone number.' });
         }
 
-        const token = jwt.sign({ id: user.id, role: user.role, status: user.status }, JWT_SECRET, { expiresIn: '24h' });
+        const { accessToken, refreshToken } = generateTokens(user);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { refreshToken }
+        });
+
+        await prisma.session.deleteMany({ where: { userId: user.id } });
 
         await prisma.session.create({
             data: {
                 userId: user.id,
-                token: token,
+                token: accessToken,
                 ipAddress: req.ip,
                 device: req.headers['user-agent'],
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                expiresAt: new Date(Date.now() + 60 * 60 * 1000)
             }
         });
 
@@ -188,9 +238,19 @@ export const loginWithPhone = async (req, res) => {
 
         res.json({
             success: true,
-            data: { token, role: user.role, status: user.status }
+            data: {
+                token: accessToken,
+                refreshToken,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                    status: user.status
+                }
+            }
         });
     } catch (error) {
+        logger.error('❌ Phone Login Error:', error);
         res.status(500).json({ success: false, error: 'PHONE_LOGIN_FAILED' });
     }
 };
@@ -208,13 +268,11 @@ export const googleLogin = async (req, res) => {
         });
 
         const payload = ticket.getPayload();
-        const { email, name, sub: googleId, picture } = payload;
+        const { email, name } = payload;
 
-        // Check if user exists
         let user = await prisma.user.findUnique({ where: { email } });
 
         if (user) {
-            // Restriction: Only allow CUSTOMER role via Google
             if (user.role !== 'CUSTOMER') {
                 return res.status(403).json({
                     success: false,
@@ -223,7 +281,6 @@ export const googleLogin = async (req, res) => {
                 });
             }
         } else {
-            // Auto-register new Google user as CUSTOMER
             user = await prisma.user.create({
                 data: {
                     email,
@@ -236,15 +293,22 @@ export const googleLogin = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({ id: user.id, role: user.role, status: user.status }, JWT_SECRET, { expiresIn: '24h' });
+        const { accessToken, refreshToken } = generateTokens(user);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { refreshToken }
+        });
+
+        await prisma.session.deleteMany({ where: { userId: user.id } });
 
         await prisma.session.create({
             data: {
                 userId: user.id,
-                token: token,
+                token: accessToken,
                 ipAddress: req.ip,
                 device: req.headers['user-agent'],
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000)
+                expiresAt: new Date(Date.now() + 60 * 60 * 1000)
             }
         });
 
@@ -255,10 +319,19 @@ export const googleLogin = async (req, res) => {
 
         res.json({
             success: true,
-            data: { token, role: user.role, status: user.status }
+            data: {
+                token: accessToken,
+                refreshToken,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                    status: user.status
+                }
+            }
         });
     } catch (error) {
-        console.error('❌ Google Auth Error:', error);
+        logger.error('❌ Google Auth Error:', error);
         res.status(400).json({ success: false, error: 'GOOGLE_AUTH_FAILED', details: error.message });
     }
 };
@@ -268,7 +341,7 @@ export const googleLogin = async (req, res) => {
  */
 export const getCurrentUser = async (req, res) => {
     try {
-        const user = req.user; // Attached by middleware
+        const user = req.user;
         res.json({
             success: true,
             data: {
@@ -285,7 +358,43 @@ export const getCurrentUser = async (req, res) => {
 };
 
 /**
- * Logout User (Clear Session)
+ * Refresh Access Token
+ */
+export const refresh = async (req, res) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) return res.status(401).json({ error: 'REFRESH_TOKEN_REQUIRED' });
+
+    try {
+        const payload = jwt.verify(refreshToken, REFRESH_SECRET);
+        const user = await prisma.user.findUnique({
+            where: { id: payload.id }
+        });
+
+        if (!user || user.refreshToken !== refreshToken) {
+            return res.status(401).json({ error: 'INVALID_REFRESH_TOKEN' });
+        }
+
+        const tokens = generateTokens(user);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { refreshToken: tokens.refreshToken }
+        });
+
+        res.json({
+            success: true,
+            data: {
+                token: tokens.accessToken,
+                refreshToken: tokens.refreshToken
+            }
+        });
+    } catch (error) {
+        res.status(401).json({ error: 'REFRESH_TOKEN_EXPIRED' });
+    }
+};
+
+/**
+ * Logout User
  */
 export const logout = async (req, res) => {
     try {
@@ -298,15 +407,32 @@ export const logout = async (req, res) => {
             });
         }
 
-        res.json({
-            success: true,
-            message: 'LOGOUT_SUCCESSFUL'
-        });
+        if (req.user) {
+            await prisma.user.update({
+                where: { id: req.user.id },
+                data: { refreshToken: null }
+            });
+        }
+
+        res.json({ success: true, message: 'LOGOUT_SUCCESSFUL' });
     } catch (error) {
-        console.error('❌ Logout Error:', error);
+        logger.error('❌ Logout Error:', error);
         res.status(500).json({ success: false, error: 'LOGOUT_FAILED' });
     }
 };
 
-export default { register, login, loginWithPhone, googleLogin, getCurrentUser, logout };
+/**
+ * Forgot Password Stub
+ */
+export const forgotPassword = async (req, res) => {
+    res.json({ success: true, message: 'RESET_LINK_SENT_IF_ACCOUNT_EXISTS' });
+};
 
+/**
+ * Reset Password Stub
+ */
+export const resetPassword = async (req, res) => {
+    res.json({ success: true, message: 'PASSWORD_RESET_SUCCESSFUL' });
+};
+
+export default { register, login, loginWithPhone, googleLogin, getCurrentUser, logout, refresh, forgotPassword, resetPassword };

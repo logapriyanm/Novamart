@@ -16,11 +16,11 @@ import {
     FaTools,
     FaMobileAlt,
     FaIndustry,
-    FaFan,
-    FaChevronDown,
-    FaChevronUp
+    FaFan
 } from 'react-icons/fa';
+import { IoIosArrowDropdown, IoIosArrowDropup } from 'react-icons/io';
 import { useSidebar } from '../../../context/SidebarContext';
+import { useAuth } from '@/client/hooks/useAuth';
 import { sidebarCategories, helpSettings } from '../../../data/categoryData';
 
 // Icon Map
@@ -38,6 +38,7 @@ const iconMap: Record<string, React.ElementType> = {
 
 export default function HomeCategorySidebar() {
     const { isCategorySidebarOpen, closeCategorySidebar } = useSidebar();
+    const { user, isAuthenticated } = useAuth();
     const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
     const toggleCategory = (id: string) => {
@@ -77,12 +78,23 @@ export default function HomeCategorySidebar() {
                         className="fixed left-0 top-0 bottom-0 w-[85vw] max-w-[365px] bg-white z-[1001] shadow-2xl flex flex-col overflow-hidden"
                     >
                         {/* Header - Amazon Style */}
-                        <div className="bg-[#232f3e] text-white p-4 flex items-center gap-3 shrink-0">
-                            <FaUserCircle className="w-8 h-8 opacity-80" />
-                            <div className="flex flex-col">
-                                <span className="text-lg font-bold">Hello, Sign In</span>
-                            </div>
-                        </div>
+                        {isAuthenticated ? (
+                            <Link href="/customer/profile" onClick={closeCategorySidebar} className="bg-[#232f3e] text-white p-4 flex items-center gap-3 shrink-0 hover:bg-[#232f3e]/90 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-black text-xs border border-primary/20">
+                                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-lg font-bold">Hello, {user?.name?.split(' ')[0]}</span>
+                                </div>
+                            </Link>
+                        ) : (
+                            <Link href="/auth/login" onClick={closeCategorySidebar} className="bg-[#232f3e] text-white p-4 flex items-center gap-3 shrink-0 hover:bg-[#232f3e]/90 transition-colors">
+                                <FaUserCircle className="w-8 h-8 opacity-80" />
+                                <div className="flex flex-col">
+                                    <span className="text-lg font-bold">Hello, Sign In</span>
+                                </div>
+                            </Link>
+                        )}
 
                         {/* Content Area */}
                         <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
@@ -101,7 +113,7 @@ export default function HomeCategorySidebar() {
                                                     <Icon className={`w-5 h-5 ${isExpanded ? 'text-[#10367D]' : 'text-gray-500'}`} />
                                                     <span className="font-bold text-sm text-left">{category.label}</span>
                                                 </div>
-                                                {isExpanded ? <FaChevronUp className="w-3 h-3 text-gray-400" /> : <FaChevronDown className="w-3 h-3 text-gray-400" />}
+                                                {isExpanded ? <IoIosArrowDropup className="w-4 h-4 text-gray-400" /> : <IoIosArrowDropdown className="w-4 h-4 text-gray-400" />}
                                             </button>
 
                                             <AnimatePresence>

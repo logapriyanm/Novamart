@@ -5,7 +5,7 @@ export const policyContent = {
         title: 'Help Center',
         content: `
             <h3 class="text-lg font-bold mb-2">How can we help you?</h3>
-            <p class="mb-4">Welcome to the Novamart Help Center. Here you can find answers to frequently asked questions and guides on how to use our platform.</p>
+            <p class="mb-4">Welcome to the NovaMart Help Center. Here you can find answers to frequently asked questions and guides on how to use our platform.</p>
             <ul class="list-disc pl-5 space-y-2">
                 <li><strong>Account Issues:</strong> Reset password, update profile, verification status.</li>
                 <li><strong>Orders:</strong> Tracking, cancellations, bulk orders.</li>
@@ -51,12 +51,12 @@ export const policyContent = {
         title: 'Dispute Resolution',
         content: `
             <h3 class="text-lg font-bold mb-2">Fair & Transparent Resolution</h3>
-            <p class="mb-4">Novamart acts as a neutral mediator in disputes between Dealers and Manufacturers.</p>
+            <p class="mb-4">NovaMart acts as a neutral mediator in disputes between Dealers and Manufacturers.</p>
             <h4 class="font-bold mt-4 mb-2">Process:</h4>
             <ol class="list-decimal pl-5 space-y-2">
                 <li><strong>Ticket Creation:</strong> Raise a dispute within 48 hours of delivery for damaged/wrong goods.</li>
                 <li><strong>Evidence Submission:</strong> Upload photos/videos of the product and packaging.</li>
-                <li><strong>Mediation:</strong> Novamart admin reviews evidence from both parties.</li>
+                <li><strong>Mediation:</strong> NovaMart admin reviews evidence from both parties.</li>
                 <li><strong>Resolution:</strong> Binding decision made (Refund, Replacement, or Claim Rejection) based on evidence.</li>
             </ol>
             <p class="mt-4">Escrow funds are held until the dispute is resolved.</p>
@@ -95,7 +95,7 @@ export const policyContent = {
         title: 'Terms of Service',
         content: `
             <h3 class="text-lg font-bold mb-2">Platform Usage Terms</h3>
-            <p class="mb-4">By accessing Novamart, you agree to these terms.</p>
+            <p class="mb-4">By accessing NovaMart, you agree to these terms.</p>
             <ul class="list-disc pl-5 space-y-2">
                 <li><strong>Eligibility:</strong> You must be a registered business entity to use B2B features.</li>
                 <li><strong>Account Security:</strong> You are responsible for maintaining the confidentiality of your credentials.</li>
@@ -113,7 +113,7 @@ export const policyContent = {
                 <li><strong>Return Window:</strong> 7 days from delivery for manufacturing defects.</li>
                 <li><strong>Condition:</strong> Items must be unused, in original packaging with seals intact.</li>
                 <li><strong>Refund Method:</strong> Processed to the original source payment method within 5-7 business days after return verification.</li>
-                <li><strong>Shipping Costs:</strong> Novamart bears return shipping costs for proven defects. Buyer pays for 'change of mind' returns (if applicable).</li>
+                <li><strong>Shipping Costs:</strong> NovaMart bears return shipping costs for proven defects. Buyer pays for 'change of mind' returns (if applicable).</li>
             </ul>
         `
     },

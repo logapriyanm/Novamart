@@ -6,13 +6,17 @@ import {
     FaLightbulb, FaCheckSquare, FaLayerGroup,
     FaInfoCircle
 } from 'react-icons/fa';
+import { IoIosArrowDropdown } from 'react-icons/io';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProductForm } from '../../../../../context/ProductFormContext';
+import { useSnackbar } from '@/client/context/SnackbarContext';
 
 export default function StepSpecs() {
     const { productData, updateProductData } = useProductForm();
+    const { showSnackbar } = useSnackbar();
     const [newKey, setNewKey] = useState('');
     const [newValue, setNewValue] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
 
     const addSpec = () => {
         if (newKey && newValue) {
@@ -56,18 +60,21 @@ export default function StepSpecs() {
                         {/* Power Consumption */}
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Power Consumption</label>
-                            <select
-                                value={productData.powerConsumption || ''}
-                                onChange={(e) => updateProductData({ powerConsumption: e.target.value })}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all"
-                            >
-                                <option value="">Select Power</option>
-                                <option value="Less than 1000W">Less than 1000W</option>
-                                <option value="1000W - 1500W">1000W - 1500W</option>
-                                <option value="1500W - 2000W">1500W - 2000W</option>
-                                <option value="Above 2000W">Above 2000W</option>
-                                <option value="Battery Operated">Battery Operated</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={productData.powerConsumption || ''}
+                                    onChange={(e) => updateProductData({ powerConsumption: e.target.value })}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
+                                >
+                                    <option value="">Select Power</option>
+                                    <option value="Less than 1000W">Less than 1000W</option>
+                                    <option value="1000W - 1500W">1000W - 1500W</option>
+                                    <option value="1500W - 2000W">1500W - 2000W</option>
+                                    <option value="Above 2000W">Above 2000W</option>
+                                    <option value="Battery Operated">Battery Operated</option>
+                                </select>
+                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            </div>
                         </div>
 
                         {/* Capacity */}
@@ -85,66 +92,78 @@ export default function StepSpecs() {
                         {/* Energy Rating */}
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Energy Rating</label>
-                            <select
-                                value={productData.energyRating || ''}
-                                onChange={(e) => updateProductData({ energyRating: e.target.value })}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all"
-                            >
-                                <option value="">Select Rating</option>
-                                <option value="5 Star">5 Star</option>
-                                <option value="4 Star">4 Star</option>
-                                <option value="3 Star">3 Star</option>
-                                <option value="2 Star">2 Star</option>
-                                <option value="1 Star">1 Star</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={productData.energyRating || ''}
+                                    onChange={(e) => updateProductData({ energyRating: e.target.value })}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
+                                >
+                                    <option value="">Select Rating</option>
+                                    <option value="5 Star">5 Star</option>
+                                    <option value="4 Star">4 Star</option>
+                                    <option value="3 Star">3 Star</option>
+                                    <option value="2 Star">2 Star</option>
+                                    <option value="1 Star">1 Star</option>
+                                </select>
+                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            </div>
                         </div>
 
                         {/* Installation Type */}
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Installation Type</label>
-                            <select
-                                value={productData.installationType || ''}
-                                onChange={(e) => updateProductData({ installationType: e.target.value })}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all"
-                            >
-                                <option value="">Select Type</option>
-                                <option value="Freestanding">Freestanding</option>
-                                <option value="Built-in">Built-in</option>
-                                <option value="Wall Mounted">Wall Mounted</option>
-                                <option value="Table Top">Table Top</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={productData.installationType || ''}
+                                    onChange={(e) => updateProductData({ installationType: e.target.value })}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
+                                >
+                                    <option value="">Select Type</option>
+                                    <option value="Freestanding">Freestanding</option>
+                                    <option value="Built-in">Built-in</option>
+                                    <option value="Wall Mounted">Wall Mounted</option>
+                                    <option value="Table Top">Table Top</option>
+                                </select>
+                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            </div>
                         </div>
 
                         {/* Usage Type */}
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Usage Type</label>
-                            <select
-                                value={productData.usageType || ''}
-                                onChange={(e) => updateProductData({ usageType: e.target.value })}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all"
-                            >
-                                <option value="">Select Usage</option>
-                                <option value="Home">Home</option>
-                                <option value="Commercial">Commercial</option>
-                                <option value="Industrial">Industrial</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={productData.usageType || ''}
+                                    onChange={(e) => updateProductData({ usageType: e.target.value })}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
+                                >
+                                    <option value="">Select Usage</option>
+                                    <option value="Home">Home</option>
+                                    <option value="Commercial">Commercial</option>
+                                    <option value="Industrial">Industrial</option>
+                                </select>
+                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            </div>
                         </div>
 
                         {/* Warranty */}
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Warranty</label>
-                            <select
-                                value={productData.warranty || ''}
-                                onChange={(e) => updateProductData({ warranty: e.target.value })}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all"
-                            >
-                                <option value="">Select Period</option>
-                                <option value="1 Year">1 Year</option>
-                                <option value="2 Years">2 Years</option>
-                                <option value="3 Years+">3 Years+</option>
-                                <option value="Compressor Warranty">Compressor Warranty</option>
-                                <option value="No Warranty">No Warranty</option>
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={productData.warranty || ''}
+                                    onChange={(e) => updateProductData({ warranty: e.target.value })}
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
+                                >
+                                    <option value="">Select Period</option>
+                                    <option value="1 Year">1 Year</option>
+                                    <option value="2 Years">2 Years</option>
+                                    <option value="3 Years+">3 Years+</option>
+                                    <option value="Compressor Warranty">Compressor Warranty</option>
+                                    <option value="No Warranty">No Warranty</option>
+                                </select>
+                                <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            </div>
                         </div>
                     </div>
 
@@ -230,7 +249,7 @@ export default function StepSpecs() {
                 </div>
             </div>
 
-            {/* Right Column: Tips */}
+            {/* Right Column: Tips & Media */}
             <div className="w-full lg:w-80 space-y-6">
                 <div className="bg-blue-50 rounded-[2rem] p-6 border border-blue-100">
                     <div className="flex items-center gap-2 mb-2">
@@ -240,6 +259,82 @@ export default function StepSpecs() {
                     <p className="text-[10px] text-slate-600 leading-relaxed font-medium">
                         Detailed specifications improve search capability by 45%. Include units where applicable (e.g. "Weight: 2.5kg" instead of just "2.5").
                     </p>
+                </div>
+
+                {/* Media Section (Unified) */}
+                <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+                    <h3 className="text-sm font-black text-[#1E293B] mb-4">Product Media</h3>
+
+                    {/* Gallery Grid */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                        {productData.images && productData.images.map((img: string, index: number) => (
+                            <div key={index} className={`relative group aspect-square rounded-xl overflow-hidden border bg-white ${index === 0 ? 'border-[#0F6CBD]' : 'border-slate-100'}`}>
+                                {index === 0 && (
+                                    <span className="absolute top-1 left-1 bg-[#0F6CBD] text-white text-[6px] font-black px-1.5 py-0.5 rounded shadow-sm z-10 uppercase tracking-wider">Cover</span>
+                                )}
+                                <img src={img} alt={`Product ${index}`} className="w-full h-full object-contain p-1" />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                    <button
+                                        onClick={() => {
+                                            const newImages = productData.images.filter((_, i) => i !== index);
+                                            updateProductData({ images: newImages });
+                                        }}
+                                        className="p-1.5 bg-white text-rose-500 rounded-full hover:bg-rose-50"
+                                    >
+                                        <FaTrash className="w-2.5 h-2.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Add Button */}
+                        <div className="relative group">
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                disabled={isUploading}
+                                onChange={async (e) => {
+                                    const files = e.target.files;
+                                    if (!files || files.length === 0) return;
+
+                                    setIsUploading(true);
+                                    const formData = new FormData();
+                                    Array.from(files).forEach(file => {
+                                        formData.append('images', file);
+                                    });
+
+                                    try {
+                                        const res = await import('@/lib/api/client').then(m => m.apiClient.upload('/media/upload', formData)) as { urls: string[] };
+
+                                        if (res && res.urls) {
+                                            updateProductData({
+                                                images: [...(productData.images || []), ...res.urls]
+                                            });
+                                            showSnackbar(`Successfully uploaded ${res.urls.length} image(s)`, 'success');
+                                        }
+                                    } catch (error: any) {
+                                        console.error('Upload failed:', error);
+                                        showSnackbar(`Failed to upload images: ${error.message || 'Unknown error'}`, 'error');
+                                    } finally {
+                                        setIsUploading(false);
+                                    }
+                                }}
+                                className="absolute inset-0 opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
+                            />
+                            <div className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all ${isUploading ? 'bg-slate-50 border-blue-200 text-blue-400' : 'border-slate-200 text-slate-300 group-hover:text-[#0F6CBD] group-hover:border-[#0F6CBD] group-hover:bg-slate-50'}`}>
+                                {isUploading ? (
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#0F6CBD]"></div>
+                                ) : (
+                                    <>
+                                        <FaPlus className="w-4 h-4" />
+                                        <span className="text-[8px] font-black uppercase mt-1">Add</span>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <p className="text-[9px] text-slate-400 font-medium text-center">Upload at least 3 images.</p>
                 </div>
             </div>
         </div>

@@ -1,60 +1,48 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FaUserCheck, FaStore, FaClock, FaMapMarkerAlt,
     FaCheck, FaTimes, FaFileExport, FaFilter,
-    FaChevronLeft, FaChevronRight, FaExternalLinkAlt
+    FaChevronLeft, FaChevronRight, FaExternalLinkAlt,
+    FaSpinner
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-
-// Mock Data for Dealer Requests
-const dealerRequests = [
-    {
-        id: 1,
-        name: 'Global Electronics Hub',
-        type: 'Premium Retailer',
-        location: 'New York, NY',
-        requestedTime: '2h ago',
-        logo: 'https://ui-avatars.com/api/?name=Global+Electronics&background=0F6CBD&color=fff&rounded=true&bold=true',
-        verified: true,
-        categories: [
-            { name: 'Home Audio', requested: true },
-            { name: 'Smart Home', requested: true },
-            { name: 'Wearables', requested: false },
-        ]
-    },
-    {
-        id: 2,
-        name: 'Alpine Outdoor Equipment',
-        type: 'Specialty Boutique',
-        location: 'Denver, CO',
-        requestedTime: '5h ago',
-        logo: 'https://ui-avatars.com/api/?name=Alpine+Outdoor&background=F59E0B&color=fff&rounded=true&bold=true',
-        verified: false,
-        reviewRequired: true,
-        categories: [
-            { name: 'Outdoor Tech', requested: true },
-        ]
-    },
-    {
-        id: 3,
-        name: 'Lumina Retail Group',
-        type: 'Nationwide Chain',
-        location: 'Seattle, WA',
-        requestedTime: '12h ago',
-        logo: 'https://ui-avatars.com/api/?name=Lumina+Retail&background=0F6CBD&color=fff&rounded=true&bold=true',
-        verified: true,
-        categories: [
-            { name: 'Kitchen Appliances', requested: true },
-            { name: 'Home Decor', requested: true },
-        ]
-    }
-];
+import { motion, AnimatePresence } from 'framer-motion';
+import { apiClient } from '../../../../../lib/api/client';
+import { useSnackbar } from '../../../../../client/context/SnackbarContext';
 
 export default function DealerRequests() {
-    const [activeTab, setActiveTab] = useState('Pending');
+    const [activeTab, setActiveTab] = useState('PENDING');
+    const [requests, setRequests] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { showSnackbar } = useSnackbar();
+
+    useEffect(() => {
+        fetchRequests();
+    }, [activeTab]);
+
+    const fetchRequests = async () => {
+        setIsLoading(true);
+        try {
+            const response = await apiClient.get<any>(`/manufacturer/dealers/requests?status=${activeTab}`);
+            setRequests(response || []);
+        } catch (error: any) {
+            showSnackbar(error.message || 'Failed to fetch requests', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleAction = async (dealerId: string, status: 'APPROVED' | 'REJECTED') => {
+        try {
+            await apiClient.post('/manufacturer/dealers/handle', { dealerId, status });
+            showSnackbar(`Dealer ${status.toLowerCase()} successfully`, 'success');
+            fetchRequests();
+        } catch (error: any) {
+            showSnackbar(error.message || `Failed to ${status.toLowerCase()} dealer`, 'error');
+        }
+    };
 
     return (
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
@@ -68,27 +56,16 @@ export default function DealerRequests() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 {/* Tabs */}
                 <div className="flex items-center gap-8 border-b border-slate-200 w-full md:w-auto">
-                    <button
-                        onClick={() => setActiveTab('Pending')}
-                        className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === 'Pending' ? 'text-[#0F6CBD]' : 'text-slate-400 hover:text-slate-600'}`}
-                    >
-                        Pending <span className="ml-1 bg-blue-100 text-[#0F6CBD] px-1.5 py-0.5 rounded text-[9px]">12</span>
-                        {activeTab === 'Pending' && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0F6CBD]" />}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('Approved')}
-                        className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === 'Approved' ? 'text-[#0F6CBD]' : 'text-slate-400 hover:text-slate-600'}`}
-                    >
-                        Approved
-                        {activeTab === 'Approved' && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0F6CBD]" />}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('Rejected')}
-                        className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === 'Rejected' ? 'text-[#0F6CBD]' : 'text-slate-400 hover:text-slate-600'}`}
-                    >
-                        Rejected
-                        {activeTab === 'Rejected' && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0F6CBD]" />}
-                    </button>
+                    {['PENDING', 'APPROVED', 'REJECTED'].map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === tab ? 'text-[#0F6CBD]' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            {tab.charAt(0) + tab.slice(1).toLowerCase()}
+                            {activeTab === tab && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0F6CBD]" />}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Filters */}
@@ -106,94 +83,120 @@ export default function DealerRequests() {
 
             {/* Requests List */}
             <div className="space-y-4">
-                {dealerRequests.map((dealer) => (
-                    <div key={dealer.id} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 flex flex-col md:flex-row gap-8">
-                        {/* Dealer Info */}
-                        <div className="flex-1">
-                            <div className="flex items-start gap-4">
-                                <img src={dealer.logo} alt={dealer.name} className="w-16 h-16 rounded-xl shadow-sm" />
-                                <div>
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                        <h3 className="text-lg font-black text-[#1E293B]">{dealer.name}</h3>
-                                        {dealer.verified && (
-                                            <span className="bg-blue-50 text-[#0F6CBD] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-100">
-                                                <FaCheck className="w-2 h-2" /> NovaMart Verified
-                                            </span>
-                                        )}
-                                        {dealer.reviewRequired && (
-                                            <span className="bg-amber-50 text-amber-600 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-100">
-                                                Review Required
-                                            </span>
-                                        )}
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
+                        <FaSpinner className="w-8 h-8 text-[#0F6CBD] animate-spin mb-4" />
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Synchronizing Request Pipeline...</p>
+                    </div>
+                ) : requests.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
+                        <FaUserCheck className="w-12 h-12 text-slate-100 mb-4" />
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No {activeTab.toLowerCase()} requests found</p>
+                    </div>
+                ) : (
+                    requests.map((request) => {
+                        const dealer = request.dealer;
+                        return (
+                            <motion.div
+                                key={request.id}
+                                layout
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 flex flex-col md:flex-row gap-8"
+                            >
+                                {/* Dealer Info */}
+                                <div className="flex-1">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-16 h-16 rounded-xl bg-[#0F6CBD]/5 flex items-center justify-center text-[#0F6CBD] shadow-sm font-black text-xl">
+                                            {dealer.businessName?.charAt(0) || 'D'}
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h3 className="text-lg font-black text-[#1E293B]">{dealer.businessName}</h3>
+                                                {dealer.isVerified && (
+                                                    <span className="bg-blue-50 text-[#0F6CBD] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-100">
+                                                        <FaCheck className="w-2 h-2" /> NovaMart Verified
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className="flex items-center gap-4 mt-2 text-xs font-bold text-slate-500">
+                                                <div className="flex items-center gap-1.5">
+                                                    <FaMapMarkerAlt className="w-3 h-3 text-slate-400" />
+                                                    {dealer.city}, {dealer.state}
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <FaStore className="w-3 h-3 text-slate-400" />
+                                                    {dealer.businessType || 'Retailer'}
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <FaClock className="w-3 h-3 text-slate-400" />
+                                                    {new Date(request.createdAt).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-center gap-4 mt-2 text-xs font-bold text-slate-500">
-                                        <div className="flex items-center gap-1.5">
-                                            <FaMapMarkerAlt className="w-3 h-3 text-slate-400" />
-                                            {dealer.location}
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <FaStore className="w-3 h-3 text-slate-400" />
-                                            {dealer.type}
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <FaClock className="w-3 h-3 text-slate-400" />
-                                            Requested {dealer.requestedTime}
-                                        </div>
+                                    <div className="mt-8">
+                                        <Link href={`/manufacturer/dealers/profile/${dealer.id}`} className="text-[10px] font-black uppercase tracking-widest text-[#0F6CBD] hover:underline flex items-center gap-1">
+                                            View Dealer Profile <FaExternalLinkAlt className="w-2 h-2" />
+                                        </Link>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="mt-8">
-                                <button className="text-[10px] font-black uppercase tracking-widest text-[#0F6CBD] hover:underline flex items-center gap-1">
-                                    View Dealer Profile <FaExternalLinkAlt className="w-2 h-2" />
-                                </button>
-                            </div>
-                        </div>
+                                {/* Summary */}
+                                <div className="flex-1 border-l border-slate-100 pl-8 md:pl-8">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Request Memo</p>
+                                    <p className="text-xs font-bold text-slate-600 italic">
+                                        {request.message || "Establishing a regional partnership for supply chain fulfillment."}
+                                    </p>
+                                    <div className="mt-4 flex flex-col gap-1">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Info</p>
+                                        <p className="text-[10px] font-bold text-slate-500">{dealer.user.email}</p>
+                                        <p className="text-[10px] font-bold text-slate-500">{dealer.user.phone}</p>
+                                    </div>
+                                </div>
 
-                        {/* Requested Categories */}
-                        <div className="flex-1 border-l border-slate-100 pl-8 md:pl-8">
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Requested Categories</p>
-                            <div className="flex gap-4 flex-wrap">
-                                {dealer.categories.map((cat, idx) => (
-                                    <label key={idx} className="flex items-center gap-2 cursor-pointer group">
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${cat.requested ? 'bg-[#0F6CBD] border-[#0F6CBD]' : 'bg-white border-slate-300'}`}>
-                                            {cat.requested && <FaCheck className="w-2 h-2 text-white" />}
+                                {/* Actions */}
+                                {request.status === 'PENDING' && (
+                                    <div className="flex flex-col justify-between items-end border-l border-slate-100 pl-8 md:pl-8 min-w-[200px]">
+                                        <div></div>
+                                        <div className="flex items-center gap-3 w-full">
+                                            <button
+                                                onClick={() => handleAction(dealer.id, 'REJECTED')}
+                                                className="flex-1 py-3 px-4 border border-rose-100 text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-50 transition-all"
+                                            >
+                                                Reject
+                                            </button>
+                                            <button
+                                                onClick={() => handleAction(dealer.id, 'APPROVED')}
+                                                className="flex-1 py-3 px-4 bg-[#0F6CBD] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                                            >
+                                                Approve <FaCheck className="w-3 h-3" />
+                                            </button>
                                         </div>
-                                        <span className="text-xs font-bold text-[#1E293B] group-hover:text-[#0F6CBD] transition-colors">{cat.name}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex flex-col justify-between items-end border-l border-slate-100 pl-8 md:pl-8 min-w-[200px]">
-                            <div></div> {/* Spacer */}
-                            <div className="flex items-center gap-3 w-full">
-                                <button className="flex-1 py-3 px-4 border border-rose-100 text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-50 transition-all">
-                                    Reject
-                                </button>
-                                <button className="flex-1 py-3 px-4 bg-[#0F6CBD] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
-                                    Approve Dealer <FaCheck className="w-3 h-3" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                                    </div>
+                                )}
+                            </motion.div>
+                        );
+                    })
+                )}
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between text-xs font-bold text-slate-500 mt-8">
-                <p>Showing 3 of 12 pending requests</p>
-                <div className="flex gap-2">
-                    <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50">
-                        <FaChevronLeft className="w-3 h-3" />
-                    </button>
-                    <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all">
-                        <FaChevronRight className="w-3 h-3" />
-                    </button>
+            {!isLoading && requests.length > 0 && (
+                <div className="flex items-center justify-between text-xs font-bold text-slate-500 mt-8">
+                    <p>Showing {requests.length} records</p>
+                    <div className="flex gap-2">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50">
+                            <FaChevronLeft className="w-3 h-3" />
+                        </button>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all">
+                            <FaChevronRight className="w-3 h-3" />
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

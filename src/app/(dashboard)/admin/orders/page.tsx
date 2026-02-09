@@ -18,7 +18,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 
-import { apiClient } from '../../../../lib/api/client';
+import { adminService } from '../../../../lib/api/services/admin.service';
 import { useSnackbar } from '../../../../client/context/SnackbarContext';
 
 export default function OrderOversightPanel() {
@@ -33,7 +33,7 @@ export default function OrderOversightPanel() {
 
     const fetchOrders = async () => {
         try {
-            const data = await apiClient.get<any[]>('/orders');
+            const data = await adminService.getAllOrders();
             setOrders(data || []);
         } catch (error) {
             console.error('Admin order fetch error:', error);
@@ -45,8 +45,7 @@ export default function OrderOversightPanel() {
 
     const handleUpdateStatus = async (orderId: string, action: 'SHIP' | 'CANCEL') => {
         try {
-            await apiClient.put(`/admin/orders/${orderId}/status`, {
-                action,
+            await adminService.updateOrderStatus(orderId, action, {
                 trackingNumber: action === 'SHIP' ? 'MANUAL-SYS-' + Date.now() : undefined,
                 carrier: action === 'SHIP' ? 'NovaLogistics' : undefined,
                 reason: action === 'CANCEL' ? 'Admin Override' : undefined

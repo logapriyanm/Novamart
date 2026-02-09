@@ -10,10 +10,10 @@ async function main() {
     const dealerPassword = await bcrypt.hash('dealer123', 10);
 
     // 1. Check/Create Customer
-    const existingCustomer = await prisma.user.findUnique({ where: { email: 'demo@novamart.com' } });
-    if (!existingCustomer) {
+    let customerUser = await prisma.user.findUnique({ where: { email: 'demo@novamart.com' } });
+    if (!customerUser) {
         console.log('Creating Customer...');
-        await prisma.user.create({
+        customerUser = await prisma.user.create({
             data: {
                 email: 'demo@novamart.com',
                 password: password,
@@ -25,7 +25,11 @@ async function main() {
             }
         });
     } else {
-        console.log('Customer already exists.');
+        console.log('Customer already exists. Updating password...');
+        await prisma.user.update({
+            where: { id: customerUser.id },
+            data: { password: password, status: 'ACTIVE' }
+        });
     }
 
     // 2. Check/Create Dealer User
@@ -41,7 +45,11 @@ async function main() {
             }
         });
     } else {
-        console.log('Dealer User already exists.');
+        console.log('Dealer User already exists. Updating password...');
+        await prisma.user.update({
+            where: { id: dealerUser.id },
+            data: { password: dealerPassword, status: 'ACTIVE' }
+        });
     }
 
     // 3. Check/Create Dealer Profile
@@ -61,35 +69,50 @@ async function main() {
                 }
             }
         });
-    } else {
-        console.log('Dealer Profile already exists.');
     }
 
     // 4. Create Product
     console.log('Creating Product...');
-    // Check if product exists to avoid duplicates if run multiple times
-    // Since product name isn't unique in schema, we'll just create one for now or check by name
     let product = await prisma.product.findFirst({ where: { name: 'Ultra-Quiet AC 2.0' } });
+
+    // Ensure Manufacturer works
+    let manufacturerUser = await prisma.user.findUnique({ where: { email: 'mfg@novamart.com' } });
+    if (!manufacturerUser) {
+        console.log('Creating Manufacturer User...');
+        manufacturerUser = await prisma.user.create({
+            data: {
+                email: 'mfg@novamart.com',
+                password: await bcrypt.hash('mfg123', 10),
+                role: 'MANUFACTURER',
+                status: 'ACTIVE'
+            }
+        });
+    } else {
+        await prisma.user.update({
+            where: { id: manufacturerUser.id },
+            data: { password: await bcrypt.hash('mfg123', 10), status: 'ACTIVE' }
+        });
+    }
+
+    let manufacturer = await prisma.manufacturer.findUnique({ where: { userId: manufacturerUser.id } });
+    if (!manufacturer) {
+        console.log('Creating Manufacturer Profile...');
+        manufacturer = await prisma.manufacturer.create({
+            data: {
+                userId: manufacturerUser.id,
+                companyName: 'Nova Cooling Systems',
+                registrationNo: 'CIN123456',
+                factoryAddress: 'Industrial Area, Pune',
+                gstNumber: '27AAECM1234F1Z5',
+                bankDetails: {}
+            }
+        });
+    }
+
     if (!product) {
         product = await prisma.product.create({
             data: {
-                manufacturer: {
-                    create: {
-                        user: {
-                            create: {
-                                email: 'mfg@novamart.com',
-                                password: await bcrypt.hash('mfg123', 10),
-                                role: 'MANUFACTURER',
-                                status: 'ACTIVE'
-                            }
-                        },
-                        companyName: 'Nova Cooling Systems',
-                        registrationNo: 'CIN123456',
-                        factoryAddress: 'Industrial Area, Pune',
-                        gstNumber: '27AAECM1234F1Z5',
-                        bankDetails: {}
-                    }
-                },
+                manufacturerId: manufacturer.id,
                 name: 'Ultra-Quiet AC 2.0',
                 description: 'Silent and efficient cooling',
                 basePrice: 42200,
@@ -102,21 +125,23 @@ async function main() {
 
     // 5. Create Inventory
     console.log('Creating Inventory...');
-    const existingInventory = await prisma.inventory.findFirst({
-        where: { productId: product.id, dealerId: dealerProfile.id }
-    });
-
-    if (!existingInventory) {
-        await prisma.inventory.create({
-            data: {
-                productId: product.id,
-                dealerId: dealerProfile.id,
-                region: 'Mumbai',
-                stock: 50,
-                locked: 0,
-                price: 42200
-            }
+    if (product && dealerProfile) {
+        const existingInventory = await prisma.inventory.findFirst({
+            where: { productId: product.id, dealerId: dealerProfile.id }
         });
+
+        if (!existingInventory) {
+            await prisma.inventory.create({
+                data: {
+                    productId: product.id,
+                    dealerId: dealerProfile.id,
+                    region: 'Mumbai',
+                    stock: 50,
+                    locked: 0,
+                    price: 42200
+                }
+            });
+        }
     }
 
     // 6. Check/Create Admin User
@@ -129,12 +154,15 @@ async function main() {
                 password: await bcrypt.hash('admin123', 10),
                 role: 'ADMIN',
                 status: 'ACTIVE',
-                // Admin might need specific profile if schema requires it, but User model has adminRole field
                 adminRole: 'SUPER_ADMIN'
             }
         });
     } else {
-        console.log('Admin User already exists.');
+        console.log('Admin User already exists. Updating password...');
+        await prisma.user.update({
+            where: { id: adminUser.id },
+            data: { password: await bcrypt.hash('admin123', 10), status: 'ACTIVE' }
+        });
     }
 
     console.log('Seeding completed successfully!');

@@ -24,18 +24,18 @@ export default function PrivacyPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#EBEBEB] pt-24 pb-20 overflow-hidden">
+        <div className="min-h-screen bg-background pt-24 pb-20 overflow-hidden">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-20">
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#10367D]/10 border border-[#10367D]/20 text-[10px] font-black uppercase tracking-widest text-[#10367D] mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black uppercase tracking-widest text-black mb-6"
                     >
                         <Shield className="w-3 h-3" />
                         Privacy Safeguards
                     </motion.div>
-                    <h1 className="text-5xl lg:text-6xl font-black text-[#1E293B] mb-6 tracking-tight">Privacy <span className="text-[#10367D]">Commitment</span></h1>
+                    <h1 className="text-5xl lg:text-6xl font-black text-foreground mb-6 tracking-tight italic uppercase">Privacy <span className="text-black/60">Commitment</span></h1>
                     <p className="text-[#1E293B]/60 font-medium leading-relaxed max-w-2xl mx-auto">
                         Your trust is our most valuable asset. Our privacy framework is designed to protect your identity while maintaining a perfectly auditable trade environment.
                     </p>
@@ -48,13 +48,13 @@ export default function PrivacyPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-white/60 p-8 rounded-[2.5rem] border border-[#10367D]/5 flex flex-col items-center text-center group hover:border-[#10367D]/20 transition-all"
+                            className="bg-white/60 p-8 rounded-[10px] border border-black/5 flex flex-col items-center text-center group hover:border-black/20 transition-all"
                         >
-                            <div className="w-12 h-12 rounded-2xl bg-[#10367D]/5 text-[#10367D] flex items-center justify-center mb-6 group-hover:bg-[#10367D] group-hover:text-white transition-all">
+                            <div className="w-12 h-12 rounded-[5px] bg-black/5 text-black flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-all">
                                 <pillar.icon className="w-6 h-6" />
                             </div>
-                            <h3 className="text-sm font-black text-[#1E293B] uppercase tracking-wider mb-2">{pillar.title}</h3>
-                            <p className="text-[11px] text-[#1E293B]/60 font-bold leading-relaxed">{pillar.description}</p>
+                            <h3 className="text-[10px] font-black text-foreground/40 uppercase tracking-widest mb-2 italic">{pillar.title}</h3>
+                            <p className="text-[11px] text-foreground/60 font-bold leading-relaxed italic">"{pillar.description}"</p>
                         </motion.div>
                     ))}
                 </div>
@@ -63,23 +63,23 @@ export default function PrivacyPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="bg-white/40 backdrop-blur-3xl border border-[#10367D]/10 rounded-[3rem] p-10 lg:p-16 space-y-12"
+                    className="bg-white/40 backdrop-blur-3xl border border-black/10 rounded-[10px] p-10 lg:p-16 space-y-12"
                 >
                     <div className="flex gap-6 items-start">
-                        <Database className="w-8 h-8 text-[#10367D] shrink-0" />
+                        <Database className="w-8 h-8 text-black shrink-0" />
                         <div className="space-y-4">
-                            <h2 className="text-2xl font-black text-[#1E293B] uppercase tracking-tight">Information We Collect</h2>
-                            <p className="text-sm text-[#1E293B]/60 font-medium leading-relaxed">
+                            <h2 className="text-2xl font-black text-foreground uppercase tracking-tight italic">Information We Collect</h2>
+                            <p className="text-sm text-foreground/60 font-medium leading-relaxed italic">
                                 We collect information strictly required for **KYC (Know Your Customer)** and **KYB (Know Your Business)** verification, as well as transactional logs for auditability. This includes legal names, registration certificate data, and location-based trade signals.
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex gap-6 items-start pt-12 border-t border-[#10367D]/10">
-                        <Search className="w-8 h-8 text-[#10367D] shrink-0" />
+                    <div className="flex gap-6 items-start pt-12 border-t border-black/10">
+                        <Search className="w-8 h-8 text-black shrink-0" />
                         <div className="space-y-4">
-                            <h2 className="text-2xl font-black text-[#1E293B] uppercase tracking-tight">Your Rights</h2>
-                            <p className="text-sm text-[#1E293B]/60 font-medium leading-relaxed">
+                            <h2 className="text-2xl font-black text-foreground uppercase tracking-tight italic">Your Rights</h2>
+                            <p className="text-sm text-foreground/60 font-medium leading-relaxed italic">
                                 Under our governance model, you have the right to audit your own data records and request account closure. However, transactional ledgers relating to financial settlements must be retained for auditing periods required by international trade law.
                             </p>
                         </div>

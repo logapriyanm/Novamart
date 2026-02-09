@@ -25,6 +25,7 @@ export default function CategoryLayout({ categoryName, description, categorySlug
         rating: null,
         availability: [],
         verifiedOnly: false,
+        subCategory: null,
         powerConsumption: [],
         capacity: [],
         energyRating: [],
@@ -68,15 +69,32 @@ export default function CategoryLayout({ categoryName, description, categorySlug
                     {/* MAIN CONTENT */}
                     <main className="flex-1 min-w-0 space-y-12">
                         {/* Sidebar Toggle & Header */}
-                        <div className="flex items-center gap-4 mb-8">
-                            <button
-                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                className="p-2 bg-surface hover:bg-primary hover:text-background rounded-xl border border-foreground/5 transition-all shadow-lg"
-                                title={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}
-                            >
-                                {isSidebarOpen ? <FaChevronLeft className="w-4 h-4" /> : <FaChevronRight className="w-4 h-4" />}
-                            </button>
-                            <h2 className="text-2xl font-black uppercase tracking-tighter">{categoryName}</h2>
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                                    className="p-2 bg-surface hover:bg-primary hover:text-background rounded-xl border border-foreground/5 transition-all shadow-lg"
+                                    title={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}
+                                >
+                                    {isSidebarOpen ? <FaChevronLeft className="w-4 h-4" /> : <FaChevronRight className="w-4 h-4" />}
+                                </button>
+                                <div>
+                                    <h2 className="text-2xl font-black uppercase tracking-tighter">{categoryName}</h2>
+                                    {filters.subCategory && (
+                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mt-1">Showing: {filters.subCategory}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                {filters.subCategory && (
+                                    <button
+                                        onClick={() => handleFilterChange('subCategory', null)}
+                                        className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-all"
+                                    >
+                                        Clear: {filters.subCategory} ×
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         <section>

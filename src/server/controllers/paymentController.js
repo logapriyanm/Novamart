@@ -2,6 +2,7 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import prisma from '../lib/prisma.js';
 import paymentService from '../services/paymentService.js';
+import logger from '../lib/logger.js';
 
 // Initialize Razorpay (ensure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are in .env)
 const razorpay = process.env.RAZORPAY_KEY_ID ? new Razorpay({
@@ -34,7 +35,15 @@ export const createPaymentOrder = async (req, res) => {
         }
 
         if (!razorpay) {
-            // Mock mode if Razorpay not configured
+            // SECURITY: Block mock payments in production
+            if (process.env.NODE_ENV === 'production') {
+                return res.status(503).json({
+                    success: false,
+                    error: 'Payment gateway not configured. Please contact support.'
+                });
+            }
+
+            // Mock mode if Razorpay not configured (DEV ONLY)
             const mockOrderId = `mock_order_${Date.now()}`;
 
             // Create payment record
@@ -103,7 +112,7 @@ export const createPaymentOrder = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Create Payment Order Error:', error);
+        logger.error('Create Payment Order Error:', error);
         res.status(500).json({ success: false, error: 'Payment initialization failed' });
     }
 };
@@ -152,14 +161,14 @@ export const verifyPayment = async (req, res) => {
         // Send payment confirmation email (non-blocking)
         import('../services/emailService.js').then((module) => {
             module.sendPaymentConfirmation(result).catch(err =>
-                console.error('Failed to send payment confirmation email:', err)
+                logger.error('Failed to send payment confirmation email:', err)
             );
         }).catch(() => { });
 
         res.json({ success: true, data: result });
 
     } catch (error) {
-        console.error('Verify Payment Error:', error);
+        logger.error('Verify Payment Error:', error);
         res.status(500).json({ success: false, error: error.message || 'Payment verification failed' });
     }
 };
@@ -212,7 +221,7 @@ export const handleWebhook = async (req, res) => {
         res.json({ status: 'ok' });
 
     } catch (error) {
-        console.error('Webhook Error:', error);
+        logger.error('Webhook Error:', error);
         res.status(500).json({ error: 'Webhook processing failed' });
     }
 };
@@ -238,7 +247,7 @@ export const getPaymentStatus = async (req, res) => {
         res.json({ success: true, data: payment });
 
     } catch (error) {
-        console.error('Get Payment Status Error:', error);
+        logger.error('Get Payment Status Error:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch payment status' });
     }
 };

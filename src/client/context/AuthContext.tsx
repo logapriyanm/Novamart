@@ -50,28 +50,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(userData);
         } catch (error) {
             console.error('Session hydration failed:', error);
-            apiClient.setToken(null);
-            setUser(null);
+            // If checking user fails (e.g. token expired), token refresh happens in apiClient.ts
+            // But if it still fails, clear tokens.
+            if (apiClient.getToken() === null) {
+                setUser(null);
+            } else {
+                // Retry once if tokens were refreshed during the failure
+                try {
+                    const retryUserData = await authService.getCurrentUser();
+                    setUser(retryUserData);
+                } catch (retryError) {
+                    apiClient.setTokens(null, null);
+                    setUser(null);
+                }
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleAuthSuccess = (response: any) => {
-        // response is the 'data' property from the standardized API response
-        // which contains { token, user } or just user depending on the endpoint
+    const handleAuthSuccess = (response: AuthResponse) => {
         const token = response.token;
-        const user = response.user;
+        const refreshToken = (response as any).refreshToken;
+        const userData = response.user;
 
-        if (token) apiClient.setToken(token);
-        if (user) setUser(user);
+        if (token) {
+            apiClient.setTokens(token, refreshToken || apiClient.getRefreshToken());
+        }
 
-        const role = user?.role || response.role;
-        switch (role) {
-            case 'ADMIN': router.push('/admin/dashboard'); break;
-            case 'MANUFACTURER': router.push('/manufacturer/dashboard'); break;
-            case 'DEALER': router.push('/dealer/dashboard'); break;
-            default: router.push('/');
+        if (userData) setUser(userData);
+
+        const role = userData?.role;
+        const status = userData?.status;
+
+        // Redirect based on role and status
+        if (role === 'ADMIN') {
+            router.push('/admin/dashboard');
+        } else if (status === 'PENDING') {
+            router.push('/auth/pending-verification');
+        } else {
+            switch (role) {
+                case 'MANUFACTURER': router.push('/manufacturer/dashboard'); break;
+                case 'DEALER': router.push('/dealer/dashboard'); break;
+                case 'CUSTOMER': router.push('/'); break;
+                default: router.push('/');
+            }
         }
     };
 
@@ -81,9 +104,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const response = await authService.login(credentials);
             handleAuthSuccess(response);
             showSnackbar('Login successful', 'success');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Login failed:', error);
-            showSnackbar('Invalid email or password', 'error');
+            showSnackbar(error.message || 'Invalid email or password', 'error');
             throw error;
         } finally {
             setIsLoading(false);
@@ -95,8 +118,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const response = await authService.loginWithGoogle(idToken);
             handleAuthSuccess(response);
-        } catch (error) {
+            showSnackbar('Login successful via Google', 'success');
+        } catch (error: any) {
             console.error('Google Login failed:', error);
+            showSnackbar(error.message || 'Google Login Failed', 'error');
             throw error;
         } finally {
             setIsLoading(false);
@@ -108,8 +133,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const response = await authService.loginWithPhone(phone, otp);
             handleAuthSuccess(response);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Phone Login failed:', error);
+            showSnackbar(error.message || 'Phone login failed', 'error');
             throw error;
         } finally {
             setIsLoading(false);
@@ -120,8 +146,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
         try {
             await authService.sendOtp(phone);
-        } catch (error) {
+            showSnackbar('OTP sent successfully', 'success');
+        } catch (error: any) {
             console.error('Send OTP failed:', error);
+            showSnackbar(error.message || 'Failed to send OTP', 'error');
             throw error;
         } finally {
             setIsLoading(false);
@@ -132,13 +160,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
         try {
             const response = await authService.register(data);
-            apiClient.setToken(response.token);
-            setUser(response.user);
-            showSnackbar('Registration successful. Await verification.', 'success');
-            router.push('/auth/login?registered=true');
-        } catch (error) {
+            // Handle success based on role
+            if (data.role === 'CUSTOMER') {
+                handleAuthSuccess(response);
+                showSnackbar('Registration successful', 'success');
+            } else {
+                showSnackbar('Registration successful. Your account is pending verification.', 'success');
+                router.push('/auth/login?registered=pending');
+            }
+        } catch (error: any) {
             console.error('Registration failed:', error);
-            showSnackbar('Something went wrong. Please try again.', 'error');
+            showSnackbar(error.message || 'Something went wrong. Please try again.', 'error');
             throw error;
         } finally {
             setIsLoading(false);
@@ -148,12 +180,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = async () => {
         try {
             await authService.logout();
-            showSnackbar('Logged out successfully', 'success');
         } catch (error) {
             console.error('Logout API failed:', error);
         } finally {
-            apiClient.setToken(null);
+            apiClient.setTokens(null, null);
             setUser(null);
+            showSnackbar('Logged out successfully', 'success');
             router.push('/auth/login');
         }
     };

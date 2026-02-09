@@ -19,7 +19,9 @@ router.use(authorize(['MANUFACTURER'], [], ['ACTIVE', 'UNDER_VERIFICATION']));
  * Dealer Network Management
  */
 router.get('/network', manufacturerController.getMyDealers);
+router.get('/dealers/requests', manufacturerController.getDealerRequests);
 router.post('/network/handle', manufacturerController.handleDealerNetwork);
+router.post('/dealers/handle', manufacturerController.handleDealerNetwork); // Alias
 router.get('/products', productController.getMyProducts);
 
 /**
@@ -31,6 +33,7 @@ router.post('/inventory/allocate', manufacturerController.allocateInventory);
  * Performance & Financials
  */
 router.get('/analytics', manufacturerController.getManufacturerStats);
+router.get('/stats', manufacturerController.getManufacturerStats); // Alias
 
 /**
  * Profile & Settings

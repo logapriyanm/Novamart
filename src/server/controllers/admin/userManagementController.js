@@ -3,6 +3,34 @@ import systemEvents, { EVENTS } from '../../lib/systemEvents.js';
 import auditService from '../../services/audit.js';
 
 /**
+ * User Management
+ */
+export const getUsers = async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            orderBy: { id: 'desc' },
+            include: {
+                documents: true,
+                manufacturer: true,
+                dealer: true,
+                customer: true
+            }
+        });
+
+        // Map users to include a display 'name'
+        const enhancedUsers = users.map(user => ({
+            ...user,
+            name: user.customer?.name || user.manufacturer?.companyName || user.dealer?.businessName || 'User'
+        }));
+
+        res.json({ success: true, data: enhancedUsers });
+    } catch (error) {
+        console.error('Get Users Error:', error);
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_USERS' });
+    }
+};
+
+/**
  * User/Manufacturer Management
  */
 export const manageUser = async (req, res) => {
@@ -73,7 +101,8 @@ export const getDealers = async (req, res) => {
                         email: true,
                         status: true
                     }
-                }
+                },
+                approvedBy: true
             },
             orderBy: { id: 'desc' }
         });
@@ -92,27 +121,42 @@ export const verifyManufacturer = async (req, res) => {
     const adminId = req.user.id;
 
     try {
+        const updateData = { isVerified };
+
         const manufacturer = await prisma.manufacturer.update({
             where: { id: manufacturerId },
-            data: { isVerified }
+            data: updateData,
+            include: { user: true }
         });
 
+        // Activate user status if verified
+        if (isVerified) {
+            await prisma.user.update({
+                where: { id: manufacturer.userId },
+                data: { status: 'ACTIVE' }
+            });
+        }
+
         // Optionally assign "VERIFIED" badge if system exists
-        const badge = await prisma.badge.findUnique({ where: { name: 'VERIFIED' } });
-        if (badge && isVerified) {
-            await prisma.userBadge.upsert({
-                where: {
-                    userId_badgeId: {
+        try {
+            const badge = await prisma.badge.findUnique({ where: { name: 'VERIFIED' } });
+            if (badge && isVerified) {
+                await prisma.userBadge.upsert({
+                    where: {
+                        userId_badgeId: {
+                            userId: manufacturer.userId,
+                            badgeId: badge.id
+                        }
+                    },
+                    update: {},
+                    create: {
                         userId: manufacturer.userId,
                         badgeId: badge.id
                     }
-                },
-                update: {},
-                create: {
-                    userId: manufacturer.userId,
-                    badgeId: badge.id
-                }
-            });
+                });
+            }
+        } catch (badgeError) {
+            console.error('Badge Assignment Failed (Non-critical):', badgeError.message);
         }
 
         await auditService.logAction('MANUFACTURER_VERIFICATION', 'MANUFACTURER', manufacturerId, {
@@ -133,8 +177,18 @@ export const verifyManufacturer = async (req, res) => {
             data: manufacturer
         });
     } catch (error) {
-        console.error('Verification failed ERROR DETAIL:', error);
-        res.status(400).json({ success: false, error: 'MANUFACTURER_VERIFICATION_FAILED', details: error.message });
+        console.error('SERVER VERIFICATION ERROR:', {
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+            manufacturerId
+        });
+        res.status(400).json({
+            success: false,
+            error: 'MANUFACTURER_VERIFICATION_FAILED',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
@@ -146,11 +200,39 @@ export const verifyDealer = async (req, res) => {
     try {
         const dealer = await prisma.dealer.update({
             where: { id: dealerId },
-            data: {
-                // businessName: ..., // Not updating name here
-                // Note: isVerified doesn't exist on Dealer schema yet
-            }
+            data: { isVerified },
+            include: { user: true }
         });
+
+        // Activate user status if verified
+        if (isVerified) {
+            await prisma.user.update({
+                where: { id: dealer.userId },
+                data: { status: 'ACTIVE' }
+            });
+        }
+
+        // Optionally assign "VERIFIED" badge if system exists
+        try {
+            const badge = await prisma.badge.findUnique({ where: { name: 'VERIFIED' } });
+            if (badge && isVerified) {
+                await prisma.userBadge.upsert({
+                    where: {
+                        userId_badgeId: {
+                            userId: dealer.userId,
+                            badgeId: badge.id
+                        }
+                    },
+                    update: {},
+                    create: {
+                        userId: dealer.userId,
+                        badgeId: badge.id
+                    }
+                });
+            }
+        } catch (badgeError) {
+            console.error('Badge Assignment Failed (Non-critical):', badgeError.message);
+        }
 
         await auditService.logAction('DEALER_VERIFICATION', 'DEALER', dealerId, {
             userId: adminId,
@@ -170,8 +252,60 @@ export const verifyDealer = async (req, res) => {
             data: dealer
         });
     } catch (error) {
-        console.error('Dealer verification failed:', error);
-        res.status(400).json({ success: false, error: 'DEALER_VERIFICATION_FAILED' });
+        console.error('SERVER VERIFICATION ERROR:', {
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+            dealerId
+        });
+        res.status(400).json({
+            success: false,
+            error: 'DEALER_VERIFICATION_FAILED',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+};
+
+export const updateDealerManufacturers = async (req, res) => {
+    const { dealerId } = req.params;
+    const { manufacturerId } = req.body;
+    const adminId = req.user.id;
+
+    try {
+        // Link or unlink based on if manufacturerId is already present
+        const currentDealer = await prisma.dealer.findUnique({
+            where: { id: dealerId },
+            include: { approvedBy: true }
+        });
+
+        const isLinked = currentDealer.approvedBy.some(m => m.id === manufacturerId);
+
+        const updatedDealer = await prisma.dealer.update({
+            where: { id: dealerId },
+            data: {
+                approvedBy: isLinked
+                    ? { disconnect: { id: manufacturerId } }
+                    : { connect: { id: manufacturerId } }
+            },
+            include: { approvedBy: true, user: true }
+        });
+
+        await auditService.logAction('DEALER_MANUFACTURER_LINK', 'DEALER', dealerId, {
+            userId: adminId,
+            manufacturerId,
+            action: isLinked ? 'UNLINK' : 'LINK',
+            req
+        });
+
+        res.json({
+            success: true,
+            message: `Manufacturer ${isLinked ? 'unlinked' : 'linked'} successfully`,
+            data: updatedDealer
+        });
+    } catch (error) {
+        console.error('Linking failed:', error);
+        res.status(400).json({ success: false, error: 'DEALER_MANUFACTURER_LINK_FAILED' });
     }
 };
 
@@ -189,10 +323,12 @@ export const assignBadge = async (req, res) => {
 };
 
 export default {
+    getUsers,
     manageUser,
     getManufacturers,
     getDealers,
     verifyManufacturer,
     verifyDealer,
+    updateDealerManufacturers,
     assignBadge
 };

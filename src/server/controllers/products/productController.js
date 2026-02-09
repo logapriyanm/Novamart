@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import systemEvents, { EVENTS } from '../../lib/systemEvents.js';
+import logger from '../../lib/logger.js';
 
 export const createProduct = async (req, res) => {
     try {
@@ -50,8 +51,10 @@ export const createProduct = async (req, res) => {
         };
 
         // 2. Create Product
-        const isVerified = manufacturer.isVerified;
-        const autoApprove = isVerified;
+        // Flow Update: Verified manufacturers publish instantly if not Draft
+        const isRequestingDraft = status === 'DRAFT';
+        const finalStatus = isRequestingDraft ? 'DRAFT' : (manufacturer.isVerified ? 'APPROVED' : 'PENDING');
+        const isApprovedStatus = finalStatus === 'APPROVED';
 
         const newProduct = await prisma.product.create({
             data: {
@@ -66,8 +69,8 @@ export const createProduct = async (req, res) => {
                 images: images || [],
                 video,
                 specifications: finalSpecs,
-                status: autoApprove ? 'APPROVED' : (status || 'APPROVED'),
-                isApproved: autoApprove || true // Sync with status for simulation
+                status: finalStatus,
+                isApproved: isApprovedStatus
             }
         });
 
@@ -78,6 +81,8 @@ export const createProduct = async (req, res) => {
             manufacturerId: manufacturer.id
         });
 
+        logger.info(`Product created: ${newProduct.name} by ${manufacturer.companyName}`);
+
         res.status(201).json({
             success: true,
             message: 'Product created successfully',
@@ -85,7 +90,7 @@ export const createProduct = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error creating product:', error);
+        logger.error('Error creating product:', error);
         res.status(500).json({
             error: 'Failed to create product',
             details: error.message
@@ -113,6 +118,7 @@ export const getMyProducts = async (req, res) => {
             data: products
         });
     } catch (error) {
+        logger.error('Error fetching my products:', error);
         res.status(500).json({
             success: false,
             error: 'Failed to fetch products'
@@ -124,146 +130,127 @@ export const getAllProducts = async (req, res) => {
     try {
         const {
             status, category, q, minPrice, maxPrice, sortBy,
-            // New Filters
             brands, rating, availability, verifiedOnly,
             powerConsumption, capacity, energyRating,
-            installationType, usageType, warranty, isSmart
+            installationType, usageType, warranty, isSmart,
+            subCategory, page = 1, limit = 20
         } = req.query;
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const take = parseInt(limit);
 
         const where = {};
 
-        // Basic Filters
-        if (status) where.status = status;
-        if (category) where.category = category;
+        const conditions = [];
+
+        // Status filter
+        if (status) conditions.push({ status });
+
+        // Hierarchical Category Filtering
+        if (category) {
+            conditions.push({
+                OR: [
+                    { category: category },
+                    { specifications: { path: ['mainCategory'], equals: category } }
+                ]
+            });
+        }
+
+        if (subCategory) {
+            conditions.push({
+                specifications: { path: ['subCategory'], equals: subCategory }
+            });
+        }
 
         // Search Query
         if (q) {
-            where.OR = [
-                { name: { contains: q, mode: 'insensitive' } },
-                { description: { contains: q, mode: 'insensitive' } },
-                { category: { contains: q, mode: 'insensitive' } },
-                { 'manufacturer.companyName': { contains: q, mode: 'insensitive' } } // Search by brand
-            ];
+            conditions.push({
+                OR: [
+                    { name: { contains: q, mode: 'insensitive' } },
+                    { description: { contains: q, mode: 'insensitive' } },
+                    { category: { contains: q, mode: 'insensitive' } },
+                    { manufacturer: { companyName: { contains: q, mode: 'insensitive' } } }
+                ]
+            });
         }
 
         // Price Filter
         if (minPrice || maxPrice) {
-            where.basePrice = {};
-            if (minPrice) where.basePrice.gte = parseFloat(minPrice);
-            if (maxPrice) where.basePrice.lte = parseFloat(maxPrice);
+            const priceCond = {};
+            if (minPrice) priceCond.gte = parseFloat(minPrice);
+            if (maxPrice) priceCond.lte = parseFloat(maxPrice);
+            conditions.push({ basePrice: priceCond });
         }
 
         // --- NEW FILTERS ---
+        const manufacturerFilter = {
+            user: {
+                status: { not: 'SUSPENDED' }
+            }
+        };
 
         // 1. Brands (Manufacturer Name)
         if (brands) {
             const brandList = Array.isArray(brands) ? brands : brands.split(',');
-            where.manufacturer = {
-                ...where.manufacturer, // Preserve existing manufacturer filters if any
-                companyName: { in: brandList, mode: 'insensitive' }
-            };
+            manufacturerFilter.companyName = { in: brandList, mode: 'insensitive' };
         }
 
         // 2. Verified Sellers Only
         if (verifiedOnly === 'true') {
-            where.manufacturer = {
-                ...where.manufacturer,
-                isVerified: true
-            };
+            manufacturerFilter.isVerified = true;
+        }
+
+        if (Object.keys(manufacturerFilter).length > 0) {
+            where.manufacturer = manufacturerFilter;
         }
 
         // 3. Minimum Rating
         if (rating) {
-            where.averageRating = { gte: parseFloat(rating) };
+            conditions.push({ averageRating: { gte: parseFloat(rating) } });
         }
 
         // 4. Availability
         if (availability) {
             const availList = Array.isArray(availability) ? availability : availability.split(',');
             if (availList.includes('In Stock')) {
-                where.inventory = { some: { stock: { gt: 0 } } };
+                conditions.push({ inventory: { some: { stock: { gt: 0 } } } });
             }
-            // 'Out of Stock' logic would be more complex (every inventory <= 0), 
-            // typically users filter for 'In Stock'. 
         }
 
         // 5. Specification Filters (JSONB Querying)
-        // Note: Prisma JSON filtering requires specific syntax. 
-        // We'll map these requests to the 'specifications' JSON field.
+        // Note: For multiple JSON path filters, we use AND to avoid overwriting the specifications key
+        const specFilters = [];
 
-        const jsonFilters = {};
-        if (powerConsumption) jsonFilters.powerConsumption = { in: Array.isArray(powerConsumption) ? powerConsumption : powerConsumption.split(',') };
-        if (capacity) jsonFilters.capacity = { in: Array.isArray(capacity) ? capacity : capacity.split(',') };
-        if (energyRating) jsonFilters.energyRating = { in: Array.isArray(energyRating) ? energyRating : energyRating.split(',') };
-        if (installationType) jsonFilters.installationType = { in: Array.isArray(installationType) ? installationType : installationType.split(',') };
-        if (usageType) jsonFilters.usageType = { in: Array.isArray(usageType) ? usageType : usageType.split(',') };
-        if (warranty) jsonFilters.warranty = { in: Array.isArray(warranty) ? warranty : warranty.split(',') };
-        if (isSmart === 'true') jsonFilters.isSmart = true;
-
-        // Apply JSON filters if any exist
-        if (Object.keys(jsonFilters).length > 0) {
-            // Simplest partial match approach for Postgres JSONB
-            // Ideally use exact matches if structure is guaranteed
-            Object.entries(jsonFilters).forEach(([key, value]) => {
-                if (key === 'isSmart') {
-                    where.specifications = {
-                        path: ['isSmart'],
-                        equals: true
-                    };
-                } else if (value.in) {
-                    // Start OR logic for array of values
-                    // Prisma JSON array filtering is tricky. 
-                    // Fallback to simpler 'array-contains' if possible, or simple equals if single.
-                    // For Production: Ideally flatten these to columns or use raw query.
-                    // For now, let's try path filtering (works for single value selection effectively)
-
-                    // Note: Filtering a JSON field for "Value IN [Array]" is limited in Prisma without raw query.
-                    // We will implement simpler single-value filtering if array length is 1, 
-                    // or skip complex multi-select filtering on JSON for this iteration to avoid crashing.
-
-                    // Implementation for now: Filter if ANY match (simplified)
-                    // If complex multi-select is needed for JSON keys, Raw SQL is preferred.
-                }
-            });
-
-            // REVISED JSON STRATEGY: 
-            // Since Prisma's JSON filtering is strict, let's use the `path` syntax for exact keys.
-            // We will handle single-select scenarios cleanly.
-
-            if (isSmart === 'true') {
-                where.specifications = { ...(where.specifications || {}), path: ['isSmart'], equals: true };
-            }
-            // Helper to add spec filter
-            const addSpecFilter = (field, val) => {
-                const values = Array.isArray(val) ? val : val.split(',');
-                if (values.length > 0) {
-                    // OR logic for multiple selected values for the SAME field
-                    // OR is not easily supported in single JSON filter object depth in Prisma.
-                    // We will filter by the FIRST value for now to demonstrate functionality 
-                    // or use `array_contains` if structure is an array (it's not, it's a value).
-
-                    // Correct way with Prisma Client extensions or Raw would be distinct.
-                    // Standard Prisma: path: ['field'], equals: value
-
-                    // We will iterate and find matches.
-                    where.specifications = {
-                        ...(where.specifications || {}),
-                        path: [field],
-                        equals: values[0] // Taking first for stability in this step
-                    };
-                }
-            };
-
-            if (powerConsumption) addSpecFilter('powerConsumption', powerConsumption);
-            if (capacity) addSpecFilter('capacity', capacity);
-            if (energyRating) addSpecFilter('energyRating', energyRating);
-            if (installationType) addSpecFilter('installationType', installationType);
-            if (usageType) addSpecFilter('usageType', usageType);
-            if (warranty) addSpecFilter('warranty', warranty);
+        if (isSmart === 'true') {
+            specFilters.push({ specifications: { path: ['isSmart'], equals: true } });
         }
 
+        const addSpecFilter = (field, val) => {
+            const values = Array.isArray(val) ? val : val.split(',');
+            if (values.length > 0) {
+                specFilters.push({ specifications: { path: [field], equals: values[0] } });
+            }
+        };
 
-        // Sorting Logic
+        if (powerConsumption) addSpecFilter('powerConsumption', powerConsumption);
+        if (capacity) addSpecFilter('capacity', capacity);
+        if (energyRating) addSpecFilter('energyRating', energyRating);
+        if (installationType) addSpecFilter('installationType', installationType);
+        if (usageType) addSpecFilter('usageType', usageType);
+        if (warranty) addSpecFilter('warranty', warranty);
+
+        if (specFilters.length > 0) {
+            conditions.push(...specFilters);
+        }
+
+        // Final check for manufacturerFilter
+        if (Object.keys(manufacturerFilter).length > 0) {
+            conditions.push({ manufacturer: manufacturerFilter });
+        }
+
+        if (conditions.length > 0) {
+            where.AND = conditions;
+        }
         let orderBy = { updatedAt: 'desc' };
         if (sortBy) {
             switch (sortBy) {
@@ -271,51 +258,56 @@ export const getAllProducts = async (req, res) => {
                 case 'price-high': orderBy = { basePrice: 'desc' }; break;
                 case 'rating': orderBy = { averageRating: 'desc' }; break;
                 case 'newest': orderBy = { createdAt: 'desc' }; break;
-                case 'popularity': orderBy = { reviewCount: 'desc' }; break; // Proxy for high selling
+                case 'popularity': orderBy = { reviewCount: 'desc' }; break;
             }
         }
 
-        const products = await prisma.product.findMany({
-            where: {
-                ...where,
-                manufacturer: {
-                    user: {
-                        status: { not: 'SUSPENDED' }
-                    }
-                }
-            },
-            include: {
-                manufacturer: {
-                    select: {
-                        companyName: true,
-                        factoryAddress: true,
-                        isVerified: true
-                    }
-                },
-                inventory: {
-                    take: 1,
-                    where: { stock: { gt: 0 } },
-                    include: {
-                        dealer: {
-                            select: {
-                                businessName: true
+        const [total, products] = await Promise.all([
+            prisma.product.count({ where }),
+            prisma.product.findMany({
+                where,
+                include: {
+                    manufacturer: {
+                        select: {
+                            companyName: true,
+                            factoryAddress: true,
+                            isVerified: true
+                        }
+                    },
+                    inventory: {
+                        take: 1,
+                        where: { stock: { gt: 0 } },
+                        include: {
+                            dealer: {
+                                select: {
+                                    businessName: true
+                                }
                             }
                         }
                     }
-                }
-            },
-            orderBy
-        });
+                },
+                orderBy,
+                skip,
+                take
+            })
+        ]);
 
         res.json({
             success: true,
-            data: products
+            data: products,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                pages: Math.ceil(total / parseInt(limit))
+            }
         });
     } catch (error) {
-        console.error('Error fetching products:', error);
+        logger.error('Error fetching products:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to fetch products'
+            error: 'Failed to fetch products',
+            details: error.message
         });
     }
 };
@@ -364,12 +356,24 @@ export const getProductById = async (req, res) => {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
 
+        // Log View Behavior (Background)
+        if (req.user) {
+            prisma.userBehavior.create({
+                data: {
+                    userId: req.user.id,
+                    type: 'VIEW',
+                    targetId: id,
+                    metadata: { type: 'PRODUCT_VIEW', category: product.category }
+                }
+            }).catch(err => console.error('Failed to log view:', err.message));
+        }
+
         res.json({
             success: true,
             data: product
         });
     } catch (error) {
-        console.error('Error fetching product details:', error);
+        logger.error('Error fetching product details:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch product' });
     }
 };
@@ -392,21 +396,108 @@ export const updateProductStatus = async (req, res) => {
             }
         });
 
-        // Audit Log for Admin Action
-        // await auditService.logAction('PRODUCT_STATUS_UPDATE', 'ADMIN', req.user.id, { productId: id, status });
+        logger.info(`Product status updated: ${id} -> ${status}`);
 
-        // res.json({ message: `Product ${status}`, product });
         res.json({
             success: true,
             message: `Product ${status}`,
             data: product
         });
     } catch (error) {
-        console.error('Error updating product status:', error);
+        logger.error('Error updating product status:', error);
         res.status(500).json({
             success: false,
             error: 'Failed to update product status'
         });
+    }
+};
+
+export const updateProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const manufacturerId = req.user.manufacturer?.id;
+
+        // Check ownership
+        const existingProduct = await prisma.product.findUnique({
+            where: { id }
+        });
+
+        if (!existingProduct || existingProduct.manufacturerId !== manufacturerId) {
+            return res.status(403).json({ error: 'Not authorized to update this product' });
+        }
+
+        const {
+            name, description, basePrice, moq, category,
+            colors, sizes, images, video, specifications,
+            status, ...otherFields
+        } = req.body;
+
+        const finalSpecs = {
+            ...(existingProduct.specifications || {}),
+            ...(specifications || {}),
+            ...otherFields
+        };
+
+        const updatedProduct = await prisma.product.update({
+            where: { id },
+            data: {
+                name, description,
+                basePrice: parseFloat(basePrice),
+                moq: parseInt(moq),
+                category,
+                colors, sizes, images, video,
+                specifications: finalSpecs,
+                // If specific critical fields change, reset status to PENDING
+                status: (existingProduct.status === 'APPROVED' && (basePrice !== existingProduct.basePrice || name !== existingProduct.name)) ? 'PENDING' : existingProduct.status
+            }
+        });
+
+        res.json({ success: true, message: 'Product updated', data: updatedProduct });
+    } catch (error) {
+        logger.error('Error updating product:', error);
+        res.status(500).json({ success: false, error: 'Failed to update product' });
+    }
+};
+
+export const deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const manufacturerId = req.user.manufacturer?.id;
+
+        const product = await prisma.product.findUnique({ where: { id } });
+
+        if (!product || product.manufacturerId !== manufacturerId) {
+            return res.status(403).json({ error: 'Not authorized to delete this product' });
+        }
+
+        await prisma.product.delete({ where: { id } });
+
+        res.json({ success: true, message: 'Product deleted successfully' });
+    } catch (error) {
+        logger.error('Error deleting product:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete product' });
+    }
+};
+
+export const getCategories = async (req, res) => {
+    try {
+        const products = await prisma.product.findMany({
+            where: { status: 'APPROVED' },
+            distinct: ['category'],
+            select: { category: true }
+        });
+
+        const categories = products
+            .map(p => p.category)
+            .filter(c => c && c.trim() !== '');
+
+        res.json({
+            success: true,
+            data: [...new Set(categories)]
+        });
+    } catch (error) {
+        logger.error('Error fetching categories:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch categories' });
     }
 };
 
@@ -415,5 +506,9 @@ export default {
     getMyProducts,
     getAllProducts,
     getProductById,
-    updateProductStatus
+    updateProductStatus,
+    updateProduct,
+    deleteProduct,
+    getCategories
 };
+

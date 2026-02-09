@@ -50,8 +50,8 @@ export default function WishlistPage() {
 
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">My Collections</h1>
-                    <p className="text-slate-500 text-sm">Organize your procurement lists and manage saved items for future orders.</p>
+                    <h1 className="text-3xl font-black text-black tracking-tight mb-2 italic uppercase">My Collections</h1>
+                    <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-[0.2em]">Organize your procurement lists and manage saved items for future orders.</p>
                 </div>
 
                 {/* Main Layout */}
@@ -64,32 +64,32 @@ export default function WishlistPage() {
                         <div className="flex items-center gap-8 border-b border-slate-200 mb-8">
                             <button
                                 onClick={() => setActiveTab('wishlist')}
-                                className={`flex items-center gap-2 pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'wishlist' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+                                className={`flex items-center gap-2 pb-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'wishlist' ? 'border-black text-black' : 'border-transparent text-foreground/20 hover:text-foreground/40'}`}
                             >
-                                <FaHeart className={activeTab === 'wishlist' ? 'text-blue-600' : 'text-slate-300'} />
+                                <FaHeart className={activeTab === 'wishlist' ? 'text-black' : 'text-foreground/10'} />
                                 My Wishlist
                             </button>
                             <button
                                 onClick={() => setActiveTab('saved')}
-                                className={`flex items-center gap-2 pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === 'saved' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+                                className={`flex items-center gap-2 pb-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'saved' ? 'border-black text-black' : 'border-transparent text-foreground/20 hover:text-foreground/40'}`}
                             >
-                                <FaBookmark className={activeTab === 'saved' ? 'text-blue-600' : 'text-slate-300'} />
+                                <FaBookmark className={activeTab === 'saved' ? 'text-black' : 'text-foreground/10'} />
                                 Saved for Later (12)
                             </button>
                         </div>
 
                         {/* Filters Toolbar */}
                         <div className="flex flex-wrap items-center gap-3 mb-8">
-                            <button className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20">
+                            <button className="px-4 py-2 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-black/20">
                                 <FaThLarge /> All Items
                             </button>
-                            <button className="px-4 py-2 bg-white text-slate-600 border border-slate-200 hover:border-blue-200 hover:text-blue-600 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors">
+                            <button className="px-4 py-2 bg-white text-foreground/40 border border-foreground/5 hover:border-black/20 hover:text-black rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
                                 <FaLaptopHouse /> Home Office
                             </button>
-                            <button className="px-4 py-2 bg-white text-slate-600 border border-slate-200 hover:border-blue-200 hover:text-blue-600 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors">
+                            <button className="px-4 py-2 bg-white text-foreground/40 border border-foreground/5 hover:border-black/20 hover:text-black rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
                                 <FaUtensils /> Kitchen Upgrades
                             </button>
-                            <button className="px-4 py-2 bg-white text-slate-600 border border-slate-200 hover:border-blue-200 hover:text-blue-600 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors">
+                            <button className="px-4 py-2 bg-white text-foreground/40 border border-foreground/5 hover:border-black/20 hover:text-black rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
                                 <FaTools /> Industrial Gear
                             </button>
                             <button className="ml-auto text-blue-600 font-bold text-xs flex items-center gap-1 hover:underline">

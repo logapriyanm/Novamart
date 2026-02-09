@@ -66,7 +66,7 @@ export default function CategoryGrid() {
             <div className="max-w-7xl mx-auto px-6 mt-12 mb-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="bg-surface rounded-3xl p-6 shadow-xl shadow-primary/5 border border-foreground/5 h-80 animate-pulse"></div>
+                        <div key={i} className="bg-white rounded-[10px] p-6 border border-foreground/5 shadow-sm h-80 animate-pulse"></div>
                     ))}
                 </div>
             </div>
@@ -78,22 +78,22 @@ export default function CategoryGrid() {
             {categories.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {categories.map((category, idx) => (
-                        <div key={idx} className="bg-surface rounded-3xl p-6 shadow-xl shadow-primary/5 border border-foreground/5 hover:translate-y-px transition-all duration-300 group">
+                        <div key={idx} className="bg-white rounded-[10px] p-6 border border-foreground/10 hover:border-black/20 transition-all duration-300 group">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <category.icon className="w-6 h-6 text-foreground" />
-                                    <h3 className="text-sm font-black text-foreground">{category.title}</h3>
+                                    <category.icon className="w-6 h-6 text-black" />
+                                    <h3 className="text-sm font-black text-black uppercase">{category.title}</h3>
                                 </div>
-                                <Link href={`/products?cat=${category.slug}`} className="text-[10px] font-bold text-primary hover:underline">View All</Link>
+                                <Link href={`/products?cat=${category.slug}`} className="text-[10px] font-bold text-black uppercase hover:underline">View All</Link>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 {category.items.map((item: any, itemIdx: number) => (
                                     <Link key={itemIdx} href={`/products?cat=${category.slug}`} className="flex flex-col gap-2 group/item">
-                                        <div className="aspect-square rounded-2xl bg-background overflow-hidden border border-foreground/5 group-hover/item:border-primary/30 transition-colors">
+                                        <div className="aspect-square rounded-[10px] bg-background overflow-hidden border border-foreground/5 group-hover/item:border-black/20 transition-colors">
                                             <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500" />
                                         </div>
-                                        <span className="text-[10px] font-bold text-foreground/60 leading-tight group-hover/item:text-primary transition-colors truncate">
+                                        <span className="text-[10px] font-bold text-foreground/60 leading-tight group-hover/item:text-black transition-colors truncate uppercase">
                                             {item.name}
                                         </span>
                                     </Link>

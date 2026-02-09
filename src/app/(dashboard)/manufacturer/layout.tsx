@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Sidebar from '../../../client/components/layout/Sidebar';
 import { FaBell as Bell, FaSearch as Search, FaShieldAlt as ShieldCheck, FaBars as Menu } from 'react-icons/fa';
 import RoleGuard from '../../../client/components/features/auth/RoleGuard';
+import UserDropdown from '../../../client/components/layout/UserDropdown';
 import { Role } from '../../../lib/api/contract';
 
 export default function ManufacturerLayout({
@@ -15,7 +16,7 @@ export default function ManufacturerLayout({
 
     return (
         <RoleGuard allowedRoles={[Role.MANUFACTURER]}>
-            <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
+            <div className="flex h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-hidden">
                 <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} role="MANUFACTURER" />
 
                 <div className="flex-1 flex flex-col min-w-0 relative z-10 w-full overflow-hidden">
@@ -30,7 +31,7 @@ export default function ManufacturerLayout({
                                     <Menu className="w-5 h-5" />
                                 </button>
                                 <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center p-1 shadow-md border border-foreground/[0.03]">
-                                    <img src="/logo.png" alt="N" className="w-full h-full object-contain" />
+                                    <img src="/assets/Novamart.png" alt="N" className="w-full h-full object-contain" />
                                 </div>
                             </div>
                             <form onSubmit={(e) => {
@@ -54,9 +55,7 @@ export default function ManufacturerLayout({
                             <button className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-background border border-foreground/5 hover:bg-background/60 transition-colors">
                                 <Bell className="w-5 h-5 text-foreground" />
                             </button>
-                            <div className="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-white font-black text-[10px] shadow-lg shadow-amber-500/20">
-                                MF
-                            </div>
+                            <UserDropdown />
                         </div>
                     </header>
 

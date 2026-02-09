@@ -83,12 +83,12 @@ const SnackbarUI = ({ message, type, isVisible, onClose }: SnackbarUIProps) => {
         <AnimatePresence>
             {isVisible && message && (
                 <motion.div
-                    initial={{ opacity: 0, x: 50, scale: 0.9 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                    className="fixed top-8 right-4 z-[9999] min-w-[320px] max-w-[90vw]"
+                    initial={{ opacity: 0, y: -20, x: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, x: 20, scale: 0.95 }}
+                    className="fixed top-24 right-6 z-[99999] min-w-[350px] max-w-[90vw]"
                 >
-                    <div className={`${colors[type]} px-6 py-4 rounded-md  flex items-center justify-between gap-4 border border-white/10 backdrop-blur-md`}>
+                    <div className={`${colors[type]} px-6 py-4 rounded-xl flex items-center justify-between gap-4 border border-white/20 shadow-2xl backdrop-blur-xl transition-all duration-300`}>
                         <div className="flex items-center gap-3">
                             <div className="flex-shrink-0">
                                 {icons[type]}

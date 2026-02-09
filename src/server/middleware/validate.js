@@ -1,7 +1,4 @@
-/**
- * Validation Middleware for Auth
- * Ensures critical fields follow strict security and format rules.
- */
+import logger from '../lib/logger.js';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegex = /^[6-9]\d{9}$/; // Indian standard mobile validation
@@ -27,6 +24,7 @@ export const validateRegistration = (req, res, next) => {
     }
 
     if (Object.keys(errors).length > 0) {
+        logger.warn('Registration validation failed', { email, phone, errors });
         return res.status(400).json({ error: 'VALIDATION_FAILED', details: errors });
     }
     next();
@@ -40,6 +38,7 @@ export const validateLogin = (req, res, next) => {
     if (!password) errors.password = 'PASSWORD_REQUIRED';
 
     if (Object.keys(errors).length > 0) {
+        logger.warn('Login validation failed', { email, errors });
         return res.status(400).json({ error: 'VALIDATION_FAILED', details: errors });
     }
     next();
@@ -53,13 +52,44 @@ export const validatePhoneLogin = (req, res, next) => {
     if (!otp || otp.length !== 6) errors.otp = 'INVALID_OTP_FORMAT';
 
     if (Object.keys(errors).length > 0) {
+        logger.warn('Phone login validation failed', { phone, errors });
         return res.status(400).json({ error: 'VALIDATION_FAILED', details: errors });
     }
+    next();
+};
+
+export const validateProduct = (req, res, next) => {
+    const { name, basePrice, category, moq } = req.body;
+    const errors = {};
+
+    const nameVal = name?.trim();
+    if (!nameVal || nameVal.length < 3) errors.name = 'NAME_TOO_SHORT';
+
+    const priceNum = parseFloat(basePrice);
+    if (isNaN(priceNum) || priceNum <= 0) {
+        errors.basePrice = 'INVALID_PRICE';
+    }
+
+    if (!category || category === '') errors.category = 'CATEGORY_REQUIRED';
+
+    if (moq) {
+        const moqNum = parseInt(moq);
+        if (isNaN(moqNum) || moqNum < 1) {
+            errors.moq = 'INVALID_MOQ';
+        }
+    }
+
+    if (Object.keys(errors).length > 0) {
+        logger.warn('Product validation failed', { name, errors, manufacturerId: req.user?.id });
+        return res.status(400).json({ error: 'VALIDATION_FAILED', details: errors });
+    }
+
     next();
 };
 
 export default {
     validateRegistration,
     validateLogin,
-    validatePhoneLogin
+    validatePhoneLogin,
+    validateProduct
 };

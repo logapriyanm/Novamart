@@ -98,7 +98,7 @@ class CustomerService {
         return await prisma.order.findMany({
             where: { customerId },
             include: {
-                items: { include: { product: true } },
+                items: { include: { linkedProduct: true } },
                 escrow: true,
                 timeline: true
             },

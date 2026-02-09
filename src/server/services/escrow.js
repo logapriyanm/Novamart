@@ -50,7 +50,7 @@ class EscrowService {
             include: {
                 order: {
                     include: {
-                        items: { include: { product: true } },
+                        items: { include: { linkedProduct: true } },
                         dealer: true
                     }
                 }
@@ -104,7 +104,7 @@ class EscrowService {
             // Calculate Manufacturer Share (Based on Base Price)
             let mfgPayout = 0;
             for (const item of escrow.order.items) {
-                mfgPayout += Number(item.product.basePrice) * item.quantity;
+                mfgPayout += Number(item.linkedProduct.basePrice) * item.quantity;
             }
 
             // Dealer Share (Remainder)

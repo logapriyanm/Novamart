@@ -211,7 +211,6 @@ export const getPublicDealerProfile = async (req, res) => {
                         createdAt: true // Member since
                     }
                 },
-                customerRatings: false, // Deprecated
                 sellerReviews: {
                     select: {
                         rating: true,

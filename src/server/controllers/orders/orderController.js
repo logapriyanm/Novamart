@@ -1,5 +1,6 @@
 
 import prisma from '../../lib/prisma.js';
+import { isValidTransition, validatePaymentState } from '../../lib/stateMachine.js';
 
 // --- Create Order ---
 export const createOrder = async (req, res) => {
@@ -142,7 +143,7 @@ export const getOrders = async (req, res) => {
             where,
             include: {
                 customer: { select: { name: true, email: true } },
-                items: { include: { product: true } },
+                items: { include: { linkedProduct: true } },
                 dealer: { select: { businessName: true } }
             },
             orderBy: { createdAt: 'desc' }
@@ -177,7 +178,7 @@ export const getMyOrders = async (req, res) => {
         const orders = await prisma.order.findMany({
             where: { customerId: customer.id },
             include: {
-                items: { include: { product: true } },
+                items: { include: { linkedProduct: true } },
                 dealer: { select: { businessName: true } }
             },
             orderBy: { createdAt: 'desc' }
@@ -194,12 +195,15 @@ export const getMyOrders = async (req, res) => {
 export const getOrderById = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.user?.id;
+        const userRole = req.user?.role;
+
         const order = await prisma.order.findUnique({
             where: { id },
             include: {
-                items: { include: { product: true } },
-                customer: true,
-                dealer: true,
+                items: { include: { linkedProduct: true } },
+                customer: { include: { user: true } },
+                dealer: { include: { user: true } },
                 timeline: true,
                 escrow: true
             }
@@ -207,8 +211,45 @@ export const getOrderById = async (req, res) => {
 
         if (!order) return res.status(404).json({ success: false, error: 'Order not found' });
 
+        // SECURITY: Role-based ownership verification
+        if (userRole === 'CUSTOMER') {
+            // Customers can only access their own orders
+            if (order.customer.userId !== userId) {
+                return res.status(403).json({ success: false, error: 'Forbidden: You can only access your own orders' });
+            }
+        } else if (userRole === 'DEALER') {
+            // Dealers can only access orders they're fulfilling
+            if (order.dealer.userId !== userId) {
+                return res.status(403).json({ success: false, error: 'Forbidden: You can only access orders assigned to you' });
+            }
+        } else if (userRole === 'MANUFACTURER') {
+            // Manufacturers can access orders containing their products
+            const manufacturerProfile = await prisma.manufacturer.findUnique({
+                where: { userId }
+            });
+            if (!manufacturerProfile) {
+                return res.status(403).json({ success: false, error: 'Manufacturer profile not found' });
+            }
+
+            // Check if any order item belongs to this manufacturer's products
+            const hasManufacturerProduct = await prisma.orderItem.findFirst({
+                where: {
+                    orderId: order.id,
+                    linkedProduct: {
+                        manufacturerId: manufacturerProfile.id
+                    }
+                }
+            });
+
+            if (!hasManufacturerProduct) {
+                return res.status(403).json({ success: false, error: 'Forbidden: This order does not contain your products' });
+            }
+        }
+        // ADMIN can access all orders (no restriction)
+
         res.json({ success: true, data: order });
     } catch (error) {
+        console.error('Get Order Error:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch order details' });
     }
 };
@@ -226,6 +267,11 @@ export const updateOrderStatus = async (req, res) => {
             });
 
             if (!currentOrder) throw new Error('Order not found');
+
+            // CRITICAL: Validate state transition
+            if (!isValidTransition(currentOrder.status, status)) {
+                throw new Error(`Invalid state transition: ${currentOrder.status} -> ${status}`);
+            }
 
             // State Machine Logic
             if (status === 'DELIVERED') {

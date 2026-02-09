@@ -1,5 +1,6 @@
 import React from 'react';
-import { FaChevronRight, FaEnvelope } from 'react-icons/fa';
+import { FaEnvelope } from 'react-icons/fa';
+import { IoIosArrowDropdown as ChevronRight } from 'react-icons/io';
 import { categorySubcategories } from '../../data/categoryData';
 import { ProductFilterSidebar, FilterState } from '../features/products/ProductFilterSidebar';
 
@@ -18,11 +19,25 @@ export default function CategorySidebarLeft({ categorySlug, filters, onFilterCha
             <div className="bg-surface rounded-3xl p-6 border border-foreground/5">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-primary">Sub-Categories</h3>
                 <ul className="space-y-1">
+                    {subCategories && (
+                        <li>
+                            <button
+                                onClick={() => onFilterChange?.('subCategory', null)}
+                                className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-background text-sm font-bold transition-all group ${!filters?.subCategory ? 'bg-background text-foreground' : 'text-foreground/70 hover:text-foreground'}`}
+                            >
+                                All Products
+                                <ChevronRight className={`w-2.5 h-2.5 transition-all ${!filters?.subCategory ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+                            </button>
+                        </li>
+                    )}
                     {(subCategories || []).map((item) => (
                         <li key={item}>
-                            <button className="w-full flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-background text-sm font-bold text-foreground/70 hover:text-foreground transition-all group">
+                            <button
+                                onClick={() => onFilterChange?.('subCategory', item)}
+                                className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-background text-sm font-bold transition-all group ${filters?.subCategory === item ? 'bg-background text-foreground' : 'text-foreground/70 hover:text-foreground'}`}
+                            >
                                 {item}
-                                <FaChevronRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-all" />
+                                <ChevronRight className={`w-2.5 h-2.5 transition-all ${filters?.subCategory === item ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                             </button>
                         </li>
                     ))}

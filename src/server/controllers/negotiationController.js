@@ -91,8 +91,19 @@ export const updateNegotiation = async (req, res) => {
         const userId = req.user.id;
         const role = req.user.role;
 
-        const negotiation = await prisma.negotiation.findUnique({ where: { id: negotiationId } });
+        const negotiation = await prisma.negotiation.findUnique({
+            where: { id: negotiationId },
+            include: { dealer: true, manufacturer: true }
+        });
         if (!negotiation) return res.status(404).json({ message: 'Negotiation not found' });
+
+        // Ownership Verification
+        const isParticipant = (role === 'DEALER' && negotiation.dealer.userId === userId) ||
+            (role === 'MANUFACTURER' && negotiation.manufacturer.userId === userId);
+
+        if (!isParticipant) {
+            return res.status(403).json({ error: 'FORBIDDEN', message: 'You are not a participant in this negotiation' });
+        }
 
         // Append to chat log
         const chatEntry = {

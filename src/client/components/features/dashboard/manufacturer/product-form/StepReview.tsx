@@ -2,15 +2,16 @@
 
 import React, { useState } from 'react';
 import {
-    FaChevronDown, FaCheckCircle,
+    FaCheckCircle,
     FaDollarSign, FaBox, FaImages, FaShieldAlt,
     FaInfoCircle, FaEdit
 } from 'react-icons/fa';
+import { IoIosArrowDropdown } from 'react-icons/io';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProductForm } from '../../../../../context/ProductFormContext';
 
 export default function StepReview() {
-    const { productData } = useProductForm();
+    const { productData, updateProductData } = useProductForm();
     const [openSection, setOpenSection] = useState<string>('Basic Details');
 
     const toggleSection = (section: string) => {
@@ -69,7 +70,7 @@ export default function StepReview() {
                 <div className="p-6 bg-slate-50/50 flex gap-12">
                     <div>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Base Price</p>
-                        <p className="text-xs font-bold text-[#1E293B]">${productData.basePrice || '0.00'}</p>
+                        <p className="text-xs font-bold text-[#1E293B]">₹{productData.basePrice || '0.00'}</p>
                     </div>
                     <div>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">MOQ</p>
@@ -96,13 +97,53 @@ export default function StepReview() {
     ];
 
     return (
-        <div className="space-y-8 animate-fade-in max-w-5xl mx-auto">
+        <div className="space-y-8 animate-fade-in w-full">
             <div className="flex flex-col gap-1 mb-4">
                 <div className="flex justify-between items-end border-b border-primary/10 pb-4">
                     <h2 className="text-2xl font-black tracking-tight text-[#1E293B]">Review Product Details</h2>
                     <span className="text-[10px] font-black text-[#1E293B] uppercase tracking-widest">Step 6 of 6</span>
                 </div>
                 <p className="text-slate-400 font-bold text-xs mt-2">Final check before admin approval and marketplace listing.</p>
+            </div>
+
+            {/* Compliance Section (Interactive) */}
+            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8">
+                <div className="flex items-center gap-3 mb-6">
+                    <FaShieldAlt className="w-5 h-5 text-[#0F6CBD]" />
+                    <h3 className="text-sm font-black text-[#1E293B] uppercase tracking-widest">Compliance & Certifications</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                        "ISO 9001:2015",
+                        "CE Marking",
+                        "RoHS Compliance",
+                        "UL Certification",
+                        "FCC Compliance",
+                        "Energy Star"
+                    ].map((cert) => (
+                        <div
+                            key={cert}
+                            onClick={() => {
+                                const certs = productData.certifications || [];
+                                if (certs.includes(cert)) {
+                                    updateProductData({ certifications: certs.filter((c: string) => c !== cert) });
+                                } else {
+                                    updateProductData({ certifications: [...certs, cert] });
+                                }
+                            }}
+                            className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${(productData.certifications || []).includes(cert) ? 'border-[#0F6CBD] bg-blue-50/50' : 'border-slate-100 hover:border-blue-200'
+                                }`}
+                        >
+                            <div className={`w-5 h-5 rounded flex items-center justify-center border ${(productData.certifications || []).includes(cert) ? 'bg-[#0F6CBD] border-[#0F6CBD] text-white' : 'border-slate-300 bg-white'
+                                }`}>
+                                {(productData.certifications || []).includes(cert) && <FaCheckCircle className="w-3 h-3" />}
+                            </div>
+                            <span className={`text-[10px] font-bold ${(productData.certifications || []).includes(cert) ? 'text-[#0F6CBD]' : 'text-[#1E293B]'
+                                }`}>{cert}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Product Snapshot Card */}
@@ -122,7 +163,7 @@ export default function StepReview() {
                     <h3 className="text-xl font-black text-[#1E293B]">{productData.name || 'Untitled Product'}</h3>
                     <p className="text-xs font-bold text-slate-500">Category: <span className="text-[#1E293B]">{productData.category || 'N/A'}</span></p>
                     <div className="pt-2">
-                        <span className="text-2xl font-black text-[#1E293B]">${productData.basePrice || '0.00'}</span>
+                        <span className="text-2xl font-black text-[#1E293B]">₹{productData.basePrice || '0.00'}</span>
                         <span className="text-[10px] font-bold text-slate-400 ml-1">/ unit (Base)</span>
                     </div>
                 </div>
@@ -142,7 +183,7 @@ export default function StepReview() {
                                 </div>
                                 <span className={`text-sm font-black ${openSection === section.id ? 'text-[#0F6CBD]' : 'text-[#1E293B]'}`}>{section.id}</span>
                             </div>
-                            <FaChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-300 ${openSection === section.id ? 'rotate-180' : ''}`} />
+                            <IoIosArrowDropdown className={`w-3 h-3 text-slate-400 transition-transform duration-300 ${openSection === section.id ? 'rotate-180' : ''}`} />
                         </button>
 
                         <AnimatePresence>

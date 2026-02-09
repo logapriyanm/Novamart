@@ -107,12 +107,12 @@ export default function Testimonials() {
         <div className="max-w-7xl mx-auto px-6 mt-32 mb-32">
             <div className="text-center mb-16">
                 <h2 className="text-3xl lg:text-4xl font-black text-foreground tracking-tight">Trusted by Industry Leaders</h2>
-                <p className="text-foreground/50 font-medium mt-4 max-w-2xl mx-auto">See what our partners and customers are saying about their experience with Novamart.</p>
+                <p className="text-foreground/50 font-medium mt-4 max-w-2xl mx-auto">See what our partners and customers are saying about their experience with NovaMart.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-auto">
                 {testimonials.map((item) => (
-                    <div key={item.id} className={`bg-surface rounded-[2rem] p-8 shadow-xl shadow-primary/5 border border-foreground/5 hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden ${item.cols} ${item.rows}`}>
+                    <div key={item.id} className={`bg-white rounded-[10px] p-8 border border-foreground/10 hover:border-black/20 transition-all duration-300 relative overflow-hidden ${item.cols} ${item.rows}`}>
 
                         {/* Service Card (Centered with arrows) */}
                         {item.variant === 'service-card' && (
@@ -121,8 +121,8 @@ export default function Testimonials() {
                                     <div className="absolute top-1/2 -left-12 -translate-y-1/2">
                                         <FaArrowLeft className="text-foreground/20 text-xs" />
                                     </div>
-                                    <div className="w-14 h-14 rounded-full p-1 bg-background border border-foreground/5 shadow-sm">
-                                        <img src={item.image} alt={item.author} className="w-full h-full rounded-full object-cover" />
+                                    <div className="w-14 h-14 rounded-[10px] p-1 bg-background border border-foreground/5 shadow-sm">
+                                        <img src={item.image} alt={item.author} className="w-full h-full rounded-[10px] object-cover" />
                                     </div>
                                     <div className="absolute top-1/2 -right-12 -translate-y-1/2">
                                         <FaArrowRight className="text-foreground/20 text-xs" />
@@ -141,8 +141,8 @@ export default function Testimonials() {
                             <div className="h-full flex flex-col">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex items-center gap-3">
-                                        <img src={item.image} alt={item.author} className="w-10 h-10 rounded-full object-cover" />
-                                        <FaQuoteRight className="text-2xl text-foreground" />
+                                        <img src={item.image} alt={item.author} className="w-10 h-10 rounded-[10px] object-cover" />
+                                        <FaQuoteRight className="text-2xl text-black" />
                                     </div>
                                 </div>
                                 <div className="mt-2 mb-6">
@@ -169,7 +169,7 @@ export default function Testimonials() {
                                         <p className="text-[8px] text-foreground/40">{item.role}</p>
                                     </div>
                                 </div>
-                                <div className="w-24 h-full rounded-2xl overflow-hidden flex-shrink-0">
+                                <div className="w-24 h-full rounded-[10px] overflow-hidden flex-shrink-0">
                                     <img src={item.image} alt={item.author} className="w-full h-full object-cover" />
                                 </div>
                             </div>
@@ -178,7 +178,7 @@ export default function Testimonials() {
                         {/* Wide Likes Card */}
                         {item.variant === 'wide-likes' && (
                             <div className="flex flex-col justify-center h-full relative">
-                                <div className="absolute top-0 right-0 bg-background px-3 py-1 rounded-bl-2xl flex items-center gap-1 border-b border-l border-foreground/5">
+                                <div className="absolute top-0 right-0 bg-background px-3 py-1 rounded-bl-[10px] flex items-center gap-1 border-b border-l border-foreground/5">
                                     <FaHeart className="text-xs text-rose-500" />
                                     <span className="text-[10px] font-bold text-foreground/60">{item.likes} Like</span>
                                 </div>
@@ -199,8 +199,8 @@ export default function Testimonials() {
                         {/* Typography Hero Card */}
                         {item.variant === 'typography-hero' && (
                             <div className="flex flex-col justify-between h-full relative p-4">
-                                <div className="w-12 h-12 rounded-full border-2 border-primary flex items-center justify-center mb-6">
-                                    <FaQuoteRight className="text-xl text-primary" />
+                                <div className="w-12 h-12 rounded-[10px] border-2 border-black flex items-center justify-center mb-6">
+                                    <FaQuoteRight className="text-xl text-black" />
                                 </div>
                                 <div className="mb-8">
                                     <p className="text-[10px] uppercase tracking-widest text-foreground/40 mb-2">What People Say</p>

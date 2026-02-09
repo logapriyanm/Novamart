@@ -16,11 +16,8 @@ class PaymentService {
 
             if (!order) throw new Error(`Order ${orderId} not found`);
 
-            console.log(`[DEBUG] Order ${orderId} Status: ${order.status}, HasPayment: ${!!order.payment}, HasEscrow: ${!!order.escrow}`);
-
             // 2. Idempotency Check: If already processed this specific payment
             if (order.payment?.razorpayPaymentId === razorpayPaymentId && order.status === 'PAID' && order.escrow) {
-                console.log(`[DEBUG] Idempotency hit: Payment ${razorpayPaymentId} for Order ${orderId} already processed.`);
                 return order;
             }
 
@@ -56,7 +53,6 @@ class PaymentService {
                         status: 'HOLD'
                     }
                 });
-                console.log(`Escrow created for Order ${orderId}`);
             }
 
             // 6. Log activity

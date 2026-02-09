@@ -1,0 +1,42 @@
+PrismaClientValidationError: 
+Invalid `prisma.escrow.findMany()` invocation:
+
+{
+  where: {
+    order: {
+      items: {
+        some: {
+          manufacturerId: "3b3ea379-c63c-4a9f-98f9-8d82da4815d2",
+          ~~~~~~~~~~~~~~
+?         AND?: OrderItemWhereInput | OrderItemWhereInput[],
+?         OR?: OrderItemWhereInput[],
+?         NOT?: OrderItemWhereInput | OrderItemWhereInput[],
+?         id?: StringFilter | String,
+?         orderId?: StringFilter | String,
+?         productId?: StringFilter | String,
+?         quantity?: IntFilter | Int,
+?         price?: DecimalFilter | Decimal,
+?         inventoryId?: StringNullableFilter | String | Null,
+?         order?: OrderRelationFilter | OrderWhereInput,
+?         linkedProduct?: ProductRelationFilter | ProductWhereInput,
+?         review?: ProductReviewNullableRelationFilter | ProductReviewWhereInput | Null
+        }
+      }
+    },
+    status: {
+      in: [
+        "HOLD",
+        "FROZEN"
+      ]
+    }
+  }
+}
+
+Unknown argument `manufacturerId`. Available options are marked with ?.
+
+{
+  "stack": "PrismaClientValidationError: \nInvalid `prisma.escrow.findMany()` invocation:\n\n{\n  where: {\n    order: {\n      items: {\n        some: {\n          manufacturerId: \"3b3ea379-c63c-4a9f-98f9-8d82da4815d2\",\n          ~~~~~~~~~~~~~~\n?         AND?: OrderItemWhereInput | OrderItemWhereInput[],\n?         OR?: OrderItemWhereInput[],\n?         NOT?: OrderItemWhereInput | OrderItemWhereInput[],\n?         id?: StringFilter | String,\n?         orderId?: StringFilter | String,\n?         productId?: StringFilter | String,\n?         quantity?: IntFilter | Int,\n?         price?: DecimalFilter | Decimal,\n?         inventoryId?: StringNullableFilter | String | Null,\n?         order?: OrderRelationFilter | OrderWhereInput,\n?         linkedProduct?: ProductRelationFilter | ProductWhereInput,\n?         review?: ProductReviewNullableRelationFilter | ProductReviewWhereInput | Null\n        }\n      }\n    },\n    status: {\n      in: [\n        \"HOLD\",\n        \"FROZEN\"\n      ]\n    }\n  }\n}\n\nUnknown argument `manufacturerId`. Available options are marked with ?.\n    at wn (F:\\PROJECTS\\Novamart\\node_modules\\@prisma\\client\\runtime\\library.js:29:1363)\n    at $n.handleRequestError (F:\\PROJECTS\\Novamart\\node_modules\\@prisma\\client\\runtime\\library.js:121:6958)\n    at $n.handleAndLogRequestError (F:\\PROJECTS\\Novamart\\node_modules\\@prisma\\client\\runtime\\library.js:121:6623)\n    at $n.request (F:\\PROJECTS\\Novamart\\node_modules\\@prisma\\client\\runtime\\library.js:121:6307)\n    at async l (F:\\PROJECTS\\Novamart\\node_modules\\@prisma\\client\\runtime\\library.js:130:9633)\n    at async test (file:///F:/PROJECTS/Novamart/debug-stats.js:38:25)",
+  "message": "\nInvalid `prisma.escrow.findMany()` invocation:\n\n{\n  where: {\n    order: {\n      items: {\n        some: {\n          manufacturerId: \"3b3ea379-c63c-4a9f-98f9-8d82da4815d2\",\n          ~~~~~~~~~~~~~~\n?         AND?: OrderItemWhereInput | OrderItemWhereInput[],\n?         OR?: OrderItemWhereInput[],\n?         NOT?: OrderItemWhereInput | OrderItemWhereInput[],\n?         id?: StringFilter | String,\n?         orderId?: StringFilter | String,\n?         productId?: StringFilter | String,\n?         quantity?: IntFilter | Int,\n?         price?: DecimalFilter | Decimal,\n?         inventoryId?: StringNullableFilter | String | Null,\n?         order?: OrderRelationFilter | OrderWhereInput,\n?         linkedProduct?: ProductRelationFilter | ProductWhereInput,\n?         review?: ProductReviewNullableRelationFilter | ProductReviewWhereInput | Null\n        }\n      }\n    },\n    status: {\n      in: [\n        \"HOLD\",\n        \"FROZEN\"\n      ]\n    }\n  }\n}\n\nUnknown argument `manufacturerId`. Available options are marked with ?.",
+  "name": "PrismaClientValidationError",
+  "clientVersion": "5.22.0"
+}

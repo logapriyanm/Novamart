@@ -35,14 +35,17 @@ const NotificationBell = () => {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-gray-400 hover:text-white transition-colors focus:outline-none group bg-gray-900/50 rounded-lg border border-white/5"
+                className="flex flex-col items-center group gap-1 relative focus:outline-none"
             >
-                <IoNotificationsOutline className="text-xl" />
-                {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white ring-2 ring-black">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                )}
+                <div className="relative">
+                    <IoNotificationsOutline className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-black text-background text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                    )}
+                </div>
+                <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Alerts</span>
             </button>
 
             <AnimatePresence>

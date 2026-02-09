@@ -45,6 +45,33 @@ export const approveProduct = async (req, res) => {
     }
 };
 
+export const getPendingProducts = async (req, res) => {
+    try {
+        const products = await prisma.product.findMany({
+            where: { status: 'PENDING' },
+            include: { manufacturer: true },
+            orderBy: { updatedAt: 'desc' }
+        });
+        res.json({ success: true, data: products });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_PENDING_PRODUCTS' });
+    }
+};
+
+export const getAllProducts = async (req, res) => {
+    try {
+        const products = await prisma.product.findMany({
+            include: { manufacturer: true },
+            orderBy: { id: 'desc' }
+        });
+        res.json({ success: true, data: products });
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_PRODUCTS' });
+    }
+};
+
 export default {
-    approveProduct
+    approveProduct,
+    getPendingProducts,
+    getAllProducts
 };

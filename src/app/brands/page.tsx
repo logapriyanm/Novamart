@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import { FaStar as Star, FaShieldAlt as ShieldCheck, FaArrowRight as ArrowRight } from 'react-icons/fa';
 
 export const metadata: Metadata = {
-    title: 'Verified Global Brands | Novamart B2B2C',
+    title: 'Verified Global Brands | NovaMart B2B2C',
     description: 'Explore verified manufacturers and leading industrial brands on our secure B2B2C platform.',
 };
 
@@ -24,7 +24,7 @@ export default function BrandPage() {
                     <span className="text-[9px] lg:text-[10px] font-bold text-[#10367D] px-3 lg:px-4 py-1.5 lg:py-2 bg-[#10367D]/10 rounded-full border border-[#10367D]/20 uppercase tracking-widest lg:tracking-[0.2em]">Verified Network</span>
                     <h1 className="text-3xl lg:text-6xl font-extrabold text-[#10367D] tracking-tight leading-tight">Verified Manufacturers</h1>
                     <p className="text-sm lg:text-lg text-[#1E293B]/70 leading-relaxed font-medium">
-                        Every manufacturer on Novamart undergoes rigorous factory audits to ensure absolute trust in every transaction.
+                        Every manufacturer on NovaMart undergoes rigorous factory audits to ensure absolute trust in every transaction.
                     </p>
                 </div>
 

@@ -6,6 +6,7 @@
 import recommendationService from '../services/recommendation.js';
 import trackingService from '../services/tracking.js';
 import prisma from '../lib/prisma.js';
+import logger from '../lib/logger.js';
 
 /**
  * Get Personalized Home Data
@@ -27,7 +28,52 @@ export const getPersonalizedHome = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Failed to get personalized home:', error);
+        logger.error('Failed to get personalized home:', error);
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_HOME' });
+    }
+};
+
+/**
+ * Get Guest Home Data (no auth required)
+ */
+export const getGuestHome = async (req, res) => {
+    try {
+        // Return featured/trending products for guest users
+        const featuredProducts = await prisma.product.findMany({
+            where: {
+                status: 'APPROVED'
+            },
+            include: {
+                manufacturer: {
+                    select: {
+                        companyName: true,
+                        id: true
+                    }
+                },
+                inventory: {
+                    select: {
+                        price: true,
+                        stock: true,
+                        dealerId: true
+                    },
+                    take: 1
+                }
+            },
+            take: 8,
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        res.json({
+            success: true,
+            data: {
+                featured: featuredProducts,
+                trending: featuredProducts.slice(0, 4)
+            }
+        });
+    } catch (error) {
+        logger.error('Failed to get guest home:', error);
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_HOME' });
     }
 };
@@ -54,5 +100,6 @@ export const trackUserEvent = async (req, res) => {
 
 export default {
     getPersonalizedHome,
+    getGuestHome,
     trackUserEvent
 };

@@ -7,6 +7,7 @@ import escrowManagementController from '../../controllers/admin/escrowManagement
 import orderLifecycleController from '../../controllers/admin/orderLifecycleController.js';
 import auditLogController from '../../controllers/admin/auditLogController.js';
 import disputeController from '../../controllers/admin/disputeController.js';
+import * as monitoringController from '../../controllers/admin/monitoringController.js';
 
 import authorize from '../../middleware/rbac.js';
 import auditLog from '../../middleware/audit.js';
@@ -25,6 +26,11 @@ router.get('/stats',
     dashboardController.getDashboardStats
 );
 
+router.get('/users',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    userManagementController.getUsers
+);
+
 router.put('/users/:id/status',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
     auditLog('UPDATE_USER_STATUS', 'USER'),
@@ -39,6 +45,16 @@ router.get('/manufacturers',
 router.get('/dealers',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
     userManagementController.getDealers
+);
+
+router.get('/products/pending',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    productApprovalController.getPendingProducts
+);
+
+router.get('/products',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    productApprovalController.getAllProducts
 );
 
 router.put('/products/:id/approve',
@@ -68,6 +84,11 @@ router.post('/escrow/refund/:orderId',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'FINANCE_ADMIN']),
     auditLog('ESCROW_REFUND', 'ESCROW'),
     escrowManagementController.refundEscrow
+);
+
+router.get('/orders',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN', 'FINANCE_ADMIN']),
+    orderLifecycleController.getAllOrders
 );
 
 router.put('/orders/:orderId/status',
@@ -110,10 +131,22 @@ router.put('/dealers/:dealerId/verify',
     userManagementController.verifyDealer
 );
 
+router.put('/dealers/:dealerId/manufacturers',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    auditLog('DEALER_MANUFACTURER_LINK', 'DEALER'),
+    userManagementController.updateDealerManufacturers
+);
+
 router.put('/settings',
     authorize(['ADMIN'], ['SUPER_ADMIN']),
     auditLog('UPDATE_SETTINGS', 'SYSTEM'),
     governanceController.updateSettings
+);
+
+// Monitoring Routes
+router.get('/monitoring/health',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    monitoringController.getSystemHealth
 );
 
 export default router;

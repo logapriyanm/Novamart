@@ -179,27 +179,27 @@ export default function PaymentPage() {
         <div className="min-h-screen pt-24 pb-24 bg-background">
             <div className="max-w-3xl mx-auto px-6 lg:px-12">
                 <header className="mb-12 text-center">
-                    <h1 className="text-4xl font-black text-foreground tracking-tight mb-2 italic">Secure <span className="text-primary">Payment</span></h1>
+                    <h1 className="text-4xl font-black text-foreground tracking-tight mb-2 italic uppercase">Secure <span className="text-black">Payment</span></h1>
                     <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">Order ID: {orderId?.slice(0, 8)}</p>
                 </header>
 
-                <div className="bg-white rounded-[2.5rem] border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02] overflow-hidden p-8 lg:p-12">
+                <div className="bg-white rounded-[10px] border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02] overflow-hidden p-8 lg:p-12">
                     {/* Order Summary */}
                     <div className="mb-10 text-center">
                         <p className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] mb-2">Total Amount Due</p>
-                        <p className="text-5xl font-black text-primary tracking-tighter">
+                        <p className="text-5xl font-black text-black tracking-tighter italic">
                             ₹{Number(order?.totalAmount || 0).toLocaleString('en-IN')}
                         </p>
                     </div>
 
                     {/* Escrow Notice */}
-                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-6 mb-10 flex items-start gap-4">
-                        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
+                    <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[10px] p-6 mb-10 flex items-start gap-4">
+                        <div className="w-10 h-10 bg-emerald-500/10 rounded-[5px] flex items-center justify-center text-emerald-600 shrink-0">
                             <HiOutlineShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest mb-1">Escrow Protection Active</h4>
-                            <p className="text-[10px] font-bold text-emerald-900/60 leading-relaxed">
+                            <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest mb-1 italic">Escrow Protection Active</h4>
+                            <p className="text-[10px] font-bold text-emerald-900/60 leading-relaxed uppercase tracking-widest">
                                 Your payment will be held securely in escrow. The seller will not receive funds until you confirm delivery of your order.
                             </p>
                         </div>
@@ -210,8 +210,8 @@ export default function PaymentPage() {
                         <div className="flex flex-col gap-2">
                             <label className="text-[10px] font-black text-foreground/50 uppercase tracking-widest">Razorpay Secure Checkout</label>
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="border-2 border-primary/20 bg-primary/5 text-foreground rounded-xl p-4 flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest">
-                                    <HiOutlineCreditCard className="w-4 h-4 text-primary" />
+                                <div className="border-2 border-black/20 bg-black/5 text-foreground rounded-[10px] p-4 flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest">
+                                    <HiOutlineCreditCard className="w-4 h-4 text-black" />
                                     <span>Card / UPI / Net Banking / Wallet</span>
                                 </div>
                             </div>
@@ -220,7 +220,7 @@ export default function PaymentPage() {
                         <button
                             onClick={handlePayment}
                             disabled={isProcessing}
-                            className="w-full bg-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-black text-white py-5 rounded-[10px] font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-black/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <HiOutlineLockClosed className="w-4 h-4" />
                             {isProcessing ? 'Processing...' : 'Pay Securely with Razorpay'}
@@ -233,7 +233,7 @@ export default function PaymentPage() {
                 </div>
 
                 <div className="mt-8 text-center text-[9px] font-bold text-foreground/20 uppercase tracking-widest">
-                    Powered by Novamart Secure Escrow • 256-Bit SSL Encryption
+                    Powered by NovaMart Secure Escrow • 256-Bit SSL Encryption
                 </div>
             </div>
         </div>

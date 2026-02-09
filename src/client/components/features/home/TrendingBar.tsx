@@ -3,47 +3,47 @@ import Link from 'next/link';
 import { FaChevronRight as ChevronRight } from 'react-icons/fa';
 
 const categories = [
-    { name: 'Refrigerators', image: 'https://images.unsplash.com/photo-1571175449180-f8b4d0201d9f?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Washing Machines', image: 'https://images.unsplash.com/photo-1626806819282-2c1dc61a0e0c?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Air Conditioners', image: 'https://images.unsplash.com/photo-1631545729916-46c23a563c77?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Microwave Ovens', image: 'https://images.unsplash.com/photo-1574265353392-0b29c9ccf6bc?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Smart TVs', image: 'https://images.unsplash.com/photo-1593359677759-543733a69271?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Vacuum Cleaners', image: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Water Purifiers', image: 'https://images.unsplash.com/photo-1585837554808-a19e1371360d?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Kitchen Chimneys', image: 'https://images.unsplash.com/photo-1556911220-ebd537d8609a?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Mixer Grinders', image: 'https://images.unsplash.com/photo-1584286595398-a59f21d313f5?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Steam Irons', image: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Dishwashers', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop' },
-    { name: 'Air Purifiers', image: 'https://images.unsplash.com/photo-1585771724684-2827df306856?q=80&w=400&auto=format&fit=crop' },
+    { name: 'Air Conditioners', image: '/assets/trendingAppliance/Air-Conditionar.jpeg' },
+    { name: 'Mixer Grinders', image: '/assets/trendingAppliance/Mixe.jpeg' },
+    { name: 'Microwave Ovens', image: '/assets/trendingAppliance/Owen.jpeg' },
+    { name: 'Smart TVs', image: '/assets/trendingAppliance/TV.jpeg' },
+    { name: 'Water Purifiers', image: '/assets/trendingAppliance/W-Purifier.jpeg' },
+    { name: 'Vacuum Cleaners', image: '/assets/trendingAppliance/W-cleaner.jpeg' },
+    { name: 'Washing Machines', image: '/assets/trendingAppliance/Wash-mach.png' },
+    { name: 'Refrigerators', image: '/assets/trendingAppliance/Fridge.jpg' },
+    { name: 'Induction Cooktops', image: '/assets/trendingAppliance/Induction.jpg' },
+    { name: 'Dishwashers', image: '/assets/trendingAppliance/Dishwasher.jpg' },
+    { name: 'Air Purifiers', image: '/assets/trendingAppliance/Air-Purifiers.jpg' },
+    { name: 'Water Heaters', image: 'https://images.unsplash.com/photo-1595191830227-705914b03335?q=80&w=2070&auto=format&fit=crop' },
 ];
 
 export default function TrendingBar() {
     return (
         <div className="max-w-7xl mx-auto px-6 mt-40">
             {/* Trending Categories Section */}
-            <div id="trending-appliances" className="bg-surface rounded-3xl p-8 lg:p-12 shadow-2xl shadow-primary/5 border border-foreground/5 relative -mt-28 z-30">
+            <div id="trending-appliances" className="bg-white rounded-[10px] p-8 lg:p-12 border border-foreground/10 relative -mt-20 z-40 shadow-xl shadow-black/5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 md:mb-12 gap-6 sm:gap-0">
                     <div>
-                        <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Trending Appliances <span className="text-primary font-medium text-lg ml-2 italic block sm:inline">in Your Location</span></h2>
-                        <p className="text-foreground/40 text-xs md:text-sm font-bold uppercase tracking-widest mt-2">Verified Direct Factory Supply</p>
+                        <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight uppercase italic">Trending Appliances <span className="text-black/40 font-bold text-lg ml-2 block sm:inline">in Your Location</span></h2>
+
                     </div>
-                    <Link href="/products" className="group self-start sm:self-auto flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest border-2 border-primary/10 px-6 py-3 rounded-2xl hover:bg-primary hover:text-background transition-all">
+                    <Link href="/products" className="group self-start sm:self-auto flex items-center gap-2 text-black text-[10px] font-black uppercase tracking-widest border-2 border-black px-6 py-4 rounded-[10px] hover:bg-black hover:text-white transition-all shadow-lg hover:shadow-black/20">
                         Explore All
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6 md:gap-8">
                     {categories.map((cat, i) => (
                         <Link key={i} href={`/products?q=${cat.name}`} className="group flex flex-col items-center text-center">
-                            <div className="w-full aspect-square rounded-2xl bg-background border border-foreground/5 overflow-hidden mb-4 group-hover:shadow-xl group-hover:shadow-primary/5 transition-all p-4">
+                            <div className="w-full aspect-square rounded-[10px] bg-white border border-foreground/5 overflow-hidden mb-4 group-hover:border-black/20 transition-all p-3 shadow-sm group-hover:shadow-md">
                                 <img
                                     src={cat.image}
                                     alt={cat.name}
                                     className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                                 />
                             </div>
-                            <span className="text-xs font-black text-foreground/60 group-hover:text-primary transition-colors">{cat.name}</span>
+                            <span className="text-[11px] font-black text-foreground/50 group-hover:text-black transition-colors uppercase tracking-tight leading-tight px-2">{cat.name}</span>
                         </Link>
                     ))}
                 </div>
