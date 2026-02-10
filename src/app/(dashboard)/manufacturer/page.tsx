@@ -67,14 +67,14 @@ export default function ManufacturerDashboard() {
     return (
         <div className="space-y-8 animate-fade-in pb-12 font-sans text-slate-800">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60 font-sans">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60">
                 <div>
-                    <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">Production <span className="text-primary">Monitor</span></h1>
+                    <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">Production <span className="text-indigo-600">Monitor</span></h1>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Global Operations & Manufacturer Analytics</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <DashboardNotificationBell />
-                    <Link href="/manufacturer/products/add" className="btn-primary">
+                    <Link href="/manufacturer/products/add" className="px-6 py-2.5 bg-black text-white text-[11px] font-black uppercase tracking-widest rounded-[10px] hover:bg-slate-800 transition-all shadow-sm">
                         + New SKU
                     </Link>
                 </div>
@@ -120,7 +120,7 @@ export default function ManufacturerDashboard() {
                 {/* Main Operations & Chart */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Revenue Chart */}
-                    <div className="card-enterprise p-8 bg-white">
+                    <div className="bg-white p-8 rounded-[10px] border border-slate-100 shadow-sm">
                         <div className="flex items-center justify-between mb-8">
                             <div>
                                 <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Production Volume</h3>
@@ -131,31 +131,34 @@ export default function ManufacturerDashboard() {
                                 <option>Last Year</option>
                             </select>
                         </div>
+
                         <div className="h-[300px] w-full relative overflow-hidden">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={mockChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10367D" stopOpacity={0.1} />
-                                            <stop offset="95%" stopColor="#10367D" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                        itemStyle={{ color: '#10367D', fontSize: '11px', fontWeight: 800 }}
-                                        cursor={{ stroke: '#bfdbfe', strokeWidth: 2 }}
-                                    />
-                                    <Area type="monotone" dataKey="value" stroke="#10367D" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
-                                </AreaChart>
-                            </ResponsiveContainer>
+                            {!isLoading && (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={mockChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                        <defs>
+                                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#10367D" stopOpacity={0.1} />
+                                                <stop offset="95%" stopColor="#10367D" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            itemStyle={{ color: '#10367D', fontSize: '11px', fontWeight: 800 }}
+                                            cursor={{ stroke: '#bfdbfe', strokeWidth: 2 }}
+                                        />
+                                        <Area type="monotone" dataKey="value" stroke="#10367D" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            )}
                         </div>
                     </div>
 
                     {/* Inventory Health */}
-                    <div className="card-enterprise p-8 bg-white">
+                    <div className="bg-white p-8 rounded-[10px] border border-slate-100 shadow-sm">
                         <div className="flex items-center justify-between mb-8">
                             <div>
                                 <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Inventory Health</h3>
@@ -255,7 +258,7 @@ export default function ManufacturerDashboard() {
 
 function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
     return (
-        <div className="card-enterprise p-6 bg-white flex flex-col justify-between group h-full">
+        <div className="p-6 bg-white border border-slate-100 rounded-[10px] shadow-sm flex flex-col justify-between group h-full">
             <div className="flex items-start justify-between">
                 <div>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{label}</p>

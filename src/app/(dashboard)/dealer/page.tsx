@@ -113,19 +113,21 @@ export default function DealerDashboard() {
                         </div>
                     </div>
                     <div className="h-[320px] w-full relative overflow-hidden">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={mockSalesData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
-                                <Tooltip
-                                    cursor={{ fill: '#f8fafc' }}
-                                    contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                    itemStyle={{ color: '#4f46e5', fontSize: '11px', fontWeight: 800 }}
-                                />
-                                <Bar dataKey="sales" fill="#4f46e5" radius={[6, 6, 0, 0]} barSize={32} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {!isLoading && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={mockSalesData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
+                                    <Tooltip
+                                        cursor={{ fill: '#f8fafc' }}
+                                        contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        itemStyle={{ color: '#4f46e5', fontSize: '11px', fontWeight: 800 }}
+                                    />
+                                    <Bar dataKey="sales" fill="#4f46e5" radius={[6, 6, 0, 0]} barSize={32} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 

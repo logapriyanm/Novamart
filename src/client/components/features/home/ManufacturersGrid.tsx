@@ -33,7 +33,7 @@ export default function ManufacturersGrid() {
                                     <img
                                         src={brand.image}
                                         alt={brand.name}
-                                        className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300"
+                                        className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 opacity-40 group-hover:opacity-100 transition-all duration-500"
                                     />
                                 ) : idx === topManufacturers.length - 1 ? (
                                     <div className="flex gap-1">

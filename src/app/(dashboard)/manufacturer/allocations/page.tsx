@@ -19,12 +19,13 @@ import {
     FaCrown
 } from 'react-icons/fa';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/api/client';
 
 export default function StockAllocationManager() {
     // const { showSnackbar } = useSnackbar();
-    const [allocations, setAllocations] = useState([]);
-    const [dealers, setDealers] = useState([]);
-    const [products, setProducts] = useState([]);
+    const [allocations, setAllocations] = useState<any[]>([]);
+    const [dealers, setDealers] = useState<any[]>([]);
+    const [products, setProducts] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,82 +48,62 @@ export default function StockAllocationManager() {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const [allocRes, dealerRes, prodRes] = await Promise.all([
-                fetch('/api/manufacturer/allocations'),
-                fetch('/api/manufacturer/network'),
-                fetch('/api/manufacturer/products')
-            ]);
-
             const [allocData, dealerData, prodData] = await Promise.all([
-                allocRes.json(),
-                dealerRes.json(),
-                prodRes.json()
+                apiClient.get<any>('/manufacturer/allocations'),
+                apiClient.get<any>('/manufacturer/network'),
+                apiClient.get<any>('/manufacturer/products')
             ]);
 
-            if (allocData.success) setAllocations(allocData.data);
-            if (dealerData.success) setDealers(dealerData.data);
-            if (prodData.success) setProducts(prodData.data.filter(p => p.status === 'APPROVED'));
-        } catch (error) {
+            setAllocations(allocData || []);
+            setDealers(dealerData || []);
+            setProducts((prodData || []).filter((p: any) => p.status === 'APPROVED'));
+        } catch (error: any) {
             console.error('Error fetching data:', error);
-            toast.error('Failed to load allocation data');
+            toast.error(error.message || 'Failed to load allocation data');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleAllocate = async (e) => {
+    const handleAllocate = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const res = await fetch('/api/manufacturer/inventory/allocate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    quantity: parseInt(formData.quantity),
-                    dealerMoq: parseInt(formData.dealerMoq),
-                    dealerBasePrice: parseFloat(formData.dealerBasePrice),
-                    maxMargin: parseFloat(formData.maxMargin)
-                })
+            await apiClient.post('/manufacturer/inventory/allocate', {
+                ...formData,
+                quantity: parseInt(formData.quantity),
+                dealerMoq: parseInt(formData.dealerMoq),
+                dealerBasePrice: parseFloat(formData.dealerBasePrice),
+                maxMargin: parseFloat(formData.maxMargin)
             });
 
-            const data = await res.json();
-            if (data.success) {
-                toast.success('Stock allocated successfully');
-                setShowModal(false);
-                fetchData();
-                setFormData({
-                    productId: '',
-                    dealerId: '',
-                    region: 'Pan-India',
-                    quantity: '0',
-                    dealerBasePrice: '',
-                    dealerMoq: '1',
-                    maxMargin: '20'
-                });
-            } else {
-                toast.error(data.error || 'Allocation failed');
-            }
-        } catch (error) {
-            toast.error('Something went wrong');
+            toast.success('Stock allocated successfully');
+            setShowModal(false);
+            fetchData();
+            setFormData({
+                productId: '',
+                dealerId: '',
+                region: 'Pan-India',
+                quantity: '0',
+                dealerBasePrice: '',
+                dealerMoq: '1',
+                maxMargin: '20'
+            });
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to allocate stock');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleRevoke = async (id) => {
+    const handleRevoke = async (id: string) => {
         if (!confirm('Are you sure you want to revoke this allocation?')) return;
         try {
-            const res = await fetch(`/api/manufacturer/allocations/${id}`, { method: 'DELETE' });
-            const data = await res.json();
-            if (data.success) {
-                toast.success('Allocation revoked');
-                fetchData();
-            } else {
-                toast.error(data.error || 'Failed to revoke');
-            }
-        } catch (error) {
-            toast.error('Error revoking allocation');
+            await apiClient.delete(`/manufacturer/allocations/${id}`);
+            toast.success('Allocation revoked');
+            fetchData();
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to revoke allocation');
         }
     };
 
@@ -150,7 +131,7 @@ export default function StockAllocationManager() {
                     { l: 'Active Dealers', v: dealers.length, c: 'text-emerald-600', b: 'bg-emerald-50' },
                     { l: 'Allocated Volume', v: allocations.reduce((acc, curr) => acc + (curr.allocatedStock || 0), 0), c: 'text-amber-600', b: 'bg-amber-50' },
                 ].map((s, i) => (
-                    <div key={i} className={`p-8 rounded-[2.5rem] border border-slate-100 shadow-sm ${s.b}`}>
+                    <div key={i} className={`p-8 rounded-[10px] border border-slate-100 shadow-sm ${s.b}`}>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{s.l}</p>
                         <p className={`text-3xl font-black ${s.c}`}>{s.v}</p>
                     </div>
@@ -158,12 +139,12 @@ export default function StockAllocationManager() {
             </div>
 
             {/* List Table */}
-            <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-6 flex-1 max-w-md">
                         <div className="relative w-full">
                             <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
-                            <input type="text" placeholder="Search Allocations..." className="w-full bg-white border border-slate-100 rounded-2xl py-3 pl-14 pr-6 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-[#10367D]/30" />
+                            <input type="text" placeholder="Search Allocations..." className="w-full bg-white border border-slate-100 rounded-[10px] py-3 pl-14 pr-6 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-[#10367D]/30" />
                         </div>
                     </div>
                 </div>
@@ -195,7 +176,7 @@ export default function StockAllocationManager() {
                                     <td className="px-10 py-8">
                                         <div className="flex items-center gap-6">
                                             <div className="relative">
-                                                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shadow-sm group-hover:scale-110 transition-transform">
+                                                <div className="w-12 h-12 rounded-[10px] bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shadow-sm group-hover:scale-110 transition-transform">
                                                     <FaUserTie className="w-5 h-5" />
                                                 </div>
                                                 {item.dealer?.subscriptions?.[0]?.plan?.priorityAllocation && (
@@ -228,7 +209,7 @@ export default function StockAllocationManager() {
 
                                     <td className="px-10 py-8">
                                         <div className="flex items-center gap-6">
-                                            <div className="w-10 h-10 rounded-xl bg-[#10367D]/5 text-[#10367D] flex items-center justify-center border border-[#10367D]/10">
+                                            <div className="w-10 h-10 rounded-[10px] bg-[#10367D]/5 text-[#10367D] flex items-center justify-center border border-[#10367D]/10">
                                                 <FaBox className="w-4 h-4" />
                                             </div>
                                             <div>
@@ -281,14 +262,14 @@ export default function StockAllocationManager() {
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="bg-white rounded-[3.5rem] w-full max-w-2xl relative shadow-2xl p-10 overflow-hidden"
+                            className="bg-white rounded-[10px] w-full max-w-2xl relative shadow-2xl p-10 overflow-hidden"
                         >
                             <div className="flex justify-between items-center mb-10">
                                 <div>
                                     <h2 className="text-2xl font-black tracking-tight italic text-[#10367D]">Strategic <span className="text-[#1E293B]">Allocation</span></h2>
                                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Configure Dealer Supply Terms</p>
                                 </div>
-                                <button onClick={() => setShowModal(false)} className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#10367D] transition-colors">
+                                <button onClick={() => setShowModal(false)} className="w-12 h-12 rounded-[10px] bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#10367D] transition-colors">
                                     <FaTimes />
                                 </button>
                             </div>
@@ -303,7 +284,7 @@ export default function StockAllocationManager() {
                                                 required
                                                 value={formData.dealerId}
                                                 onChange={(e) => setFormData({ ...formData, dealerId: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-xs font-black uppercase appearance-none focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase appearance-none focus:outline-none focus:border-[#10367D]/30"
                                             >
                                                 <option value="">Select Target Dealer</option>
                                                 {dealers.map(d => (
@@ -320,7 +301,7 @@ export default function StockAllocationManager() {
                                                 required
                                                 value={formData.productId}
                                                 onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-xs font-black uppercase appearance-none focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase appearance-none focus:outline-none focus:border-[#10367D]/30"
                                             >
                                                 <option value="">Select Master SKU</option>
                                                 {products.map(p => (
@@ -341,7 +322,7 @@ export default function StockAllocationManager() {
                                                 type="number"
                                                 value={formData.quantity}
                                                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
                                             />
                                         </div>
                                     </div>
@@ -355,7 +336,7 @@ export default function StockAllocationManager() {
                                                 value={formData.dealerBasePrice}
                                                 onChange={(e) => setFormData({ ...formData, dealerBasePrice: e.target.value })}
                                                 placeholder="Unit Price"
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
                                             />
                                         </div>
                                     </div>
@@ -365,7 +346,7 @@ export default function StockAllocationManager() {
                                             type="text"
                                             value={formData.region}
                                             onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 px-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
                                         />
                                     </div>
                                 </div>
@@ -377,7 +358,7 @@ export default function StockAllocationManager() {
                                             type="number"
                                             value={formData.dealerMoq}
                                             onChange={(e) => setFormData({ ...formData, dealerMoq: e.target.value })}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 px-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -388,7 +369,7 @@ export default function StockAllocationManager() {
                                                 type="number"
                                                 value={formData.maxMargin}
                                                 onChange={(e) => setFormData({ ...formData, maxMargin: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
                                             />
                                         </div>
                                     </div>
@@ -397,7 +378,7 @@ export default function StockAllocationManager() {
                                 <button
                                     disabled={isSubmitting}
                                     type="submit"
-                                    className="w-full py-6 bg-[#10367D] text-white rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-[#10367D]/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50"
+                                    className="w-full py-6 bg-[#10367D] text-white rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-[#10367D]/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50"
                                 >
                                     {isSubmitting ? 'Configuring Asset...' : 'Deploy Allocation to Network'}
                                     <FaCheck className="w-3 h-3" />

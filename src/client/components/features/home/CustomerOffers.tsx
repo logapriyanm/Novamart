@@ -17,49 +17,47 @@ const offers = [
     {
         id: 'welcome',
         icon: FaGift,
-        title: 'Welcome / New User Offers',
-        subtitle: 'For our newest members',
+        title: 'New Member Welcome',
+        subtitle: 'Exclusive Starter Pack',
         details: [
-            'Flat ₹X discount on first order',
-            'Free delivery on first purchase',
-            'Welcome coupon valid for limited days'
+            'Flat ₹500 OFF on your first order',
+            'Zero Delivery Fees (Capped at ₹100)',
+            'Combo Coupon: 20% OFF on next purchase'
         ],
-        purpose: ['Increase conversion', 'Reduce hesitation'],
+        purpose: ['Instant Value', 'Seamless Onboarding'],
         color: 'bg-indigo-600',
         lightColor: 'bg-indigo-50'
     },
     {
         id: 'festival',
         icon: FaCalendarAlt,
-        title: 'Festival & Special Day Offers',
-        subtitle: 'Celebrate with us',
+        title: 'Mega Festive Bonanza',
+        subtitle: 'Limited Season Deals',
         details: [
-            'Diwali & Festive Sales',
-            'Valentine\'s Day Specials',
-            'Birthday Discounts',
-            'Seasonal limited-time coupons'
+            'Up to 45% Cluster Discount on Brands',
+            'Exclusive Buy 1 Get 1 on Accessories',
+            'Flash Sale: New Deals every 4 Hours',
+            'No Cost EMI for all Premium Models'
         ],
-        purpose: ['Emotional engagement', 'Time-based urgency'],
+        purpose: ['High Velocity', 'Maximum Savings'],
         color: 'bg-rose-500',
         lightColor: 'bg-rose-50',
-        badge: 'Limited Time'
+        badge: 'LIVE NOW'
     },
-   
     {
         id: 'coupons',
         icon: FaTicketAlt,
-        title: 'Coupon Code Offers',
-        subtitle: 'Smart savings at checkout',
+        title: 'Smart Voucher Codes',
+        subtitle: 'Stacked Savings',
         details: [
-            'Flat & Percentage discount codes',
-            'Category-specific vouchers',
-            'Codes: NOVA10, FIRSTBUY, FESTIVE20'
+            'NOVA10: Flat 10% for App Users',
+            'FREESHIP: Free delivery above ₹2999',
+            'EXCHANGE: Get 15% extra on Trade-ins'
         ],
-        purpose: ['Easy marketing', 'Campaign tracking'],
+        purpose: ['Loyalty Rewards', 'Flexible Savings'],
         color: 'bg-amber-500',
         lightColor: 'bg-amber-50'
     },
-   
 ];
 
 export default function CustomerOffers() {
@@ -88,7 +86,7 @@ export default function CustomerOffers() {
                             transition={{ delay: 0.1 }}
                             className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
                         >
-                            🎁 Customer Offers <br />
+                            🎁 Customer Offers
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">in NovaMart</span>
                         </motion.h2>
                         <motion.p
@@ -112,7 +110,7 @@ export default function CustomerOffers() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: idx * 0.1 }}
-                            className="group relative bg-white rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-200/40 border border-slate-100 transition-all duration-500"
+                            className="group relative bg-white rounded-[10px] p-10 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-200/40 border border-slate-100 transition-all duration-500"
                         >
                             {offer.badge && (
                                 <div className="absolute top-8 right-8 px-4 py-1.5 rounded-full bg-rose-100 text-rose-600 text-[10px] font-black uppercase tracking-widest animate-pulse">
@@ -167,7 +165,7 @@ export default function CustomerOffers() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    className="mt-20 p-12 bg-slate-900 rounded-[3rem] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-10"
+                    className="mt-10 p-12 bg-slate-900 rounded-[10px] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-10"
                 >
                     <div className="absolute top-0 right-0 w-full h-full opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
 

@@ -96,19 +96,19 @@ export default function ProductMaster() {
 
             {/* Product Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total SKU</p>
                     <p className="text-3xl font-black text-[#1E293B] mt-1">{products.length}</p>
                 </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Live Products</p>
                     <p className="text-3xl font-black text-[#1E293B] mt-1">{products.filter(p => p.status === 'APPROVED').length}</p>
                 </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Awaiting Approval</p>
                     <p className="text-3xl font-black text-[#1E293B] mt-1">{products.filter(p => p.status === 'PENDING').length}</p>
                 </div>
-                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Draft Mode</p>
                     <p className="text-3xl font-black text-[#1E293B] mt-1">{products.filter(p => p.status === 'DRAFT').length}</p>
                 </div>

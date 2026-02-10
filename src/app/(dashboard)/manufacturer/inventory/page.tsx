@@ -1,28 +1,38 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     FaBox,
     FaPlus,
     FaSearch,
     FaFilter,
-    FaCheckCircle,
-    FaHistory,
     FaShieldAlt,
-    FaRegClock,
-    FaExclamationCircle,
-    FaArrowRight
+    FaHistory,
+    FaSpinner
 } from 'react-icons/fa';
 import Link from 'next/link';
-
-const manufacturerProducts = [
-    { id: 'MFP-101', name: 'Ultra-Quiet AC 2.0', status: 'APPROVED', price: '₹34,500', stock: 500, category: 'Home Appliances' },
-    { id: 'MFP-102', name: 'Pro-Mix Grinder X', status: 'SUBMITTED', price: '₹8,400', stock: 1200, category: 'Kitchen Tech' },
-    { id: 'MFP-103', name: 'Industrial Heat Pump', status: 'DRAFT', price: '₹89,000', stock: 50, category: 'Climate' },
-];
+import { manufacturerService } from '@/lib/api/services/manufacturer.service';
+import { toast } from 'sonner';
 
 export default function ManufacturerInventory() {
+    const [products, setProducts] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await manufacturerService.getProducts();
+                setProducts(data || []);
+            } catch (error: any) {
+                toast.error(error.message || 'Failed to fetch inventory');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
+
     return (
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
             {/* Header */}
@@ -31,7 +41,7 @@ export default function ManufacturerInventory() {
                     <h1 className="text-3xl font-black tracking-tight italic">Bulk <span className="text-[#10367D]">Portfolio</span></h1>
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Production Planning & Governance Queue</p>
                 </div>
-                <Link href="/manufacturer/inventory/add" className="px-10 py-5 bg-[#10367D] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-3">
+                <Link href="/manufacturer/products/add" className="px-10 py-5 bg-[#10367D] text-white rounded-[10px] font-black text-xs uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-3">
                     <FaPlus className="w-3 h-3" />
                     Initialize New Batch
                 </Link>
@@ -40,29 +50,29 @@ export default function ManufacturerInventory() {
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {[
-                    { l: 'Total SKUs', v: '18', c: 'text-[#10367D]', b: 'bg-blue-50' },
-                    { l: 'Approved Distribution', v: '12', c: 'text-emerald-600', b: 'bg-emerald-50' },
-                    { l: 'In Governor Review', v: '04', c: 'text-amber-600', b: 'bg-amber-50' },
-                    { l: 'Draft Designs', v: '02', c: 'text-slate-400', b: 'bg-slate-50' },
+                    { l: 'Total SKUs', v: products.length, c: 'text-[#10367D]', b: 'bg-blue-50' },
+                    { l: 'Approved Distribution', v: products.filter(p => p.status === 'APPROVED').length, c: 'text-emerald-600', b: 'bg-emerald-50' },
+                    { l: 'In Governor Review', v: products.filter(p => p.status === 'PENDING').length, c: 'text-amber-600', b: 'bg-amber-50' },
+                    { l: 'Draft Designs', v: products.filter(p => p.status === 'DRAFT').length, c: 'text-slate-400', b: 'bg-slate-50' },
                 ].map((s, i) => (
-                    <div key={i} className={`p-8 rounded-[2.5rem] border border-slate-100 shadow-sm ${s.b}`}>
+                    <div key={i} className={`p-8 rounded-[10px] border border-slate-100 shadow-sm ${s.b}`}>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{s.l}</p>
-                        <p className={`text-3xl font-black ${s.c}`}>{s.v}</p>
+                        <p className={`text-3xl font-black ${s.c}`}>{isLoading ? '...' : s.v}</p>
                     </div>
                 ))}
             </div>
 
             {/* Catalog Table */}
-            <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-6 flex-1 max-w-md">
                         <div className="relative w-full">
                             <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
-                            <input type="text" placeholder="Search Master Catalog..." className="w-full bg-white border border-slate-100 rounded-2xl py-3 pl-14 pr-6 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-[#10367D]/30" />
+                            <input type="text" placeholder="Search Master Catalog..." className="w-full bg-white border border-slate-100 rounded-[10px] py-3 pl-14 pr-6 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-[#10367D]/30" />
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <button className="p-4 bg-white border border-slate-100 text-slate-400 rounded-xl hover:text-[#10367D] transition-colors shadow-sm">
+                        <button className="p-4 bg-white border border-slate-100 text-slate-400 rounded-[10px] hover:text-[#10367D] transition-colors shadow-sm">
                             <FaFilter className="w-3 h-3" />
                         </button>
                     </div>
@@ -80,46 +90,58 @@ export default function ManufacturerInventory() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {manufacturerProducts.map((item) => (
+                            {isLoading ? (
+                                Array(3).fill(0).map((_, i) => (
+                                    <tr key={i} className="animate-pulse">
+                                        <td colSpan={5} className="px-10 py-8 bg-slate-50/10 h-24"></td>
+                                    </tr>
+                                ))
+                            ) : products.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-10 py-20 text-center text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
+                                        No assets discovered in master catalog
+                                    </td>
+                                </tr>
+                            ) : products.map((item) => (
                                 <tr key={item.id} className="group hover:bg-slate-50/50 transition-all">
                                     <td className="px-10 py-8">
                                         <div className="flex items-center gap-6">
-                                            <div className="w-12 h-12 rounded-xl bg-[#10367D]/5 text-[#10367D] flex items-center justify-center border border-[#10367D]/10 shadow-sm group-hover:scale-110 transition-transform">
+                                            <div className="w-12 h-12 rounded-[10px] bg-[#10367D]/5 text-[#10367D] flex items-center justify-center border border-[#10367D]/10 shadow-sm group-hover:scale-110 transition-transform">
                                                 <FaBox className="w-6 h-6" />
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-black text-[#1E293B] italic">{item.name}</h4>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mt-1">{item.id} • {item.category}</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] mt-1">{item.modelNo || item.id} • {item.category?.name || 'Uncategorized'}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-10 py-8">
                                         <div className="flex items-center gap-3">
                                             <span className={`w-2 h-2 rounded-full ${item.status === 'APPROVED' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' :
-                                                    item.status === 'SUBMITTED' ? 'bg-amber-500 animate-pulse' :
-                                                        'bg-slate-300'
+                                                item.status === 'PENDING' ? 'bg-amber-500 animate-pulse' :
+                                                    'bg-slate-300'
                                                 }`} />
                                             <span className={`text-[10px] font-black uppercase tracking-widest ${item.status === 'APPROVED' ? 'text-emerald-600' :
-                                                    item.status === 'SUBMITTED' ? 'text-amber-600' :
-                                                        'text-slate-400'
+                                                item.status === 'PENDING' ? 'text-amber-600' :
+                                                    'text-slate-400'
                                                 }`}>{item.status}</span>
                                         </div>
                                     </td>
                                     <td className="px-10 py-8">
-                                        <span className="text-sm font-black text-[#1E293B]">{item.price}</span>
+                                        <span className="text-sm font-black text-[#1E293B]">₹{Number(item.basePrice).toLocaleString()}</span>
                                     </td>
                                     <td className="px-10 py-8">
-                                        <span className="text-sm font-black text-[#1E293B] italic">{item.stock} <span className="text-slate-300 text-[10px] uppercase font-bold ml-1">Units</span></span>
+                                        <span className="text-sm font-black text-[#1E293B] italic">{item.stock || 0} <span className="text-slate-300 text-[10px] uppercase font-bold ml-1">Units</span></span>
                                     </td>
                                     <td className="px-10 py-8 text-right">
                                         {item.status === 'DRAFT' ? (
-                                            <button className="px-6 py-2 bg-[#10367D] text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-[#10367D]/20 hover:scale-105 transition-all">
+                                            <button className="px-6 py-2 bg-[#10367D] text-[#10367D] text-[10px] font-black uppercase tracking-widest rounded-[10px] shadow-lg shadow-[#10367D]/20 hover:scale-105 transition-all">
                                                 Submit Audit
                                             </button>
                                         ) : (
-                                            <button className="px-6 py-2 bg-white border border-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all">
+                                            <Link href={`/manufacturer/products/${item.id}`} className="inline-block px-6 py-2 bg-white border border-slate-100 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-[10px] hover:bg-slate-50 transition-all">
                                                 View Specs
-                                            </button>
+                                            </Link>
                                         )}
                                     </td>
                                 </tr>
@@ -130,9 +152,9 @@ export default function ManufacturerInventory() {
             </div>
 
             {/* Compliance Note */}
-            <div className="p-10 bg-[#1E293B] rounded-[3.5rem] border border-[#10367D]/20 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden group">
+            <div className="p-10 bg-[#1E293B] rounded-[10px] border border-[#10367D]/20 flex flex-col md:flex-row items-center gap-12 relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent pointer-events-none" />
-                <div className="w-16 h-16 rounded-[1.8rem] bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+                <div className="w-16 h-16 rounded-[10px] bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
                     <FaShieldAlt className="w-8 h-8" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
@@ -146,4 +168,3 @@ export default function ManufacturerInventory() {
         </div>
     );
 }
-

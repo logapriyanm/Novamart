@@ -21,7 +21,7 @@ const GUEST_SLIDES = [
         ctaText: "Buy Refrigerators Online",
         ctaLink: "/products?category=refrigerators",
         secondaryCta: "Refrigerator Buying Guide",
-        image: "https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?q=80&w=2070&auto=format&fit=crop"
+        image: "/assets/BestSeller.png"
     },
     {
         id: 2,
@@ -35,7 +35,7 @@ const GUEST_SLIDES = [
         ctaText: "Buy Washing Machines",
         ctaLink: "/products?category=washing-machines",
         secondaryCta: "Compare Washing Machines",
-        image: "https://images.unsplash.com/photo-1582735689369-aa669e38f6b0?q=80&w=2070&auto=format&fit=crop"
+        image: "/assets/BestSeller2.png"
     },
     {
         id: 3,
@@ -49,7 +49,7 @@ const GUEST_SLIDES = [
         ctaText: "Shop Air Conditioners",
         ctaLink: "/products?category=air-conditioners",
         secondaryCta: "AC Power & Energy Calculator",
-        image: "https://images.unsplash.com/photo-1590794144662-790113c1c8ea?q=80&w=2070&auto=format&fit=crop"
+        image: "/assets/hero/carousel_ac.jpg"
     },
     {
         id: 4,
@@ -63,7 +63,7 @@ const GUEST_SLIDES = [
         ctaText: "Shop Kitchen Appliances",
         ctaLink: "/products?category=kitchen-appliances",
         secondaryCta: "Kitchen Appliance Recipes",
-        image: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=2070&auto=format&fit=crop"
+        image: "/assets/hero/carousel_kitchen.jpg"
     }
 ];
 
@@ -79,7 +79,7 @@ const LOGGED_IN_SLIDES = [
         ctaText: "View My Deals",
         ctaLink: "/products?deals=exclusive",
         secondaryCta: "My Orders",
-        image: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?q=80&w=2070&auto=format&fit=crop"
+        image: "/assets/hero/main.png"
     },
     {
         id: 2,
@@ -92,7 +92,7 @@ const LOGGED_IN_SLIDES = [
         ctaText: "Shop Wholesale",
         ctaLink: "/products?mode=wholesale",
         secondaryCta: "Request A Quote",
-        image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2070&auto=format&fit=crop"
+        image: "/assets/hero/wholesale.png"
     },
     {
         id: 3,
@@ -105,7 +105,7 @@ const LOGGED_IN_SLIDES = [
         ctaText: "Shop New Arrivals",
         ctaLink: "/products?sort=newest",
         secondaryCta: "View Catalog",
-        image: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2057&auto=format&fit=crop"
+        image: "/assets/hero/AI-featured.png"
     }
 ];
 
@@ -142,7 +142,7 @@ export default function HeroSection() {
 
 
                 {/* Main Carousel Card */}
-                <div className="relative w-full aspect-[16/16] md:aspect-[16/8] lg:aspect-[21/9] rounded-[32px] overflow-hidden group shadow-2xl">
+                <div className="relative w-full aspect-[16/16] md:aspect-[16/8] lg:aspect-[21/9] rounded-[32px] overflow-hidden group ">
                     <AnimatePresence mode='wait'>
                         <motion.div
                             key={`${isAuthenticated ? 'auth' : 'guest'}-${currentIndex}`}
@@ -198,19 +198,11 @@ export default function HeroSection() {
                                             {currentSlide.subText}
                                         </div>
                                     </div>
-                                    {/* Social Proof / Avatars */}
-                                    <div className="hidden lg:flex -space-x-3 pl-4 border-l border-slate-200/50">
-                                        {[1, 2, 3].map(i => (
-                                            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200" />
-                                        ))}
-                                        <div className="w-8 h-8 rounded-full border-2 border-white bg-black flex items-center justify-center text-[8px] font-bold text-white">
-                                            +4k
-                                        </div>
-                                    </div>
+                                   
                                 </motion.div>
 
                                 {/* Buttons */}
-                                <motion.div
+                                {/* <motion.div
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.5 }}
@@ -222,7 +214,7 @@ export default function HeroSection() {
                                     <button className="px-8 py-4 bg-white/80 backdrop-blur-sm border border-white/50 rounded-xl font-bold text-xs uppercase tracking-widest text-slate-600 hover:bg-white transition-colors">
                                         {currentSlide.secondaryCta}
                                     </button>
-                                </motion.div>
+                                </motion.div> */}
                             </div>
 
                             {/* Image Side (Right) */}

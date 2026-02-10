@@ -85,12 +85,12 @@ export default function DealerRequests() {
             {/* Requests List */}
             <div className="space-y-4">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[10px] border border-dashed border-slate-200">
                         <FaSpinner className="w-8 h-8 text-[#0F6CBD] animate-spin mb-4" />
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Synchronizing Request Pipeline...</p>
                     </div>
                 ) : requests.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
+                    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[10px] border border-dashed border-slate-200">
                         <FaUserCheck className="w-12 h-12 text-slate-100 mb-4" />
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No {activeTab.toLowerCase()} requests found</p>
                     </div>
@@ -103,7 +103,7 @@ export default function DealerRequests() {
                                 layout
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 flex flex-col md:flex-row gap-8"
+                                className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-8 flex flex-col md:flex-row gap-8"
                             >
                                 {/* Dealer Info */}
                                 <div className="flex-1">

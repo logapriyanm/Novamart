@@ -27,7 +27,7 @@ const SETUPS = [
 
 export default function BrandSpotlight() {
     return (
-        <div className="py-20">
+        <div className="py-3">
             <div className="flex flex-col gap-2 mb-10 text-center">
                 <h2 className="text-3xl font-black text-black uppercase tracking-tight italic">Premium <span className="text-black/40">Setups</span></h2>
                 <p className="text-black/40 font-bold text-xs uppercase tracking-[0.2em]">Curated Collections for Your Modern Home</p>

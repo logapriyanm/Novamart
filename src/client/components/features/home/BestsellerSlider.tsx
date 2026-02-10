@@ -7,44 +7,43 @@ import { FaChevronLeft, FaChevronRight, FaLock } from 'react-icons/fa';
 const bestsellers = [
     {
         id: 1,
-        title: "The 'Bureaucrat' Chair",
-        category: "Office",
+        title: "Smart Inverter Refrigerator",
+        category: "Home Appliances",
         image: "/assets/BestSeller.png",
-        price: "₹899",
+        price: "₹42,999",
         status: "In Stock"
     },
     {
         id: 2,
-        title: "The 'Classic' Chair",
-        category: "Living",
+        title: "Front Load Washing Machine",
+        category: "Laundry",
         image: "/assets/BestSeller2.png",
-        price: "₹1,299",
-        status: "Low Stock"
+        price: "₹34,500",
+        status: "Selling Fast"
     },
     {
         id: 3,
-        title: "The 'Classic' Chair",
-        category: "Royal",
+        title: "4K QLED Smart TV 55\"",
+        category: "Entertainment",
         image: "/assets/BestSeller3.png",
-        price: "₹1,589",
-        status: "Sold Out",
-        locked: true
+        price: "₹54,990",
+        status: "In Stock"
     },
     {
         id: 4,
-        title: "The 'Diplomat' Chair",
-        category: "Executive",
+        title: "Convection Microwave Oven",
+        category: "Kitchen",
         image: "/assets/BestSeller4.png",
-        price: "₹1,150",
-        status: "Pre-order"
+        price: "₹14,200",
+        status: "Limited Stock"
     },
     {
         id: 5,
-        title: "The 'Intelligent' Chair",
-        category: "Modern",
+        title: "Inverter Split AC 1.5 Ton",
+        category: "Cooling",
         image: "/assets/BestSeller5.png",
-        price: "₹950",
-        status: "In Stock"
+        price: "₹38,990",
+        status: "Best Seller"
     }
 ];
 
@@ -134,7 +133,7 @@ export default function BestsellerSlider() {
     return (
         <section className="py-20 overflow-hidden relative min-h-[700px] flex flex-col justify-center">
             <div className="max-w-[1600px] mx-auto px-8 w-full">
-               
+
 
                 <div className="relative h-[500px] flex items-center justify-center perspective-1000">
                     {bestsellers.map((item, index) => {
@@ -163,11 +162,6 @@ export default function BestsellerSlider() {
                             >
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
 
-                                {item.locked && (
-                                    <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
-                                        <FaLock className="w-3 h-3 text-white" />
-                                    </div>
-                                )}
 
                                 <div className="absolute bottom-0 left-0 w-full p-8">
                                     <h3 className="text-lg font-bold text-white uppercase tracking-wider mb-1">{item.title}</h3>

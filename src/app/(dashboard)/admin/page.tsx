@@ -132,18 +132,20 @@ export default function AdminDashboard() {
                         </span>
                     </div>
                     <div className="h-[320px] w-full relative overflow-hidden">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={mockActivityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                    itemStyle={{ color: '#1e293b', fontSize: '11px', fontWeight: 800 }}
-                                />
-                                <Line type="monotone" dataKey="users" stroke="#10367D" strokeWidth={3} dot={{ r: 4, fill: '#10367D', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, fill: '#10367D' }} />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        {!isLoading && (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={mockActivityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        itemStyle={{ color: '#1e293b', fontSize: '11px', fontWeight: 800 }}
+                                    />
+                                    <Line type="monotone" dataKey="users" stroke="#10367D" strokeWidth={3} dot={{ r: 4, fill: '#10367D', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, fill: '#10367D' }} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </div>
 

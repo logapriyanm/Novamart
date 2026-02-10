@@ -87,7 +87,7 @@ export default function ManufacturerNegotiations() {
                             key={negotiation.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-md transition-all"
+                            className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-6 hover:shadow-md transition-all"
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-4 flex-1">
