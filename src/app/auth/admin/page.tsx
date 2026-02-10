@@ -11,7 +11,6 @@ import { useSnackbar } from '@/client/context/SnackbarContext';
 export default function AdminLoginPage() {
     const router = useRouter();
     const { login } = useAuth();
-    // const { showSnackbar } = useSnackbar(); // If available
     const [step, setStep] = useState(1);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({

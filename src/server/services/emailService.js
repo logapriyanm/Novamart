@@ -15,15 +15,29 @@ const createTransporter = () => {
         });
     }
 
-    // Default: Use SMTP configuration
-    return nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
-        port: parseInt(process.env.SMTP_PORT || '2525'),
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASSWORD
+    // Default: Use SMTP configuration if credentials provided
+    if (process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+        return nodemailer.createTransport({
+            host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
+            port: parseInt(process.env.SMTP_PORT || '2525'),
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASSWORD
+            }
+        });
+    }
+
+    // Fallback: Logger transporter for development/testing
+    console.warn('⚠️ No email credentials found. Falling back to Logger transporter.');
+    return {
+        sendMail: async (options) => {
+            console.log('\n--- 📧 [MOCK EMAIL SENT] ---');
+            console.log(`To: ${options.to}`);
+            console.log(`Subject: ${options.subject}`);
+            console.log('----------------------------\n');
+            return { messageId: `mock-${Date.now()}` };
         }
-    });
+    };
 };
 
 const transporter = createTransporter();
@@ -222,6 +236,52 @@ const emailTemplates = {
 </body>
 </html>
         `
+    }),
+    passwordReset: (user, resetLink) => ({
+        subject: 'Password Reset Request - NovaMart',
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background: #000; color: white; padding: 40px 30px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+        .content { padding: 40px 30px; text-align: center; }
+        .button { display: inline-block; background: #000; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 30px 0; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
+        .footer { background: #F9FAFB; padding: 30px; text-align: center; color: #6B7280; font-size: 12px; }
+        .warning { font-size: 12px; color: #999; margin-top: 20px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NovaMart Security</h1>
+        </div>
+        <div class="content">
+            <h2 style="color: #333; margin-top: 0;">Password Reset Request</h2>
+            <p style="color: #666; line-height: 1.6;">
+                Hi ${user.firstName || user.email.split('@')[0]},<br>
+                We received a request to reset the password for your NovaMart account. 
+                Click the button below to set a new password.
+            </p>
+            <a href="${resetLink}" class="button">Reset Password</a>
+            <p class="warning">
+                This link will expire in 1 hour. If you didn't request this, you can safely ignore this email. 
+                Your password will remain unchanged.
+            </p>
+        </div>
+        <div class="footer">
+            <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">NovaMart Hub</p>
+            <p style="margin: 0;">Verified B2B Wholesale Ecosystem</p>
+            <p style="margin: 10px 0 0 0;">© 2026 NovaMart. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+        `
     })
 };
 
@@ -300,5 +360,6 @@ import prisma from '../lib/prisma.js';
 export default {
     sendEmail,
     sendOrderConfirmation,
-    sendPaymentConfirmation
+    sendPaymentConfirmation,
+    emailTemplates
 };

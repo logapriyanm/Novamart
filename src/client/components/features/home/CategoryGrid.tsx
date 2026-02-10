@@ -19,17 +19,27 @@ const iconMap: Record<string, any> = {
     'home-comfort': FaWind,
 };
 
+import { useAuth } from '../../../context/AuthContext';
+
 export default function CategoryGrid() {
+    const { user } = useAuth();
     const [categories, setCategories] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const isMounted = React.useRef(false);
+
     useEffect(() => {
+        if (isMounted.current) return;
+        isMounted.current = true;
+
         const fetchCategories = async () => {
             try {
                 // Fetch products and extract unique categories
-                const data = await apiClient.get<any[]>('/products', {
+                const response = await apiClient.get<any>('/products', {
                     params: { status: 'APPROVED' }
                 });
+
+                const data = response.products || [];
 
                 // Group products by category
                 const categoryMap = new Map();
@@ -62,6 +72,8 @@ export default function CategoryGrid() {
 
         fetchCategories();
     }, []);
+
+    if (!user) return null;
 
     if (isLoading) {
         return (

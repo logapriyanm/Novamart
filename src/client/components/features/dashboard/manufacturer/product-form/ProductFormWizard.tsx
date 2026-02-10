@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { useProductForm } from '@/client/context/ProductFormContext';
 
 import StepGeneral from './StepGeneral';
@@ -25,7 +25,7 @@ export default function ProductFormWizard({ productId }: ProductFormWizardProps)
     const [currentStep, setCurrentStep] = useState(1);
     const [isVerified, setIsVerified] = useState<boolean | null>(null);
     const { submitProduct, isSubmitting, updateProductData, productData } = useProductForm();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [isLoading, setIsLoading] = useState(!!productId);
 
     useEffect(() => {
@@ -61,7 +61,7 @@ export default function ProductFormWizard({ productId }: ProductFormWizardProps)
                     });
                 } catch (error) {
                     console.error('Failed to fetch product:', error);
-                    showSnackbar('Failed to load product data', 'error');
+                    toast.error('Failed to load product data');
                 } finally {
                     setIsLoading(false);
                 }
@@ -79,29 +79,29 @@ export default function ProductFormWizard({ productId }: ProductFormWizardProps)
     const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, steps.length));
     const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
-    const handleSubmit = async (status: 'DRAFT' | 'PENDING' | 'update' = 'PENDING') => {
+    const handleSubmit = async (status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'update' = 'PENDING') => {
         try {
             if (productId) {
                 // Update existing
                 const response = await apiClient.put<any>(`/products/${productId}`, { ...productData, status: status === 'update' ? productData.status : status });
-                showSnackbar(response.data?.status === 'APPROVED' ? 'Product Updated & Published!' : 'Product Updated Successfully!', 'success');
+                toast.success(response.data?.status === 'APPROVED' ? 'Product Updated & Published!' : 'Product Updated Successfully!');
             } else {
                 // Create new
                 const response = await submitProduct({ status: status === 'update' ? 'PENDING' : status });
                 const actualStatus = response.data?.status || (status === 'DRAFT' ? 'DRAFT' : 'PENDING');
 
                 if (actualStatus === 'DRAFT') {
-                    showSnackbar('Draft Saved!', 'success');
+                    toast.success('Draft Saved!');
                 } else if (actualStatus === 'APPROVED') {
-                    showSnackbar('Product Published Instantly!', 'success');
+                    toast.success('Product Published Instantly!');
                 } else {
-                    showSnackbar('Product Submitted for Approval!', 'success');
+                    toast.success('Product Submitted for Approval! Admin review required.');
                 }
             }
             router.push('/manufacturer/products');
         } catch (error: any) {
             console.error('Submit Error:', error);
-            showSnackbar(error.message || 'Failed to save product', 'error');
+            toast.error(error.message || 'Failed to save product');
         }
     };
 
@@ -219,7 +219,7 @@ export default function ProductFormWizard({ productId }: ProductFormWizardProps)
                             </button>
                         ) : (
                             <button
-                                onClick={() => handleSubmit(productId ? 'update' : 'PENDING')}
+                                onClick={() => handleSubmit(productId ? 'update' : (isVerified ? 'APPROVED' : 'PENDING'))}
                                 disabled={isSubmitting}
                                 className="px-6 py-3 bg-[#0F6CBD] text-white rounded-[10px] text-xs font-bold uppercase tracking-widest hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2"
                             >

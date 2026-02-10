@@ -69,6 +69,7 @@ const manufacturerMenuItems = [
     { name: 'Dashboard', icon: DashboardIcon, path: '/manufacturer' },
     { name: 'Products', icon: ProductsIcon, path: '/manufacturer/products' },
     { name: 'Dealer Requests', icon: FaUserCheck, path: '/manufacturer/dealers/requests' },
+    { name: 'Negotiations', icon: FaHandshake, path: '/manufacturer/negotiations' },
     { name: 'Approved Dealers', icon: DealersIcon, path: '/manufacturer/dealers' },
     { name: 'Orders Overview', icon: LogisticsIcon, path: '/manufacturer/orders' },
     { name: 'Pricing Rules', icon: FaTag, path: '/manufacturer/pricing' },
@@ -163,10 +164,10 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
             <motion.aside
                 initial={false}
                 animate={{
-                    x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1024 ? -300 : 0),
+                    x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1025 ? -300 : 0),
                     width: isCollapsed ? 80 : 288 // 5rem (80px) vs 18rem (288px)
                 }}
-                className={`fixed inset-y-0 left-0 bg-surface border-r border-border z-50 flex flex-col transition-all lg:sticky overflow-hidden h-screen`}
+                className={`fixed inset-y-0 left-0 bg-surface border-r border-border z-50 flex flex-col transition-all md:sticky overflow-hidden h-screen`}
             >
                 {/* Logo Section */}
                 <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center p-4' : 'gap-3'}`}>
@@ -189,34 +190,34 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 )}
 
                 {/* Primary Navigation */}
-                <nav className="flex-1 px-4 py-2 space-y-2 overflow-y-auto custom-scrollbar overflow-x-hidden">
-                    {/* Customer Profile Section (Keep existing logic for Customer role) */}
+                <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
+                    {/* Customer Profile Section (Refined) */}
                     {role === 'CUSTOMER' && !isCollapsed && (
-                        <div className="mb-6 p-4 bg-muted/30 rounded-[10px] border border-border">
+                        <div className="mb-6 p-4 bg-muted/20 rounded-[10px] border border-border/50">
                             <div className="flex items-center gap-4 p-2">
-                                <div className="w-12 h-12 bg-black rounded-[10px] flex items-center justify-center text-white font-black text-lg">
+                                <div className="w-12 h-12 bg-black rounded-[10px] flex items-center justify-center text-white font-black text-lg shadow-sm">
                                     {user?.name?.charAt(0) || 'R'}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5">
-                                        <h3 className="text-sm font-black text-foreground truncate">{user?.name || 'User'}</h3>
+                                        <h3 className="text-sm font-bold text-foreground truncate">{user?.name || 'User'}</h3>
                                         <CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" />
                                     </div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
                                         {user?.role === 'CUSTOMER' ? 'Retail Partner' : `${user?.role} Access`}
                                     </p>
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
-                                    <span className="text-muted-foreground">Account Status</span>
-                                    <span className="text-primary">{user?.status === 'ACTIVE' ? 'Verified' : 'Pending'}</span>
+                            <div className="space-y-2 mt-2 px-2">
+                                <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                                    <span>Account Status</span>
+                                    <span className="text-emerald-600">Verified</span>
                                 </div>
-                                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                                <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
                                     <motion.div
                                         initial={{ width: 0 }}
-                                        animate={{ width: user?.status === 'ACTIVE' ? '100%' : '50%' }}
-                                        className="h-full bg-black"
+                                        animate={{ width: '100%' }}
+                                        className="h-full bg-emerald-500"
                                     />
                                 </div>
                             </div>
@@ -230,19 +231,18 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     </div>
                 </nav>
 
-                {/* Bottom Navigation / Storage Widget (Image 1) */}
-                <div className="p-4 space-y-1">
-                    {/* Image 1 shows "Used Storage" widget at bottom for Dealer */}
+                {/* Bottom Navigation / Storage Widget */}
+                <div className="p-4 space-y-1 bg-surface border-t border-border/10">
                     {role === 'DEALER' && !isCollapsed && (
-                        <div className="mt-4 mb-4 p-4 bg-muted/20 rounded-[10px] border border-border/50">
+                        <div className="mb-4 p-4 bg-primary/5 rounded-[10px] border border-primary/10">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-[10px] font-bold text-muted-foreground">Platform Activity</span>
-                                <span className="text-[10px] font-bold text-foreground">Active</span>
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Market Reputation</span>
+                                <span className="text-[10px] font-bold text-primary">Top 10%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mb-3">
-                                <div className="h-full bg-black w-full rounded-full opacity-50"></div>
+                            <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden mb-3">
+                                <div className="h-full bg-primary w-[90%] rounded-full opacity-80"></div>
                             </div>
-                            <Link href="/dealer/subscription" className="block text-center w-full py-2 bg-background border border-border text-foreground text-[10px] font-bold rounded-[10px] hover:bg-muted transition-colors">
+                            <Link href="/dealer/subscription" className="block text-center w-full py-2 bg-white border border-primary/10 text-primary text-[10px] font-bold rounded-[10px] hover:bg-primary hover:text-white transition-all shadow-sm">
                                 View Subscription
                             </Link>
                         </div>

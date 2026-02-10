@@ -21,10 +21,12 @@ router.use(authorize(['DEALER'], [], ['ACTIVE', 'UNDER_VERIFICATION', 'PENDING']
  * Inventory & Pricing
  */
 router.get('/inventory', dealerController.getMyInventory);
+router.get('/inventory/:id', dealerController.getInventoryItem);
 router.get('/allocations', dealerController.getMyAllocations);
 router.post('/source', dealerController.sourceProduct);
 router.put('/inventory/price', dealerController.updatePrice);
 router.put('/inventory/stock', dealerController.updateStock);
+router.put('/inventory/toggle-listing', dealerController.toggleListing);
 
 
 /**

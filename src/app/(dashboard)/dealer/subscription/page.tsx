@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { FaCheck, FaCrown, FaStar, FaBuilding } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 export default function DealerSubscriptionPage() {
     const [plans, setPlans] = useState<any[]>([]);
     const [currentSub, setCurrentSub] = useState<any>(null);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchPlans();
@@ -38,11 +38,11 @@ export default function DealerSubscriptionPage() {
         try {
             const res = await apiClient.post<any>('/subscription/subscribe', { planId });
             if (res.success) {
-                showSnackbar('Subscription successful!', 'success');
+                toast.success('Subscription successful!');
                 fetchMySubscription();
             }
         } catch (error) {
-            showSnackbar('Subscription failed. Please try again.', 'error');
+            toast.error('Subscription failed. Please try again.');
         }
     };
 
@@ -52,11 +52,11 @@ export default function DealerSubscriptionPage() {
         try {
             const res = await apiClient.post<any>('/subscription/cancel', {});
             if (res.success) {
-                showSnackbar('Subscription cancelled successfully', 'success');
+                toast.success('Subscription cancelled successfully');
                 fetchMySubscription();
             }
         } catch (error) {
-            showSnackbar('Cancellation failed', 'error');
+            toast.error('Cancellation failed');
         }
     };
 

@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { useProfile } from '@/client/hooks/useProfile';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 interface AdminSettings {
     maintenanceMode: boolean;
@@ -25,7 +25,7 @@ interface AdminSettings {
 
 export default function PlatformSettingsPortal() {
     const [isSaving, setIsSaving] = useState(false);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     // Use the custom hook for persistence
     const { profile, saveProfile, isLoaded } = useProfile<AdminSettings>('admin_settings', {
@@ -40,7 +40,7 @@ export default function PlatformSettingsPortal() {
         // Simulate network delay
         setTimeout(() => {
             setIsSaving(false);
-            showSnackbar('System Parameters Saved Successfully!', 'success');
+            toast.success('System Parameters Saved Successfully!');
         }, 800);
     };
 
@@ -149,8 +149,8 @@ export default function PlatformSettingsPortal() {
                             <h4 className="text-sm font-black text-rose-800 uppercase tracking-widest mb-2">Destructive Protocol Center</h4>
                             <p className="text-[11px] font-bold text-rose-700 leading-relaxed mb-6">These actions affect the fundamental platform state and cannot be undone without manual database intervention.</p>
                             <div className="flex gap-4">
-                                <button onClick={() => showSnackbar('Audit Buffer Flushed!', 'warning')} className="px-6 py-3 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 active:scale-95 transition-all">Flush Audit Buffer</button>
-                                <button onClick={() => showSnackbar('API Tokens Reset!', 'warning')} className="px-6 py-3 bg-white border border-rose-200 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">Reset All API Tokens</button>
+                                <button onClick={() => toast.warning('Audit Buffer Flushed!')} className="px-6 py-3 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 active:scale-95 transition-all">Flush Audit Buffer</button>
+                                <button onClick={() => toast.warning('API Tokens Reset!')} className="px-6 py-3 bg-white border border-rose-200 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">Reset All API Tokens</button>
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ export default function PlatformSettingsPortal() {
                         <div className="space-y-8">
                             <div className="space-y-3">
                                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Escrow Gateway ID</label>
-                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 font-mono text-xs">
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 text-xs font-bold tracking-wider">
                                     RZP_LIVE_9901_ZAA
                                 </div>
                             </div>

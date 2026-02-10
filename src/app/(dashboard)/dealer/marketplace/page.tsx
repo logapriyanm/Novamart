@@ -8,11 +8,12 @@ import {
 } from 'react-icons/fa';
 import { apiClient } from '@/lib/api/client';
 import { useAuth } from '@/client/context/AuthContext';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 export default function DealerMarketplace() {
     const { user } = useAuth();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [manufacturers, setManufacturers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -42,7 +43,7 @@ export default function DealerMarketplace() {
             }
         } catch (error) {
             console.error('❌ Failed to fetch manufacturers:', error);
-            showSnackbar('Failed to load manufacturers', 'error');
+            toast.error('Failed to load manufacturers');
         } finally {
             setLoading(false);
             fetchInProgress.current = false;
@@ -70,13 +71,21 @@ export default function DealerMarketplace() {
     return (
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-black tracking-tight text-[#1E293B]">
-                    Manufacturer <span className="text-[#0F6CBD]">Directory</span>
-                </h1>
-                <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">
-                    Browse verified manufacturers and request access to start partnerships
-                </p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-3xl font-black tracking-tight text-[#1E293B]">
+                        Manufacturer <span className="text-[#0F6CBD]">Directory</span>
+                    </h1>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">
+                        Browse verified manufacturers and request access to start partnerships
+                    </p>
+                </div>
+                <Link href="/dealer/sourcing">
+                    <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-xl font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                        <FaBoxOpen />
+                        Go to Sourcing Terminal
+                    </button>
+                </Link>
             </div>
 
             {/* Search & Filters */}
@@ -100,8 +109,8 @@ export default function DealerMarketplace() {
                         key={cat}
                         onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
                         className={`p-6 rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-pointer group text-left ${selectedCategory === cat
-                                ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-500/20'
-                                : 'bg-white border-slate-100'
+                            ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-500/20'
+                            : 'bg-white border-slate-100'
                             }`}
                     >
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${selectedCategory === cat ? 'bg-[#0F6CBD] text-white' : 'bg-blue-50 text-[#0F6CBD]'
@@ -254,7 +263,7 @@ function ManufacturerCard({ manufacturer, onRequestAccess }: { manufacturer: any
 }
 
 function RequestAccessModal({ manufacturer, onClose }: { manufacturer: any; onClose: () => void }) {
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         message: '',
@@ -273,10 +282,21 @@ function RequestAccessModal({ manufacturer, onClose }: { manufacturer: any; onCl
                 ...formData
             });
 
-            showSnackbar('Access request sent successfully!', 'success');
+            toast.success('Access request sent successfully!');
             onClose();
         } catch (error: any) {
-            showSnackbar(error?.message || 'Failed to send request', 'error');
+            const msg = error?.message || 'Failed to send request';
+
+            if (msg.includes('already an approved dealer')) {
+                toast.success('You have access! Redirecting to inventory...');
+                onClose();
+                // Optional: router.push('/dealer/inventory');
+            } else if (msg.includes('Request already sent')) {
+                toast.info('Request already pending approval.');
+                onClose();
+            } else {
+                toast.error(msg);
+            }
         } finally {
             setLoading(false);
         }

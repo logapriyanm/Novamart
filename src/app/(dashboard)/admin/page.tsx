@@ -6,7 +6,8 @@ import {
     FaUsers,
     FaCube,
     FaGavel,
-    FaShieldAlt
+    FaShieldAlt,
+    FaArrowRight as ArrowRight
 } from 'react-icons/fa';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import Link from 'next/link';
@@ -69,13 +70,13 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-8 animate-fade-in pb-12 font-sans text-slate-800">
             {/* Page Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60 font-sans">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Admin Control</h1>
-                    <p className="text-sm font-medium text-slate-400 mt-2">Platform Governance & Health Monitor</p>
+                    <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">System <span className="text-primary">Governance</span></h1>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Central Authority & Health Monitor</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Link href="/admin/verification" className="px-6 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all text-xs font-semibold tracking-wide shadow-lg shadow-slate-200">
+                    <Link href="/admin/verification" className="btn-primary">
                         Review Verification Queue
                     </Link>
                 </div>
@@ -120,33 +121,36 @@ export default function AdminDashboard() {
             {/* Main Content Sections */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* Live Traffic / Usage Chart */}
-                <div className="xl:col-span-2 bg-white rounded-xl border border-slate-100 shadow-sm p-8">
+                <div className="xl:col-span-2 card-enterprise p-8 bg-white">
                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-sm font-bold text-slate-800">Platform Activity</h3>
-                        <span className="flex items-center gap-2 text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full animate-pulse">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Live
+                        <div>
+                            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Platform Activity</h3>
+                            <p className="text-lg font-bold text-slate-900 mt-1">Real-time Usage Dynamics</p>
+                        </div>
+                        <span className="flex items-center gap-2 text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full ring-1 ring-emerald-500/20">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SYSTEM LIVE
                         </span>
                     </div>
-                    <div className="h-[320px] w-full">
+                    <div className="h-[320px] w-full relative overflow-hidden">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={mockActivityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} dy={10} />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#94a3b8' }} />
+                                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                    itemStyle={{ color: '#1e293b', fontSize: '12px', fontWeight: 600 }}
+                                    contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                    itemStyle={{ color: '#1e293b', fontSize: '11px', fontWeight: 800 }}
                                 />
-                                <Line type="monotone" dataKey="users" stroke="#0f172a" strokeWidth={2} dot={{ r: 4, fill: '#0f172a', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                                <Line type="monotone" dataKey="users" stroke="#10367D" strokeWidth={3} dot={{ r: 4, fill: '#10367D', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, fill: '#10367D' }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 {/* Recent Audit Logs */}
-                <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-8 flex flex-col">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-sm font-bold text-slate-800">Recent Audit Logs</h3>
+                <div className="card-enterprise p-8 bg-white flex flex-col">
+                    <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Security Audit</h3>
                     </div>
 
                     <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar max-h-[400px]">
@@ -158,21 +162,25 @@ export default function AdminDashboard() {
                             />
                         ) : (
                             activities.slice(0, 6).map((log, index) => (
-                                <div key={log.id || index} className="flex gap-4 p-3 rounded-lg hover:bg-slate-50 transition-colors group">
-                                    <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${log.action.includes('REJECT') || log.action.includes('SUSPEND') ? 'bg-rose-500' : 'bg-emerald-500'
+                                <div key={log.id || index} className="flex gap-4 p-4 rounded-[10px] hover:bg-slate-50 transition-all group table-row-enterprise border border-slate-100/50">
+                                    <div className={`mt-1 w-2.5 h-2.5 rounded-full shrink-0 shadow-sm ${log.action.includes('REJECT') || log.action.includes('SUSPEND') ? 'bg-rose-500' : 'bg-emerald-500'
                                         }`} />
                                     <div>
-                                        <p className="text-xs font-bold text-slate-800">{log.action.replace(/_/g, ' ')}</p>
-                                        <p className="text-[10px] font-medium text-slate-500 mt-0.5">
-                                            {log.actorRole} &bull; {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </p>
+                                        <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{log.action.replace(/_/g, ' ')}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{log.actorRole}</span>
+                                            <span className="text-[9px] font-medium text-slate-300">•</span>
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             ))
                         )}
                     </div>
-                    <Link href="/admin/audit" className="mt-6 text-center text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">
-                        View Full Audit Trail &rarr;
+                    <Link href="/admin/audit" className="mt-8 text-center text-[10px] font-black text-primary uppercase tracking-[0.2em] hover:translate-x-1 transition-transform inline-flex items-center justify-center gap-2">
+                        View Full Audit Trail <ArrowRight className="w-3 h-3" />
                     </Link>
                 </div>
             </div>
@@ -182,18 +190,18 @@ export default function AdminDashboard() {
 
 function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
     return (
-        <div className="bg-white rounded-xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+        <div className="card-enterprise p-6 bg-white flex flex-col justify-between group h-full">
             <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">{label}</p>
-                    <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{label}</p>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h3>
                 </div>
-                <div className={`w-10 h-10 ${bgColor} ${color} rounded-lg flex items-center justify-center transition-transform group-hover:scale-110`}>
+                <div className={`w-12 h-12 ${bgColor} ${color} rounded-[10px] flex items-center justify-center transition-all group-hover:scale-110 shadow-sm`}>
                     <Icon className="w-5 h-5" />
                 </div>
             </div>
-            <div className="mt-4 flex items-center gap-2">
-                <span className={`text-xs font-medium ${color} bg-white px-1.5 py-0.5 rounded border border-slate-100`}>
+            <div className="mt-6 flex items-center gap-2">
+                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[6px] border border-slate-100 shadow-sm`}>
                     {trend}
                 </span>
             </div>

@@ -29,35 +29,72 @@
   }
 
   body {
-    @apply font-sans antialiased;
+    @apply font-sans antialiased text-foreground bg-background;
+    font-size: 14px;
+    /* Default for mobile */
+  }
+
+  @screen sm {
+    body {
+      font-size: 15px;
+      /* Tablet */
+    }
+  }
+
+  @screen md {
+    body {
+      font-size: 16px;
+      /* Laptop/Desktop */
+    }
   }
 
   * {
     font-family: 'Inter', sans-serif !important;
     @apply border-foreground/10;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Responsive Container */
+  .container-responsive {
+    @apply w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 max-w-[1440px];
+  }
+
+  /* Responsive Grid for Cards */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+  }
+
+  /* Touch Target Standard */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
 }
 
 @layer components {
 
-  /* Design System Standard: 10px rounded corners */
-  .rounded-ns {
+  /* Design System Standard: 10px rounded corners (Enterprise Grade) */
+  .rounded-10 {
     border-radius: 10px !important;
   }
 
-  /* Button Standard: Primary */
+  /* Button Standard: Primary (10px, reduced padding for clarity) */
   .btn-primary {
-    @apply bg-black text-white px-5 py-2.5 rounded-[10px] font-bold transition-all hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-widest flex items-center justify-center gap-2;
+    @apply bg-primary text-white px-5 py-2.5 rounded-[10px] font-bold transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm;
   }
 
-  /* Button Standard: Secondary */
+  /* Button Standard: Secondary (Consistent 10px) */
   .btn-secondary {
-    @apply border-2 border-black text-black px-5 py-2.5 rounded-[10px] font-bold transition-all hover:bg-black hover:text-white disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-widest flex items-center justify-center gap-2;
+    @apply border-2 border-primary/20 text-primary px-5 py-2.5 rounded-[10px] font-bold transition-all hover:bg-primary/5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-[11px] uppercase tracking-widest flex items-center justify-center gap-2;
   }
 
-  /* Card Standard */
-  .card-flat {
-    @apply bg-surface border border-foreground/10 rounded-[10px] overflow-hidden;
+  /* Card Standard: Enterprise (Clean Borders, Subtle Shadows) */
+  .card-enterprise {
+    @apply bg-white border border-slate-200/60 rounded-[10px] shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden;
+  }
+
+  /* Table Row Spacing Utility */
+  .table-row-enterprise {
+    @apply border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors;
   }
 }
 

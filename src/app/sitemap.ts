@@ -5,25 +5,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Static routes
     const routes = [
-        '',
-        '/products',
-        '/categories',
-        '/sellers',
-        '/blog',
-        '/about',
-        '/contact',
-        '/terms',
-        '/privacy',
+        { path: '', priority: 1, changefreq: 'daily' },
+        { path: '/products', priority: 0.9, changefreq: 'daily' },
+        { path: '/categories', priority: 0.8, changefreq: 'weekly' },
+        { path: '/sellers', priority: 0.8, changefreq: 'weekly' },
+        { path: '/about', priority: 0.5, changefreq: 'monthly' },
+        { path: '/contact', priority: 0.5, changefreq: 'monthly' },
+        { path: '/terms', priority: 0.3, changefreq: 'monthly' },
+        { path: '/privacy', priority: 0.3, changefreq: 'monthly' },
     ].map(route => ({
-        url: `${baseUrl}${route}`,
+        url: `${baseUrl}${route.path}`,
         lastModified: new Date(),
-        changeFrequency: 'daily' as const,
-        priority: route === '' ? 1 : 0.8,
+        changeFrequency: route.changefreq as any,
+        priority: route.priority,
     }));
-
-    // TODO: Fetch dynamic products, categories, sellers from API/DB
-    // const products = await getProducts();
-    // const productRoutes = products.map(...)
 
     return [...routes];
 }

@@ -13,13 +13,13 @@ import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
 import MediaUpload from '@/client/components/ui/MediaUpload';
 import OptimizedImage from '@/client/components/ui/OptimizedImage';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function CustomerReviewPortal() {
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     const [order, setOrder] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +56,7 @@ export default function CustomerReviewPortal() {
                 }
             } catch (error) {
                 console.error('Failed to fetch order', error);
-                showSnackbar('Failed to load order details', 'error');
+                toast.error('Failed to load order details');
             } finally {
                 setIsLoading(false);
             }
@@ -68,11 +68,11 @@ export default function CustomerReviewPortal() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!rating || !reviewItem) {
-            showSnackbar('Please provide an overall rating', 'error');
+            toast.error('Please provide an overall rating');
             return;
         }
         if (reviewText.length < 20) {
-            showSnackbar('Review text must be at least 20 characters', 'error');
+            toast.error('Review text must be at least 20 characters');
             return;
         }
 
@@ -102,10 +102,10 @@ export default function CustomerReviewPortal() {
             }
 
             setIsSubmitted(true);
-            showSnackbar('Review submitted successfully!', 'success');
+            toast.success('Review submitted successfully!');
         } catch (error) {
             console.error('Submission failed', error);
-            showSnackbar('Failed to submit review', 'error');
+            toast.error('Failed to submit review');
         } finally {
             setIsSubmitting(false);
         }

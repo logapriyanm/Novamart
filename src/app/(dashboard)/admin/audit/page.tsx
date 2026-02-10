@@ -94,7 +94,7 @@ export default function AuditLogsPanel() {
                                         </div>
                                     </td>
                                     <td className="px-10 py-6 text-right">
-                                        <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100">{log.ip}</span>
+                                        <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100">{log.ip}</span>
                                     </td>
                                 </tr>
                             ))}

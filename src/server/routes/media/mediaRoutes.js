@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post('/upload',
     authenticate,
-    authorize(['MANUFACTURER', 'ADMIN'], [], ['ACTIVE', 'UNDER_VERIFICATION']),
+    authorize(['MANUFACTURER', 'ADMIN', 'CUSTOMER', 'DEALER'], [], ['ACTIVE', 'UNDER_VERIFICATION']),
     upload.array('images', 10),
     async (req, res) => {
         try {

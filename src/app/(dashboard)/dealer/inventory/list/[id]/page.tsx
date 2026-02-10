@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaArrowLeft,
@@ -16,21 +16,84 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
+import { toast } from 'sonner';
+import { apiClient } from '@/lib/api/client';
 
 export default function CreateRetailListing() {
     const router = useRouter();
     const params = useParams();
+    const inventoryId = params.id as string;
+
+    const [loading, setLoading] = useState(true);
+    const [inventory, setInventory] = useState<any>(null);
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
 
-    const handleSubmit = () => {
+    // Form State
+    const [price, setPrice] = useState('');
+    const [stock, setStock] = useState('');
+    const [promoTagline, setPromoTagline] = useState('');
+
+    useEffect(() => {
+        const fetchItem = async () => {
+            try {
+                const data = await apiClient.get<any>(`/dealer/inventory/${inventoryId}`);
+                if (data) {
+                    setInventory(data);
+                    setPrice(data.price?.toString() || '');
+                    setStock(data.allocatedStock?.toString() || '0');
+                }
+            } catch (error) {
+                toast.error('Failed to load asset details');
+                router.push('/dealer/inventory');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchItem();
+    }, [inventoryId, router]);
+
+    const handleSubmit = async () => {
         setIsSubmitting(true);
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            // 1. Update Price
+            await apiClient.put('/dealer/inventory/price', {
+                inventoryId,
+                price: parseFloat(price)
+            });
+
+            // 2. Update Stock (Move allocated to salable)
+            await apiClient.put('/dealer/inventory/stock', {
+                inventoryId,
+                stock: parseInt(stock)
+            });
+
+            // 3. Go Live
+            await apiClient.put('/dealer/inventory/toggle-listing', {
+                inventoryId,
+                isListed: true
+            });
+
             setIsComplete(true);
-        }, 2000);
+            toast.success('Listing Activated Successfully!');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to activate listing');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-[#10367D] border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Asset Data</p>
+                </div>
+            </div>
+        );
+    }
 
     if (isComplete) {
         return (
@@ -45,7 +108,7 @@ export default function CreateRetailListing() {
                     </div>
                     <h2 className="text-3xl font-black text-[#1E293B] mb-4">Listing Activated</h2>
                     <p className="text-sm font-medium text-slate-400 mb-10 leading-relaxed">
-                        Product <span className="text-[#10367D] font-black italic">ULTRA-AC-X</span> is now visible to customers.
+                        Product <span className="text-[#10367D] font-black italic">{inventory?.product?.name}</span> is now visible to customers.
                         Retail reputation tracking has been initialized.
                     </p>
                     <Link href="/dealer/inventory" className="inline-block w-full py-5 bg-[#10367D] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-[#10367D]/20">
@@ -55,6 +118,10 @@ export default function CreateRetailListing() {
             </div>
         );
     }
+
+    const marginPercent = inventory?.dealerBasePrice && price
+        ? (((parseFloat(price) - inventory.dealerBasePrice) / parseFloat(price)) * 100).toFixed(1)
+        : '0.0';
 
     return (
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
@@ -82,23 +149,27 @@ export default function CreateRetailListing() {
                         <div className="space-y-8">
                             <div className="flex items-center gap-6">
                                 <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400">
-                                    <FaBox className="w-8 h-8" />
+                                    {inventory?.product?.images?.[0] ? (
+                                        <img src={inventory.product.images[0]} alt="" className="w-full h-full object-cover rounded-xl" />
+                                    ) : (
+                                        <FaBox className="w-8 h-8" />
+                                    )}
                                 </div>
                                 <div>
-                                    <h4 className="text-lg font-black tracking-tight leading-tight">Ultra-Quiet AC 2.0</h4>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">By Mega-Mart Mfg.</p>
+                                    <h4 className="text-lg font-black tracking-tight leading-tight">{inventory?.product?.name}</h4>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">By {inventory?.product?.manufacturer?.companyName}</p>
                                 </div>
                             </div>
                             <div className="space-y-4">
                                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-2">Technical Core</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-[8px] font-black text-slate-600 uppercase">Power</p>
-                                        <p className="text-xs font-bold text-slate-300">5-Star Inverter</p>
+                                        <p className="text-[8px] font-black text-slate-600 uppercase">Category</p>
+                                        <p className="text-xs font-bold text-slate-300">{inventory?.product?.category}</p>
                                     </div>
                                     <div>
-                                        <p className="text-[8px] font-black text-slate-600 uppercase">Weight</p>
-                                        <p className="text-xs font-bold text-slate-300">42 KG (Net)</p>
+                                        <p className="text-[8px] font-black text-slate-600 uppercase">Region</p>
+                                        <p className="text-xs font-bold text-slate-300">{inventory?.region}</p>
                                     </div>
                                 </div>
                                 <p className="text-[9px] font-black text-rose-500 pt-4 italic">Note: Technical specs cannot be modified by retail partners.</p>
@@ -108,11 +179,11 @@ export default function CreateRetailListing() {
 
                     <div className="p-10 bg-slate-50 border border-slate-100 rounded-[3rem] flex items-center gap-6">
                         <div className="w-12 h-12 rounded-2xl bg-white text-[#10367D] flex items-center justify-center border border-slate-100 shadow-sm">
-                            <FaInfoCircle className="w-6 h-6" />
+                            <FaTag className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pricing Floor</p>
-                            <p className="text-sm font-black text-[#1E293B]">Min Retail: ₹38,400</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Wholesale Acq. Price</p>
+                            <p className="text-sm font-black text-[#1E293B]">Cost: ₹{inventory?.dealerBasePrice || inventory?.product?.basePrice}</p>
                         </div>
                     </div>
                 </div>
@@ -137,20 +208,40 @@ export default function CreateRetailListing() {
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Proposed Retail Price (INR)</label>
                                         <div className="relative">
                                             <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 font-black">₹</span>
-                                            <input type="text" placeholder="39,999" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-6 text-sm font-black text-[#1E293B] focus:outline-none focus:border-[#10367D]/30" />
+                                            <input
+                                                type="number"
+                                                value={price}
+                                                onChange={(e) => setPrice(e.target.value)}
+                                                placeholder="e.g. 39999"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-12 pr-6 text-sm font-black text-[#1E293B] focus:outline-none focus:border-[#10367D]/30"
+                                            />
                                         </div>
-                                        <p className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest ml-1">Est. Gross Margin: 15.2%</p>
+                                        <p className={`text-[8px] font-bold uppercase tracking-widest ml-1 ${parseFloat(marginPercent) > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                            Est. Gross Margin: {marginPercent}%
+                                        </p>
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Available Consumer Units</label>
-                                        <input type="number" defaultValue={10} max={12} className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-sm font-black text-[#1E293B] focus:outline-none focus:border-[#10367D]/30" />
-                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1">Max Owned Stock: 12 Units</p>
+                                        <input
+                                            type="number"
+                                            value={stock}
+                                            onChange={(e) => setStock(e.target.value)}
+                                            max={inventory?.allocatedStock || 0}
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-sm font-black text-[#1E293B] focus:outline-none focus:border-[#10367D]/30"
+                                        />
+                                        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1">Allocated (Max): {inventory?.allocatedStock || 0} Units</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dealer Promotional Tagline</label>
-                                    <input type="text" placeholder="e.g. Authorized Mega-Mart Partner | Genuine 5-Year Warranty" className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-sm font-medium focus:outline-none focus:border-[#10367D]/30" />
+                                    <input
+                                        type="text"
+                                        value={promoTagline}
+                                        onChange={(e) => setPromoTagline(e.target.value)}
+                                        placeholder="e.g. Authorized Partner | Express Local Shipping | Genuine Warranty"
+                                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-sm font-medium focus:outline-none focus:border-[#10367D]/30"
+                                    />
                                 </div>
 
                                 <button onClick={() => setStep(2)} className="px-12 py-5 bg-[#10367D] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-3">

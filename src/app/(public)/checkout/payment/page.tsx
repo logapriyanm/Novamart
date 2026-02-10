@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { orderService } from '@/lib/api/services/order.service';
 import { paymentService } from '@/lib/api/services/payment.service';
 import { HiOutlineCreditCard, HiOutlineLockClosed, HiOutlineShieldCheck } from 'react-icons/hi';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 // Extend window for Razorpay types
 declare global {
@@ -22,7 +22,7 @@ export default function PaymentPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         if (!orderId) {
@@ -71,7 +71,7 @@ export default function PaymentPage() {
 
             // 2a. If mock mode, simulate payment
             if (isMock) {
-                showSnackbar('Mock payment mode - auto-completing', 'info');
+                toast.info('Mock payment mode - auto-completing');
 
                 setTimeout(async () => {
                     try {
@@ -83,13 +83,13 @@ export default function PaymentPage() {
                         });
 
                         if (verifyRes.success) {
-                            showSnackbar('Payment successful!', 'success');
+                            toast.success('Payment successful!');
                             router.push(`/checkout/success?id=${orderId}`);
                         } else {
                             throw new Error('Payment verification failed');
                         }
                     } catch (err: any) {
-                        showSnackbar(err.message || 'Payment failed', 'error');
+                        toast.error(err.message || 'Payment failed');
                     } finally {
                         setIsProcessing(false);
                     }
@@ -100,7 +100,7 @@ export default function PaymentPage() {
 
             // 2b. Real Razorpay integration
             if (typeof window.Razorpay === 'undefined') {
-                showSnackbar('Payment gateway not loaded. Please refresh.', 'error');
+                toast.error('Payment gateway not loaded. Please refresh.');
                 setIsProcessing(false);
                 return;
             }
@@ -123,14 +123,14 @@ export default function PaymentPage() {
                         });
 
                         if (verifyRes.success) {
-                            showSnackbar('Payment successful!', 'success');
+                            toast.success('Payment successful!');
                             router.push(`/checkout/success?id=${orderId}`);
                         } else {
-                            showSnackbar('Payment verification failed', 'error');
+                            toast.error('Payment verification failed');
                         }
                     } catch (err: any) {
                         console.error('Payment verification error:', err);
-                        showSnackbar(err.message || 'Payment verification failed', 'error');
+                        toast.error(err.message || 'Payment verification failed');
                     } finally {
                         setIsProcessing(false);
                     }
@@ -146,14 +146,14 @@ export default function PaymentPage() {
                 modal: {
                     ondismiss: function () {
                         setIsProcessing(false);
-                        showSnackbar('Payment cancelled', 'warning');
+                        toast.warning('Payment cancelled');
                     }
                 }
             };
 
             const rzp = new window.Razorpay(options);
             rzp.on('payment.failed', function (response: any) {
-                showSnackbar('Payment failed: ' + response.error.description, 'error');
+                toast.error('Payment failed: ' + response.error.description);
                 setIsProcessing(false);
             });
 
@@ -161,7 +161,7 @@ export default function PaymentPage() {
 
         } catch (err: any) {
             console.error('Payment Error:', err);
-            showSnackbar(err.message || 'Payment processing failed', 'error');
+            toast.error(err.message || 'Payment processing failed');
             setIsProcessing(false);
         }
     };

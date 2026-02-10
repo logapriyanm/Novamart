@@ -10,13 +10,13 @@ import {
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function DealerRequests() {
     const [activeTab, setActiveTab] = useState('PENDING');
     const [requests, setRequests] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchRequests();
@@ -26,9 +26,10 @@ export default function DealerRequests() {
         setIsLoading(true);
         try {
             const response = await apiClient.get<any>(`/manufacturer/dealers/requests?status=${activeTab}`);
+            console.log('Fetched Requests:', response);
             setRequests(response || []);
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to fetch requests', 'error');
+            toast.error(error.message || 'Failed to fetch requests');
         } finally {
             setIsLoading(false);
         }
@@ -37,10 +38,10 @@ export default function DealerRequests() {
     const handleAction = async (dealerId: string, status: 'APPROVED' | 'REJECTED') => {
         try {
             await apiClient.post('/manufacturer/dealers/handle', { dealerId, status });
-            showSnackbar(`Dealer ${status.toLowerCase()} successfully`, 'success');
+            toast.success(`Dealer ${status.toLowerCase()} successfully`);
             fetchRequests();
         } catch (error: any) {
-            showSnackbar(error.message || `Failed to ${status.toLowerCase()} dealer`, 'error');
+            toast.error(error.message || `Failed to ${status.toLowerCase()} dealer`);
         }
     };
 
@@ -152,8 +153,8 @@ export default function DealerRequests() {
                                     </p>
                                     <div className="mt-4 flex flex-col gap-1">
                                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Info</p>
-                                        <p className="text-[10px] font-bold text-slate-500">{dealer.user.email}</p>
-                                        <p className="text-[10px] font-bold text-slate-500">{dealer.user.phone}</p>
+                                        <p className="text-[10px] font-bold text-slate-500">{dealer.user?.email || 'No Email'}</p>
+                                        <p className="text-[10px] font-bold text-slate-500">{dealer.user?.phone || 'No Phone'}</p>
                                     </div>
                                 </div>
 

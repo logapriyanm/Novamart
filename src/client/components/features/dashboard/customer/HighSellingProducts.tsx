@@ -13,12 +13,13 @@ export default function HighSellingProducts() {
         const fetchHighSelling = async () => {
             try {
                 // Fetch sorted by popularity (review count)
-                const data = await apiClient.get<any[]>('/products', {
+                const res = await apiClient.get<any>('/products', {
                     params: { sortBy: 'popularity' }
                 });
+                const productsArray = res.products || [];
 
                 // transform and take top 8
-                const transformed = data.slice(0, 8).map((p: any) => ({
+                const transformed = productsArray.slice(0, 8).map((p: any) => ({
                     id: p.id,
                     name: p.name,
                     price: parseFloat(p.basePrice),

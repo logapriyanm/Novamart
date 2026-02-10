@@ -4,7 +4,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter } from 'next/navigation';
 import { authService } from '../../lib/api/services/auth.service';
 import { apiClient } from '../../lib/api/client';
-import { useSnackbar } from './SnackbarContext';
+// import { useSnackbar } from './SnackbarContext';
+import { toast } from 'sonner';
 import {
     User,
     LoginRequest,
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     // Hydrate session on mount
     useEffect(() => {
@@ -103,10 +104,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const response = await authService.login(credentials);
             handleAuthSuccess(response);
-            showSnackbar('Login successful', 'success');
+            toast.success('Login successful');
         } catch (error: any) {
             console.error('Login failed:', error);
-            showSnackbar(error.message || 'Invalid email or password', 'error');
+            toast.error(error.message || 'Invalid email or password');
             throw error;
         } finally {
             setIsLoading(false);
@@ -118,10 +119,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const response = await authService.loginWithGoogle(idToken);
             handleAuthSuccess(response);
-            showSnackbar('Login successful via Google', 'success');
+            toast.success('Login successful via Google');
         } catch (error: any) {
             console.error('Google Login failed:', error);
-            showSnackbar(error.message || 'Google Login Failed', 'error');
+            toast.error(error.message || 'Google Login Failed');
             throw error;
         } finally {
             setIsLoading(false);
@@ -135,7 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             handleAuthSuccess(response);
         } catch (error: any) {
             console.error('Phone Login failed:', error);
-            showSnackbar(error.message || 'Phone login failed', 'error');
+            toast.error(error.message || 'Phone login failed');
             throw error;
         } finally {
             setIsLoading(false);
@@ -146,10 +147,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(true);
         try {
             await authService.sendOtp(phone);
-            showSnackbar('OTP sent successfully', 'success');
+            toast.success('OTP sent successfully');
         } catch (error: any) {
             console.error('Send OTP failed:', error);
-            showSnackbar(error.message || 'Failed to send OTP', 'error');
+            toast.error(error.message || 'Failed to send OTP');
             throw error;
         } finally {
             setIsLoading(false);
@@ -163,14 +164,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Handle success based on role
             if (data.role === 'CUSTOMER') {
                 handleAuthSuccess(response);
-                showSnackbar('Registration successful', 'success');
+                toast.success('Registration successful');
             } else {
-                showSnackbar('Registration successful. Your account is pending verification.', 'success');
+                toast.success('Registration successful. Your account is pending verification.');
                 router.push('/auth/login?registered=pending');
             }
         } catch (error: any) {
             console.error('Registration failed:', error);
-            showSnackbar(error.message || 'Something went wrong. Please try again.', 'error');
+            toast.error(error.message || 'Something went wrong. Please try again.');
             throw error;
         } finally {
             setIsLoading(false);
@@ -185,7 +186,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             apiClient.setTokens(null, null);
             setUser(null);
-            showSnackbar('Logged out successfully', 'success');
+            toast.success('Logged out successfully');
             router.push('/auth/login');
         }
     };

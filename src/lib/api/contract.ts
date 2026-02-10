@@ -76,6 +76,8 @@ export const ENDPOINTS = {
         GOOGLE: '/auth/google',
         OTP_SEND: '/auth/otp/send',
         LOGIN_PHONE: '/auth/login/phone',
+        FORGOT_PASSWORD: '/auth/forgot-password',
+        RESET_PASSWORD: '/auth/reset-password',
     },
     MANUFACTURER: {
         DASHBOARD: '/manufacturer/dashboard',

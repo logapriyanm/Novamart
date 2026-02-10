@@ -18,10 +18,10 @@ import {
     FaEdit,
     FaCrown
 } from 'react-icons/fa';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function StockAllocationManager() {
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [allocations, setAllocations] = useState([]);
     const [dealers, setDealers] = useState([]);
     const [products, setProducts] = useState([]);
@@ -64,7 +64,7 @@ export default function StockAllocationManager() {
             if (prodData.success) setProducts(prodData.data.filter(p => p.status === 'APPROVED'));
         } catch (error) {
             console.error('Error fetching data:', error);
-            showSnackbar('Failed to load allocation data', 'error');
+            toast.error('Failed to load allocation data');
         } finally {
             setIsLoading(false);
         }
@@ -88,7 +88,7 @@ export default function StockAllocationManager() {
 
             const data = await res.json();
             if (data.success) {
-                showSnackbar('Stock allocated successfully', 'success');
+                toast.success('Stock allocated successfully');
                 setShowModal(false);
                 fetchData();
                 setFormData({
@@ -101,10 +101,10 @@ export default function StockAllocationManager() {
                     maxMargin: '20'
                 });
             } else {
-                showSnackbar(data.error || 'Allocation failed', 'error');
+                toast.error(data.error || 'Allocation failed');
             }
         } catch (error) {
-            showSnackbar('Something went wrong', 'error');
+            toast.error('Something went wrong');
         } finally {
             setIsSubmitting(false);
         }
@@ -116,13 +116,13 @@ export default function StockAllocationManager() {
             const res = await fetch(`/api/manufacturer/allocations/${id}`, { method: 'DELETE' });
             const data = await res.json();
             if (data.success) {
-                showSnackbar('Allocation revoked', 'success');
+                toast.success('Allocation revoked');
                 fetchData();
             } else {
-                showSnackbar(data.error || 'Failed to revoke', 'error');
+                toast.error(data.error || 'Failed to revoke');
             }
         } catch (error) {
-            showSnackbar('Error revoking allocation', 'error');
+            toast.error('Error revoking allocation');
         }
     };
 

@@ -6,6 +6,7 @@ import {
     FaEdit, FaTrash, FaEye, FaHistory, FaCheckCircle,
     FaClock, FaLayerGroup, FaChevronLeft, FaChevronRight
 } from 'react-icons/fa';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/contract';
@@ -38,7 +39,7 @@ export default function ProductMaster() {
             setProducts(prev => prev.filter(p => p.id !== id));
         } catch (error) {
             console.error('Failed to delete product:', error);
-            alert('Failed to delete product');
+            toast.error('Failed to delete product');
         }
     };
 
@@ -53,11 +54,11 @@ export default function ProductMaster() {
                 const productsArray = Array.isArray(json) ? json : [json];
 
                 await apiClient.post('/products/bulk', { products: productsArray });
-                alert('Products imported successfully!');
+                toast.success('Products imported successfully!');
                 fetchProducts();
             } catch (error) {
                 console.error('Import failed:', error);
-                alert('Failed to import products. Please ensure valid JSON format.');
+                toast.error('Failed to import products. Please ensure valid JSON format.');
             }
         };
         reader.readAsText(file);

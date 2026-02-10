@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { FaArrowLeft, FaBox, FaStore, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaTruck, FaStar } from 'react-icons/fa';
 import ChatWidget from '@/client/components/features/chat/ChatWidget';
@@ -11,7 +11,7 @@ import ChatWidget from '@/client/components/features/chat/ChatWidget';
 export default function OrderDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [order, setOrder] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -32,7 +32,7 @@ export default function OrderDetailsPage() {
             } catch (error) {
                 console.error('Failed to fetch order:', error);
                 // Fallback for demo/dev if endpoint missing
-                // showSnackbar('Failed to load order', 'error');
+                // toast.error('Failed to load order');
             } finally {
                 setIsLoading(false);
             }
@@ -156,10 +156,10 @@ export default function OrderDetailsPage() {
                                                     onClick={async () => {
                                                         try {
                                                             await apiClient.post('/escrow/confirm-delivery', { orderId: order.id });
-                                                            showSnackbar('Delivery confirmed! Funds released.', 'success');
+                                                            toast.success('Delivery confirmed! Funds released.');
                                                             setTimeout(() => window.location.reload(), 1500);
                                                         } catch (err) {
-                                                            showSnackbar('Failed to confirm delivery', 'error');
+                                                            toast.error('Failed to confirm delivery');
                                                         }
                                                     }}
                                                     className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors"
@@ -174,10 +174,10 @@ export default function OrderDetailsPage() {
                                                     if (reason) {
                                                         apiClient.post('/escrow/request-refund', { orderId: order.id, reason })
                                                             .then(() => {
-                                                                showSnackbar('Dispute raised. Admin will review.', 'success');
+                                                                toast.success('Dispute raised. Admin will review.');
                                                                 setTimeout(() => window.location.reload(), 1500);
                                                             })
-                                                            .catch(() => showSnackbar('Failed to raise dispute', 'error'));
+                                                            .catch(() => toast.error('Failed to raise dispute'));
                                                     }
                                                 }}
                                                 className="px-4 py-2 bg-white border border-rose-200 text-rose-500 rounded-lg text-xs font-bold hover:bg-rose-50 transition-colors"
@@ -201,7 +201,7 @@ export default function OrderDetailsPage() {
                                 <button
                                     onClick={async () => {
                                         await apiClient.post(`/orders/${order.id}/simulate-tracking`, {});
-                                        showSnackbar('Tracking simulation started!', 'info');
+                                        toast.info('Tracking simulation started!');
                                         setTimeout(() => window.location.reload(), 2000);
                                     }}
                                     className="text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-black transition-all"

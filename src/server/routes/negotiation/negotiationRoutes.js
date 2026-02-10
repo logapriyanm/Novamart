@@ -4,7 +4,7 @@ import { authenticateUser, authorizeRoles } from '../../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/create', authenticateUser, authorizeRoles(['DEALER']), createNegotiation);
+router.post('/create', authenticateUser, authorizeRoles('DEALER'), createNegotiation);
 router.get('/', authenticateUser, getNegotiations);
 router.get('/:negotiationId', authenticateUser, getSingleNegotiation);
 router.put('/:negotiationId', authenticateUser, updateNegotiation);

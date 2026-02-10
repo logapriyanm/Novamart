@@ -14,10 +14,20 @@ export const getNotifications = async (req, res) => {
 
 export const markAsRead = async (req, res) => {
     try {
-        await Notification.findOneAndUpdate(
-            { _id: req.params.id, userId: req.user.id },
+        const { id } = req.params;
+        if (!id || id === 'undefined') {
+            return res.status(400).json({ success: false, error: 'INVALID_ID', message: 'Notification ID is required' });
+        }
+
+        const result = await Notification.findOneAndUpdate(
+            { _id: id, userId: req.user.id },
             { readAt: new Date() }
         );
+
+        if (!result) {
+            return res.status(404).json({ success: false, error: 'NOT_FOUND', message: 'Notification not found' });
+        }
+
         res.json({ success: true });
     } catch (error) {
         console.error('Update Notification Error:', error);

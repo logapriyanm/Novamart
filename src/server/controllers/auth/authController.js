@@ -6,6 +6,8 @@ import { OAuth2Client } from 'google-auth-library';
 import auditService from '../../services/audit.js';
 import { verifyOTP } from './otpController.js';
 import logger from '../../lib/logger.js';
+import crypto from 'crypto';
+import emailService from '../../services/emailService.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
@@ -422,17 +424,80 @@ export const logout = async (req, res) => {
 };
 
 /**
- * Forgot Password Stub
+ * Forgot Password - Send Reset Link
  */
 export const forgotPassword = async (req, res) => {
-    res.json({ success: true, message: 'RESET_LINK_SENT_IF_ACCOUNT_EXISTS' });
+    const { email } = req.body;
+
+    try {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            // Industry standard: Don't reveal if user exists
+            return res.json({ success: true, message: 'RESET_LINK_SENT_IF_ACCOUNT_EXISTS' });
+        }
+
+        // Generate Secure Token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        const tokenExpiry = new Date(Date.now() + 3600000); // 1 Hour
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                resetPasswordToken: hashedToken,
+                resetPasswordExpires: tokenExpiry
+            }
+        });
+
+        // Send Email
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+        await emailService.sendEmail(email, emailService.emailTemplates.passwordReset(user, resetLink));
+
+        await auditService.logAction('FORGOT_PASSWORD_REQUEST', 'USER', user.id, { email, req });
+
+        res.json({ success: true, message: 'RESET_LINK_SENT' });
+    } catch (error) {
+        logger.error('❌ Forgot Password Error:', error);
+        res.status(500).json({ success: false, error: 'FORGOT_PASSWORD_FAILED' });
+    }
 };
 
 /**
- * Reset Password Stub
+ * Reset Password - Update Password with Token
  */
 export const resetPassword = async (req, res) => {
-    res.json({ success: true, message: 'PASSWORD_RESET_SUCCESSFUL' });
+    const { token, password } = req.body;
+
+    try {
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+        const user = await prisma.user.findUnique({
+            where: { resetPasswordToken: hashedToken }
+        });
+
+        if (!user || user.resetPasswordExpires < new Date()) {
+            return res.status(400).json({ error: 'INVALID_OR_EXPIRED_TOKEN' });
+        }
+
+        // Hash New Password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                resetPasswordToken: null,
+                resetPasswordExpires: null
+            }
+        });
+
+        await auditService.logAction('PASSWORD_RESET_SUCCESSFUL', 'USER', user.id, { req });
+
+        res.json({ success: true, message: 'PASSWORD_RESET_SUCCESSFUL' });
+    } catch (error) {
+        logger.error('❌ Reset Password Error:', error);
+        res.status(500).json({ success: false, error: 'RESET_PASSWORD_FAILED' });
+    }
 };
 
 export default { register, login, loginWithPhone, googleLogin, getCurrentUser, logout, refresh, forgotPassword, resetPassword };

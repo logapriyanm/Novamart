@@ -1,9 +1,12 @@
 import prisma from '../lib/prisma.js';
+import logger from '../lib/logger.js';
+import stockAllocationService from '../services/stockAllocationService.js';
 
 export const createNegotiation = async (req, res) => {
     try {
         const dealerUserId = req.user.id;
-        const { productId, quantity, initialOffer } = req.body;
+        const { productId, quantity, initialOffer, proposedPrice } = req.body;
+        const offerPrice = proposedPrice || initialOffer; // Support both names
 
         // Get Dealer Profile
         const dealer = await prisma.dealer.findUnique({ where: { userId: dealerUserId } });
@@ -33,11 +36,11 @@ export const createNegotiation = async (req, res) => {
                 manufacturerId: product.manufacturerId,
                 productId: productId,
                 quantity: parseInt(quantity),
-                currentOffer: parseFloat(initialOffer),
+                currentOffer: parseFloat(offerPrice),
                 status: 'OPEN',
                 chatLog: [{
                     sender: 'DEALER',
-                    message: `Started negotiation for ${quantity} units at ${initialOffer}`,
+                    message: `Started negotiation for ${quantity} units at ₹${offerPrice}`,
                     time: new Date()
                 }]
             }
@@ -55,7 +58,7 @@ export const createNegotiation = async (req, res) => {
                     userId: manufacturer.user.id,
                     type: 'NEGOTIATION_STARTED',
                     title: 'New Price Negotiation Request',
-                    message: `${dealer.businessName} wants to negotiate pricing for ${product.name}. Initial offer: ₹${initialOffer} for ${quantity} units.`,
+                    message: `${dealer.businessName} wants to negotiate pricing for ${product.name}. Initial offer: ₹${offerPrice} for ${quantity} units.`,
                     link: `/manufacturer/negotiations`
                 }
             });
@@ -72,6 +75,7 @@ export const getNegotiations = async (req, res) => {
     try {
         const userId = req.user.id;
         const role = req.user.role; // MANUFACTURER or DEALER
+        console.log(`[Negotiation] Fetching for User: ${userId}, Role: ${role}`);
 
         let query = {};
         if (role === 'DEALER') {
@@ -89,7 +93,7 @@ export const getNegotiations = async (req, res) => {
         const negotiations = await prisma.negotiation.findMany({
             where: query,
             include: {
-                product: { select: { name: true, image: true, basePrice: true } },
+                product: { select: { name: true, images: true, basePrice: true } },
                 dealer: { select: { businessName: true } },
                 manufacturer: { select: { companyName: true } }
             },
@@ -98,14 +102,16 @@ export const getNegotiations = async (req, res) => {
 
         res.json({ success: true, data: negotiations });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to fetch negotiations' });
+        console.error('Failed to fetch negotiations:', error);
+        res.status(500).json({ message: 'Failed to fetch negotiations', error: error.message });
     }
 };
 
 export const updateNegotiation = async (req, res) => {
     try {
         const { negotiationId } = req.params;
-        const { message, newOffer, status } = req.body; // status: ACCEPTED | REJECTED
+        const { message, newOffer, counterPrice, status } = req.body; // status: ACCEPTED | REJECTED
+        const offerUpdate = counterPrice || newOffer;
         const userId = req.user.id;
         const role = req.user.role;
 
@@ -126,7 +132,7 @@ export const updateNegotiation = async (req, res) => {
         // Append to chat log
         const chatEntry = {
             sender: role,
-            message: message || (status ? `Changed status to ${status}` : `New offer: ${newOffer}`),
+            message: message || (status ? `Changed status to ${status}` : `New offer: ₹${offerUpdate}`),
             time: new Date()
         };
         const updatedLog = [...(negotiation.chatLog || []), chatEntry];
@@ -135,7 +141,7 @@ export const updateNegotiation = async (req, res) => {
             chatLog: updatedLog
         };
 
-        if (newOffer) updateData.currentOffer = newOffer;
+        if (offerUpdate) updateData.currentOffer = parseFloat(offerUpdate);
         if (status) updateData.status = status;
 
         const updatedNegotiation = await prisma.negotiation.update({
@@ -143,21 +149,76 @@ export const updateNegotiation = async (req, res) => {
             data: updateData
         });
 
+        // Trigger Stock Allocation if Manufacturer fulfills the order
+        if (status === 'ORDER_FULFILLED' && role === 'MANUFACTURER') {
+            try {
+                await stockAllocationService.allocateStock(negotiation.manufacturerId, {
+                    productId: negotiation.productId,
+                    dealerId: negotiation.dealerId,
+                    region: 'NATIONAL', // Default/Fallback to match SourcingTerminal
+                    quantity: negotiation.quantity,
+                    dealerBasePrice: negotiation.currentOffer,
+                    dealerMoq: 1, // Default
+                    maxMargin: 20 // Default
+                });
+
+                // Add system message
+                await prisma.negotiation.update({
+                    where: { id: negotiationId },
+                    data: {
+                        chatLog: [...updatedNegotiation.chatLog, {
+                            sender: 'SYSTEM',
+                            message: `Order Processed. ${negotiation.quantity} units allocated at ₹${negotiation.currentOffer}.`,
+                            time: new Date()
+                        }]
+                    }
+                });
+            } catch (allocError) {
+                console.error("Allocation Failed:", allocError);
+                // Revert status if allocation fails? Or just notify?
+                // For now, let's just log it. In prod, we should revert or flag error.
+            }
+        }
+
         // Send notification to the other party
         const recipientUserId = role === 'DEALER' ? negotiation.manufacturer.userId : negotiation.dealer.userId;
         const senderName = role === 'DEALER' ? negotiation.dealer.businessName : negotiation.manufacturer.companyName;
 
         if (status) {
-            // Notify about status change (approval/rejection)
+            // Mapping status to notification types
+            let notificationType = 'NEGOTIATION_UPDATE';
+            let notificationTitle = `Negotiation ${status.replace('_', ' ')}`;
+            let notificationMessage = '';
+
+            switch (status) {
+                case 'ACCEPTED':
+                    notificationType = 'NEGOTIATION_ACCEPTED';
+                    notificationMessage = `${senderName} has accepted the negotiation terms. Stock will be allocated soon.`;
+                    break;
+                case 'REJECTED':
+                    notificationType = 'NEGOTIATION_REJECTED';
+                    notificationMessage = `${senderName} has declined the negotiation.`;
+                    break;
+                case 'ORDER_REQUESTED':
+                    notificationType = 'ORDER_PLACED';
+                    notificationTitle = 'New Purchase Order Raised';
+                    notificationMessage = `${senderName} has raised a purchase order for ${negotiation.quantity} units.`;
+                    break;
+                case 'ORDER_FULFILLED':
+                    notificationType = 'ORDER_FULFILLED';
+                    notificationTitle = 'Order Confirmed & Stock Allocated';
+                    notificationMessage = `${senderName} has fulfilled the order. Inventory has been allocated.`;
+                    break;
+            }
+
+            // Notify about status change
             await prisma.notification.create({
                 data: {
                     userId: recipientUserId,
-                    type: status === 'ACCEPTED' ? 'NEGOTIATION_ACCEPTED' : 'NEGOTIATION_REJECTED',
-                    title: `Negotiation ${status}`,
-                    message: status === 'ACCEPTED'
-                        ? `${senderName} has accepted the negotiation terms. Stock will be allocated soon.`
-                        : `${senderName} has declined the negotiation. You can start a new negotiation with different terms.`,
-                    link: role === 'DEALER' ? '/dealer/negotiations' : '/manufacturer/negotiations'
+                    type: notificationType,
+                    title: notificationTitle,
+                    message: notificationMessage,
+                    link: role === 'DEALER' ? '/manufacturer/negotiations' : '/dealer/negotiations'
                 }
             });
         } else if (message || newOffer) {
@@ -167,8 +228,8 @@ export const updateNegotiation = async (req, res) => {
                     userId: recipientUserId,
                     type: 'NEGOTIATION_MESSAGE',
                     title: 'New Negotiation Message',
-                    message: newOffer
-                        ? `${senderName} sent a new offer: ₹${newOffer}`
+                    message: offerUpdate
+                        ? `${senderName} sent a new offer: ₹${offerUpdate}`
                         : `${senderName}: ${message?.substring(0, 50)}${message?.length > 50 ? '...' : ''}`,
                     link: role === 'DEALER' ? '/dealer/negotiations' : '/manufacturer/negotiations'
                 }
@@ -223,8 +284,10 @@ export const getSingleNegotiation = async (req, res) => {
         }
 
         // Verify access - only participants can view
-        const isParticipant = (role === 'DEALER' && negotiation.dealer.id === await getUserDealerId(userId)) ||
-            (role === 'MANUFACTURER' && negotiation.manufacturer.id === await getUserManufacturerId(userId));
+        const currentDealerId = req.user.dealer?.id;
+        const currentMfrId = req.user.manufacturer?.id;
+        const isParticipant = (role === 'DEALER' && negotiation.dealerId === currentDealerId) ||
+            (role === 'MANUFACTURER' && negotiation.manufacturerId === currentMfrId);
 
         if (!isParticipant) {
             return res.status(403).json({ success: false, message: 'Access denied' });

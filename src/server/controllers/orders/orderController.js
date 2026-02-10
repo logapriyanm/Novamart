@@ -4,13 +4,16 @@ import logger from '../../lib/logger.js';
 export const createOrder = async (req, res) => {
     try {
         const { dealerId, items, shippingAddress } = req.body;
-        const userId = req.user?.id;
+        const customerId = req.user?.customer?.id;
+        if (!customerId) {
+            return res.status(403).json({ success: false, error: 'Customer profile required for orders.' });
+        }
 
         // Items in req.body might be [{inventoryId, quantity}]
         // OrderService.createOrder expects [{productId, quantity, price}]
         // We might need a small shim or update OrderService to handle inventoryId
 
-        const order = await orderService.createOrder(userId, dealerId, items);
+        const order = await orderService.createOrder(customerId, dealerId, items, shippingAddress);
         res.status(201).json({ success: true, data: order });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
@@ -61,10 +64,43 @@ export const updateOrderStatus = async (req, res) => {
     }
 };
 
+import shipmentService from '../../services/shipmentService.js';
+import disputeService from '../../services/dispute.js';
+
+export const raiseDispute = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const userId = req.user.id;
+
+        const dispute = await disputeService.raiseDispute(id, userId, {
+            reason,
+            triggerType: 'CUSTOMER_TO_DEALER'
+        });
+
+        res.json({ success: true, data: dispute });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+};
+
+export const simulateDelivery = async (req, res) => {
+    try {
+        const { id } = req.params;
+        // This is an async action that runs in background
+        shipmentService.simulateJourney(id);
+        res.json({ success: true, message: 'Delivery simulation started' });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+};
+
 export default {
     createOrder,
     getOrders,
     getMyOrders,
     getOrderById,
-    updateOrderStatus
+    updateOrderStatus,
+    raiseDispute,
+    simulateDelivery
 };

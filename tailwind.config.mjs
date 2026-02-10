@@ -8,7 +8,11 @@ export default {
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
             },
-
+            screens: {
+                'sm': '481px',   // Tablet (481px – 768px)
+                'md': '769px',   // Laptop (769px – 1024px)
+                'lg': '1025px',  // Desktop (≥ 1025px)
+            },
             colors: {
                 primary: "#10367D", // Deep Navy (Buttons, Important Text)
                 secondary: "#74b4da", // Sky Blue (Minimal Usage)

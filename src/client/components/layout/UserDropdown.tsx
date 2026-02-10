@@ -67,7 +67,7 @@ export default function UserDropdown() {
                     {user.avatar ? (
                         <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                     ) : (
-                        <div className="w-full h-full bg-black flex items-center justify-center text-white font-black text-lg">
+                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-black text-lg">
                             {user.name?.charAt(0) || 'U'}
                         </div>
                     )}

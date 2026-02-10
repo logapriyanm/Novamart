@@ -128,12 +128,19 @@ export const verifyPayment = async (req, res) => {
 
         // For mock payments, skip real signature verification
         if (razorpay_order_id && razorpay_order_id.startsWith('mock_')) {
-            const result = await paymentService.processPaymentSuccess({
+            const { order, payment } = await paymentService.processPaymentSuccess({
                 orderId,
                 razorpayPaymentId: razorpay_payment_id || 'mock_payment',
                 method: 'MOCK'
             });
-            return res.json({ success: true, data: result });
+            // Send email for mock too if needed, or just return
+            import('../services/emailService.js').then((module) => {
+                module.sendPaymentConfirmation(payment, order).catch(err =>
+                    logger.error('Failed to send payment confirmation email:', err)
+                );
+            }).catch(() => { });
+
+            return res.json({ success: true, data: { order, payment } });
         }
 
         // Real Razorpay verification
@@ -152,7 +159,7 @@ export const verifyPayment = async (req, res) => {
             return res.status(400).json({ success: false, error: 'Invalid payment signature' });
         }
 
-        const result = await paymentService.processPaymentSuccess({
+        const { order, payment } = await paymentService.processPaymentSuccess({
             orderId,
             razorpayPaymentId: razorpay_payment_id,
             method: 'CARD' // Razorpay handles method details, we can enrich later via API if needed
@@ -160,12 +167,12 @@ export const verifyPayment = async (req, res) => {
 
         // Send payment confirmation email (non-blocking)
         import('../services/emailService.js').then((module) => {
-            module.sendPaymentConfirmation(result).catch(err =>
+            module.sendPaymentConfirmation(payment, order).catch(err =>
                 logger.error('Failed to send payment confirmation email:', err)
             );
         }).catch(() => { });
 
-        res.json({ success: true, data: result });
+        res.json({ success: true, data: { order, payment } });
 
     } catch (error) {
         logger.error('Verify Payment Error:', error);

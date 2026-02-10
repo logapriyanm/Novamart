@@ -197,14 +197,28 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Global Error Handlers to prevent crash
+process.on('uncaughtException', (err) => {
+    logger.error('🔥 Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error('🔥 Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 const startServer = async () => {
     try {
         if (process.env.MONGODB_URI) {
-            mongoose.connect(process.env.MONGODB_URI, {
-                serverSelectionTimeoutMS: 5000,
-            })
-                .then(() => logger.info('✅ Connected to MongoDB (Chat & Tracking)'))
-                .catch(err => logger.error('⚠️ MongoDB Connection Failed:', err.message));
+            try {
+                await mongoose.connect(process.env.MONGODB_URI, {
+                    serverSelectionTimeoutMS: 5000,
+                });
+                logger.info('✅ Connected to MongoDB (Chat & Tracking)');
+            } catch (err) {
+                logger.error('⚠️ MongoDB Connection Failed (Chat/Tracking features limited):', err.message);
+            }
+        } else {
+            logger.warn('⚠️ MONGODB_URI not found in environment variables. Skipped connection.');
         }
 
         httpServer.listen(PORT, () => {

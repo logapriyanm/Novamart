@@ -16,13 +16,14 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { GoogleLogin } from '@react-oauth/google';
+import { toast } from 'sonner';
 import { useAuth } from '../../../context/AuthContext';
-import { useSnackbar } from '../../../context/SnackbarContext';
+// import { useSnackbar } from '../../../context/SnackbarContext';
 
 export default function LoginForm() {
     const router = useRouter();
     const { login, loginWithGoogle, loginWithPhone, sendOtp, isAuthenticated, isLoading: authLoading, user } = useAuth();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     React.useEffect(() => {
         if (isAuthenticated && !authLoading && user) {
@@ -102,7 +103,7 @@ export default function LoginForm() {
                 await loginWithGoogle(credentialResponse.credential);
             }
         } catch (error: any) {
-            showSnackbar(error.message || 'Google Login Failed', 'error');
+            toast.error(error.message || 'Google Login Failed');
         }
     };
 
@@ -110,14 +111,14 @@ export default function LoginForm() {
         try {
             await sendOtp(formData.identifier);
             setOtpSent(true);
-            showSnackbar('OTP Sent successfully!', 'success');
+            toast.success('OTP Sent successfully!');
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to send OTP', 'error');
+            toast.error(error.message || 'Failed to send OTP');
         }
     };
 
     return (
-        <div className="bg-white/40 backdrop-blur-xl border border-black/10 rounded-[10px] p-8 lg:p-10 shadow-2xl shadow-black/5">
+        <div className="bg-white/40 backdrop-blur-xl border border-black/10 rounded-[10px] p-6 sm:p-8 lg:p-10 shadow-2xl shadow-black/5">
             <div className="text-center flex mb-10">
                 <div className="w-20 h-15 bg-white rounded-4xl flex items-center justify-center p-2 mx-auto mb-6 shadow-xl shadow-black/10 overflow-hidden border border-black/5">
                     <img src="/assets/Novamart.png" alt="NovaMart" className="w-full h-full object-contain" />
@@ -206,7 +207,9 @@ export default function LoginForm() {
                             </div>
 
                             <div className="flex items-center justify-between px-2">
-                                <button type="button" className="text-[10px] font-black text-black uppercase tracking-wider hover:underline underline-offset-4">Forgot Password?</button>
+                                <Link href="/auth/forgot-password">
+                                    <button type="button" className="text-[10px] font-black text-black uppercase tracking-wider hover:underline underline-offset-4">Forgot Password?</button>
+                                </Link>
                                 {loginMethod === 'phone' && (
                                     <button
                                         type="button"
@@ -305,7 +308,7 @@ export default function LoginForm() {
                     <div className="flex justify-center">
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
-                            onError={() => showSnackbar('Google authentication failed', 'error')}
+                            onError={() => toast.error('Google authentication failed')}
                             useOneTap
                             theme="outline"
                             shape="pill"

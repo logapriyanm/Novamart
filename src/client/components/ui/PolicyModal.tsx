@@ -35,23 +35,23 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({ isOpen, onClose, polic
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-background rounded-3xl shadow-2xl z-[160] overflow-hidden border border-foreground/5"
+                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-background rounded-2xl md:rounded-3xl shadow-2xl z-[160] overflow-hidden border border-foreground/5"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-8 py-6 border-b border-foreground/5 bg-surface">
-                            <h2 className="text-xl font-black text-foreground tracking-tight">
+                        <div className="flex items-center justify-between px-6 md:px-8 py-4 md:py-6 border-b border-foreground/5 bg-surface">
+                            <h2 className="text-lg md:text-xl font-black text-foreground tracking-tight">
                                 {content.title}
                             </h2>
                             <button
                                 onClick={onClose}
-                                className="p-2 -mr-2 rounded-full hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground"
+                                className="p-2 -mr-2 rounded-full hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground touch-target"
                             >
                                 <FaTimes className="w-5 h-5" />
                             </button>
                         </div>
 
                         {/* Body */}
-                        <div className="px-8 py-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                        <div className="px-6 md:px-8 py-6 md:py-8 max-h-[60vh] md:max-h-[70vh] overflow-y-auto custom-scrollbar">
                             <div
                                 className="prose prose-sm max-w-none text-foreground/70"
                                 dangerouslySetInnerHTML={{ __html: content.content }}
@@ -59,10 +59,10 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({ isOpen, onClose, polic
                         </div>
 
                         {/* Footer */}
-                        <div className="px-8 py-6 bg-surface border-t border-foreground/5 flex justify-end">
+                        <div className="px-6 md:px-8 py-4 md:py-6 bg-surface border-t border-foreground/5 flex justify-end">
                             <button
                                 onClick={onClose}
-                                className="px-6 py-2.5 bg-primary text-background text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+                                className="px-6 py-2.5 bg-primary text-background text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 touch-target"
                             >
                                 Close
                             </button>

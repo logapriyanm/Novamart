@@ -153,24 +153,50 @@ class RecommendationService {
             }
 
             // 8. Determine Special Day / Occasion (Anniversary or Member Special)
-            const user = await prisma.user.findUnique({ where: { id: userId } });
+            const user = await prisma.user.findUnique({
+                where: { id: userId },
+                include: { dealer: true, manufacturer: true }
+            });
             let specialDay = null;
+            let b2bMetrics = null;
 
             if (user) {
+                // Personalization for B2C/Generic
                 const joinDate = new Date(user.createdAt);
                 const now = new Date();
                 const isAnniversaryMonth = joinDate.getMonth() === now.getMonth();
                 const daysSinceJoin = Math.floor((now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
 
                 if (isAnniversaryMonth) {
-                    specialDay = {
-                        type: 'ANNIVERSARY',
-                        discount: 15
-                    };
+                    specialDay = { type: 'ANNIVERSARY', discount: 15 };
                 } else if (daysSinceJoin < 30) {
-                    specialDay = {
-                        type: 'WELCOME',
-                        discount: 10
+                    specialDay = { type: 'WELCOME', discount: 10 };
+                }
+
+                // Personalization for B2B (New in Flow 10)
+                if (user.role === 'DEALER' && user.dealer) {
+                    const [openNegs, newAllocations] = await Promise.all([
+                        prisma.negotiation.count({ where: { dealerId: user.dealer.id, status: 'OPEN' } }),
+                        prisma.inventory.count({ where: { dealerId: user.dealer.id, isAllocated: true, stock: 0 } }) // Allocated but not "sourced" yet
+                    ]);
+                    b2bMetrics = {
+                        role: 'DEALER',
+                        actions: [
+                            { label: 'Active Negotiations', count: openNegs, link: '/dealer/negotiation', icon: 'Negotiate' },
+                            { label: 'New Allocations', count: newAllocations, link: '/dealer/inventory', icon: 'Package' }
+                        ]
+                    };
+                } else if (user.role === 'MANUFACTURER' && user.manufacturer) {
+                    const [pendingRequests, activeNegs] = await Promise.all([
+                        prisma.dealerRequest.count({ where: { manufacturerId: user.manufacturer.id, status: 'PENDING' } }),
+                        prisma.negotiation.count({ where: { manufacturerId: user.manufacturer.id, status: 'OPEN' } })
+                    ]);
+                    b2bMetrics = {
+                        role: 'MANUFACTURER',
+                        actions: [
+                            { label: 'Dealer Requests', count: pendingRequests, link: '/manufacturer/dealers/requests', icon: 'UserPlus' },
+                            { label: 'Active Negotiations', count: activeNegs, link: '/manufacturer/products', icon: 'Negotiate' }
+                        ]
                     };
                 }
             }
@@ -194,6 +220,7 @@ class RecommendationService {
             return {
                 hero,
                 specialDay,
+                b2bMetrics,
                 recommended: recommendations,
                 newArrivals,
                 trending,

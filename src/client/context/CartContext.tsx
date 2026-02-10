@@ -3,7 +3,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { cartService } from '../../lib/api/services/cart.service';
 import { useAuth } from '../hooks/useAuth';
-import { useSnackbar } from './SnackbarContext';
+// import { useSnackbar } from './SnackbarContext';
+import { toast } from 'sonner';
 
 export interface CartItem {
     id: string; // cart item ID
@@ -37,7 +38,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const { isAuthenticated, user } = useAuth();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     // Fetch cart from backend
     const fetchCart = async () => {
@@ -135,7 +136,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 localStorage.setItem('novamart_cart', JSON.stringify(updated));
                 return updated;
             });
-            showSnackbar('Product added to cart', 'success');
+            toast.success('Product added to cart');
             return;
         }
 
@@ -143,10 +144,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         try {
             await cartService.addToCart(item.inventoryId, item.quantity);
             await fetchCart(); // Refresh cart
-            showSnackbar('Product added to cart', 'success');
+            toast.success('Product added to cart');
         } catch (error: any) {
             console.error('Failed to add to cart:', error);
-            showSnackbar('Something went wrong. Please try again.', 'error');
+            toast.error('Something went wrong. Please try again.');
             throw error;
         } finally {
             setIsLoading(false);
@@ -162,18 +163,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 localStorage.setItem('novamart_cart', JSON.stringify(updated));
                 return updated;
             });
-            showSnackbar('Item removed from cart', 'success');
+            toast.success('Item removed from cart');
             return;
         }
 
         setIsLoading(true);
         try {
             await cartService.removeFromCart(cartItemId);
+            await cartService.removeFromCart(cartItemId);
             await fetchCart(); // Refresh cart
-            showSnackbar('Item removed from cart', 'success');
+            toast.success('Item removed from cart');
         } catch (error) {
             console.error('Failed to remove from cart:', error);
-            showSnackbar('Something went wrong. Please try again.', 'error');
+            toast.error('Something went wrong. Please try again.');
             throw error;
         } finally {
             setIsLoading(false);
@@ -195,7 +197,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 localStorage.setItem('novamart_cart', JSON.stringify(updated));
                 return updated;
             });
-            showSnackbar('Cart updated', 'success');
+            toast.success('Cart updated');
             return;
         }
 
@@ -206,11 +208,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 const newQuantity = Math.max(1, item.quantity + delta);
                 await cartService.updateQuantity(cartItemId, newQuantity);
                 await fetchCart(); // Refresh cart
-                showSnackbar('Cart updated', 'success');
+                toast.success('Cart updated');
             }
         } catch (error) {
             console.error('Failed to update quantity:', error);
-            showSnackbar('Something went wrong. Please try again.', 'error');
+            toast.error('Something went wrong. Please try again.');
             throw error;
         } finally {
             setIsLoading(false);

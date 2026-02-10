@@ -22,11 +22,13 @@ export interface Product {
     reviewCount?: number;
     specifications?: any;
     subCategory?: string;
+    colors?: string[];
+    sizes?: string[];
 }
 
 export const productService = {
-    async getAllProducts(params?: any): Promise<Product[]> {
-        return apiClient.get<Product[]>(ENDPOINTS.PUBLIC.PRODUCTS, { params });
+    async getAllProducts(params?: any): Promise<{ products: Product[], pagination: any }> {
+        return apiClient.get<{ products: Product[], pagination: any }>(ENDPOINTS.PUBLIC.PRODUCTS, { params });
     },
 
     async getProductById(id: string): Promise<Product> {

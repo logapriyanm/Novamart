@@ -6,10 +6,14 @@ export interface Negotiation {
     dealerId: string;
     manufacturerId: string;
     productId: string;
-    status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COUNTERED';
-    currentPrice: number;
+    status: 'OPEN' | 'ACCEPTED' | 'REJECTED' | 'COUNTERED' | 'ORDER_REQUESTED' | 'ORDER_FULFILLED';
+    currentOffer: number;
     quantity: number;
-    history: any[];
+    chatLog: any[];
+    product: any;
+    dealer?: any;
+    manufacturer?: any;
+    updatedAt: string;
 }
 
 export const negotiationService = {
@@ -21,7 +25,7 @@ export const negotiationService = {
         return apiClient.get<Negotiation[]>(ENDPOINTS.NEGOTIATION.LIST);
     },
 
-    async updateNegotiation(id: string, data: { status: string; counterPrice?: number }): Promise<Negotiation> {
+    async updateNegotiation(id: string, data: { status?: string; counterPrice?: number; message?: string }): Promise<Negotiation> {
         return apiClient.put<Negotiation>(ENDPOINTS.NEGOTIATION.UPDATE(id), data);
     }
 };

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineShieldCheck } from 'react-icons/hi';
 import { apiClient } from '../../../lib/api/client';
-import { useSnackbar } from '../../context/SnackbarContext';
+import { toast } from 'sonner';
 
 interface EscrowActionsProps {
     order: any;
@@ -11,7 +11,7 @@ interface EscrowActionsProps {
 }
 
 export default function EscrowActions({ order, onUpdate }: EscrowActionsProps) {
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [isProcessing, setIsProcessing] = useState(false);
     const [showRefundModal, setShowRefundModal] = useState(false);
     const [refundReason, setRefundReason] = useState('');
@@ -31,13 +31,13 @@ export default function EscrowActions({ order, onUpdate }: EscrowActionsProps) {
             });
 
             if (res.success) {
-                showSnackbar('Delivery confirmed! Funds released to seller.', 'success');
+                toast.success('Delivery confirmed! Funds released to seller.');
                 onUpdate();
             } else {
-                showSnackbar(res.error || 'Failed to confirm delivery', 'error');
+                toast.error(res.error || 'Failed to confirm delivery');
             }
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to confirm delivery', 'error');
+            toast.error(error.message || 'Failed to confirm delivery');
         } finally {
             setIsProcessing(false);
         }
@@ -45,7 +45,7 @@ export default function EscrowActions({ order, onUpdate }: EscrowActionsProps) {
 
     const handleRequestRefund = async () => {
         if (!refundReason.trim()) {
-            showSnackbar('Please provide a reason for refund', 'warning');
+            toast.warning('Please provide a reason for refund');
             return;
         }
 
@@ -57,15 +57,15 @@ export default function EscrowActions({ order, onUpdate }: EscrowActionsProps) {
             });
 
             if (res.success) {
-                showSnackbar('Refund request submitted. Admin will review.', 'success');
+                toast.success('Refund request submitted. Admin will review.');
                 setShowRefundModal(false);
                 setRefundReason('');
                 onUpdate();
             } else {
-                showSnackbar(res.error || 'Failed to request refund', 'error');
+                toast.error(res.error || 'Failed to request refund');
             }
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to request refund', 'error');
+            toast.error(error.message || 'Failed to request refund');
         } finally {
             setIsProcessing(false);
         }

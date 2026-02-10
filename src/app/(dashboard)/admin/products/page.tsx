@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function AdminProductApproval() {
     const [products, setProducts] = useState<any[]>([]);
@@ -25,7 +25,7 @@ export default function AdminProductApproval() {
     const [auditStatus, setAuditStatus] = useState<null | 'APPROVED' | 'REJECTED'>(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectModal, setShowRejectModal] = useState(false);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchPendingProducts();
@@ -62,9 +62,9 @@ export default function AdminProductApproval() {
                 setShowRejectModal(false);
                 setRejectionReason('');
             }, 1000);
-            showSnackbar(`Product ${status === 'APPROVED' ? 'Approved' : 'Rejected'}`, 'success');
+            toast.success(`Product ${status === 'APPROVED' ? 'Approved' : 'Rejected'}`);
         } catch (error) {
-            showSnackbar('Failed to update status', 'error');
+            toast.error('Failed to update status');
         }
     };
 

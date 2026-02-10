@@ -27,6 +27,20 @@ export const getMyInventory = async (req, res) => {
 };
 
 /**
+ * Get Specific Inventory Asset Details
+ */
+export const getInventoryItem = async (req, res) => {
+    const dealerId = req.user.dealer.id;
+    const { id } = req.params;
+    try {
+        const item = await dealerService.getInventoryItem(id, dealerId);
+        res.json({ success: true, data: item });
+    } catch (error) {
+        res.status(404).json({ success: false, error: error.message });
+    }
+};
+
+/**
  * Get Allocated Products from Manufacturers (Phase 4)
  */
 export const getMyAllocations = async (req, res) => {
@@ -82,6 +96,24 @@ export const updateStock = async (req, res) => {
         res.json({
             success: true,
             message: 'Stock updated successfully',
+            data: result
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+};
+
+/**
+ * Toggle Product Visibility (Go Live)
+ */
+export const toggleListing = async (req, res) => {
+    const dealerId = req.user.dealer.id;
+    const { inventoryId, isListed } = req.body;
+    try {
+        const result = await dealerService.toggleListing(inventoryId, dealerId, isListed);
+        res.json({
+            success: true,
+            message: `Product ${isListed ? 'listed' : 'delisted'} successfully`,
             data: result
         });
     } catch (error) {
@@ -326,9 +358,11 @@ export const getMyRequests = async (req, res) => {
 
 export default {
     getMyInventory,
+    getInventoryItem,
     getMyAllocations,
     updatePrice,
     updateStock,
+    toggleListing,
     getDealerStats,
     confirmOrder,
     shipOrder,

@@ -14,7 +14,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../context/CartContext';
-import { useSnackbar } from '../../context/SnackbarContext';
+import { toast } from 'sonner';
 import OptimizedImage from './OptimizedImage';
 
 interface ProductCardProps {
@@ -60,7 +60,7 @@ export default function CustomerProductCard({
     const router = useRouter();
     const { isAuthenticated } = useAuth();
     const { addToCart } = useCart();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [isWishlisted, setIsWishlisted] = React.useState(false);
 
     const handleWishlist = (e: React.MouseEvent) => {
@@ -71,7 +71,7 @@ export default function CustomerProductCard({
         }
         const newState = !isWishlisted;
         setIsWishlisted(newState);
-        showSnackbar(newState ? 'Added to wishlist' : 'Removed from wishlist', 'success');
+        toast.success(newState ? 'Added to wishlist' : 'Removed from wishlist');
     };
 
     return (
@@ -123,6 +123,8 @@ export default function CustomerProductCard({
                     <button
                         onClick={handleWishlist}
                         className={`w-9 h-9 rounded-[10px] flex items-center justify-center transition-all ${isWishlisted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-white/80 text-foreground/40 border border-foreground/10 hover:text-foreground backdrop-blur-sm'}`}
+                        aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                        title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                     >
                         <FaHeart className={`w-3.5 h-3.5 ${isWishlisted ? 'fill-current' : ''}`} />
                     </button>
@@ -136,6 +138,16 @@ export default function CustomerProductCard({
 
             <div className="p-6 flex flex-col flex-1 bg-surface">
                 {/* 4️⃣ Product Name */}
+                <div className="flex items-center justify-between mb-1 gap-2">
+                    <span className="text-[10px] font-black text-primary uppercase tracking-widest truncate">
+                        {brand}
+                    </span>
+                    {seller.isVerified && (
+                        <div className="flex items-center gap-1 shrink-0">
+                            <img src="/verify.png" className="w-3.5 h-3.5 object-contain" alt="Verified" />
+                        </div>
+                    )}
+                </div>
                 <h3
                     className="font-black text-foreground text-sm leading-tight mb-3 group-hover:text-black transition-colors line-clamp-2 min-h-[2.5rem] cursor-pointer italic uppercase"
                     onClick={() => router.push(`/products/${id}`)}
@@ -184,6 +196,7 @@ export default function CustomerProductCard({
                             });
                         }}
                         className="btn-primary w-full py-4 text-[11px] tracking-[0.2em]"
+                        aria-label={`Add ${name} to cart`}
                     >
                         Add to Cart
                     </button>

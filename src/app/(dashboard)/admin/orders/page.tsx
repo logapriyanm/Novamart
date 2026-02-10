@@ -18,13 +18,13 @@ import {
 import Link from 'next/link';
 
 import { adminService } from '@/lib/api/services/admin.service';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function OrderOversightPanel() {
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchOrders();
@@ -36,7 +36,7 @@ export default function OrderOversightPanel() {
             setOrders(data || []);
         } catch (error) {
             console.error('Admin order fetch error:', error);
-            showSnackbar('Failed to load global order stream.', 'error');
+            toast.error('Failed to load global order stream.');
         } finally {
             setLoading(false);
         }
@@ -49,10 +49,10 @@ export default function OrderOversightPanel() {
                 carrier: action === 'SHIP' ? 'NovaLogistics' : undefined,
                 reason: action === 'CANCEL' ? 'Admin Override' : undefined
             });
-            showSnackbar(`Order ${action === 'SHIP' ? 'Shipped' : 'Cancelled'} Successfully`, 'success');
+            toast.success(`Order ${action === 'SHIP' ? 'Shipped' : 'Cancelled'} Successfully`);
             fetchOrders();
         } catch (error) {
-            showSnackbar('Status Update Failed', 'error');
+            toast.error('Status Update Failed');
         }
     };
 

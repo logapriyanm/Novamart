@@ -18,10 +18,10 @@ import {
     FaExclamationTriangle,
     FaRocket
 } from 'react-icons/fa';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function DealerAllocationView() {
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [allocations, setAllocations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showListingModal, setShowListingModal] = useState(false);
@@ -44,7 +44,7 @@ export default function DealerAllocationView() {
             const data = await res.json();
             if (data.success) setAllocations(data.data);
         } catch (error) {
-            showSnackbar('Failed to load allocations', 'error');
+            toast.error('Failed to load allocations');
         } finally {
             setIsLoading(false);
         }
@@ -67,14 +67,14 @@ export default function DealerAllocationView() {
 
             const data = await res.json();
             if (data.success) {
-                showSnackbar('Product sourced and listed successfully!', 'success');
+                toast.success('Product sourced and listed successfully!');
                 setShowListingModal(false);
                 fetchAllocations();
             } else {
-                showSnackbar(data.error || 'Failed to list product', 'error');
+                toast.error(data.error || 'Failed to list product');
             }
         } catch (error) {
-            showSnackbar('Network error', 'error');
+            toast.error('Network error');
         } finally {
             setIsSubmitting(false);
         }

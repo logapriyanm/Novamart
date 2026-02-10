@@ -5,7 +5,9 @@ import {
     getOrders,
     getMyOrders,
     getOrderById,
-    updateOrderStatus
+    updateOrderStatus,
+    raiseDispute,
+    simulateDelivery
 } from '../../controllers/orders/orderController.js';
 import authenticate from '../../middleware/auth.js';
 
@@ -21,5 +23,7 @@ router.get('/my', getMyOrders);
 router.get('/:id', getOrderById);
 router.get('/:id/payment', getOrderById); // Reusing getOrderById for now, or create dedicated controller
 router.patch('/:id/status', updateOrderStatus);
+router.post('/:id/dispute', raiseDispute);
+router.post('/:id/simulate-delivery', simulateDelivery);
 
 export default router;

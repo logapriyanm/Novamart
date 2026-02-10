@@ -96,13 +96,15 @@ export default function Navbar() {
     return (
         <header className="fixed top-0 left-0 right-0 z-[100] bg-background border-b border-foreground/5">
             {/* Top Row: Logo, Search, User Actions */}
-            <div className="w-full mx-auto px-4 lg:px-12 py-2">
-                <div className="flex items-center justify-between gap-4 lg:gap-8">
+            <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-2">
+                <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-8">
                     {/* Brand & Mobile Toggle */}
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="lg:hidden p-2 hover:bg-foreground/5 rounded-[10px]"
+                            className="md:hidden p-2 hover:bg-foreground/5 rounded-[10px] touch-target"
+                            aria-label="Toggle mobile menu"
+                            aria-expanded={isMobileMenuOpen}
                         >
                             <Menu className="w-6 h-6 text-foreground/60" />
                         </button>
@@ -125,22 +127,26 @@ export default function Navbar() {
                         </Link>
 
 
-                        <div className="flex-1 max-w-2xl hidden xl:flex items-center mr-8">
+                        <div className="flex-1 max-w-2xl hidden md:flex items-center mx-4 lg:mx-8">
                             <form onSubmit={handleSearch} className="flex w-full h-10 bg-surface border-2 border-black/10 rounded-[10px] overflow-hidden shadow-sm focus-within:border-black transition-colors">
 
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Enter Product or Service to search..."
+                                    placeholder="Search products..."
                                     className="flex-1 px-4 text-sm focus:outline-none bg-surface text-foreground font-medium placeholder:text-foreground/30"
                                 />
 
-                                <button type="submit" className="bg-black hover:bg-black/90 text-background px-6 transition-colors flex items-center justify-center group relative overflow-hidden">
-                                    <div className="relative w-6 h-6 group-hover:scale-110 transition-transform">
+                                <button
+                                    type="submit"
+                                    className="bg-black hover:bg-black/90 text-background px-6 transition-colors flex items-center justify-center group relative overflow-hidden"
+                                    aria-label="Search products"
+                                >
+                                    <div className="relative w-5 h-5 group-hover:scale-110 transition-transform">
                                         <img
                                             src="/assets/search-hover-spin.svg"
-                                            alt="Search"
+                                            alt=""
                                             className="w-full h-full object-contain brightness-0 invert"
                                         />
                                     </div>
@@ -158,7 +164,7 @@ export default function Navbar() {
                             </Link>
                         )}
 
-                        <div className="h-8 w-px bg-foreground/10 hidden lg:block" />
+                        <div className="h-8 w-px bg-foreground/10 hidden md:block" />
 
                         <Link href="/contact" className="flex flex-col items-center group gap-1">
                             <FaHeadset className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
@@ -185,12 +191,21 @@ export default function Navbar() {
                         >
                             <button
                                 className="flex flex-col items-center group gap-1 min-w-[60px]"
+                                aria-label="User profile and account"
+                                aria-haspopup="true"
+                                aria-expanded={isProfileDropdownOpen}
                             >
                                 {isAuthenticated ? (
                                     <>
-                                        <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black text-[10px] border border-primary/20 group-hover:bg-primary group-hover:text-background transition-all">
-                                            {user?.name?.charAt(0).toUpperCase() || 'U'}
-                                        </div>
+                                        {user?.avatar ? (
+                                            <div className="w-7 h-7 rounded-full overflow-hidden border border-primary/20 group-hover:border-primary transition-all">
+                                                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                                            </div>
+                                        ) : (
+                                            <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black text-[10px] border border-primary/20 group-hover:bg-primary group-hover:text-background transition-all">
+                                                {user?.name?.charAt(0).toUpperCase() || 'U'}
+                                            </div>
+                                        )}
                                         <span className="text-[9px] font-black text-primary uppercase tracking-tighter truncate max-w-[80px]">
                                             {user?.name?.split(' ')[0] || 'User'}
                                         </span>
@@ -262,10 +277,7 @@ export default function Navbar() {
                                                             <HiOutlineUserCircle className="w-4 h-4 text-background/80" />
                                                             <span className="text-xs font-bold uppercase tracking-widest text-left">Sign In</span>
                                                         </Link>
-                                                        <Link href="/auth/register" onClick={() => setIsProfileDropdownOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 rounded-[10px] border border-foreground/10 hover:bg-foreground/5 text-foreground transition-all group">
-                                                            <FaClipboardList className="w-4 h-4 text-foreground/20" />
-                                                            <span className="text-xs font-bold uppercase tracking-widest text-left">Register</span>
-                                                        </Link>
+                                                       
                                                     </div>
                                                 )}
                                             </div>
@@ -280,7 +292,7 @@ export default function Navbar() {
 
             {/* Bottom Row: Categories (Products page) or Trust Bar (Home page only) */}
             {(isHomePage || isProductsPage) && (
-                <div className="bg-surface border-t border-foreground/5 hidden lg:block transition-all">
+                <div className="bg-surface border-t border-foreground/5 hidden md:block transition-all">
                     <div className="max-w-[1600px] mx-auto px-8">
                         <div className="flex items-center gap-4">
                             {/* Categories Toggle Button (on home & products page) */}
@@ -333,14 +345,16 @@ export default function Navbar() {
 
             {/* Mobile Search - Visible only on small screens below top row */}
             <div className="md:hidden px-4 pb-4 bg-background">
-                <div className="flex items-center bg-surface rounded-xl px-4 py-3 gap-3 border border-foreground/5">
-                    <Search className="w-5 h-5 text-foreground/40" />
+                <form onSubmit={handleSearch} className="flex items-center bg-surface rounded-xl px-4 py-2 gap-3 border border-foreground/5 focus-within:border-black/20 transition-colors">
+                    <Search className="w-4 h-4 text-foreground/40" />
                     <input
                         type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search for products..."
-                        className="bg-transparent text-sm w-full focus:outline-none font-medium text-foreground placeholder:text-foreground/30"
+                        className="bg-transparent text-sm w-full h-10 focus:outline-none font-medium text-foreground placeholder:text-foreground/30"
                     />
-                </div>
+                </form>
             </div>
 
             {/* Mobile Menu Drawer */}
@@ -352,14 +366,14 @@ export default function Navbar() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-[110] lg:hidden"
+                            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-[110] md:hidden"
                         />
                         <motion.div
                             initial={{ x: '-100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed top-0 left-0 bottom-0 w-80 bg-background z-[120] lg:hidden shadow-2xl overflow-y-auto border-r border-foreground/5"
+                            className="fixed top-0 left-0 bottom-0 w-80 max-w-[90vw] bg-background z-[120] md:hidden shadow-2xl overflow-y-auto border-r border-foreground/5"
                         >
                             <div className="p-6">
                                 <div className="flex items-center justify-between mb-8">
@@ -419,9 +433,7 @@ export default function Navbar() {
                                         <Link href="/auth/login" className="btn-primary" onClick={() => setIsMobileMenuOpen(false)}>
                                             Sign In
                                         </Link>
-                                        <Link href="/auth/register" className="btn-secondary" onClick={() => setIsMobileMenuOpen(false)}>
-                                            Register Now
-                                        </Link>
+                                       
                                     </div>
                                 )}
                             </div>

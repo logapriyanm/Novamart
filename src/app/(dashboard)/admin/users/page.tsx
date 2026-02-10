@@ -19,7 +19,7 @@ import {
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
 import UserVerificationModal from '@/client/components/features/admin/UserVerificationModal';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function UserManagementPortal() {
     const [selectedRole, setSelectedRole] = useState('ALL');
@@ -33,7 +33,7 @@ export default function UserManagementPortal() {
     const [selectedEntity, setSelectedEntity] = useState<any>(null);
     const [entityType, setEntityType] = useState<'MANUFACTURER' | 'DEALER'>('MANUFACTURER');
 
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchAllData();
@@ -69,10 +69,10 @@ export default function UserManagementPortal() {
             } else {
                 await adminService.verifyDealer(selectedEntity.id, isVerified);
             }
-            showSnackbar(`${entityType} ${isVerified ? 'Verified' : 'Rejected'} Successfully`, 'success');
+            toast.success(`${entityType} ${isVerified ? 'Verified' : 'Rejected'} Successfully`);
             fetchAllData(); // Refresh list
         } catch (error) {
-            showSnackbar('Action Failed', 'error');
+            toast.error('Action Failed');
             throw error;
         }
     };

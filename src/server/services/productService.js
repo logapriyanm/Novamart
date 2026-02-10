@@ -6,6 +6,7 @@
 import prisma from '../lib/prisma.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import logger from '../lib/logger.js';
+import { getFiltersBySubCategory } from '../lib/applianceConfig.js';
 
 class ProductService {
     /**
@@ -81,16 +82,18 @@ class ProductService {
         }
 
         // 2. Category & Subcategory
-        if (category) {
+        if (category && category !== 'all') {
+            conditions.push({ category: { equals: category, mode: 'insensitive' } });
+        }
+
+        if (subCategory && subCategory !== 'all') {
+            const normalizedSubCategory = subCategory.toLowerCase().replace(/\s+/g, '-');
             conditions.push({
                 OR: [
-                    { category: category },
-                    { specifications: { path: ['mainCategory'], equals: category } }
+                    { specifications: { path: ['subCategory'], equals: subCategory } },
+                    { specifications: { path: ['subCategory'], equals: normalizedSubCategory } }
                 ]
             });
-        }
-        if (subCategory) {
-            conditions.push({ specifications: { path: ['subCategory'], equals: subCategory } });
         }
 
         // 3. Search Query
@@ -127,6 +130,36 @@ class ProductService {
         if (availability?.includes('In Stock')) {
             conditions.push({ inventory: { some: { stock: { gt: 0 } } } });
         }
+
+        // 7. Dynamic Spec Filters (Technical Filters)
+        // Expected format for specFilters in query: specs=capacity:500L,compressor:Inverter
+        if (filters.specs) {
+            const specsArray = filters.specs.split(',');
+            specsArray.forEach(pair => {
+                const [key, value] = pair.split(':');
+                if (key && value) {
+                    if (value.includes('|')) {
+                        const values = value.split('|');
+                        conditions.push({
+                            OR: values.map(v => ({
+                                specifications: {
+                                    path: [key],
+                                    equals: v
+                                }
+                            }))
+                        });
+                    } else {
+                        conditions.push({
+                            specifications: {
+                                path: [key],
+                                equals: value
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
         if (specFilters.length > 0) {
             conditions.push(...specFilters);
         }

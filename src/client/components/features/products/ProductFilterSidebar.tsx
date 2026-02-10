@@ -43,13 +43,15 @@ export interface FilterState {
     usageType: string[];
     warranty: string[];
     isSmart: boolean | null;
+    // Dynamic technical filters
+    [key: string]: any;
 }
 
 interface ProductFilterSidebarProps {
     currentCategory?: string;
     onCategoryChange?: (slug: string) => void;
     filters: FilterState;
-    onFilterChange: (key: keyof FilterState, value: any) => void;
+    onFilterChange: (key: string, value: any) => void;
 }
 
 export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filters, onFilterChange }: ProductFilterSidebarProps) => {
@@ -58,14 +60,19 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
     const [mainCategories, setMainCategories] = React.useState<{ name: string, slug: string, count?: number }[]>([]);
     const [availableBrands, setAvailableBrands] = React.useState<string[]>([]);
     const [priceLimits, setPriceLimits] = React.useState({ min: 0, max: 100000 });
+    const [technicalFilters, setTechnicalFilters] = React.useState<any[]>([]);
 
     React.useEffect(() => {
         const fetchFilters = async () => {
             try {
-                // Fetch aggregated filters based on current category context if needed, or global
-                const response = await productService.getFilters({ category: currentCategory || 'all' });
-                if (response.data) {
-                    const { categories, brands, minPrice, maxPrice } = response.data;
+                // Fetch aggregated filters
+                const response = await productService.getFilters({
+                    category: currentCategory || 'all',
+                    subCategory: filters.subCategory || 'all'
+                });
+
+                if (response) {
+                    const { categories, brands, minPrice, maxPrice, technicalFilters: tech } = response;
 
                     // Map categories
                     const mappedCats = categories.map((c: any) => ({
@@ -80,15 +87,16 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
 
                     // Set Price Limits
                     setPriceLimits({ min: minPrice, max: maxPrice });
-                    // Only update selected price range if it's currently at default/extreme values? 
-                    // Better to leave user selection alone unless it's out of bounds.
+
+                    // Set Technical Filters
+                    setTechnicalFilters(tech || []);
                 }
             } catch (error) {
                 console.error('Failed to fetch filters:', error);
             }
         };
         fetchFilters();
-    }, [currentCategory]);
+    }, [currentCategory, filters.subCategory]);
 
     const toggleSection = (section: string) => {
         setOpenSections(prev =>
@@ -384,192 +392,53 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                     )}
                 </div>
 
-                {/* 8️⃣ Power Consumption */}
-                <div className="space-y-4 pt-4 border-t border-foreground/5">
-                    <button onClick={() => toggleSection('power')} className="w-full flex items-center justify-between group">
-                        <label className="text-[11px] font-black text-foreground uppercase tracking-widest cursor-pointer group-hover:text-primary transition-colors">Power Consumption</label>
-                        <ChevronDown className={`w-3 h-3 text-foreground/40 transition-transform ${openSections.includes('power') ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openSections.includes('power') && (
-                        <div className="space-y-2 pt-1">
-                            {['Less than 1000W', '1000W - 1500W', '1500W - 2000W', 'Above 2000W', '5 Star Rated', '4 Star Rated', '3 Star Rated'].map((opt) => (
-                                <button
-                                    key={opt}
-                                    onClick={() => {
-                                        const newVal = (filters.powerConsumption || []).includes(opt)
-                                            ? filters.powerConsumption.filter(v => v !== opt)
-                                            : [...(filters.powerConsumption || []), opt];
-                                        onFilterChange('powerConsumption', newVal);
-                                    }}
-                                    className="w-full flex items-center gap-3 group py-0.5"
-                                >
-                                    <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${(filters.powerConsumption || []).includes(opt) ? 'bg-primary border-primary' : 'border-foreground/10 group-hover:border-primary'}`}>
-                                        {(filters.powerConsumption || []).includes(opt) && <FaCheckSquare className="text-background w-3 h-3" />}
-                                    </div>
-                                    <span className={`text-xs ${(filters.powerConsumption || []).includes(opt) ? 'font-bold text-primary' : 'font-medium text-foreground/60 group-hover:text-primary'}`}>{opt}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                {/* Dynamic Technical Filters */}
+                {technicalFilters.map((filter) => (
+                    <div key={filter.id} className="space-y-4 pt-4 border-t border-foreground/5">
+                        <button onClick={() => toggleSection(filter.id)} className="w-full flex items-center justify-between group">
+                            <label className="text-[11px] font-black text-foreground uppercase tracking-widest cursor-pointer group-hover:text-black transition-colors">{filter.label}</label>
+                            <ChevronDown className={`w-3 h-3 text-foreground/40 transition-transform ${openSections.includes(filter.id) ? 'rotate-180' : ''}`} />
+                        </button>
+                        {openSections.includes(filter.id) && (
+                            <div className="space-y-2 pt-1">
+                                {filter.type === 'select' && filter.options?.map((opt: string) => {
+                                    const specKey = `spec_${filter.id}`;
+                                    const isSelected = (filters as any)[specKey]?.includes(opt);
 
-                {/* 9️⃣ Capacity */}
-                <div className="space-y-4 pt-4 border-t border-foreground/5">
-                    <button onClick={() => toggleSection('capacity')} className="w-full flex items-center justify-between group">
-                        <label className="text-[11px] font-black text-foreground uppercase tracking-widest cursor-pointer group-hover:text-primary transition-colors">Capacity</label>
-                        <ChevronDown className={`w-3 h-3 text-foreground/40 transition-transform ${openSections.includes('capacity') ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openSections.includes('capacity') && (
-                        <div className="space-y-2 pt-1">
-                            {['Less than 200L / 6kg', '200L - 300L / 6-8kg', '300L - 500L / 8-10kg', 'Above 500L / 10kg+'].map((opt) => (
-                                <button
-                                    key={opt}
-                                    onClick={() => {
-                                        const newVal = (filters.capacity || []).includes(opt)
-                                            ? filters.capacity.filter(v => v !== opt)
-                                            : [...(filters.capacity || []), opt];
-                                        onFilterChange('capacity', newVal);
-                                    }}
-                                    className="w-full flex items-center gap-3 group py-0.5"
-                                >
-                                    <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${(filters.capacity || []).includes(opt) ? 'bg-primary border-primary' : 'border-foreground/10 group-hover:border-primary'}`}>
-                                        {(filters.capacity || []).includes(opt) && <FaCheckSquare className="text-background w-3 h-3" />}
+                                    return (
+                                        <button
+                                            key={opt}
+                                            onClick={() => {
+                                                const currentVals = (filters as any)[specKey] || [];
+                                                const newVal = isSelected
+                                                    ? currentVals.filter((v: string) => v !== opt)
+                                                    : [...currentVals, opt];
+                                                onFilterChange(specKey as any, newVal);
+                                            }}
+                                            className="w-full flex items-center gap-3 group py-0.5"
+                                        >
+                                            <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${isSelected ? 'bg-black border-black' : 'border-foreground/10 group-hover:border-black'}`}>
+                                                {isSelected && <FaCheckSquare className="text-white w-3 h-3" />}
+                                            </div>
+                                            <span className={`text-xs ${isSelected ? 'font-bold text-black' : 'font-medium text-foreground/60 group-hover:text-black'}`}>{opt}</span>
+                                        </button>
+                                    );
+                                })}
+                                {filter.type === 'number' && (
+                                    <div className="flex gap-2 p-1">
+                                        <input
+                                            type="number"
+                                            placeholder={`Enter ${filter.label}`}
+                                            className="w-full bg-background border border-foreground/5 rounded-[5px] px-3 py-2 text-xs font-bold text-foreground outline-none focus:border-black/20"
+                                            onChange={(e) => onFilterChange(`spec_${filter.id}` as any, e.target.value)}
+                                        />
+                                        {filter.unit && <span className="text-[10px] font-black self-center opacity-40 uppercase">{filter.unit}</span>}
                                     </div>
-                                    <span className={`text-xs ${(filters.capacity || []).includes(opt) ? 'font-bold text-primary' : 'font-medium text-foreground/60 group-hover:text-primary'}`}>{opt}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* 🔟 Energy Rating */}
-                <div className="space-y-4 pt-4 border-t border-foreground/5">
-                    <button onClick={() => toggleSection('energy')} className="w-full flex items-center justify-between group">
-                        <label className="text-[11px] font-black text-foreground uppercase tracking-widest cursor-pointer group-hover:text-primary transition-colors">Energy Rating</label>
-                        <ChevronDown className={`w-3 h-3 text-foreground/40 transition-transform ${openSections.includes('energy') ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openSections.includes('energy') && (
-                        <div className="space-y-2 pt-1">
-                            {['5 Star', '4 Star', '3 Star'].map((opt) => (
-                                <button
-                                    key={opt}
-                                    onClick={() => {
-                                        const newVal = (filters.energyRating || []).includes(opt)
-                                            ? filters.energyRating.filter(v => v !== opt)
-                                            : [...(filters.energyRating || []), opt];
-                                        onFilterChange('energyRating', newVal);
-                                    }}
-                                    className="w-full flex items-center gap-3 group py-0.5"
-                                >
-                                    <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${(filters.energyRating || []).includes(opt) ? 'bg-primary border-primary' : 'border-foreground/10 group-hover:border-primary'}`}>
-                                        {(filters.energyRating || []).includes(opt) && <FaCheckSquare className="text-background w-3 h-3" />}
-                                    </div>
-                                    <span className={`text-xs ${(filters.energyRating || []).includes(opt) ? 'font-bold text-primary' : 'font-medium text-foreground/60 group-hover:text-primary'}`}>{opt}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* 1️⃣1️⃣ Installation Type */}
-                <div className="space-y-4 pt-4 border-t border-foreground/5">
-                    <button onClick={() => toggleSection('installation')} className="w-full flex items-center justify-between group">
-                        <label className="text-[11px] font-black text-foreground uppercase tracking-widest cursor-pointer group-hover:text-primary transition-colors">Installation Type</label>
-                        <ChevronDown className={`w-3 h-3 text-foreground/40 transition-transform ${openSections.includes('installation') ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openSections.includes('installation') && (
-                        <div className="space-y-2 pt-1">
-                            {['Freestanding', 'Built-in', 'Wall Mounted'].map((opt) => (
-                                <button
-                                    key={opt}
-                                    onClick={() => {
-                                        const newVal = (filters.installationType || []).includes(opt)
-                                            ? filters.installationType.filter(v => v !== opt)
-                                            : [...(filters.installationType || []), opt];
-                                        onFilterChange('installationType', newVal);
-                                    }}
-                                    className="w-full flex items-center gap-3 group py-0.5"
-                                >
-                                    <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${(filters.installationType || []).includes(opt) ? 'bg-primary border-primary' : 'border-foreground/10 group-hover:border-primary'}`}>
-                                        {(filters.installationType || []).includes(opt) && <FaCheckSquare className="text-background w-3 h-3" />}
-                                    </div>
-                                    <span className={`text-xs ${(filters.installationType || []).includes(opt) ? 'font-bold text-primary' : 'font-medium text-foreground/60 group-hover:text-primary'}`}>{opt}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* 1️⃣2️⃣ Usage Type */}
-                <div className="space-y-4 pt-4 border-t border-foreground/5">
-                    <button onClick={() => toggleSection('usage')} className="w-full flex items-center justify-between group">
-                        <label className="text-[11px] font-black text-foreground uppercase tracking-widest cursor-pointer group-hover:text-primary transition-colors">Usage Type</label>
-                        <ChevronDown className={`w-3 h-3 text-foreground/40 transition-transform ${openSections.includes('usage') ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openSections.includes('usage') && (
-                        <div className="space-y-2 pt-1">
-                            {['Home', 'Commercial', 'Industrial'].map((opt) => (
-                                <button
-                                    key={opt}
-                                    onClick={() => {
-                                        const newVal = (filters.usageType || []).includes(opt)
-                                            ? filters.usageType.filter(v => v !== opt)
-                                            : [...(filters.usageType || []), opt];
-                                        onFilterChange('usageType', newVal);
-                                    }}
-                                    className="w-full flex items-center gap-3 group py-0.5"
-                                >
-                                    <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${(filters.usageType || []).includes(opt) ? 'bg-primary border-primary' : 'border-foreground/10 group-hover:border-primary'}`}>
-                                        {(filters.usageType || []).includes(opt) && <FaCheckSquare className="text-background w-3 h-3" />}
-                                    </div>
-                                    <span className={`text-xs ${(filters.usageType || []).includes(opt) ? 'font-bold text-primary' : 'font-medium text-foreground/60 group-hover:text-primary'}`}>{opt}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* 1️⃣3️⃣ Warranty */}
-                <div className="space-y-4 pt-4 border-t border-foreground/5">
-                    <button onClick={() => toggleSection('warranty')} className="w-full flex items-center justify-between group">
-                        <label className="text-[11px] font-black text-foreground uppercase tracking-widest cursor-pointer group-hover:text-primary transition-colors">Warranty</label>
-                        <ChevronDown className={`w-3 h-3 text-foreground/40 transition-transform ${openSections.includes('warranty') ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openSections.includes('warranty') && (
-                        <div className="space-y-2 pt-1">
-                            {['1 Year', '2 Years', '3 Years+', 'Compressor Warranty'].map((opt) => (
-                                <button
-                                    key={opt}
-                                    onClick={() => {
-                                        const newVal = (filters.warranty || []).includes(opt)
-                                            ? filters.warranty.filter(v => v !== opt)
-                                            : [...(filters.warranty || []), opt];
-                                        onFilterChange('warranty', newVal);
-                                    }}
-                                    className="w-full flex items-center gap-3 group py-0.5"
-                                >
-                                    <div className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${(filters.warranty || []).includes(opt) ? 'bg-primary border-primary' : 'border-foreground/10 group-hover:border-primary'}`}>
-                                        {(filters.warranty || []).includes(opt) && <FaCheckSquare className="text-background w-3 h-3" />}
-                                    </div>
-                                    <span className={`text-xs ${(filters.warranty || []).includes(opt) ? 'font-bold text-primary' : 'font-medium text-foreground/60 group-hover:text-primary'}`}>{opt}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* 1️⃣4️⃣ Smart Feature */}
-                <div className="space-y-4 pt-4 border-t border-foreground/5">
-                    <button
-                        onClick={() => onFilterChange('isSmart', !filters.isSmart)}
-                        className="w-full flex items-center gap-3 group"
-                    >
-                        <div className={`w-4 h-4 rounded-[3px] border transition-colors flex items-center justify-center ${filters.isSmart ? 'bg-black border-black' : 'border-foreground/20 group-hover:border-black'}`}>
-                            {filters.isSmart && <FaCheckSquare className="text-white w-3 h-3" />}
-                        </div>
-                        <label className="text-[11px] font-black text-foreground uppercase tracking-widest cursor-pointer group-hover:text-black transition-colors">Smart / IoT Enabled</label>
-                    </button>
-                </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                ))}
             </div>
         </aside>
     );

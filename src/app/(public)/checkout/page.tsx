@@ -25,7 +25,7 @@ import { useCart } from '@/client/context/CartContext';
 import { orderService } from '@/lib/api/services/order.service';
 import { wishlistService } from '@/lib/api/services/wishlist.service';
 import { paymentService } from '@/lib/api/services/payment.service';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function CheckoutPage() {
     const { cart, total, clearCart } = useCart();
@@ -39,7 +39,7 @@ export default function CheckoutPage() {
     const [showAddressForm, setShowAddressForm] = useState(false);
     const [newAddress, setNewAddress] = useState({ label: '', name: '', line1: '', city: '', state: '', zip: '', type: 'home' });
 
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     const handleAddAddress = (e: React.FormEvent) => {
         e.preventDefault();
@@ -48,12 +48,12 @@ export default function CheckoutPage() {
         setSelectedAddressId(id);
         setShowAddressForm(false);
         setNewAddress({ label: '', name: '', line1: '', city: '', state: '', zip: '', type: 'home' });
-        showSnackbar('Address added successfully!', 'success');
+        toast.success('Address added successfully!');
     };
 
     const handleCreateOrder = async () => {
         if (!selectedAddressId) {
-            showSnackbar('Please select a shipping address.', 'error');
+            toast.error('Please select a shipping address.');
             return;
         }
 
@@ -89,16 +89,16 @@ export default function CheckoutPage() {
             }
 
             if (orderIds.length > 0) {
-                showSnackbar('Order placed successfully', 'success');
+                toast.success('Order placed successfully');
                 // For simplicity, redirect to the first order's payment
                 router.push(`/checkout/payment?orderId=${orderIds[0]}`);
             } else {
-                showSnackbar('Order creation failed.', 'error');
+                toast.error('Order creation failed.');
             }
 
         } catch (error: any) {
             console.error('Checkout error:', error);
-            showSnackbar(error.message || 'Critical error during checkout.', 'error');
+            toast.error(error.message || 'Critical error during checkout.');
         } finally {
             setIsProcessing(false);
         }
@@ -112,11 +112,11 @@ export default function CheckoutPage() {
     ];
 
     return (
-        <div className="min-h-screen pt-24 pb-24 bg-background">
-            <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+        <div className="min-h-screen pt-20 md:pt-24 pb-12 md:pb-24 bg-background">
+            <div className="container-responsive">
 
                 {/* Step Progress Bar */}
-                <div className="flex items-center justify-between max-w-4xl mx-auto mb-12 relative">
+                <div className="flex items-center justify-between max-w-4xl mx-auto mb-8 md:mb-12 relative px-2">
                     <div className="absolute top-1/2 left-0 w-full h-0.5 bg-foreground/5 -translate-y-1/2" />
                     <div
                         className="absolute top-1/2 left-0 h-0.5 bg-black -translate-y-1/2 transition-all duration-500"
@@ -124,12 +124,12 @@ export default function CheckoutPage() {
                     />
 
                     {steps.map((s) => (
-                        <div key={s.id} className="relative z-10 flex flex-col items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs transition-all duration-300 border-2 ${step >= s.id ? 'bg-black border-black text-white shadow-lg shadow-black/20' : 'bg-white border-foreground/10 text-foreground/20'
+                        <div key={s.id} className="relative z-10 flex flex-col items-center gap-2">
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-[10px] sm:text-xs transition-all duration-300 border-2 ${step >= s.id ? 'bg-black border-black text-white shadow-lg shadow-black/20' : 'bg-white border-foreground/10 text-foreground/20'
                                 }`}>
-                                {step > s.id ? <HiOutlineCheckCircle className="w-6 h-6" /> : s.id}
+                                {step > s.id ? <HiOutlineCheckCircle className="w-5 h-5 sm:w-6 sm:h-6" /> : s.id}
                             </div>
-                            <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${step >= s.id ? 'text-black' : 'text-foreground/20'}`}>
+                            <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest ${step >= s.id ? 'text-black' : 'text-foreground/20'}`}>
                                 {s.label}
                             </span>
                         </div>
@@ -140,8 +140,8 @@ export default function CheckoutPage() {
                     {/* Left Side: Checkout Form */}
                     <div className="lg:col-span-8 space-y-10">
                         <header>
-                            <h1 className="text-5xl font-black text-foreground tracking-tight mb-4 italic uppercase">Secure <span className="text-black">Escrow Checkout</span></h1>
-                            <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">Review your shipping details and proceed to secure escrow payment.</p>
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground tracking-tight mb-4 italic uppercase leading-tight">Secure <span className="text-black">Escrow Checkout</span></h1>
+                            <p className="text-foreground/40 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Review your shipping details and proceed to secure escrow payment.</p>
                         </header>
 
                         {/* Buyer Protection Banner */}

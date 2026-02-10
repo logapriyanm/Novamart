@@ -16,10 +16,10 @@ import {
 } from 'react-icons/fa';
 import { apiClient } from '@/lib/api/client';
 import OptimizedImage from '@/client/components/ui/OptimizedImage';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function MyReviewsPage() {
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [reviews, setReviews] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'ALL' | 'PHOTOS' | 'VERIFIED'>('ALL');
@@ -35,7 +35,7 @@ export default function MyReviewsPage() {
             setReviews(data || []);
         } catch (error) {
             console.error('Failed to fetch reviews:', error);
-            showSnackbar('Failed to load reviews history', 'error');
+            toast.error('Failed to load reviews history');
         } finally {
             setIsLoading(false);
         }
@@ -45,10 +45,10 @@ export default function MyReviewsPage() {
         if (!confirm('Are you sure you want to delete this review?')) return;
         try {
             // await apiClient.delete(`/reviews/${reviewId}`); // API not ready yet
-            showSnackbar('Review deleted successfully', 'success');
+            toast.success('Review deleted successfully');
             setReviews(prev => prev.filter(r => r.id !== reviewId));
         } catch (error) {
-            showSnackbar('Failed to delete review', 'error');
+            toast.error('Failed to delete review');
         }
     };
 

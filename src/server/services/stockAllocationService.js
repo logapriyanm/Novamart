@@ -20,16 +20,20 @@ class StockAllocationService {
             throw new Error('UNAUTHORIZED_PRODUCT_ALLOCATION');
         }
 
-        // 2. Verify Dealer is in network (Approved)
-        const isApproved = await prisma.manufacturer.findFirst({
-            where: {
-                id: mfgId,
-                dealersApproved: { some: { id: dealerId } }
-            }
+        // 2. Ensure Dealer is in network (Approved)
+        const manufacturer = await prisma.manufacturer.findUnique({
+            where: { id: mfgId },
+            include: { dealersApproved: { where: { id: dealerId } } }
         });
 
-        if (!isApproved) {
-            throw new Error('DEALER_NOT_IN_NETWORK');
+        if (manufacturer.dealersApproved.length === 0) {
+            // Automatically add to network if allocating stock (relationship established via negotiation)
+            await prisma.manufacturer.update({
+                where: { id: mfgId },
+                data: {
+                    dealersApproved: { connect: { id: dealerId } }
+                }
+            });
         }
 
         // 3. Check if dealer is blocked (Phase 8 integration)

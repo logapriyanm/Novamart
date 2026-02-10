@@ -6,13 +6,13 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function DealerInventoryPage() {
     const [inventory, setInventory] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState<string | null>(null);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchInventory();
@@ -38,9 +38,9 @@ export default function DealerInventoryPage() {
                 price: parseFloat(newPrice)
             });
             await fetchInventory();
-            showSnackbar('Price updated successfully', 'success');
+            toast.success('Price updated successfully');
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to update price', 'error');
+            toast.error(error.message || 'Failed to update price');
         } finally {
             setIsUpdating(null);
         }
@@ -54,9 +54,25 @@ export default function DealerInventoryPage() {
                 stock: parseInt(newStock)
             });
             await fetchInventory();
-            showSnackbar('Stock updated successfully', 'success');
+            toast.success('Stock updated successfully');
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to update stock', 'error');
+            toast.error(error.message || 'Failed to update stock');
+        } finally {
+            setIsUpdating(null);
+        }
+    };
+
+    const handleToggleListing = async (id: string, currentStatus: boolean) => {
+        setIsUpdating(id);
+        try {
+            await apiClient.put('/dealer/inventory/toggle-listing', {
+                inventoryId: id,
+                isListed: !currentStatus
+            });
+            await fetchInventory();
+            toast.success(currentStatus ? 'Product delisted' : 'Product is now LIVE');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to toggle status');
         } finally {
             setIsUpdating(null);
         }
@@ -71,13 +87,6 @@ export default function DealerInventoryPage() {
                     <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest text-[10px]">Real-time regional fulfillment spine</p>
                 </div>
                 <div className="flex gap-3">
-                    <Link
-                        href="/dealer/sourcing"
-                        className="flex items-center gap-2 px-6 py-2.5 bg-[#10367D] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#10367D]/90 transition-all shadow-lg shadow-[#10367D]/20"
-                    >
-                        <FaBox className="w-3 h-3" />
-                        Source New Assets
-                    </Link>
                     <button
                         onClick={fetchInventory}
                         className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-100 rounded-xl text-[10px] font-black text-[#1E293B] hover:bg-slate-50 transition-all shadow-sm"
@@ -95,10 +104,10 @@ export default function DealerInventoryPage() {
                         <thead>
                             <tr className="bg-slate-50/50 border-b border-slate-100">
                                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Product Asset</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Base Price</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Retail Price (Edit)</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Stock Level (Edit)</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Fulfillment</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Wholesale</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Retail Config</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status / Visibility</th>
+                                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -132,44 +141,62 @@ export default function DealerInventoryPage() {
                                                     <h4 className="text-sm font-black text-[#1E293B]">{item.product.name}</h4>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <FaIndustry className="w-2 h-2 text-slate-300" />
-                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">CAT: {item.product.category}</p>
+                                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">ALLOCATED: {item.allocatedStock || 0} UNITS</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6 text-xs font-bold text-slate-400">₹{item.product.basePrice}</td>
+                                        <td className="px-8 py-6 text-xs font-bold text-slate-400 italic">₹{item.dealerBasePrice || item.product.basePrice}</td>
                                         <td className="px-8 py-6">
-                                            <div className="flex items-center gap-2 group/input">
-                                                <span className="text-xs font-black text-[#1E293B]">₹</span>
-                                                <input
-                                                    type="number"
-                                                    defaultValue={item.price}
-                                                    onBlur={(e) => handleUpdatePrice(item.id, e.target.value)}
-                                                    className="w-28 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-black focus:outline-none focus:border-[#10367D]/30 transition-all group-hover/input:bg-white"
-                                                    disabled={isUpdating === item.id}
-                                                />
+                                            <div className="space-y-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase">PRC:</span>
+                                                    <span className="text-xs font-black text-[#1E293B]">₹{item.price}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase">STK:</span>
+                                                    <div className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${item.stock > 0 ? 'bg-blue-50 text-[#10367D]' : 'bg-rose-50 text-rose-600'}`}>
+                                                        {item.stock} Units
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
-                                            <div className="flex items-center gap-3">
-                                                <input
-                                                    type="number"
-                                                    defaultValue={item.stock}
-                                                    onBlur={(e) => handleUpdateStock(item.id, e.target.value)}
-                                                    className="w-20 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-xs font-black focus:outline-none focus:border-[#10367D]/30 transition-all"
-                                                    disabled={isUpdating === item.id}
-                                                />
-                                                <div className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${item.stock > 10 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${item.stock > 10 ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`}></span>
-                                                    {item.stock} Units
+                                            <div className="flex flex-col gap-2">
+                                                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest w-fit ${item.isListed ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${item.isListed ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></span>
+                                                    {item.isListed ? 'Public Listing' : 'Draft Access'}
                                                 </div>
-                                                {item.stock <= 5 && <FaExclamationTriangle className="text-amber-500 w-3 h-3" />}
+                                                {!item.isListed && (
+                                                    <button
+                                                        onClick={() => handleToggleListing(item.id, false)}
+                                                        className="text-[9px] font-black text-[#10367D] uppercase tracking-widest hover:underline text-left"
+                                                    >
+                                                        Publish to Market
+                                                    </button>
+                                                )}
+                                                {item.isListed && (
+                                                    <button
+                                                        onClick={() => handleToggleListing(item.id, true)}
+                                                        className="text-[9px] font-black text-rose-500 uppercase tracking-widest hover:underline text-left"
+                                                    >
+                                                        Temporarily Unlist
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6 text-right">
-                                            <button className="text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:underline flex items-center gap-2 ml-auto">
-                                                <FaHistory className="w-3 h-3" /> Batch History
-                                            </button>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <Link
+                                                    href={`/dealer/inventory/list/${item.id}`}
+                                                    className="px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2 shadow-sm"
+                                                >
+                                                    Configure Listing
+                                                </Link>
+                                                <button className="text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-[#10367D] flex items-center gap-2">
+                                                    <FaHistory className="w-2.5 h-2.5" /> Log
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

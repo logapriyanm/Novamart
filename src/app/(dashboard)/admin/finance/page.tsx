@@ -12,12 +12,12 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function FinanceDashboard() {
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         // Fetch orders and filter for PAID status locally for now, 
@@ -40,20 +40,20 @@ export default function FinanceDashboard() {
     const handleRelease = async (orderId: string) => {
         try {
             await apiClient.put(`/admin/escrow/settle/${orderId}`, {});
-            showSnackbar('Funds Released to Dealer', 'success');
+            toast.success('Funds Released to Dealer');
             fetchOrders();
         } catch (error) {
-            showSnackbar('Settlement Failed', 'error');
+            toast.error('Settlement Failed');
         }
     };
 
     const handleRefund = async (orderId: string) => {
         try {
             await apiClient.post(`/admin/escrow/refund/${orderId}`, { amount: 0, isPartial: false });
-            showSnackbar('Full Refund Initiated', 'success');
+            toast.success('Full Refund Initiated');
             fetchOrders();
         } catch (error) {
-            showSnackbar('Refund Failed', 'error');
+            toast.error('Refund Failed');
         }
     };
 

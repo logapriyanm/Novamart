@@ -51,7 +51,7 @@ export const getAllProducts = async (req, res) => {
         const dealerId = req.user?.dealer?.id;
 
         const result = await productService.getAllProducts(req.query, userRole, dealerId);
-        res.json({ success: true, ...result });
+        res.json({ success: true, data: result });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -110,9 +110,11 @@ export const bulkImportProducts = async (req, res) => {
 
 export const getDiscoveryFilters = async (req, res) => {
     try {
-        const data = await productService.getDiscoveryFilters(req.query.category);
+        const { category, subCategory } = req.query;
+        const data = await productService.getDiscoveryFilters(category, subCategory);
         res.json({ success: true, data });
     } catch (error) {
+        logger.error('Fetch discovery filters failed:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch filters' });
     }
 };

@@ -3,8 +3,8 @@ import { Metadata, ResolvingMetadata } from 'next';
 import SellerClient from './SellerClient';
 
 interface Props {
-    params: { id: string };
-    searchParams: { [key: string]: string | string[] | undefined };
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 // Function to fetch seller data
@@ -31,7 +31,8 @@ export async function generateMetadata(
     { params }: Props,
     parent: ResolvingMetadata
 ): Promise<Metadata> {
-    const seller = await getSeller(params.id);
+    const { id } = await params;
+    const seller = await getSeller(id);
 
     if (!seller) {
         return {
@@ -40,20 +41,21 @@ export async function generateMetadata(
     }
 
     return {
-        title: `${seller.businessName} - Verified Seller | NovaMart`,
-        description: `Shop from ${seller.businessName} on NovaMart. ${seller.city}, ${seller.state}. ${seller.stats.totalProducts} products available. Verified and trusted.`,
+        title: `Verified ${seller.role === 'MANUFACTURER' ? 'Manufacturer' : 'Dealer'} – ${seller.businessName} | NovaMart`,
+        description: `Connect with ${seller.businessName}, a verified ${seller.role.toLowerCase()} on NovaMart. Located in ${seller.city}, ${seller.state}. Browse their wholesale portfolio and verified products.`,
         openGraph: {
             title: `${seller.businessName} | NovaMart Seller`,
             description: `Shop wholesale products from ${seller.businessName}. Secure payments and fast delivery via NovaMart.`,
         },
         alternates: {
-            canonical: `https://novamart.com/sellers/${params.id}`
+            canonical: `https://novamart.com/sellers/${id}`
         },
     };
 }
 
 export default async function SellerPage({ params }: Props) {
-    const seller = await getSeller(params.id);
+    const { id } = await params;
+    const seller = await getSeller(id);
 
     // JSON-LD for LocalBusiness or Organization
     const jsonLd = seller ? {
@@ -83,7 +85,8 @@ export default async function SellerPage({ params }: Props) {
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
                 />
             )}
-            <SellerClient id={params.id} initialData={seller} />
+            <SellerClient id={id} initialData={seller} />
         </>
     );
 }
+

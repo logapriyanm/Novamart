@@ -7,7 +7,8 @@ import {
     FaStore, FaBoxOpen, FaCoins, FaSpinner, FaArrowLeft
 } from 'react-icons/fa';
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+// import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
 interface ChatRoomProps {
@@ -17,7 +18,7 @@ interface ChatRoomProps {
 
 export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
     const router = useRouter();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     const [negotiation, setNegotiation] = useState<any>(null);
@@ -36,11 +37,13 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
     }, [negotiation?.chatLog]);
 
     const fetchNegotiation = async () => {
+        if (!negotiationId || negotiationId === 'undefined') return;
+
         try {
             const data = await apiClient.get<any>(`/negotiation/${negotiationId}`);
             setNegotiation(data);
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to load negotiation', 'error');
+            toast.error(error.message || 'Failed to load negotiation');
         } finally {
             setLoading(false);
         }
@@ -59,9 +62,9 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
             setMessage('');
             setNewOffer('');
             await fetchNegotiation(); // Refresh data
-            showSnackbar('Message sent', 'success');
+            toast.success('Message sent');
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to send message', 'error');
+            toast.error(error.message || 'Failed to send message');
         } finally {
             setSending(false);
         }
@@ -72,14 +75,46 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
         try {
             await apiClient.put(`/negotiation/${negotiationId}`, { status });
             await fetchNegotiation();
-            showSnackbar(`Negotiation ${status.toLowerCase()}`, 'success');
+            toast.success(`Negotiation ${status.toLowerCase()}`);
 
             // Redirect after successful action
             setTimeout(() => {
                 router.push(userRole === 'DEALER' ? '/dealer/negotiations' : '/manufacturer/negotiations');
             }, 2000);
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to update status', 'error');
+            toast.error(error.message || 'Failed to update status');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const handlePlaceOrder = async () => {
+        setSending(true);
+        try {
+            await apiClient.put(`/negotiation/${negotiationId}`, {
+                status: 'ORDER_REQUESTED',
+                message: 'Requesting purchase order...'
+            });
+            await fetchNegotiation();
+            toast.success('Purchase Order Sent!');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to send order request');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const handleOrderFulfillment = async () => {
+        setSending(true);
+        try {
+            await apiClient.put(`/negotiation/${negotiationId}`, {
+                status: 'ORDER_FULFILLED',
+                message: 'Processing Order...'
+            });
+            await fetchNegotiation();
+            toast.success('Order Approved & Stock Allocated');
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to fulfill order');
         } finally {
             setSending(false);
         }
@@ -103,7 +138,24 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
 
     const isDealer = userRole === 'DEALER';
     const partnerName = isDealer ? negotiation.manufacturer.companyName : negotiation.dealer.businessName;
-    const statusColor = negotiation.status === 'OPEN' ? 'blue' : negotiation.status === 'ACCEPTED' ? 'green' : 'red';
+    const statusColorMap: Record<string, string> = {
+        'OPEN': 'blue',
+        'ACCEPTED': 'green',
+        'REJECTED': 'red',
+        'ORDER_REQUESTED': 'amber',
+        'ORDER_FULFILLED': 'emerald'
+    };
+
+    const statusLabelMap: Record<string, string> = {
+        'OPEN': 'Negotiating',
+        'ACCEPTED': 'Terms Accepted',
+        'REJECTED': 'Rejected',
+        'ORDER_REQUESTED': 'Order Requested',
+        'ORDER_FULFILLED': 'Order Fulfilled'
+    };
+
+    const statusColor = statusColorMap[negotiation.status] || 'slate';
+    const statusLabel = statusLabelMap[negotiation.status] || negotiation.status;
 
     return (
         <div className="space-y-6">
@@ -139,12 +191,12 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                     </div>
 
                     <span className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-${statusColor}-50 text-${statusColor}-600 border border-${statusColor}-100`}>
-                        {negotiation.status}
+                        {statusLabel}
                     </span>
                 </div>
             </div>
 
-            {/* Chat Messages */}
+
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
                 <div className="space-y-4 max-h-96 overflow-y-auto mb-6">
                     {negotiation.chatLog?.map((chat: any, idx: number) => {
@@ -223,7 +275,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                                     className="flex-1 py-3 px-4 bg-green-600 text-white rounded-xl font-black text-sm hover:bg-green-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     <FaCheckCircle />
-                                    Accept & Allocate Stock
+                                    Accept Terms
                                 </button>
                             </div>
                         )}
@@ -235,6 +287,51 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                         <p className="text-sm font-bold text-slate-600">
                             This negotiation has been {negotiation.status.toLowerCase()}.
                         </p>
+
+                        {/* Dealer: Place Order Action */}
+                        {negotiation.status === 'ACCEPTED' && isDealer && (
+                            <div className="mt-4 pt-4 border-t border-slate-200">
+                                <button
+                                    onClick={handlePlaceOrder}
+                                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-200"
+                                >
+                                    <FaCheckCircle />
+                                    Raise Purchase Order
+                                </button>
+                                <p className="text-[10px] text-center text-slate-400 mt-2">
+                                    Request purchase of {negotiation.quantity} units at ₹{negotiation.currentOffer}.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Manufacturer: Fulfill Order Action */}
+                        {negotiation.status === 'ORDER_REQUESTED' && !isDealer && (
+                            <div className="mt-4 pt-4 border-t border-slate-200">
+                                <button
+                                    onClick={handleOrderFulfillment}
+                                    disabled={sending}
+                                    className="w-full py-3 bg-[#10367D] hover:bg-blue-800 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-200 disabled:opacity-50"
+                                >
+                                    <FaBoxOpen />
+                                    Approve & Allocate Stock
+                                </button>
+                                <p className="text-[10px] text-center text-slate-400 mt-2">
+                                    This will automatically allocate inventory to the dealer.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Order Confirmed State */}
+                        {negotiation.status === 'ORDER_FULFILLED' && (
+                            <div className="mt-4 pt-4 border-t border-slate-200 bg-emerald-50 rounded-xl p-4 text-center">
+                                <p className="text-emerald-700 font-bold flex items-center justify-center gap-2">
+                                    <FaCheckCircle /> Order Processed
+                                </p>
+                                <p className="text-[10px] text-emerald-600 mt-1">
+                                    Inventory has been allocated.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

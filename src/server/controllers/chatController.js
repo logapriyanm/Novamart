@@ -1,6 +1,28 @@
 import { Chat, Message } from '../models/index.js';
 import prisma from '../lib/prisma.js';
 
+const checkSubscription = async (userId, requiredTier = 'PRO') => {
+    const dealer = await prisma.dealer.findUnique({
+        where: { userId },
+        include: {
+            subscriptions: {
+                where: { status: 'ACTIVE' },
+                include: { plan: true },
+                orderBy: { endDate: 'desc' },
+                take: 1
+            }
+        }
+    });
+
+    if (!dealer) return false;
+    const activeSub = dealer.subscriptions[0];
+    if (!activeSub) return false;
+
+    // Rank 1: BASIC, Rank 2: PRO, Rank 3: ENTERPRISE
+    const tiers = { 'BASIC': 1, 'PRO': 2, 'ENTERPRISE': 3 };
+    return tiers[activeSub.plan.name] >= tiers[requiredTier];
+};
+
 export const createChat = async (req, res) => {
     try {
         const { type, contextId, receiverId, receiverRole } = req.body;
@@ -11,8 +33,17 @@ export const createChat = async (req, res) => {
         if (senderRole === 'CUSTOMER' && receiverRole !== 'DEALER') {
             return res.status(403).json({ message: 'Customers can only chat with Dealers' });
         }
-        if (senderRole === 'DEALER' && !['CUSTOMER', 'MANUFACTURER', 'ADMIN'].includes(receiverRole)) {
-            return res.status(403).json({ message: 'Invalid chat recipient for Dealer' });
+
+        // 2. Subscription Gating (B2B/Manufacturer Only)
+        if (senderRole === 'DEALER' && receiverRole === 'MANUFACTURER') {
+            // Only gate Dealer-Manufacturer chats, not Customer-Dealer
+            const hasAccess = await checkSubscription(senderId, 'PRO');
+            if (!hasAccess) {
+                return res.status(403).json({
+                    message: 'B2B Chat with Manufacturers requires a PRO or ENTERPRISE subscription.',
+                    code: 'SUBSCRIPTION_REQUIRED'
+                });
+            }
         }
 
         // 2. Order Gating (Crucial)

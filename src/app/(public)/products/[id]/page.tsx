@@ -3,8 +3,8 @@ import { Metadata, ResolvingMetadata } from 'next';
 import ProductClient from './ProductClient';
 
 interface Props {
-    params: { id: string };
-    searchParams: { [key: string]: string | string[] | undefined };
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 // Function to fetch product data
@@ -36,7 +36,7 @@ export async function generateMetadata(
     { params, searchParams }: Props,
     parent: ResolvingMetadata
 ): Promise<Metadata> {
-    const id = params.id;
+    const { id } = await params;
     const product = await getProduct(id);
 
     if (!product) {
@@ -50,8 +50,8 @@ export async function generateMetadata(
     const mainImage = product.images?.[0] || '/og-image.jpg';
 
     return {
-        title: `${product.name} | Buy Wholesale on NovaMart`,
-        description: `Buy ${product.name} from verified sellers on NovaMart. ${product.description.substring(0, 150)}...`,
+        title: `${product.name} Price, Specs & Wholesale – NovaMart`,
+        description: `Get the best price and full specifications for ${product.name} on NovaMart. Buy wholesale from verified manufacturers and dealers with secure escrow payments.`,
         openGraph: {
             title: product.name,
             description: product.description.substring(0, 200),
@@ -71,7 +71,8 @@ export async function generateMetadata(
 
 // Server Component
 export default async function ProductPage({ params }: Props) {
-    const product = await getProduct(params.id);
+    const { id } = await params;
+    const product = await getProduct(id);
 
     // JSON-LD Structured Data
     const jsonLd = product ? {
@@ -103,7 +104,8 @@ export default async function ProductPage({ params }: Props) {
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
                 />
             )}
-            <ProductClient id={params.id} initialData={product} />
+            <ProductClient id={id} initialData={product} />
         </>
     );
 }
+

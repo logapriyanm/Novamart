@@ -18,11 +18,11 @@ class PaymentService {
 
             // 2. Idempotency Check: If already processed this specific payment
             if (order.payment?.razorpayPaymentId === razorpayPaymentId && order.status === 'PAID' && order.escrow) {
-                return order;
+                return { order, payment: order.payment };
             }
 
             // 3. Upsert Payment record
-            await tx.payment.upsert({
+            const paymentRecord = await tx.payment.upsert({
                 where: { orderId },
                 update: {
                     razorpayPaymentId,
@@ -65,7 +65,7 @@ class PaymentService {
                 }
             });
 
-            return updatedOrder;
+            return { order: updatedOrder, payment: paymentRecord };
         });
     }
 

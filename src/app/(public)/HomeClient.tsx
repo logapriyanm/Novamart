@@ -5,7 +5,7 @@ import HeroSection from '@/client/components/features/home/HeroSection';
 import TrustStrip from '@/client/components/features/home/TrustStrip';
 import TrendingBar from '@/client/components/features/home/TrendingBar';
 import CategoryGrid from '@/client/components/features/home/CategoryGrid';
-import FeaturedProducts from '@/client/components/features/home/FeaturedProducts';
+import CustomerOffers from '@/client/components/features/home/CustomerOffers';
 import WhyNovaMart from '@/client/components/features/home/WhyNovaMart';
 import ManufacturersGrid from '@/client/components/features/home/ManufacturersGrid';
 import Testimonials from '@/client/components/features/home/Testimonials';
@@ -14,12 +14,17 @@ import DeliveryPartners from '@/client/components/features/home/DeliveryPartners
 import OccasionBanner from '@/client/components/features/home/OccasionBanner';
 import RecommendedProducts from '@/client/components/features/home/RecommendedProducts';
 import BestsellerSlider from '@/client/components/features/home/BestsellerSlider';
+import B2BShortcuts from '@/client/components/features/home/B2BShortcuts';
 import { useAuth } from '@/client/hooks/useAuth';
 import { apiClient } from '@/lib/api/client';
 
 // Simple interface for personalized data to avoid any type errors
 interface PersonalizedData {
     specialDay?: { type: string; discount: string };
+    b2bMetrics?: {
+        role: 'DEALER' | 'MANUFACTURER';
+        actions: { label: string; count: number; link: string; icon: string }[];
+    };
     hero?: { product?: any; category?: string };
     continueViewing?: any[];
     recommended?: any[];
@@ -77,6 +82,10 @@ export default function HomeClient() {
                                 />
                             )}
 
+                            {personalizedData?.b2bMetrics && (
+                                <B2BShortcuts metrics={personalizedData.b2bMetrics} />
+                            )}
+
                             {personalizedData?.hero && personalizedData.hero.product && (
                                 <RecommendedProducts
                                     title={`Top Pick for You: ${personalizedData.hero.category}`}
@@ -103,7 +112,7 @@ export default function HomeClient() {
                     )}
 
                     <TrustStrip />
-                    <FeaturedProducts />
+                    <CustomerOffers />
                     <CategoryGrid />
 
                     {/* Guest-only Trust Components */}

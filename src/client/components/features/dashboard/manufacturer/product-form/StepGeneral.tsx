@@ -46,7 +46,10 @@ export default function StepGeneral() {
 
     const handleSubCategoryChange = (val: string) => {
         setSelectedSubCategory(val);
-        updateProductData({ subCategory: val });
+        updateProductData({
+            subCategory: val,
+            specifications: { ...productData.specifications, subCategory: val }
+        });
     };
 
     return (
@@ -88,7 +91,7 @@ export default function StepGeneral() {
                                     className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none"
                                 >
                                     <option value="">Select Category</option>
-                                    {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
+                                    {Object.entries(CATEGORY_CONFIG).map(([key, config]: [string, any]) => (
                                         <option key={key} value={key}>{config.label}</option>
                                     ))}
                                 </select>
@@ -107,8 +110,8 @@ export default function StepGeneral() {
                                     className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
                                 >
                                     <option value="">Select Sub-Category</option>
-                                    {availableSubCategories.map(sub => (
-                                        <option key={sub} value={sub}>{sub}</option>
+                                    {selectedMainCategory && Object.values(CATEGORY_CONFIG[selectedMainCategory].subCategories).map((sub: any) => (
+                                        <option key={sub.id} value={sub.id}>{sub.label}</option>
                                     ))}
                                 </select>
                                 <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />

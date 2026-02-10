@@ -49,10 +49,11 @@ export default function FeaturedProductsGrid({ columns = 4, filters }: FeaturedP
                 // If on a category page, we might have categorySlug prop, but here it's implicit in filters or passed via useParams in parent
                 // For global products page, it uses query params.
 
-                const data = await apiClient.get<any[]>('/products', { params });
+                const res = await apiClient.get<any>('/products', { params });
+                const productsArray = res.products || [];
 
                 // Transform API data to Card props
-                const transformed = data.map((p: any) => ({
+                const transformed = productsArray.map((p: any) => ({
                     id: p.id,
                     name: p.name,
                     price: parseFloat(p.basePrice), // Use base price or lowest inventory price

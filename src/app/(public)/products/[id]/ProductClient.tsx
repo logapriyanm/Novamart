@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaShieldAlt, FaStar, FaTruck, FaClock, FaUndo, FaCheckCircle, FaMinus, FaPlus, FaShoppingCart, FaBolt, FaQuestionCircle, FaAward, FaStore } from 'react-icons/fa';
+import { FaShieldAlt, FaStar, FaTruck, FaClock, FaUndo, FaCheckCircle, FaMinus, FaPlus, FaShoppingCart, FaBolt, FaQuestionCircle, FaAward, FaStore, FaHandshake } from 'react-icons/fa';
 import ChatWidget from '@/client/components/features/chat/ChatWidget';
 import Breadcrumb from '@/client/components/ui/Breadcrumb';
 import { useAuth } from '@/client/hooks/useAuth';
 import { useCart } from '@/client/context/CartContext';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { productService } from '@/lib/api/services/product.service';
 import Link from 'next/link';
 
@@ -19,13 +19,13 @@ interface ProductClientProps {
 
 export default function ProductClient({ id, initialData }: ProductClientProps) {
     const router = useRouter();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { addToCart } = useCart();
     const [product, setProduct] = useState<any>(initialData || null);
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('description');
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [isLoading, setIsLoading] = useState(!initialData);
 
     useEffect(() => {
@@ -36,7 +36,7 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                 setProduct(data);
             } catch (error) {
                 console.error('Failed to fetch product:', error);
-                showSnackbar('Failed to load product details', 'error');
+                toast.error('Failed to load product details');
             } finally {
                 setIsLoading(false);
             }
@@ -51,7 +51,7 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
         // Find inventory record
         const inventory = product.inventory?.[0];
         if (!inventory) {
-            showSnackbar('This product is currently unavailable', 'error');
+            toast.error('This product is currently unavailable');
             return;
         }
 
@@ -72,10 +72,10 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
             if (action === 'buy') {
                 router.push('/checkout');
             } else {
-                showSnackbar('Added to Cart successfully!', 'success');
+                toast.success('Added to Cart successfully!');
             }
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to add item to cart', 'error');
+            toast.error(error.message || 'Failed to add item to cart');
         }
     };
 
@@ -95,8 +95,8 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
     const discount = product.inventory?.[0]?.discount;
 
     return (
-        <div className="min-h-screen pt-28 pb-20 bg-slate-50/30">
-            <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
+        <div className="min-h-screen pt-20 md:pt-28 pb-10 md:pb-20 bg-slate-50/30">
+            <div className="container-responsive">
                 <Breadcrumb
                     items={[
                         { label: 'Products', href: '/products' },
@@ -115,12 +115,12 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                                 animate={{ opacity: 1, scale: 1 }}
                                 src={product.images[selectedImage]}
                                 alt={product.name}
-                                className="w-full h-full object-contain p-12"
+                                className="w-full h-full object-contain p-6 sm:p-12"
                             />
                             {product.manufacturer?.isVerified && (
-                                <div className="absolute top-8 left-8 bg-black text-white px-4 py-1.5 rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-xl shadow-black/20">
-                                    <FaShieldAlt className="w-4 h-4" />
-                                    Verified Quality
+                                <div className="absolute top-4 sm:top-8 left-4 sm:left-8 bg-white/90 backdrop-blur-sm p-1 rounded-full shadow-xl shadow-black/10 flex items-center gap-2 group cursor-help">
+                                    <img src="/verify.png" className="w-5 h-5 sm:w-6 sm:h-6 object-contain" alt="Verified" />
+                                    <span className="hidden group-hover:block pr-2 text-[8px] font-black uppercase tracking-widest text-slate-800">Verified Origin</span>
                                 </div>
                             )}
                         </div>
@@ -142,18 +142,21 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                         <div className="mb-8">
                             <div className="flex items-center gap-3 mb-4">
                                 {primarySeller && (
-                                    <Link href={`/sellers/${primarySeller.id}`} className="bg-black/5 text-black px-3 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-widest border border-black/10 hover:bg-black/10 transition-colors flex items-center gap-1">
+                                    <Link href={`/sellers/${primarySeller.id}`} className="bg-black/5 text-black px-3 py-1 rounded-[10px] text-[10px] font-black uppercase tracking-widest border border-black/10 hover:bg-black/10 transition-colors flex items-center gap-1.5">
                                         <FaStore className="w-3 h-3" />
                                         Sold by {primarySeller.businessName}
+                                        {primarySeller.isVerified && (
+                                            <img src="/verify.png" className="w-3.5 h-3.5 object-contain ml-0.5" alt="Verified" />
+                                        )}
                                     </Link>
                                 )}
                                 <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-3 py-1 rounded-[10px]">
                                     <FaStar className="w-3 h-3 fill-current" />
-                                    <span className="text-xs font-black">{product.averageRating?.toFixed(1) || 'New'}</span>
-                                    <span className="text-[10px] font-bold text-amber-600/60 ml-1">({product.reviewCount || 0} reviews)</span>
+                                    <span className="text-[10px] font-black">{product.averageRating?.toFixed(1) || 'New'}</span>
+                                    <span className="text-[10px] sm:text-[10px] font-bold text-amber-600/60 ml-1">({product.reviewCount || 0} reviews)</span>
                                 </div>
                             </div>
-                            <h1 className="text-3xl lg:text-5xl font-black text-black tracking-tight mb-6 leading-tight italic uppercase">
+                            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-black text-black tracking-tight mb-4 sm:mb-6 leading-tight italic uppercase">
                                 {product.name}
                             </h1>
 
@@ -174,8 +177,8 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-baseline gap-4">
-                                        <span className="text-5xl lg:text-6xl font-black text-black tracking-tighter">
+                                    <div className="flex items-baseline gap-2 sm:gap-4">
+                                        <span className="text-4xl sm:text-5xl lg:text-6xl font-black text-black tracking-tighter">
                                             ₹{currentPrice.toLocaleString()}
                                         </span>
                                         <div className="flex flex-col mb-1">
@@ -198,9 +201,9 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                                         <div className="flex items-center justify-between">
                                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Authorized Distributor</span>
                                             {primarySeller.isVerified && (
-                                                <div className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-[5px] border border-emerald-100 italic">
-                                                    <FaCheckCircle className="w-2.5 h-2.5" />
-                                                    <span className="text-[8px] font-black uppercase">Verified Chain</span>
+                                                <div className="flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-[5px] border border-black/5 italic shadow-sm">
+                                                    <img src="/verify.png" className="w-3 h-3 object-contain" alt="Verified" />
+                                                    <span className="text-[8px] font-black uppercase text-slate-800">Verified Chain</span>
                                                 </div>
                                             )}
                                         </div>
@@ -290,6 +293,16 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                                         Secure Buy now
                                     </button>
                                 </div>
+
+                                {/* Dealer-Specific: Bulk Negotiation */}
+                                {isAuthenticated && user?.role === 'DEALER' && (
+                                    <div className="mt-4">
+                                        <Link href={`/dealer/sourcing?search=${encodeURIComponent(product.name)}`} className="w-full py-5 bg-emerald-50 border-2 border-emerald-500 text-emerald-700 font-black text-sm rounded-[10px] shadow-xl shadow-emerald-500/10 hover:bg-emerald-100 transition-all uppercase tracking-widest flex items-center justify-center gap-3">
+                                            <FaHandshake className="w-5 h-5" />
+                                            Bulk Negotiation (Dealer)
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                         )}
 

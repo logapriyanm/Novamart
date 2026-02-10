@@ -8,7 +8,9 @@ export default function FCMHandler() {
         // Only run on client-side
         if (typeof window !== 'undefined') {
             const initFCM = async () => {
-                await requestNotificationPermission();
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    await requestNotificationPermission();
+                }
             };
 
             // Delay initialization slightly to ensure browser is ready

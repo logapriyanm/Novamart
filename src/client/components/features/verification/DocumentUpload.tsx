@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { FaCloudUploadAlt, FaCheckCircle, FaTimesCircle, FaSpinner, FaFileAlt, FaClock } from 'react-icons/fa';
 import { apiClient } from '../../../../lib/api/client';
-import { useSnackbar } from '../../../context/SnackbarContext';
+import { toast } from 'sonner';
 
 interface DocumentUploadProps {
     type: string;
@@ -16,7 +16,7 @@ interface DocumentUploadProps {
 export default function DocumentUpload({ type, label, description, onUploadSuccess, existingStatus }: DocumentUploadProps) {
     const [isUploading, setIsUploading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [status, setStatus] = useState(existingStatus);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,15 +50,15 @@ export default function DocumentUpload({ type, label, description, onUploadSucce
 
             if (data.success) {
                 setStatus('PENDING');
-                showSnackbar(`${label} uploaded successfully`, 'success');
+                toast.success(`${label} uploaded successfully`);
                 if (onUploadSuccess) onUploadSuccess();
                 setFile(null);
             } else {
-                showSnackbar(data.message || 'Upload failed', 'error');
+                toast.error(data.message || 'Upload failed');
             }
         } catch (error) {
             console.error('Upload error:', error);
-            showSnackbar('Failed to upload document', 'error');
+            toast.error('Failed to upload document');
         } finally {
             setIsUploading(false);
         }

@@ -11,7 +11,7 @@ class OrderService {
     /**
      * Create an order and lock inventory.
      */
-    async createOrder(customerId, dealerId, items) {
+    async createOrder(customerId, dealerId, items, shippingAddress) {
         return await prisma.$transaction(async (tx) => {
             let totalAmount = 0;
 
@@ -37,16 +37,28 @@ class OrderService {
 
                 if (!inventory) throw new Error(`Insufficient stock for item at this dealer.`);
 
-                // Update item with resolved values for DB creation later
-                item.productId = inventory.productId;
-                item.price = inventory.price;
+                // Check if negotiation exists for this item
+                if (item.negotiationId) {
+                    const negotiation = await tx.negotiation.findUnique({
+                        where: { id: item.negotiationId }
+                    });
+
+                    if (!negotiation) throw new Error('Invalid negotiation ID');
+                    if (negotiation.status !== 'ACCEPTED') throw new Error('Negotiation must be ACCEPTED to place order');
+                    if (negotiation.productId !== inventory.productId) throw new Error('Negotiation product mismatch');
+
+                    // Use negotiated price
+                    item.price = negotiation.currentOffer;
+                } else {
+                    item.price = inventory.price;
+                }
 
                 await tx.inventory.update({
                     where: { id: inventory.id },
                     data: { stock: { decrement: item.quantity }, locked: { increment: item.quantity } }
                 });
 
-                totalAmount += Number(inventory.price) * item.quantity;
+                totalAmount += Number(item.price) * item.quantity;
             }
 
             // 2. Dynamic Rules (GST & Commission)
@@ -64,9 +76,15 @@ class OrderService {
                     totalAmount,
                     taxAmount,
                     commissionAmount,
+                    shippingAddress,
                     status: 'CREATED',
                     items: {
-                        create: items.map(i => ({ productId: i.productId, quantity: i.quantity, price: i.price }))
+                        create: items.map(i => ({
+                            productId: i.productId,
+                            quantity: i.quantity,
+                            price: i.price,
+                            inventoryId: i.inventoryId // Saving inventory link
+                        }))
                     }
                 },
                 include: { items: true }
@@ -159,11 +177,28 @@ class OrderService {
     /**
      * Mark order as shipped.
      */
-    async shipOrder(orderId, trackingDetails) {
+    async shipOrder(orderId, trackingNumber, carrier = 'NovaExpress') {
         return await prisma.$transaction(async (tx) => {
             const order = await tx.order.update({
                 where: { id: orderId },
-                data: { status: 'SHIPPED' }
+                data: {
+                    status: 'SHIPPED',
+                    shipmentTracking: {
+                        upsert: {
+                            create: {
+                                trackingNumber,
+                                carrier,
+                                status: 'SHIPPED',
+                                estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // T+3 days
+                            },
+                            update: {
+                                trackingNumber,
+                                carrier,
+                                status: 'SHIPPED'
+                            }
+                        }
+                    }
+                }
             });
 
             await tx.orderTimeline.create({
@@ -171,7 +206,7 @@ class OrderService {
                     orderId,
                     fromState: 'CONFIRMED',
                     toState: 'SHIPPED',
-                    reason: `Order shipped via logistics partner. Tracking: ${trackingDetails}`
+                    reason: `Order shipped via ${carrier}. Tracking: ${trackingNumber}`
                 }
             });
 
@@ -179,7 +214,7 @@ class OrderService {
             systemEvents.emit(EVENTS.ORDER.SHIPPED, {
                 orderId,
                 userId: order.customerId,
-                trackingDetails
+                trackingNumber
             });
 
             return order;
@@ -194,6 +229,11 @@ class OrderService {
             const order = await tx.order.update({
                 where: { id: orderId },
                 data: { status: 'DELIVERED' }
+            });
+
+            await tx.shipmentTracking.update({
+                where: { orderId },
+                data: { status: 'DELIVERED', actualDelivery: new Date() }
             });
 
             await tx.orderTimeline.create({
@@ -308,8 +348,9 @@ class OrderService {
                 items: { include: { linkedProduct: true } },
                 customer: { include: { user: true } },
                 dealer: { include: { user: true } },
-                timeline: true,
-                escrow: true
+                timeline: { orderBy: { createdAt: 'desc' } },
+                escrow: true,
+                shipmentTracking: true
             }
         });
 

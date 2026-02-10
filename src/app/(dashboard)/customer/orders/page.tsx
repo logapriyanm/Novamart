@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaSearch as Search,
     FaFilter as Filter,
@@ -13,44 +13,52 @@ import {
     FaUndo as Undo,
     FaHeadset as Support,
     FaArrowRight as ArrowRight,
+    FaTimes,
+    FaCheckCircle,
+    FaInfoCircle,
 } from 'react-icons/fa';
 import { WhiteCard, TrackingBadge, StatusBadge, Stepper } from '@/client/components/features/dashboard/DashboardUI';
 
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function MyOrders() {
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const { showSnackbar } = useSnackbar();
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
+    const [isTrackingOpen, setIsTrackingOpen] = useState(false);
+    const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+    const [disputeReason, setDisputeReason] = useState('');
+    const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
+    // const { showSnackbar } = useSnackbar();
+
+    const fetchOrders = async () => {
+        try {
+            const data = await apiClient.get<any[]>('/orders/my');
+            const ordersList = data || [];
+
+            const mappedOrders = ordersList.map((order: any) => ({
+                id: order.id,
+                displayId: `NM-${order.id.slice(0, 5).toUpperCase()}`,
+                dealer: order.dealer?.businessName || 'Unknown Dealer',
+                dealerId: order.dealerId,
+                total: Number(order.totalAmount),
+                status: order.status,
+                currentStep: getStepFromStatus(order.status),
+                items: order.items.map((item: any) => `${item.linkedProduct?.name || 'Product'} (${item.quantity})`),
+                date: new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+            }));
+
+            setOrders(mappedOrders);
+        } catch (error) {
+            console.error('Failed to fetch orders:', error);
+            toast.error('Could not load your orders.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     React.useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const data = await apiClient.get<any[]>('/orders/my');
-                const ordersList = data || [];
-
-                // Map API response to UI format
-                const mappedOrders = ordersList.map((order: any) => ({
-                    id: order.id,
-                    displayId: `NM-${order.id.slice(0, 5).toUpperCase()}`,
-                    dealer: order.dealer?.businessName || 'Unknown Dealer',
-                    total: Number(order.totalAmount),
-                    status: order.status,
-                    currentStep: getStepFromStatus(order.status),
-                    items: order.items.map((item: any) => `${item.product.name} (${item.quantity})`),
-                    date: new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-                }));
-
-                setOrders(mappedOrders);
-            } catch (error) {
-                console.error('Failed to fetch orders:', error);
-                showSnackbar('Could not load your orders.', 'error');
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchOrders();
     }, []);
 
@@ -58,10 +66,47 @@ export default function MyOrders() {
         switch (status) {
             case 'CREATED': return 1;
             case 'PAID': return 2;
-            case 'PACKED': return 2; // In between
+            case 'PACKED': return 2;
             case 'SHIPPED': return 3;
             case 'DELIVERED': return 4;
             default: return -1;
+        }
+    };
+
+    const handleTrackOrder = async (orderId: string) => {
+        try {
+            const res = await apiClient.get<any>(`/orders/${orderId}`);
+            if (res) {
+                setSelectedOrder(res);
+                setIsTrackingOpen(true);
+            }
+        } catch (error) {
+            toast.error('Failed to fetch tracking details');
+        }
+    };
+
+    const handleOpenDispute = (order: any) => {
+        setSelectedOrder(order);
+        setIsDisputeOpen(true);
+    };
+
+    const submitDispute = async () => {
+        if (!disputeReason.trim()) {
+            toast.error('Please provide a reason for the return.');
+            return;
+        }
+
+        try {
+            setIsSubmittingDispute(true);
+            await apiClient.post(`/orders/${selectedOrder.id}/dispute`, { reason: disputeReason });
+            toast.success('Return request submitted successfully.');
+            setIsDisputeOpen(false);
+            setDisputeReason('');
+            fetchOrders();
+        } catch (error) {
+            toast.error('Failed to submit return request.');
+        } finally {
+            setIsSubmittingDispute(false);
         }
     };
 
@@ -69,6 +114,114 @@ export default function MyOrders() {
 
     return (
         <div className="space-y-10 pb-20 animate-fade-in">
+            {/* Modal Components */}
+            <AnimatePresence>
+                {/* Tracking Modal */}
+                {isTrackingOpen && selectedOrder && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            onClick={() => setIsTrackingOpen(false)}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">Live Tracking</h3>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Package NM-{selectedOrder.id.slice(0, 5).toUpperCase()}</p>
+                                </div>
+                                <button onClick={() => setIsTrackingOpen(false)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
+                                    <FaTimes />
+                                </button>
+                            </div>
+                            <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                <Stepper currentStep={getStepFromStatus(selectedOrder.status)} />
+
+                                {selectedOrder.shipmentTracking && (
+                                    <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100/50 flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Carrier: {selectedOrder.shipmentTracking.carrier}</p>
+                                            <p className="text-sm font-black text-slate-800 tracking-tight">ID: {selectedOrder.shipmentTracking.trackingNumber}</p>
+                                        </div>
+                                        <Truck className="text-blue-600 w-6 h-6" />
+                                    </div>
+                                )}
+
+                                <div className="space-y-6">
+                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Journey Timeline</h4>
+                                    <div className="space-y-6 relative ml-4 border-l-2 border-slate-50 pl-8">
+                                        {selectedOrder.timeline?.map((event: any, i: number) => (
+                                            <div key={i} className="relative">
+                                                <div className="absolute -left-[41px] top-1 w-4 h-4 rounded-full bg-white border-4 border-blue-600 shadow-sm" />
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{new Date(event.createdAt).toLocaleString()}</p>
+                                                <p className="text-xs font-black text-slate-800 tracking-tight uppercase italic">{event.toState.replace(/_/g, ' ')}</p>
+                                                <p className="text-xs font-bold text-slate-500 mt-1">{event.reason}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+
+                {/* Return Request Modal */}
+                {isDisputeOpen && selectedOrder && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            onClick={() => setIsDisputeOpen(false)}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">Return Request</h3>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Order NM-{selectedOrder.id.slice(0, 5).toUpperCase()}</p>
+                                </div>
+                                <button onClick={() => setIsDisputeOpen(false)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
+                                    <FaTimes />
+                                </button>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-4">
+                                    <FaInfoCircle className="text-amber-600 shrink-0 mt-1" />
+                                    <p className="text-xs font-bold text-amber-700 leading-relaxed">
+                                        Submitting a return request will freeze the payment in escrow. Our team will review your reason and evidence to process the refund.
+                                    </p>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2 mb-2 block">Reason for Return</label>
+                                    <textarea
+                                        value={disputeReason}
+                                        onChange={(e) => setDisputeReason(e.target.value)}
+                                        placeholder="Please describe why you want to return this product (e.g. wrong item, damaged, not as described)..."
+                                        className="w-full p-6 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[150px] transition-all"
+                                    />
+                                </div>
+                                <button
+                                    onClick={submitDispute}
+                                    disabled={isSubmittingDispute}
+                                    className="w-full py-5 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10 hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
+                                >
+                                    {isSubmittingDispute ? 'Submitting...' : 'Submit Return Request'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {/* Header & Breadcrumbs */}
             <div>
                 <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
@@ -171,13 +324,21 @@ export default function MyOrders() {
                                     <button className="px-6 py-3 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
                                         <Invoice className="w-3 h-3" /> Invoice
                                     </button>
-                                    <button className="px-6 py-3 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all">
+                                    <button onClick={() => handleTrackOrder(order.id)} className="px-6 py-3 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all">
                                         View Details
                                     </button>
-                                    {order.status !== 'CANCELLED' && (
-                                        <button className="px-6 py-3 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
-                                            {order.status === 'DELIVERED' ? 'Buy Again' : 'Track Order'}
+                                    {order.status !== 'CANCELLED' && order.status !== 'DISPUTED' && (
+                                        <button
+                                            onClick={order.status === 'DELIVERED' ? () => handleOpenDispute(order) : () => handleTrackOrder(order.id)}
+                                            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+                                        >
+                                            {order.status === 'DELIVERED' ? 'Request Return' : 'Track Order'}
                                         </button>
+                                    )}
+                                    {order.status === 'DISPUTED' && (
+                                        <div className="px-6 py-3 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                                            Return Requested
+                                        </div>
                                     )}
                                 </div>
                             </div>

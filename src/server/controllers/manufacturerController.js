@@ -62,6 +62,7 @@ export const getDealerRequests = async (req, res) => {
 
     try {
         const requests = await manufacturerService.getDealerRequests(mfgId, status || 'PENDING');
+        console.log(`[Manufacturer] Fetched ${requests.length} requests for ${mfgId} with status ${status || 'PENDING'}`);
         res.json({ success: true, data: requests });
     } catch (error) {
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_REQUESTS' });

@@ -9,21 +9,21 @@ import {
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProductForm } from '../../../../../context/ProductFormContext';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { CATEGORY_CONFIG, CategoryKey } from '@/lib/constants';
 
 export default function StepSpecs() {
     const { productData, updateProductData } = useProductForm();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [newKey, setNewKey] = useState('');
     const [newValue, setNewValue] = useState('');
     const [isUploading, setIsUploading] = useState(false);
 
-    const selectedCategoryConfig = (productData.category && CATEGORY_CONFIG[productData.category as CategoryKey])
-        ? CATEGORY_CONFIG[productData.category as CategoryKey]
+    const selectedSubCategoryConfig = (productData.category && productData.subCategory && CATEGORY_CONFIG[productData.category as CategoryKey]?.subCategories[productData.subCategory])
+        ? CATEGORY_CONFIG[productData.category as CategoryKey].subCategories[productData.subCategory]
         : null;
 
-    const categorySpecs = selectedCategoryConfig?.specs || [];
+    const categorySpecs = selectedSubCategoryConfig?.filters || [];
 
     const addSpec = () => {
         if (newKey && newValue) {
@@ -61,45 +61,50 @@ export default function StepSpecs() {
                             <FaBolt className="w-4 h-4" />
                         </div>
                         <h3 className="text-lg font-black text-[#1E293B]">Key Specifications</h3>
-                        {selectedCategoryConfig && (
+                        {selectedSubCategoryConfig && (
                             <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded font-bold uppercase">
-                                For {selectedCategoryConfig.label}
+                                For {selectedSubCategoryConfig.label}
                             </span>
                         )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {categorySpecs.map((spec) => (
-                            <div key={spec.name} className="space-y-2">
+                        {categorySpecs.map((spec: any) => (
+                            <div key={spec.id} className="space-y-2">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                     {spec.label} {spec.required && <span className="text-rose-500">*</span>}
                                 </label>
                                 {spec.type === 'select' && spec.options ? (
                                     <div className="relative">
                                         <select
-                                            value={productData.specifications[spec.name] || ''}
+                                            value={productData.specifications[spec.id] || ''}
                                             onChange={(e) => updateProductData({
-                                                specifications: { ...productData.specifications, [spec.name]: e.target.value }
+                                                specifications: { ...productData.specifications, [spec.id]: e.target.value }
                                             })}
                                             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all appearance-none"
                                         >
                                             <option value="">Select {spec.label}</option>
-                                            {spec.options.map(opt => (
+                                            {spec.options.map((opt: string) => (
                                                 <option key={opt} value={opt}>{opt}</option>
                                             ))}
                                         </select>
                                         <IoIosArrowDropdown className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                     </div>
                                 ) : (
-                                    <input
-                                        type="text"
-                                        placeholder={`Enter ${spec.label}`}
-                                        value={productData.specifications[spec.name] || ''}
-                                        onChange={(e) => updateProductData({
-                                            specifications: { ...productData.specifications, [spec.name]: e.target.value }
-                                        })}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={spec.type === 'number' ? 'number' : 'text'}
+                                            placeholder={`Enter ${spec.label}`}
+                                            value={productData.specifications[spec.id] || ''}
+                                            onChange={(e) => updateProductData({
+                                                specifications: { ...productData.specifications, [spec.id]: e.target.value }
+                                            })}
+                                            className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all ${spec.unit ? 'pr-12' : ''}`}
+                                        />
+                                        {spec.unit && (
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase">{spec.unit}</span>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         ))}
@@ -256,11 +261,11 @@ export default function StepSpecs() {
                                             updateProductData({
                                                 images: [...(productData.images || []), ...res.urls]
                                             });
-                                            showSnackbar(`Successfully uploaded ${res.urls.length} image(s)`, 'success');
+                                            toast.success(`Successfully uploaded ${res.urls.length} image(s)`);
                                         }
                                     } catch (error: any) {
                                         console.error('Upload failed:', error);
-                                        showSnackbar(`Failed to upload images: ${error.message || 'Unknown error'}`, 'error');
+                                        toast.error(`Failed to upload images: ${error.message || 'Unknown error'}`);
                                     } finally {
                                         setIsUploading(false);
                                     }

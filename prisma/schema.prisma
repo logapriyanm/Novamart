@@ -35,14 +35,16 @@ model User {
   avatar        String?
   dob           DateTime?
   fcmToken      String?
-  interests     UserInterest[]
+  refreshToken           String?
+  resetPasswordToken     String?        @unique
+  resetPasswordExpires   DateTime?
+  interests              UserInterest[]
   customer      Customer?
   dealer        Dealer?
   documents     Document[]
   manufacturer  Manufacturer?
   notifications Notification[]
   sessions      Session[]
-  refreshToken  String?
   userBadges    UserBadge[]
   behaviors     UserBehavior[]
 
@@ -82,13 +84,13 @@ model Manufacturer {
   brandDescription   String?
   marketingMaterials String[]
   bankDetails        Json
+  dealerRequests     DealerRequest[]
+  dealerBlocks       ManufacturerDealerBlock[]
   user               User                      @relation(fields: [userId], references: [id])
   negotiations       Negotiation[]
+  pooledDemands      PooledDemand[]
   products           Product[]
   dealersApproved    Dealer[]                  @relation("ApprovedDealers")
-  dealerRequests     DealerRequest[]
-  pooledDemands      PooledDemand[]
-  dealerBlocks       ManufacturerDealerBlock[] // Phase 8: Blocked dealers
 
   @@map("manufacturers")
 }
@@ -114,18 +116,18 @@ model Dealer {
   averageRating       Float                     @default(0)
   reviewCount         Int                       @default(0)
   isVerified          Boolean                   @default(false)
+  performanceMetrics  DealerPerformanceMetrics?
+  partnershipRequests DealerRequest[]
   subscriptions       DealerSubscription[]
   user                User                      @relation(fields: [userId], references: [id])
   inventory           Inventory[]
+  blockedBy           ManufacturerDealerBlock[]
   negotiations        Negotiation[]
   orders              Order[]                   @relation("DealerOrders")
+  PoolParticipant     PoolParticipant[]
   customerRatings     Rating[]
   sellerReviews       SellerReview[]
   approvedBy          Manufacturer[]            @relation("ApprovedDealers")
-  partnershipRequests DealerRequest[]
-  PoolParticipant     PoolParticipant[]
-  performanceMetrics  DealerPerformanceMetrics? // Phase 8: Performance tracking
-  blockedBy           ManufacturerDealerBlock[] // Phase 8: Blocking by manufacturers
 
   @@map("dealers")
 }
@@ -161,10 +163,12 @@ model CartItem {
   inventoryId String?
   productId   String
   quantity    Int
+  price       Decimal  @db.Decimal(12, 2)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   cart        Cart     @relation(fields: [cartId], references: [id])
 
+  @@unique([cartId, inventoryId])
   @@map("cart_items")
 }
 
@@ -194,10 +198,10 @@ model Product {
   wholesalePrice  Decimal?        @db.Decimal(12, 2)
   inventory       Inventory[]
   negotiations    Negotiation[]
-  reviews         ProductReview[]
   orderItems      OrderItem[]
-  manufacturer    Manufacturer    @relation(fields: [manufacturerId], references: [id])
   pooledDemands   PooledDemand[]
+  reviews         ProductReview[]
+  manufacturer    Manufacturer    @relation(fields: [manufacturerId], references: [id])
 
   @@map("products")
 }
@@ -213,16 +217,14 @@ model Inventory {
   originalPrice   Decimal?  @db.Decimal(12, 2)
   discount        Int?
   orderCount      Int       @default(0)
-  // Phase 4: Stock Allocation Fields
-  allocatedStock  Int? // Maximum stock allocated by manufacturer
-  dealerMoq       Int? // Dealer-specific minimum order quantity
-  dealerBasePrice Decimal?  @db.Decimal(12, 2) // Wholesale price from manufacturer
-  maxMargin       Decimal?  @db.Decimal(5, 2) // Maximum margin % dealer can apply
-  isAllocated     Boolean   @default(false) // Whether this is manufacturer-allocated
-  // Phase 5: Dealer Listing Fields
-  isListed        Boolean   @default(false) // Whether dealer has activated this listing
-  marginPercent   Decimal?  @db.Decimal(5, 2) // Applied margin percentage
-  listedAt        DateTime? // When dealer activated the listing
+  allocatedStock  Int?
+  dealerBasePrice Decimal?  @db.Decimal(12, 2)
+  dealerMoq       Int?
+  isAllocated     Boolean   @default(false)
+  isListed        Boolean   @default(false)
+  listedAt        DateTime?
+  marginPercent   Decimal?  @db.Decimal(5, 2)
+  maxMargin       Decimal?  @db.Decimal(5, 2)
   dealer          Dealer    @relation(fields: [dealerId], references: [id])
   product         Product   @relation(fields: [productId], references: [id])
 
@@ -249,7 +251,7 @@ model Order {
   dealer           Dealer            @relation("DealerOrders", fields: [dealerId], references: [id])
   payment          Payment?
   sellerReview     SellerReview?
-  shipmentTracking ShipmentTracking? // Phase 7: Shipment tracking
+  shipmentTracking ShipmentTracking?
 
   @@map("orders")
 }
@@ -273,14 +275,13 @@ model Escrow {
   orderId          String       @unique
   status           EscrowStatus @default(HOLD)
   amount           Decimal      @db.Decimal(12, 2)
-  // Phase 7: Escrow Enhancement
-  dealerAmount     Decimal?     @db.Decimal(12, 2) // Amount for dealer after commission
-  platformFee      Decimal?     @db.Decimal(12, 2) // Platform commission
-  releaseCondition String?      @default("DELIVERY_CONFIRMED") // Condition for release
-  disputeId        String? // Link to dispute if any
   releasedAt       DateTime?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
+  dealerAmount     Decimal?     @db.Decimal(12, 2)
+  disputeId        String?
+  platformFee      Decimal?     @db.Decimal(12, 2)
+  releaseCondition String?      @default("DELIVERY_CONFIRMED")
   order            Order        @relation(fields: [orderId], references: [id])
 
   @@map("escrows")
@@ -461,12 +462,11 @@ model SubscriptionPlan {
   features           Json
   margin             Decimal
   rank               Int
-  // Phase 6: Subscription Benefits
-  wholesaleDiscount  Decimal              @default(0) @db.Decimal(5, 2) // % discount on wholesale prices
-  marginBoost        Decimal              @default(0) @db.Decimal(5, 2) // Additional margin % for subscribers
-  priorityAllocation Boolean              @default(false) // Priority stock access
-  isActive           Boolean              @default(true) // Plan availability
   createdAt          DateTime             @default(now())
+  isActive           Boolean              @default(true)
+  marginBoost        Decimal              @default(0) @db.Decimal(5, 2)
+  priorityAllocation Boolean              @default(false)
+  wholesaleDiscount  Decimal              @default(0) @db.Decimal(5, 2)
   subscriptions      DealerSubscription[]
 
   @@map("subscription_plans")
@@ -508,6 +508,101 @@ model Negotiation {
   @@index([manufacturerId])
   @@index([status])
   @@map("negotiations")
+}
+
+model DealerRequest {
+  id             String        @id @default(uuid())
+  dealerId       String
+  manufacturerId String
+  status         RequestStatus @default(PENDING)
+  message        String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  metadata       Json?
+  dealer         Dealer        @relation(fields: [dealerId], references: [id])
+  manufacturer   Manufacturer  @relation(fields: [manufacturerId], references: [id])
+
+  @@unique([dealerId, manufacturerId])
+  @@map("dealer_requests")
+}
+
+model PooledDemand {
+  id              String            @id @default(uuid())
+  manufacturerId  String
+  productId       String
+  targetQuantity  Int
+  currentQuantity Int               @default(0)
+  status          PoolStatus        @default(OPEN)
+  expiresAt       DateTime
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  participants    PoolParticipant[]
+  manufacturer    Manufacturer      @relation(fields: [manufacturerId], references: [id])
+  product         Product           @relation(fields: [productId], references: [id])
+
+  @@map("pooled_demands")
+}
+
+model PoolParticipant {
+  id        String       @id @default(uuid())
+  poolId    String
+  dealerId  String
+  quantity  Int
+  status    String       @default("COMMITTED")
+  createdAt DateTime     @default(now())
+  dealer    Dealer       @relation(fields: [dealerId], references: [id])
+  pool      PooledDemand @relation(fields: [poolId], references: [id])
+
+  @@unique([poolId, dealerId])
+  @@map("pool_participants")
+}
+
+model ShipmentTracking {
+  id                String    @id @default(uuid())
+  orderId           String    @unique
+  trackingNumber    String
+  carrier           String?
+  status            String    @default("PENDING")
+  estimatedDelivery DateTime?
+  actualDelivery    DateTime?
+  statusHistory     Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  order             Order     @relation(fields: [orderId], references: [id])
+
+  @@map("shipment_tracking")
+}
+
+model DealerPerformanceMetrics {
+  id                   String   @id @default(uuid())
+  dealerId             String   @unique
+  orderFulfillmentRate Decimal  @default(0) @db.Decimal(5, 2)
+  averageShippingTime  Decimal  @default(0) @db.Decimal(10, 2)
+  disputeRate          Decimal  @default(0) @db.Decimal(5, 2)
+  customerSatisfaction Decimal  @default(0) @db.Decimal(5, 2)
+  performanceScore     Decimal  @default(0) @db.Decimal(5, 2)
+  totalOrders          Int      @default(0)
+  lastUpdated          DateTime @updatedAt
+  createdAt            DateTime @default(now())
+  dealer               Dealer   @relation(fields: [dealerId], references: [id])
+
+  @@map("dealer_performance_metrics")
+}
+
+model ManufacturerDealerBlock {
+  id             String       @id @default(uuid())
+  manufacturerId String
+  dealerId       String
+  reason         String
+  notes          String?
+  isActive       Boolean      @default(true)
+  blockedAt      DateTime     @default(now())
+  unblockedAt    DateTime?
+  dealer         Dealer       @relation(fields: [dealerId], references: [id])
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+
+  @@unique([manufacturerId, dealerId])
+  @@map("manufacturer_dealer_blocks")
 }
 
 enum Role {
@@ -572,57 +667,10 @@ enum ReviewStatus {
   HIDDEN
 }
 
-model DealerRequest {
-  id             String        @id @default(uuid())
-  dealerId       String
-  manufacturerId String
-  status         RequestStatus @default(PENDING)
-  message        String?
-  metadata       Json? // Stores: expectedQuantity, region, priceExpectation
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  dealer         Dealer        @relation(fields: [dealerId], references: [id])
-  manufacturer   Manufacturer  @relation(fields: [manufacturerId], references: [id])
-
-  @@unique([dealerId, manufacturerId])
-  @@map("dealer_requests")
-}
-
 enum RequestStatus {
   PENDING
   APPROVED
   REJECTED
-}
-
-model PooledDemand {
-  id              String            @id @default(uuid())
-  manufacturerId  String
-  productId       String
-  targetQuantity  Int
-  currentQuantity Int               @default(0)
-  status          PoolStatus        @default(OPEN)
-  expiresAt       DateTime
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  participants    PoolParticipant[]
-  manufacturer    Manufacturer      @relation(fields: [manufacturerId], references: [id])
-  product         Product           @relation(fields: [productId], references: [id])
-
-  @@map("pooled_demands")
-}
-
-model PoolParticipant {
-  id        String       @id @default(uuid())
-  poolId    String
-  dealerId  String
-  quantity  Int
-  status    String       @default("COMMITTED")
-  createdAt DateTime     @default(now())
-  pool      PooledDemand @relation(fields: [poolId], references: [id])
-  dealer    Dealer       @relation(fields: [dealerId], references: [id])
-
-  @@unique([poolId, dealerId])
-  @@map("pool_participants")
 }
 
 enum PoolStatus {
@@ -633,53 +681,27 @@ enum PoolStatus {
   CANCELLED
 }
 
-// Phase 7: Shipment Tracking
-model ShipmentTracking {
-  id                String    @id @default(uuid())
-  orderId           String    @unique
-  trackingNumber    String
-  carrier           String?
-  status            String    @default("PENDING") // PENDING, SHIPPED, IN_TRANSIT, OUT_FOR_DELIVERY, DELIVERED
-  estimatedDelivery DateTime?
-  actualDelivery    DateTime?
-  statusHistory     Json? // Timeline of status updates
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  order             Order     @relation(fields: [orderId], references: [id])
-
-  @@map("shipment_tracking")
+model MarginRule {
+  id        String   @id @default(uuid())
+  category  String
+  maxCap    Decimal  @db.Decimal(5, 2)
+  minMOQ    Int      @default(1)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
-// Phase 8: Performance Metrics
-model DealerPerformanceMetrics {
-  id                   String   @id @default(uuid())
-  dealerId             String   @unique
-  orderFulfillmentRate Decimal  @default(0) @db.Decimal(5, 2) // % of orders fulfilled
-  averageShippingTime  Decimal  @default(0) @db.Decimal(10, 2) // Average days to ship
-  disputeRate          Decimal  @default(0) @db.Decimal(5, 2) // % of orders disputed
-  customerSatisfaction Decimal  @default(0) @db.Decimal(5, 2) // Average rating
-  performanceScore     Decimal  @default(0) @db.Decimal(5, 2) // Calculated overall score
-  totalOrders          Int      @default(0)
-  lastUpdated          DateTime @updatedAt
-  createdAt            DateTime @default(now())
-  dealer               Dealer   @relation(fields: [dealerId], references: [id])
-
-  @@map("dealer_performance_metrics")
+model PlatformSettings {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
 }
 
-// Phase 8: Manufacturer Blocking
-model ManufacturerDealerBlock {
-  id             String       @id @default(uuid())
-  manufacturerId String
-  dealerId       String
-  reason         String
-  notes          String?
-  isActive       Boolean      @default(true)
-  blockedAt      DateTime     @default(now())
-  unblockedAt    DateTime?
-  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
-  dealer         Dealer       @relation(fields: [dealerId], references: [id])
-
-  @@unique([manufacturerId, dealerId])
-  @@map("manufacturer_dealer_blocks")
+model TaxRule {
+  id        String   @id @default(uuid())
+  state     String?
+  taxSlab   Decimal  @db.Decimal(5, 2)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }

@@ -21,7 +21,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function ManufacturerApprovalPanel() {
     const [manufacturers, setManufacturers] = useState<any[]>([]);
@@ -30,7 +30,7 @@ export default function ManufacturerApprovalPanel() {
     const [isVerifying, setIsVerifying] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterTab, setFilterTab] = useState<'ALL' | 'VERIFIED' | 'PENDING' | 'SUSPENDED'>('ALL');
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchManufacturers();
@@ -56,9 +56,9 @@ export default function ManufacturerApprovalPanel() {
             if (selectedRequest?.id === manufacturerId) {
                 setSelectedRequest({ ...selectedRequest, isVerified: verify });
             }
-            showSnackbar(`Manufacturer ${verify ? 'Verified' : 'Verification Revoked'}`, 'success');
+            toast.success(`Manufacturer ${verify ? 'Verified' : 'Verification Revoked'}`);
         } catch (error) {
-            showSnackbar('Action failed', 'error');
+            toast.error('Action failed');
         } finally {
             setIsVerifying(false);
         }
@@ -72,9 +72,9 @@ export default function ManufacturerApprovalPanel() {
             if (selectedRequest?.userId === userId) {
                 setSelectedRequest({ ...selectedRequest, user: { ...selectedRequest.user, status } });
             }
-            showSnackbar(`User status updated to ${status}`, 'success');
+            toast.success(`User status updated to ${status}`);
         } catch (error) {
-            showSnackbar('Status update failed', 'error');
+            toast.error('Status update failed');
         } finally {
             setIsVerifying(false);
         }
@@ -285,7 +285,7 @@ export default function ManufacturerApprovalPanel() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
                                                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Reg. Hash</p>
-                                                    <p className="text-[10px] font-black text-blue-400 font-mono tracking-tighter">{selectedRequest.registrationNo}</p>
+                                                    <p className="text-[10px] font-black text-blue-400 tracking-tighter">{selectedRequest.registrationNo}</p>
                                                 </div>
                                                 <div>
                                                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Tax Token</p>

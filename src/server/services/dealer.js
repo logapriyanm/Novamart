@@ -10,6 +10,26 @@ class DealerService {
     /**
      * Get Dealer's localized inventory.
      */
+    /**
+     * Get specific inventory item with details.
+     */
+    async getInventoryItem(inventoryId, dealerId) {
+        const inv = await prisma.inventory.findUnique({
+            where: { id: inventoryId },
+            include: {
+                product: {
+                    include: { manufacturer: { select: { companyName: true } } }
+                }
+            }
+        });
+
+        if (!inv || inv.dealerId !== dealerId) {
+            throw new Error('UNAUTHORIZED_INVENTORY_ACCESS');
+        }
+
+        return inv;
+    }
+
     async getInventory(dealerId) {
         return await prisma.inventory.findMany({
             where: { dealerId },
@@ -76,6 +96,27 @@ class DealerService {
         });
     }
 
+
+    /**
+     * Toggle public listing status.
+     */
+    async toggleListing(inventoryId, dealerId, isListed) {
+        const inv = await prisma.inventory.findUnique({
+            where: { id: inventoryId }
+        });
+
+        if (!inv || inv.dealerId !== dealerId) {
+            throw new Error('UNAUTHORIZED_INVENTORY_ACCESS');
+        }
+
+        return await prisma.inventory.update({
+            where: { id: inventoryId },
+            data: {
+                isListed,
+                listedAt: isListed ? new Date() : inv.listedAt
+            }
+        });
+    }
 
     /**
      * Update Stock Levels.
@@ -246,15 +287,33 @@ class DealerService {
         const { message, expectedQuantity, region, priceExpectation } = metadata;
 
         // Check for existing request
+        // Check for existing request (Status Agnostic)
         const existing = await prisma.dealerRequest.findFirst({
             where: {
                 dealerId,
-                manufacturerId,
-                status: 'PENDING'
+                manufacturerId
             }
         });
 
-        if (existing) throw new Error('PENDING_REQUEST_EXISTS');
+        if (existing) {
+            if (existing.status === 'PENDING') throw new Error('Request already sent. Please wait for approval.');
+            if (existing.status === 'APPROVED') throw new Error('You are already an approved dealer for this manufacturer.');
+
+            // If REJECTED or other, allow re-application by updating
+            return await prisma.dealerRequest.update({
+                where: { id: existing.id },
+                data: {
+                    status: 'PENDING',
+                    message: message || existing.message,
+                    metadata: {
+                        expectedQuantity,
+                        region,
+                        priceExpectation
+                    },
+                    createdAt: new Date() // Treat as new request
+                }
+            });
+        }
 
         return await prisma.$transaction(async (tx) => {
             const request = await tx.dealerRequest.create({

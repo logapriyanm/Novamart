@@ -39,14 +39,22 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         }
         try {
             const data = await notificationService.getNotifications();
-            const items = data || [];
+            const items = (data || []).map((n: any) => ({
+                ...n,
+                id: n.id || n._id // Ensure id is available for frontend
+            }));
             setNotifications(items);
-            setUnreadCount(items.filter(n => !n.readAt).length);
-        } catch (error) {
+            setUnreadCount(items.filter((n: any) => !n.readAt).length);
+        } catch (error: any) {
+            // Silence session expired errors for background notification polling
+            if (error.code === 'SESSION_EXPIRED' || error.status === 401) {
+                return;
+            }
             console.error('Failed to fetch notifications:', error);
         } finally {
             setLoading(false);
         }
+
     }, [isAuthenticated]);
 
     useEffect(() => {
@@ -62,6 +70,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     }, [isAuthenticated, fetchNotifications]);
 
     const markAsRead = async (id: string) => {
+        if (!id) {
+            console.error('Cannot mark notification as read: ID is undefined');
+            return;
+        }
         try {
             await notificationService.markAsRead(id);
             setNotifications(prev =>

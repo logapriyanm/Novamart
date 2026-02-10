@@ -13,14 +13,14 @@ import {
     FaTimesCircle
 } from 'react-icons/fa';
 import Link from 'next/link';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/client';
 
 export default function DealerOrderManagement() {
     const [orders, setOrders] = useState<any[]>([]);
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [filter, setFilter] = useState('All');
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     React.useEffect(() => {
         fetchOrders();
@@ -47,7 +47,7 @@ export default function DealerOrderManagement() {
             setOrders(mappedOrders);
         } catch (error) {
             console.error('Failed to fetch dealer orders:', error);
-            showSnackbar('Failed to load orders', 'error');
+            toast.error('Failed to load orders');
         }
     };
 
@@ -60,25 +60,40 @@ export default function DealerOrderManagement() {
         if (!selectedOrder) return;
 
         try {
+            const trackingNum = `NX-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
             const res = await apiClient.patch<{ success: boolean }>(`/orders/${selectedOrder.id}/status`, {
-                status: 'SHIPPED'
+                status: 'SHIPPED',
+                trackingNumber: trackingNum,
+                carrier: 'NovaExpress'
             });
 
             if (res.success) {
-                showSnackbar(`Order ${selectedOrder.displayId} dispatched successfully`, 'success');
+                toast.success(`Order ${selectedOrder.displayId} dispatched successfully`);
                 setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, status: 'Shipped', rawStatus: 'SHIPPED' } : o));
-                setSelectedOrder(prev => ({ ...prev, status: 'Shipped', rawStatus: 'SHIPPED' }));
+                setSelectedOrder(prev => ({ ...prev, status: 'Shipped', rawStatus: 'SHIPPED', trackingNumber: trackingNum }));
             } else {
-                showSnackbar('Failed to update order status', 'error');
+                toast.error('Failed to update order status');
             }
         } catch (error) {
             console.error('Dispatch error:', error);
-            showSnackbar('Error processing dispatch', 'error');
+            toast.error('Error processing dispatch');
+        }
+    };
+
+    const handleSimulateDelivery = async () => {
+        if (!selectedOrder) return;
+        try {
+            await apiClient.post(`/orders/${selectedOrder.id}/simulate-delivery`, {});
+            toast.info('Delivery simulation started. Order will reach user soon.');
+            // Optimistically update or just wait for refresh
+            setTimeout(fetchOrders, 5000); // Refresh after 5s
+        } catch (error) {
+            toast.error('Simulation failed');
         }
     };
 
     const handleInvoice = () => {
-        showSnackbar('Downloading Tax Invoice... (Mock Action)', 'info');
+        toast.info('Downloading Tax Invoice... (Mock Action)');
     };
 
     return (
@@ -234,6 +249,17 @@ export default function DealerOrderManagement() {
                                         <FaTruck className="w-3 h-3" />
                                         {selectedOrder.rawStatus === 'PAID' ? 'Initialize Dispatch' : 'Dispatch Active'}
                                     </button>
+
+                                    {selectedOrder.rawStatus === 'SHIPPED' && (
+                                        <button
+                                            onClick={handleSimulateDelivery}
+                                            className="w-full py-3 bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600 rounded-[8px] uppercase tracking-wide hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <FaTruck className="w-3 h-3 animate-pulse" />
+                                            Simulate Journey (Dev)
+                                        </button>
+                                    )}
+
                                     <button
                                         onClick={handleInvoice}
                                         className="w-full py-3 bg-white border border-slate-200 text-xs font-bold text-slate-600 rounded-[8px] uppercase tracking-wide hover:bg-slate-50 transition-all flex items-center justify-center gap-2"

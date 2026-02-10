@@ -1,12 +1,34 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaPlus, FaDownload } from 'react-icons/fa';
 import { useAuth } from '@/client/hooks/useAuth';
+import { apiClient } from '@/lib/api/client';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardHeader() {
     const { user } = useAuth();
+    const router = useRouter();
     const joinedDate = new Date(user?.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const [activeCount, setActiveCount] = useState<number | null>(null);
+
+    useEffect(() => {
+        const fetchActiveCount = async () => {
+            try {
+                const orders = await apiClient.get<any[]>('/orders/my');
+                if (orders) {
+                    const count = orders.filter((o: any) => !['DELIVERED', 'CANCELLED', 'RETURNED'].includes(o.status)).length;
+                    setActiveCount(count);
+                } else {
+                    setActiveCount(0);
+                }
+            } catch (err) {
+                console.error(err);
+                setActiveCount(0);
+            }
+        };
+        fetchActiveCount();
+    }, []);
 
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[20px] shadow-sm border border-slate-100">
@@ -15,7 +37,7 @@ export default function DashboardHeader() {
                     Welcome back, {user?.name?.split(' ')[0] || 'Member'}!
                 </h1>
                 <p className="text-slate-500 font-medium text-sm">
-                    Member since {joinedDate} • You have <span className="text-[#0F6CBD] font-bold">1 active shipment</span>.
+                    Member since {joinedDate} • You have <span className="text-[#0F6CBD] font-bold">{activeCount === null ? '...' : activeCount} active shipment{activeCount !== 1 && 's'}</span>.
                 </p>
             </div>
 
@@ -24,7 +46,10 @@ export default function DashboardHeader() {
                     <FaDownload className="w-3 h-3" />
                     Export Data
                 </button>
-                <button className="flex items-center gap-2 px-6 py-3 bg-[#0F6CBD] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#0E5DA8] transition-all shadow-lg shadow-blue-500/20">
+                <button
+                    onClick={() => router.push('/products')}
+                    className="flex items-center gap-2 px-6 py-3 bg-[#0F6CBD] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#0E5DA8] transition-all shadow-lg shadow-blue-500/20"
+                >
                     <FaPlus className="w-3 h-3" />
                     New Order
                 </button>

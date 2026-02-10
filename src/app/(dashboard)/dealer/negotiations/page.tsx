@@ -8,10 +8,10 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function DealerNegotiations() {
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
     const [negotiations, setNegotiations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState<string>('ALL');
@@ -26,7 +26,7 @@ export default function DealerNegotiations() {
             const data = await apiClient.get<any>('/negotiation');
             setNegotiations(data || []);
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to load negotiations', 'error');
+            toast.error(error.message || 'Failed to load negotiations');
         } finally {
             setLoading(false);
         }
@@ -118,10 +118,10 @@ export default function DealerNegotiations() {
                                 <div className="flex items-center gap-3">
                                     <span
                                         className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider ${negotiation.status === 'OPEN'
-                                                ? 'bg-blue-50 text-blue-600 border border-blue-100'
-                                                : negotiation.status === 'ACCEPTED'
-                                                    ? 'bg-green-50 text-green-600 border border-green-100'
-                                                    : 'bg-rose-50 text-rose-600 border border-rose-100'
+                                            ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                                            : negotiation.status === 'ACCEPTED'
+                                                ? 'bg-green-50 text-green-600 border border-green-100'
+                                                : 'bg-rose-50 text-rose-600 border border-rose-100'
                                             }`}
                                     >
                                         {negotiation.status === 'ACCEPTED' && <FaCheckCircle className="inline mr-1" />}

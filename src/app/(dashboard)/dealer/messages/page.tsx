@@ -15,46 +15,77 @@ import {
     FaCheckCircle,
     FaInfoCircle
 } from 'react-icons/fa';
-import io from 'socket.io-client';
+import { chatService, Chat, Message } from '@/lib/api/services/chat.service';
+import { useAuth } from '@/client/context/AuthContext';
+// import { useSnackbar } from '@/client/context/SnackbarContext';
+import { apiClient } from '@/lib/api/client';
+import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5000');
-
-const mockChats = [
-    { id: 'chat_1', type: 'PRE_PURCHASE', contextId: 'PROD-102', user: 'Customer #8841', lastMsg: 'Is this available in Blue?', time: '2m ago', status: 'OPEN', unread: true },
-    { id: 'chat_2', type: 'ORDER', contextId: 'ORD-559', user: 'Customer #2201', lastMsg: 'When will it ship?', time: '1h ago', status: 'OPEN', unread: false },
-];
+// Use current origin for socket if developing locally
+const SOCKET_URL = typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') : 'http://localhost:5000';
 
 export default function DealerMessagingCenter() {
+    const { user } = useAuth();
+    // const { showSnackbar } = useSnackbar();
+    const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<any>(null);
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
+    const [socket, setSocket] = useState<any>(null);
 
     useEffect(() => {
-        if (selectedChat) {
-            socket.emit('join-room', selectedChat.id);
-            // Fetch messages from API...
-            setMessages([
-                { senderRole: 'CUSTOMER', message: selectedChat.lastMsg, createdAt: new Date().toISOString() }
-            ]);
+        const token = apiClient.getToken();
+        const s = io(SOCKET_URL, {
+            auth: { token }
+        });
+        setSocket(s);
+        fetchChats();
+        return () => { s.disconnect(); };
+    }, []);
+
+    const fetchChats = async () => {
+        try {
+            const data = await chatService.getChats();
+            setChats(data);
+        } catch (error) {
+            console.error('Failed to fetch chats');
         }
-    }, [selectedChat]);
+    };
 
     useEffect(() => {
-        socket.on('chat:message', (msg: any) => {
-            if (selectedChat && msg.chatId === selectedChat.id) {
+        if (selectedChat && socket) {
+            socket.emit('join-room', selectedChat._id || selectedChat.id);
+            fetchMessages(selectedChat._id || selectedChat.id);
+        }
+    }, [selectedChat, socket]);
+
+    const fetchMessages = async (chatId: string) => {
+        try {
+            const data = await chatService.getMessages(chatId);
+            setMessages(data);
+        } catch (error) {
+            console.error('Failed to fetch messages');
+        }
+    };
+
+    useEffect(() => {
+        if (!socket) return;
+        const handleMsg = (msg: any) => {
+            if (selectedChat && (msg.chatId === selectedChat._id || msg.chatId === selectedChat.id)) {
                 setMessages(prev => [...prev, msg]);
             }
-        });
-        return () => { socket.off('chat:message'); };
-    }, [selectedChat]);
+        };
+        socket.on('chat:message', handleMsg);
+        return () => { socket.off('chat:message', handleMsg); };
+    }, [selectedChat, socket]);
 
     const sendMessage = () => {
-        if (!input.trim() || !selectedChat) return;
+        if (!input.trim() || !selectedChat || !socket) return;
 
         const payload = {
-            chatId: selectedChat.id,
+            chatId: selectedChat._id || selectedChat.id,
             message: input,
-            senderId: 'dealer-id',
+            senderId: user?.id,
             senderRole: 'DEALER'
         };
 
@@ -88,30 +119,32 @@ export default function DealerMessagingCenter() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
-                        {mockChats.map((chat) => (
-                            <div
-                                key={chat.id}
-                                onClick={() => setSelectedChat(chat)}
-                                className={`p-8 hover:bg-slate-50 transition-all cursor-pointer group flex items-start gap-6 relative ${selectedChat?.id === chat.id ? 'bg-blue-50/30' : ''}`}
-                            >
-                                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-[#10367D] group-hover:text-white transition-all shadow-sm">
-                                    <FaCommentDots className="w-6 h-6" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h4 className="text-sm font-black text-[#1E293B] italic leading-tight">{chat.user}</h4>
-                                        <span className="text-[8px] font-bold text-slate-400 uppercase">{chat.time}</span>
+                        {chats.map((chat: any) => {
+                            const otherParticipant = chat.participants.find((p: any) => p.userId !== user?.id);
+                            return (
+                                <div
+                                    key={chat._id || chat.id}
+                                    onClick={() => setSelectedChat(chat)}
+                                    className={`p-8 hover:bg-slate-50 transition-all cursor-pointer group flex items-start gap-6 relative ${(selectedChat?._id === chat._id || selectedChat?.id === chat.id) ? 'bg-blue-50/30' : ''}`}
+                                >
+                                    <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-[#10367D] group-hover:text-white transition-all shadow-sm">
+                                        <FaCommentDots className="w-6 h-6" />
                                     </div>
-                                    <p className="text-[10px] font-bold text-slate-500 truncate mb-2 uppercase">{chat.lastMsg}</p>
-                                    <div className="flex items-center gap-3">
-                                        <span className={`text-[8px] font-black px-2 py-0.5 rounded border ${chat.type === 'ORDER' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'
-                                            }`}>{chat.type}</span>
-                                        <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">{chat.contextId}</span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start mb-1">
+                                            <h4 className="text-sm font-black text-[#1E293B] italic leading-tight">{otherParticipant?.name || 'User'}</h4>
+                                            <span className="text-[8px] font-bold text-slate-400 uppercase">{new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                        <p className="text-[10px] font-bold text-slate-500 truncate mb-2 uppercase">{chat.lastMessage?.text || 'No messages'}</p>
+                                        <div className="flex items-center gap-3">
+                                            <span className={`text-[8px] font-black px-2 py-0.5 rounded border ${chat.type === 'ORDER' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                                                }`}>{chat.type}</span>
+                                            <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">{chat.contextId}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                {chat.unread && <div className="absolute top-8 right-8 w-2 h-2 rounded-full bg-[#10367D] shadow-sm" />}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 

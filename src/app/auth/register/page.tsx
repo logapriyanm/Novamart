@@ -15,7 +15,8 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { useAuth } from '@/client/hooks/useAuth';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+// import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api/client';
 import { FaSpinner as Loader2 } from 'react-icons/fa';
@@ -25,7 +26,7 @@ type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';
 export default function Register({ initialRole }: { initialRole?: Role | null }) {
     const router = useRouter();
     const { login, isAuthenticated, isLoading: authLoading } = useAuth();
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     React.useEffect(() => {
         if (isAuthenticated && !authLoading) {
@@ -130,7 +131,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
         } catch (error: any) {
             console.error('Registration Error:', error);
             if (error.message === 'DUPLICATE_ENTRY' || error.error === 'DUPLICATE_ENTRY') {
-                showSnackbar('Account already exists with this Email or Phone', 'error');
+                toast.error('Account already exists with this Email or Phone');
                 if (error.details) {
                     const fieldErrors: Record<string, string> = {};
                     Object.keys(error.details).forEach(field => {
@@ -154,12 +155,12 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 // If there are field errors but we are on step 3 and they are step 2 errors, go back
                 if (step === 3 && (backendErrors.email || backendErrors.password || backendErrors.phone)) {
                     setStep(2);
-                    showSnackbar('Please fix the errors in Step 2', 'error');
+                    toast.error('Please fix the errors in Step 2');
                 }
             } else {
                 const msg = error.message || 'Registration failed. Please try again.';
                 setErrors({ general: msg });
-                showSnackbar(msg, 'error');
+                toast.error(msg);
             }
         } finally {
             setIsLoading(false);
@@ -368,7 +369,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
             <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-black/5 blur-[150px] rounded-full pointer-events-none" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-black/5 blur-[150px] rounded-full pointer-events-none" />
 
-            <div className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-[10px] flex items-center justify-center p-2 mb-6 md:mb-8 shadow-xl shadow-black/10 overflow-hidden border border-black/5 relative z-10">
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-[10px] flex items-center justify-center p-2 mb-6 md:mb-8 shadow-xl shadow-black/10 overflow-hidden border border-black/5 relative z-10">
                 <img src="/assets/Novamart.png" alt="NovaMart" className="w-full h-full object-contain" />
             </div>
 

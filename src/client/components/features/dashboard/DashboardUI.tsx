@@ -2,8 +2,8 @@ import React from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
-export const Card = ({ children, className = '' }: { children: React.ReactNode, className?: string }) => (
-    <div className={`bg-surface border border-foreground/10 rounded-[10px] p-6 shadow-sm ${className}`}>
+export const Card = ({ children, className = '', onClick }: { children: React.ReactNode, className?: string, onClick?: () => void }) => (
+    <div className={`bg-surface border border-foreground/10 rounded-[10px] p-6 shadow-sm ${className}`} onClick={onClick}>
         {children}
     </div>
 );

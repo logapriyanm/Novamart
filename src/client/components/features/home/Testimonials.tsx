@@ -204,14 +204,14 @@ export default function Testimonials() {
                                 </div>
                                 <div className="mb-8">
                                     <p className="text-[10px] uppercase tracking-widest text-foreground/40 mb-2">What People Say</p>
-                                    <h3 className="text-2xl font-serif font-bold text-foreground leading-tight">
+                                    <h3 className="text-2xl font-black text-foreground leading-tight">
                                         {item.text}
                                     </h3>
                                 </div>
                                 <div className="flex items-center gap-3 mt-auto">
                                     <img src={item.image} className="w-8 h-8 rounded-full" />
                                     <span className="text-xs font-bold text-foreground">{item.author}</span>
-                                    <span className="ml-auto font-handwriting text-foreground/20 text-lg">dribbble</span>
+                                    <span className="ml-auto text-xs font-bold text-foreground/40 uppercase tracking-widest">dribbble</span>
                                 </div>
                             </div>
                         )}
@@ -247,7 +247,7 @@ export default function Testimonials() {
                                 <p className="text-[10px] text-foreground/50 leading-relaxed mb-4">
                                     {item.text}
                                 </p>
-                                <span className="font-handwriting text-xl text-foreground/40">Isabella ..</span>
+                                <span className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Isabella ..</span>
                             </div>
                         )}
 

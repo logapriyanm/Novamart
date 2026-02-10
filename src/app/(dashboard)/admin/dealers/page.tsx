@@ -21,7 +21,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 
 export default function DealerApprovalPanel() {
     const [dealers, setDealers] = useState<any[]>([]);
@@ -31,7 +31,7 @@ export default function DealerApprovalPanel() {
     const [isVerifying, setIsVerifying] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterTab, setFilterTab] = useState<'ALL' | 'PENDING' | 'VERIFIED' | 'SUSPENDED'>('ALL');
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchDealers();
@@ -67,9 +67,9 @@ export default function DealerApprovalPanel() {
             if (selectedRequest?.id === dealerId) {
                 setSelectedRequest({ ...selectedRequest, isVerified: verify });
             }
-            showSnackbar(`Dealer ${verify ? 'Verified' : 'Verification Revoked'}`, 'success');
+            toast.success(`Dealer ${verify ? 'Verified' : 'Verification Revoked'}`);
         } catch (error) {
-            showSnackbar('Action failed', 'error');
+            toast.error('Action failed');
         } finally {
             setIsVerifying(false);
         }
@@ -83,9 +83,9 @@ export default function DealerApprovalPanel() {
             if (selectedRequest?.userId === userId) {
                 setSelectedRequest({ ...selectedRequest, user: { ...selectedRequest.user, status } });
             }
-            showSnackbar(`User status updated to ${status}`, 'success');
+            toast.success(`User status updated to ${status}`);
         } catch (error) {
-            showSnackbar('Status update failed', 'error');
+            toast.error('Status update failed');
         } finally {
             setIsVerifying(false);
         }
@@ -99,9 +99,9 @@ export default function DealerApprovalPanel() {
             const updatedDealer = { ...selectedRequest, approvedBy: manufacturers.find(m => m.id === manufacturerId) };
             setDealers(prev => prev.map(d => d.id === selectedRequest.id ? updatedDealer : d));
             setSelectedRequest(updatedDealer);
-            showSnackbar('Manufacturer linked successfully', 'success');
+            toast.success('Manufacturer linked successfully');
         } catch (error) {
-            showSnackbar('Linking failed', 'error');
+            toast.error('Linking failed');
         } finally {
             setIsVerifying(false);
         }

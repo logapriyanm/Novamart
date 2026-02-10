@@ -12,12 +12,15 @@ import {
     FaShoppingCart,
     FaCheckCircle,
     FaInfoCircle,
+    FaHandshake,
+    FaTimes,
     FaSpinner as Loader2
 } from 'react-icons/fa';
 import { apiClient } from '@/lib/api/client';
 import { useRouter } from 'next/navigation';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+import { toast } from 'sonner';
 import { useAuth } from '@/client/hooks/useAuth';
+import { negotiationService } from '@/lib/api/services/negotiation.service';
 
 export default function SourcingTerminal() {
     const router = useRouter();
@@ -27,7 +30,8 @@ export default function SourcingTerminal() {
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [isSourcing, setIsSourcing] = useState(false);
     const [sourceSuccess, setSourceSuccess] = useState(false);
-    const { showSnackbar } = useSnackbar();
+    const [showNegModal, setShowNegModal] = useState(false);
+    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
         fetchApprovedProducts();
@@ -37,8 +41,8 @@ export default function SourcingTerminal() {
         setIsLoading(true);
         try {
             // Fetch products with status APPROVED
-            const data = await apiClient.get<any[]>('/products?status=APPROVED');
-            setProducts(data);
+            const res = await apiClient.get<any>('/products?status=APPROVED');
+            setProducts(res.products || []);
         } catch (error) {
             console.error('Failed to fetch products:', error);
         } finally {
@@ -57,12 +61,12 @@ export default function SourcingTerminal() {
                 price: selectedProduct.basePrice // Initial retail price matches base
             }, {});
             setSourceSuccess(true);
-            showSnackbar('Product sourced successfully!', 'success');
+            toast.success('Product sourced successfully!');
             setTimeout(() => {
                 router.push('/dealer/inventory');
             }, 1500);
         } catch (error: any) {
-            showSnackbar(error.message || 'Failed to source product', 'error');
+            toast.error(error.message || 'Failed to source product');
         } finally {
             setIsSourcing(false);
         }
@@ -194,14 +198,24 @@ export default function SourcingTerminal() {
                                         <p className="text-[8px] font-bold opacity-80 mt-1">Directing to Inventory Control...</p>
                                     </div>
                                 ) : (
-                                    <button
-                                        onClick={handleSource}
-                                        disabled={isSourcing}
-                                        className="w-full bg-[#10367D] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50"
-                                    >
-                                        {isSourcing ? <Loader2 className="w-5 h-5 animate-spin" /> : <FaShoppingCart className="w-5 h-5" />}
-                                        {isSourcing ? 'Acquiring...' : 'Source for my Fleet'}
-                                    </button>
+                                    <div className="space-y-4">
+                                        <button
+                                            onClick={handleSource}
+                                            disabled={isSourcing}
+                                            className="w-full bg-[#10367D] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50"
+                                        >
+                                            {isSourcing ? <Loader2 className="w-5 h-5 animate-spin" /> : <FaShoppingCart className="w-5 h-5" />}
+                                            {isSourcing ? 'Acquiring...' : 'Source for my Fleet'}
+                                        </button>
+
+                                        <button
+                                            onClick={() => setShowNegModal(true)}
+                                            className="w-full bg-white border-2 border-[#10367D] text-[#10367D] py-6 rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-[#10367D]/5 transition-all flex items-center justify-center gap-4"
+                                        >
+                                            <FaHandshake className="w-5 h-5" />
+                                            Negotiate Price
+                                        </button>
+                                    </div>
                                 )}
                                 <p className="text-[8px] font-black text-slate-400 text-center uppercase tracking-widest leading-relaxed">
                                     Note: Sourcing creates a link to the manufacturer. You must add stock and set your regional retail price in the **Inventory Control** center before it goes live.
@@ -217,6 +231,115 @@ export default function SourcingTerminal() {
                     )}
                 </div>
             </div>
+
+            {/* Negotiation Modal */}
+            <AnimatePresence>
+                {showNegModal && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl"
+                        >
+                            <div className="p-8 bg-[#10367D] text-white flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-xl font-black italic uppercase tracking-tight">Bulk Negotiation</h2>
+                                    <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Formalizing direct procurement terms</p>
+                                </div>
+                                <button onClick={() => setShowNegModal(false)} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all">
+                                    <FaTimes />
+                                </button>
+                            </div>
+                            <div className="p-10 space-y-8">
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Negotiating for</p>
+                                    <h3 className="text-lg font-black text-[#1E293B]">{selectedProduct.name}</h3>
+                                </div>
+
+                                <NegotiationForm
+                                    productId={selectedProduct.id}
+                                    basePrice={selectedProduct.basePrice}
+                                    moq={selectedProduct.moq}
+                                    onSuccess={() => {
+                                        setShowNegModal(false);
+                                        toast.success('Negotiation request sent!');
+                                        router.push('/dealer/negotiations');
+                                    }}
+                                />
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
+    );
+}
+
+function NegotiationForm({ productId, basePrice, moq, onSuccess }: { productId: string, basePrice: number, moq: number, onSuccess: () => void }) {
+    const [quantity, setQuantity] = useState(moq);
+    const [proposedPrice, setProposedPrice] = useState(basePrice);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await negotiationService.createNegotiation({
+                productId,
+                quantity,
+                proposedPrice
+            });
+            onSuccess();
+        } catch (error: any) {
+            console.error('Negotiation failed:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quantity (MOQ: {moq})</label>
+                    <input
+                        type="number"
+                        min={moq}
+                        value={quantity}
+                        onChange={(e) => setQuantity(parseInt(e.target.value))}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-sm font-black focus:outline-none focus:border-[#10367D]/30 transition-all"
+                        required
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Proposed Price (Base: ₹{basePrice})</label>
+                    <input
+                        type="number"
+                        value={proposedPrice}
+                        onChange={(e) => setProposedPrice(parseFloat(e.target.value))}
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-sm font-black focus:outline-none focus:border-[#10367D]/30 transition-all"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div className="bg-[#10367D]/5 p-6 rounded-2xl border border-[#10367D]/10">
+                <div className="flex justify-between items-center mb-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Projected Deal Value</p>
+                    <p className="text-xl font-black text-[#10367D]">₹{(quantity * proposedPrice).toLocaleString()}</p>
+                </div>
+                <p className="text-[8px] font-bold text-[#10367D]/60 uppercase tracking-widest">Subject to manufacturer approval and availability</p>
+            </div>
+
+            <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-[#10367D] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50"
+            >
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <FaHandshake className="w-5 h-5" />}
+                Submit Formal Offer
+            </button>
+        </form>
     );
 }

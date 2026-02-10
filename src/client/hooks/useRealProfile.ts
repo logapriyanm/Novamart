@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { apiClient } from '../../lib/api/client';
-import { useSnackbar } from '../context/SnackbarContext';
+import { toast } from 'sonner';
 
 export function useRealProfile<T>(role: 'dealer' | 'manufacturer') {
     const [profile, setProfile] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     const fetchProfile = async () => {
         setIsLoading(true);
@@ -31,10 +31,10 @@ export function useRealProfile<T>(role: 'dealer' | 'manufacturer') {
         try {
             const result = await apiClient.put<T>(`/${role}/profile`, { section, data });
             setProfile(result);
-            showSnackbar('Profile updated', 'success');
+            toast.success('Profile updated');
             return result;
         } catch (err: any) {
-            showSnackbar('Something went wrong. Please try again.', 'error');
+            toast.error('Something went wrong. Please try again.');
             throw new Error(err.message || 'Update failed');
         }
     };

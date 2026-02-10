@@ -14,6 +14,7 @@ const categories = [
     { name: 'Dishwashers', image: '/assets/trendingAppliance/Dishwasher.jpg' },
     { name: 'Air Purifiers', image: '/assets/trendingAppliance/Air-Purifiers.jpg' },
     { name: 'Water Heaters', image: 'https://images.unsplash.com/photo-1595191830227-705914b03335?q=80&w=2070&auto=format&fit=crop' },
+    { name: 'Smart TVs', image: '/assets/trendingAppliance/TV.jpeg' },
 ];
 
 export default function TrendingBar() {

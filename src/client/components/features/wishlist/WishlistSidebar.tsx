@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { FaPlus, FaShareAlt } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
-import { useSnackbar } from '../../../context/SnackbarContext';
+// import { useSnackbar } from '../../../context/SnackbarContext';
+import { toast } from 'sonner';
 import { useCart } from '../../../context/CartContext';
 import OptimizedImage from '../../ui/OptimizedImage';
 
@@ -30,10 +31,10 @@ const recommendations = [
 ];
 
 export default function WishlistSidebar() {
-    const { showSnackbar } = useSnackbar();
+    // const { showSnackbar } = useSnackbar();
 
     const handleShare = () => {
-        showSnackbar('Wishlist shared successfully', 'success');
+        toast.success('Wishlist shared successfully');
     };
 
     return (

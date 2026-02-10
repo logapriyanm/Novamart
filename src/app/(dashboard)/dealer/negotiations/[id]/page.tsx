@@ -1,10 +1,14 @@
 'use client';
 
+import { use } from 'react';
 import ChatRoom from '@/client/components/features/negotiation/ChatRoom';
 import { useAuth } from '@/client/context/AuthContext';
 
-export default function DealerNegotiationChatPage({ params }: { params: { id: string } }) {
+
+export default function DealerNegotiationChatPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const { user } = useAuth();
 
-    return <ChatRoom negotiationId={params.id} userRole="DEALER" />;
+    return <ChatRoom negotiationId={id} userRole="DEALER" />;
 }
+

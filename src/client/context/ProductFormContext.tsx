@@ -65,7 +65,12 @@ export function ProductFormProvider({ children }: { children: ReactNode }) {
     const submitProduct = async (overrides?: Partial<ProductData>) => {
         setIsSubmitting(true);
         try {
-            const data = { ...productData, ...overrides };
+            const data = {
+                ...productData,
+                ...overrides,
+                basePrice: Number(productData.basePrice),
+                moq: Number(productData.moq)
+            };
             const response = await api.post<any>('/products', data);
             router.push('/manufacturer/products');
             return response;
