@@ -10,20 +10,20 @@ class ReviewService {
     /**
      * Submit a product review.
      */
-    async submitProductReview({ orderItemId, productId, customerId, rating, comment, images }) {
+    async submitProductReview({ orderId, productId, customerId, rating, comment, images }) {
         try {
             const review = await Review.create({
                 type: 'PRODUCT',
+                orderId,
                 productId,
                 customerId,
-                orderId: null, // orderItemId not stored directly in Review model usually, but can be added if needed
                 rating,
                 comment,
                 images,
                 status: 'PENDING'
             });
 
-            // Async update - don't block
+            // Update product stats (async)
             this.updateProductRating(productId);
 
             return review;
@@ -40,9 +40,9 @@ class ReviewService {
         try {
             const review = await Review.create({
                 type: 'SELLER',
+                orderId,
                 dealerId,
                 customerId,
-                orderId,
                 rating,
                 deliveryRating: delivery,
                 packagingRating: packaging,
@@ -51,7 +51,7 @@ class ReviewService {
                 status: 'PENDING'
             });
 
-            // Async update
+            // Update dealer stats (async)
             this.updateDealerRating(dealerId);
 
             return review;

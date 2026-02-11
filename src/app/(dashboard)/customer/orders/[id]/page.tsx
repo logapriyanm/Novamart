@@ -71,14 +71,14 @@ export default function OrderDetailsPage() {
         <div className="min-h-screen pb-20 animate-fade-in spacing-y-8">
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
-                <button onClick={() => router.back()} className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-all">
+                <button onClick={() => router.back()} className="w-10 h-10 rounded-[10px] bg-white border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-all">
                     <FaArrowLeft size={14} />
                 </button>
                 <div>
                     <h1 className="text-2xl font-black text-slate-800 tracking-tight">Order #{order.id.slice(-6).toUpperCase()}</h1>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{new Date(order.createdAt).toLocaleString()}</p>
                 </div>
-                <div className={`ml-auto px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${getStatusColor(order.status)}`}>
+                <div className={`ml-auto px-4 py-2 rounded-[10px] border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${getStatusColor(order.status)}`}>
                     <FaBox size={12} />
                     {order.status}
                 </div>
@@ -88,14 +88,14 @@ export default function OrderDetailsPage() {
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Items */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-blue-600/5 border border-slate-100">
+                    <div className="bg-white rounded-[10px] p-8 shadow-xl shadow-blue-600/5 border border-slate-100">
                         <h2 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
                             <FaBox className="text-primary" /> Order Items
                         </h2>
                         <div className="space-y-6">
                             {order.items?.map((item: any) => (
                                 <div key={item.id} className="flex gap-6 items-start">
-                                    <div className="w-20 h-20 bg-slate-50 rounded-xl flex-shrink-0" />
+                                    <div className="w-20 h-20 bg-slate-50 rounded-[10px] flex-shrink-0" />
                                     <div className="flex-1">
                                         <h3 className="font-bold text-slate-800">{item.product?.name || 'Product Name'}</h3>
                                         <p className="text-sm text-slate-500 mt-1">Qty: {item.quantity} × ₹{item.price}</p>
@@ -122,7 +122,7 @@ export default function OrderDetailsPage() {
 
                     {/* Escrow & Trust Section */}
                     {order.escrow && (
-                        <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-blue-600/5 border border-slate-100 relative overflow-hidden">
+                        <div className="bg-white rounded-[10px] p-8 shadow-xl shadow-blue-600/5 border border-slate-100 relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-8 opacity-10">
                                 <FaMoneyBillWave size={100} className={
                                     order.escrow.status === 'RELEASED' ? 'text-emerald-500' :
@@ -136,7 +136,7 @@ export default function OrderDetailsPage() {
 
                             <div className="relative z-10">
                                 <div className="flex items-center gap-4 mb-6">
-                                    <div className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border ${order.escrow.status === 'RELEASED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                    <div className={`px-4 py-2 rounded-[10px] text-xs font-black uppercase tracking-widest border ${order.escrow.status === 'RELEASED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                                         order.escrow.status === 'FROZEN' ? 'bg-rose-50 text-rose-600 border-rose-100' :
                                             'bg-blue-50 text-blue-600 border-blue-100'
                                         }`}>
@@ -148,7 +148,7 @@ export default function OrderDetailsPage() {
                                 </div>
 
                                 {order.escrow.status === 'HOLD' && (
-                                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                    <div className="p-4 bg-slate-50 rounded-[10px] border border-slate-100">
                                         <h4 className="font-bold text-slate-800 mb-2">Buyer Protection Actions</h4>
                                         <div className="flex gap-4">
                                             {order.status === 'DELIVERED' && (
@@ -192,7 +192,7 @@ export default function OrderDetailsPage() {
                     )}
 
                     {/* Timeline / Journey */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-blue-600/5 border border-slate-100">
+                    <div className="bg-white rounded-[10px] p-8 shadow-xl shadow-blue-600/5 border border-slate-100">
                         <div className="flex justify-between items-center mb-8">
                             <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
                                 <FaTruck className="text-primary" /> Delivery Journey
@@ -204,7 +204,7 @@ export default function OrderDetailsPage() {
                                         toast.info('Tracking simulation started!');
                                         setTimeout(() => window.location.reload(), 2000);
                                     }}
-                                    className="text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-black transition-all"
+                                    className="text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white px-4 py-2 rounded-[10px] hover:bg-black transition-all"
                                 >
                                     Simulate Journey
                                 </button>
@@ -227,7 +227,7 @@ export default function OrderDetailsPage() {
                                             </h4>
                                             <p className="text-xs text-slate-500 mt-1 font-medium">{event.reason}</p>
                                             {event.metadata && Object.keys(event.metadata).length > 0 && (
-                                                <div className="mt-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                                <div className="mt-3 p-4 bg-slate-50 rounded-[10px] border border-slate-100">
                                                     <div className="grid grid-cols-2 gap-4">
                                                         {Object.entries(event.metadata).map(([key, val]: [string, any]) => (
                                                             <div key={key}>
@@ -251,7 +251,7 @@ export default function OrderDetailsPage() {
                 {/* Sidebar */}
                 <div className="space-y-6">
                     {/* Dealer Info */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-blue-600/5 border border-slate-100">
+                    <div className="bg-white rounded-[10px] p-8 shadow-xl shadow-blue-600/5 border border-slate-100">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Sold By</h3>
                             {order.status === 'DELIVERED' && (
@@ -285,7 +285,7 @@ export default function OrderDetailsPage() {
                     </div>
 
                     {/* Shipping Info */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-blue-600/5 border border-slate-100">
+                    <div className="bg-white rounded-[10px] p-8 shadow-xl shadow-blue-600/5 border border-slate-100">
                         <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Shipping Details</h3>
                         <div className="space-y-4">
                             <div className="flex gap-3">

@@ -30,8 +30,8 @@ export const adminService = {
         return apiClient.get<any[]>('/admin/products');
     },
 
-    async approveProduct(productId: string, isApproved: boolean, rejectionReason?: string): Promise<any> {
-        return apiClient.put(`/admin/products/${productId}/approve`, { isApproved, rejectionReason });
+    async approveProduct(productId: string, isApproved: boolean, rejectionReason?: string, status?: string): Promise<any> {
+        return apiClient.put(`/admin/products/${productId}/approve`, { isApproved, rejectionReason, status });
     },
 
     async getAllOrders(): Promise<any[]> {
@@ -56,6 +56,14 @@ export const adminService = {
 
     async updateDealerManufacturers(dealerId: string, manufacturerId: string): Promise<any> {
         return apiClient.put(`/admin/dealers/${dealerId}/manufacturers`, { manufacturerId });
+    },
+
+    async getPendingReviews(): Promise<any[]> {
+        return apiClient.get<any[]>('/reviews/pending');
+    },
+
+    async moderateReview(reviewId: string, type: string, status: string): Promise<any> {
+        return apiClient.post('/reviews/moderate', { reviewId, type, status });
     }
 };
 

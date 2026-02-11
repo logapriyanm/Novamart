@@ -1,4 +1,5 @@
 import models from '../models/index.js';
+import logger from '../lib/logger.js';
 
 /**
  * Universal service for MongoDB CRUD with auditing and rules.
@@ -39,10 +40,7 @@ class MongoService {
         if (!Model) throw new Error(`Model ${collectionName} not found`);
 
         const doc = await Model.findByIdAndUpdate(id, updateData, { new: true });
-        console.log(`DEBUG: MongoService.update - Model: ${collectionName}, ID: ${id}, Result: ${doc ? 'SUCCESS' : 'NOT_FOUND'}`);
-        if (doc) {
-            console.log(`   New Data:`, JSON.stringify(updateData));
-        }
+        logger.debug('MongoService.update - Model: %s, ID: %s, Result: %s', collectionName, id, doc ? 'SUCCESS' : 'NOT_FOUND');
 
         await models.AuditLog.create({
             actorId,

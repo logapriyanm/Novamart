@@ -126,7 +126,7 @@ export default function ManufacturerDashboard() {
                                 <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Production Volume</h3>
                                 <p className="text-lg font-bold text-slate-900 mt-1">Output Consistency</p>
                             </div>
-                            <select className="bg-slate-50 border border-slate-200 text-[10px] font-black uppercase text-slate-600 rounded-[8px] px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <select className="bg-slate-50 border border-slate-200 text-[10px] font-black uppercase text-slate-600 rounded-[10px] px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20">
                                 <option>This Year</option>
                                 <option>Last Year</option>
                             </select>
@@ -177,7 +177,7 @@ export default function ManufacturerDashboard() {
                                         <p className="text-xl font-black text-slate-900">3 Items</p>
                                     </div>
                                 </div>
-                                <span className="text-[9px] font-black text-amber-600 bg-white border border-amber-100 px-2.5 py-1 rounded-[6px] shadow-sm uppercase tracking-widest">Restock</span>
+                                <span className="text-[9px] font-black text-amber-600 bg-white border border-amber-100 px-2.5 py-1 rounded-[10px] shadow-sm uppercase tracking-widest">Restock</span>
                             </div>
                             <div className="p-6 bg-primary/5 rounded-[10px] border border-primary/10 flex items-center justify-between group">
                                 <div className="flex items-center gap-4">
@@ -189,7 +189,7 @@ export default function ManufacturerDashboard() {
                                         <p className="text-xl font-black text-slate-900">1,240 Units</p>
                                     </div>
                                 </div>
-                                <span className="text-[9px] font-black text-primary bg-white border border-primary/10 px-2.5 py-1 rounded-[6px] shadow-sm uppercase tracking-widest">Stable</span>
+                                <span className="text-[9px] font-black text-primary bg-white border border-primary/10 px-2.5 py-1 rounded-[10px] shadow-sm uppercase tracking-widest">Stable</span>
                             </div>
                         </div>
                     </div>
@@ -269,7 +269,7 @@ function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
                 </div>
             </div>
             <div className="mt-6 flex items-center gap-2">
-                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[6px] border border-slate-100 shadow-sm`}>
+                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[10px] border border-slate-100 shadow-sm`}>
                     {trend}
                 </span>
                 <span className="text-[10px] font-bold text-slate-400">vs last cycle</span>

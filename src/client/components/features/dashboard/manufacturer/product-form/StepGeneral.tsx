@@ -59,7 +59,7 @@ export default function StepGeneral() {
                 <p className="text-slate-400 font-bold text-xs">Basic details about your product.</p>
             </div>
 
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 space-y-6">
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-8 space-y-6">
 
                 {/* Product Name */}
                 <div className="space-y-2">
@@ -71,12 +71,12 @@ export default function StepGeneral() {
                         value={productData.name}
                         onChange={(e) => updateProductData({ name: e.target.value })}
                         placeholder="e.g. Industrial Smart Controller X500"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-300"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-[10px] px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-300"
                     />
                 </div>
 
                 {/* Category Selection Section */}
-                <div className="space-y-4 bg-slate-50/50 p-6 rounded-2xl border border-dashed border-slate-200">
+                <div className="space-y-4 bg-slate-50/50 p-6 rounded-[10px] border border-dashed border-slate-200">
                     <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                         <FaLayerGroup className="w-3 h-3 text-[#0F6CBD]" /> Categorization <span className="text-rose-500">*</span>
                     </label>
@@ -88,7 +88,7 @@ export default function StepGeneral() {
                                 <select
                                     value={selectedMainCategory}
                                     onChange={(e) => handleMainCategoryChange(e.target.value)}
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none"
+                                    className="w-full bg-white border border-slate-200 rounded-[10px] px-4 py-2.5 text-xs font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none"
                                 >
                                     <option value="">Select Category</option>
                                     {Object.entries(CATEGORY_CONFIG).map(([key, config]: [string, any]) => (
@@ -107,7 +107,7 @@ export default function StepGeneral() {
                                     value={selectedSubCategory}
                                     onChange={(e) => handleSubCategoryChange(e.target.value)}
                                     disabled={!selectedMainCategory}
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
+                                    className="w-full bg-white border border-slate-200 rounded-[10px] px-4 py-2.5 text-xs font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed appearance-none"
                                 >
                                     <option value="">Select Sub-Category</option>
                                     {selectedMainCategory && Object.values(CATEGORY_CONFIG[selectedMainCategory].subCategories).map((sub: any) => (
@@ -130,7 +130,7 @@ export default function StepGeneral() {
                         onChange={(e) => updateProductData({ description: e.target.value })}
                         placeholder="Detailed description of the product features and applications..."
                         rows={6}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-300 resize-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-[10px] px-4 py-3 text-sm font-medium text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-300 resize-none"
                     />
                 </div>
 
@@ -145,7 +145,7 @@ export default function StepGeneral() {
                             value={productData.basePrice}
                             onChange={(e) => updateProductData({ basePrice: e.target.value })}
                             placeholder="0.00"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-300"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-[10px] px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-300"
                         />
                     </div>
                     <div className="space-y-2">
@@ -157,7 +157,7 @@ export default function StepGeneral() {
                             value={productData.moq}
                             onChange={(e) => updateProductData({ moq: e.target.value })}
                             placeholder="1"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-300"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-[10px] px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-300"
                         />
                     </div>
                 </div>

@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api/client';
 import { FaSpinner as Loader2 } from 'react-icons/fa';
+import { PolicyModal } from '@/client/components/ui/PolicyModal';
 
 type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';
 
@@ -46,10 +47,12 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
         businessName: '',
         gstNumber: '',
         address: '',
+        agreedToTerms: false,
     });
 
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [showTermsModal, setShowTermsModal] = useState(false);
 
     const nextStep = async () => {
         setErrors({});
@@ -68,6 +71,10 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
             }
             if (!formData.phone || !/^[6-9]\d{9}$/.test(formData.phone)) {
                 setErrors({ phone: 'Invalid Indian phone number (10 digits)' });
+                return;
+            }
+            if (!formData.agreedToTerms) {
+                setErrors({ general: 'You must agree to the Terms and Conditions to continue.' });
                 return;
             }
 
@@ -171,28 +178,31 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
         switch (step) {
             case 1:
                 return (
-                    <div className="space-y-8 animate-fade-in">
-                        <div className="text-center space-y-2">
-                            <h2 className="text-3xl font-black text-black italic uppercase">Choose Your Identity</h2>
-                            <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-[0.3em]">Select your role in the NovaMart Ecosystem</p>
+                    <div className="space-y-6 animate-fade-in">
+                        <div className="text-left space-y-2">
+                            <h2 className="text-2xl font-bold text-gray-900">Choose your account type</h2>
+                            <p className="text-sm text-gray-500">Select how you want to operate within the NovaMart Ecosystem</p>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 gap-4">
                             {[
-                                { id: 'MANUFACTURER', label: 'Manufacturer', icon: Factory, desc: 'List direct inventory & manage bulk' },
-                                { id: 'DEALER', label: 'Dealer', icon: Store, desc: 'Quality source & retail to patrons' },
-                                { id: 'CUSTOMER', label: 'Individual', icon: User, desc: 'Elite access with escrow safety' }
+                                { id: 'MANUFACTURER', label: 'Manufacturer', icon: Factory, desc: 'List direct inventory & manage bulk orders' },
+                                { id: 'DEALER', label: 'Dealer / Seller', icon: Store, desc: 'Source products & reach retail customers' },
+                                { id: 'CUSTOMER', label: 'Individual Buyer', icon: User, desc: 'Shop securely with escrow protection' }
                             ].map((r) => (
                                 <button
                                     key={r.id}
                                     onClick={() => handleRoleSelect(r.id as Role)}
-                                    className="p-8 rounded-[10px] bg-white border border-black/5 hover:border-black hover:shadow-xl hover:shadow-black/10 transition-all group flex flex-col items-center text-center gap-6"
+                                    className="p-4 rounded-[10px] bg-white border border-gray-100 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all group flex items-start gap-4 text-left w-full"
                                 >
-                                    <div className="w-20 h-20 rounded-[10px] bg-black/5 flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-all">
-                                        <r.icon className="w-10 h-10" />
+                                    <div className="w-12 h-12 rounded-[10px] bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                        <r.icon className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black text-black mb-2 uppercase italic">{r.label}</h3>
-                                        <p className="text-[10px] text-foreground/40 font-bold uppercase tracking-widest">{r.desc}</p>
+                                        <h3 className="text-base font-bold text-gray-900 group-hover:text-primary transition-colors">{r.label}</h3>
+                                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">{r.desc}</p>
+                                    </div>
+                                    <div className="ml-auto flex items-center justify-center w-6 h-6 rounded-full border border-gray-200 group-hover:border-primary group-hover:bg-primary group-hover:text-white transition-all opacity-0 group-hover:opacity-100">
+                                        <ArrowRight className="w-3 h-3" />
                                     </div>
                                 </button>
                             ))}
@@ -201,160 +211,223 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 );
             case 2:
                 return (
-                    <div className="space-y-8 max-w-lg mx-auto">
-                        <div className="text-center space-y-2">
-                            <h2 className="text-3xl font-black text-black italic uppercase">Fast Onboarding</h2>
-                            <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-[0.3em]">Enter your official details to proceed</p>
+                    <div className="space-y-6">
+                        <div className="text-left space-y-2">
+                            <h2 className="text-2xl font-bold text-gray-900">Basic Information</h2>
+                            <p className="text-sm text-gray-500">Enter your personal details to get started</p>
                         </div>
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 gap-4">
-                                <input
-                                    type="text"
-                                    placeholder=" Name"
-                                    className={`w-full bg-white/60 border ${errors.name ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-5 text-sm font-bold focus:outline-none focus:border-black transition-all`}
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                />
-                                {errors.name && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.name}</p>}
-                                <input
-                                    type="email"
-                                    placeholder="Email"
-                                    className={`w-full bg-white/60 border ${errors.email ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-5 text-sm font-bold focus:outline-none focus:border-black transition-all`}
-                                    value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                />
-                                {errors.email && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.email}</p>}
-                                <div className="relative">
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Password "
-                                        className={`w-full bg-white/60 border ${errors.password ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-5 pr-12 text-sm font-bold focus:outline-none focus:border-black transition-all`}
-                                        value={formData.password}
-                                        onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-black/20 hover:text-black transition-colors"
-                                    >
-                                        {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
-                                    </button>
-                                </div>
-                                {errors.password && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.password}</p>}
-                                <div className="flex flex-col gap-1">
-                                    <div className="flex gap-4">
-                                        <input
-                                            type="tel"
-                                            placeholder="Mobile Number"
-                                            className={`flex-1 bg-white/60 border ${errors.phone ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-5 text-sm font-bold focus:outline-none focus:border-black transition-all`}
-                                            value={formData.phone}
-                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                        />
-                                        {!otpSent && (
-                                            <button
-                                                onClick={() => setOtpSent(true)}
-                                                className="px-6 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-black/80 transition-all font-black"
-                                            >
-                                                Get OTP
-                                            </button>
-                                        )}
-                                    </div>
-                                    {errors.phone && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.phone}</p>}
-                                </div>
-                                {otpSent && (
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-gray-700">Full Name</label>
                                     <input
                                         type="text"
-                                        placeholder="0 0 0 0 0 0"
-                                        className="w-full bg-white border-2 border-black rounded-[10px] p-5 text-center text-sm font-black tracking-[1em] focus:outline-none"
-                                        value={formData.otp}
-                                        onChange={e => setFormData({ ...formData, otp: e.target.value })}
+                                        placeholder="John Doe"
+                                        className={`w-full bg-white border ${errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm transition-all focus:ring-1 focus:outline-none`}
+                                        value={formData.name}
+                                        onChange={e => {
+                                            const value = e.target.value;
+                                            if (/^[a-zA-Z\s]*$/.test(value)) {
+                                                setFormData({ ...formData, name: value });
+                                            }
+                                        }}
                                     />
-                                )}
+                                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-gray-700">Email Address</label>
+                                    <input
+                                        type="email"
+                                        placeholder="name@company.com"
+                                        className={`w-full bg-white border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm transition-all focus:ring-1 focus:outline-none`}
+                                        value={formData.email}
+                                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                    />
+                                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-gray-700">Secure Password</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Min. 8 chars"
+                                            className={`w-full bg-white border ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 pr-12 text-sm transition-all focus:ring-1 focus:outline-none`}
+                                            value={formData.password}
+                                            onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        >
+                                            {showPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
+                                    {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-gray-700">Phone Number</label>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex gap-3">
+                                            <input
+                                                type="tel"
+                                                placeholder="+91 98765 43210"
+                                                className={`flex-1 bg-white border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm transition-all focus:ring-1 focus:outline-none`}
+                                                value={formData.phone}
+                                                onChange={e => {
+                                                    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                                    setFormData({ ...formData, phone: value });
+                                                }}
+                                            />
+                                            {!otpSent && (
+                                                <button
+                                                    onClick={() => setOtpSent(true)}
+                                                    className="px-4 bg-gray-900 text-white rounded-[10px] text-xs font-bold uppercase tracking-wide hover:bg-black transition-all whitespace-nowrap"
+                                                >
+                                                    Get OTP
+                                                </button>
+                                            )}
+                                        </div>
+                                        {errors.phone && <p className="text-red-500 text-xs ml-1">{errors.phone}</p>}
+                                    </div>
+                                    {otpSent && (
+                                        <input
+                                            type="text"
+                                            placeholder="0 0 0 0 0 0"
+                                            maxLength={6}
+                                            className="w-full bg-white border border-gray-200 focus:border-primary focus:ring-primary rounded-lg px-4 py-3 text-center text-lg font-bold tracking-[0.5em] transition-all focus:ring-1 focus:outline-none mt-2"
+                                            value={formData.otp}
+                                            onChange={e => {
+                                                const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                                setFormData({ ...formData, otp: value });
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-2">
+                                <input
+                                    type="checkbox"
+                                    id="terms-and-conditions-register"
+                                    checked={formData.agreedToTerms}
+                                    onChange={(e) => setFormData({ ...formData, agreedToTerms: e.target.checked })}
+                                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                />
+                                <label htmlFor="terms-and-conditions-register" className="text-xs text-gray-500">
+                                    I agree to the <button type="button" onClick={() => setShowTermsModal(true)} className="text-primary hover:underline font-semibold">Terms and Conditions</button>
+                                </label>
                             </div>
                         </div>
+
                         <button
                             onClick={nextStep}
-                            disabled={isLoading}
-                            className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 transition-all hover:scale-[1.02] uppercase tracking-[0.3em] text-[10px] disabled:opacity-50"
+                            disabled={isLoading || !formData.agreedToTerms}
+                            className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wider"
                         >
                             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                                 <>
-                                    {role === 'CUSTOMER' ? 'Finalize Profile' : 'Business Details'}
-                                    <ArrowRight className="w-5 h-5" />
+                                    {role === 'CUSTOMER' ? 'Create Account' : 'Continue'}
+                                    <ArrowRight className="w-4 h-4" />
                                 </>
                             )}
                         </button>
-                        {errors.general && <p className="text-rose-500 text-[10px] font-black uppercase text-center mt-4 bg-rose-50 p-4 rounded-xl border border-rose-100">{errors.general}</p>}
+                        {errors.general && (
+                            <div className="bg-red-50 border border-red-100 p-3 rounded-[10px] text-center">
+                                <p className="text-red-600 text-xs font-semibold">{errors.general}</p>
+                            </div>
+                        )}
                     </div>
                 );
             case 3:
                 return role === 'CUSTOMER' ? (
-                    <div className="text-center space-y-6 max-w-md mx-auto">
-                        <div className="w-20 h-20 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
-                            <CheckCircle2 className="w-10 h-10" />
+                    <div className="text-center space-y-6">
+                        <div className="w-24 h-24 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto">
+                            <CheckCircle2 className="w-12 h-12" />
                         </div>
-                        <h2 className="text-3xl font-black text-[#10367D]">Welcome to NovaMart</h2>
-                        <p className="text-[#1E293B]/70 font-medium">Your account has been activated. You can now browse products and purchase securely with escrow.</p>
-                        <Link href="/profile">
-                            <button className="w-full bg-[#10367D] text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-xs">Go to Profile</button>
+                        <div className="space-y-3">
+                            <h2 className="text-3xl font-bold text-primary">Welcome to NovaMart</h2>
+                            <p className="text-gray-500 font-medium">Your account has been activated. You can now browse products and purchase securely with escrow.</p>
+                        </div>
+                        <Link href="/profile" className="block w-full">
+                            <button className="w-full bg-primary text-white font-bold py-4 rounded-[10px] transition-all hover:bg-primary/90 shadow-lg shadow-primary/20 uppercase tracking-widest text-xs">
+                                Go to Profile
+                            </button>
                         </Link>
                     </div>
                 ) : (
-                    <div className="space-y-6 max-md mx-auto">
-                        <div className="text-center space-y-2">
-                            <h2 className="text-3xl font-black text-black italic uppercase">Business Verification</h2>
-                            <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-[0.3em]">Mandatory checks for {role?.toLowerCase()}s</p>
+                    <div className="space-y-6">
+                        <div className="text-left space-y-2">
+                            <h2 className="text-2xl font-bold text-gray-900">Business Details</h2>
+                            <p className="text-sm text-gray-500">Mandatory verification for {role?.toLowerCase()}s</p>
                         </div>
                         <div className="space-y-4">
-                            <div className="flex flex-col gap-1">
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-700">
+                                    {role === 'MANUFACTURER' ? "Company Registered Name" : "Business Name"}
+                                </label>
                                 <input
                                     type="text"
-                                    placeholder={role === 'MANUFACTURER' ? "Company Name" : "Business Name"}
-                                    className={`w-full bg-white/60 border ${errors.companyName || errors.businessName ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-4 font-bold focus:outline-none focus:border-black transition-all text-sm`}
+                                    placeholder={role === 'MANUFACTURER' ? "e.g. Acme Industries Pvt Ltd" : "e.g. Royal Traders"}
+                                    className={`w-full bg-white border ${errors.companyName || errors.businessName ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm font-medium transition-all focus:ring-1 focus:outline-none`}
                                     value={role === 'MANUFACTURER' ? formData.companyName : formData.businessName}
                                     onChange={e => setFormData({ ...formData, [role === 'MANUFACTURER' ? 'companyName' : 'businessName']: e.target.value })}
                                 />
-                                {(errors.companyName || errors.businessName) && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.companyName || errors.businessName}</p>}
+                                {(errors.companyName || errors.businessName) && <p className="text-red-500 text-xs mt-1 ml-1">{errors.companyName || errors.businessName}</p>}
                             </div>
-                            <div className="flex flex-col gap-1">
+
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-700">GSTIN Number</label>
                                 <input
                                     type="text"
-                                    placeholder="GST Number"
-                                    className={`w-full bg-white/60 border ${errors.gstNumber ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-4 font-bold focus:outline-none focus:border-black transition-all text-sm`}
+                                    placeholder="22AAAAA0000A1Z5"
+                                    className={`w-full bg-white border ${errors.gstNumber ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm font-medium transition-all focus:ring-1 focus:outline-none uppercase`}
                                     value={formData.gstNumber}
                                     onChange={e => setFormData({ ...formData, gstNumber: e.target.value })}
                                 />
-                                {errors.gstNumber && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.gstNumber}</p>}
+                                {errors.gstNumber && <p className="text-red-500 text-xs mt-1 ml-1">{errors.gstNumber}</p>}
                             </div>
-                            <div className="flex flex-col gap-1">
+
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-gray-700">Registered Address</label>
                                 <textarea
-                                    placeholder="Business Address"
-                                    className={`w-full bg-white/60 border ${errors.address ? 'border-rose-500' : 'border-black/10'} rounded-[10px] p-4 font-bold focus:outline-none focus:border-black transition-all h-32 text-sm`}
+                                    placeholder="Enter full business address"
+                                    className={`w-full bg-white border ${errors.address ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm font-medium transition-all focus:ring-1 focus:outline-none h-32 resize-none`}
                                     value={formData.address}
                                     onChange={e => setFormData({ ...formData, address: e.target.value })}
                                 />
-                                {errors.address && <p className="text-rose-500 text-[9px] font-black uppercase mt-1 ml-1">{errors.address}</p>}
+                                {errors.address && <p className="text-red-500 text-xs mt-1 ml-1">{errors.address}</p>}
                             </div>
                         </div>
+
                         <button
                             onClick={nextStep}
-                            className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 hover:bg-black/80 transition-all uppercase tracking-[0.3em] text-[10px]"
+                            className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all uppercase tracking-wider text-sm"
                         >
                             Finalize Application
-                            <ArrowRight className="w-5 h-5" />
+                            <ArrowRight className="w-4 h-4" />
                         </button>
                     </div>
                 );
             case 4:
                 return (
-                    <div className="text-center space-y-6 max-w-md mx-auto">
-                        <div className="w-20 h-20 rounded-full bg-[#10367D]/10 text-[#10367D] flex items-center justify-center mx-auto">
-                            <ShieldCheck className="w-10 h-10" />
+                    <div className="text-center space-y-6">
+                        <div className="w-24 h-24 rounded-full bg-blue-50 text-primary flex items-center justify-center mx-auto">
+                            <ShieldCheck className="w-12 h-12" />
                         </div>
-                        <h2 className="text-3xl font-black text-[#10367D]">Application Submitted</h2>
-                        <p className="text-[#1E293B]/70 font-medium">Your request is now in <span className="text-[#10367D] font-bold">UNDER VERIFICATION</span> status. We will notify you once your business details are verified (SLA: 24-48h).</p>
-                        <Link href="/">
-                            <button className="w-full bg-[#10367D] text-white font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-xs">Back to Home</button>
+                        <div className="space-y-3">
+                            <h2 className="text-3xl font-bold text-primary">Application Submitted</h2>
+                            <p className="text-gray-600 font-medium leading-relaxed">
+                                Your request is now in <span className="text-primary font-bold">UNDER VERIFICATION</span> status. We will notify you once your business details are verified (SLA: 24-48h).
+                            </p>
+                        </div>
+                        <Link href="/" className="block w-full">
+                            <button className="w-full bg-primary text-white font-bold py-4 rounded-[10px] transition-all hover:bg-primary/90 uppercase tracking-widest text-xs">
+                                Back to Home
+                            </button>
                         </Link>
                     </div>
                 );
@@ -364,49 +437,123 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 md:p-8 pt-24 md:pt-32 relative overflow-hidden text-black">
-            {/* Ambient Background Glows */}
-            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-black/5 blur-[150px] rounded-full pointer-events-none" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-black/5 blur-[150px] rounded-full pointer-events-none" />
+        <div className="min-h-screen w-full flex overflow-hidden">
+            {/* Left Panel - Branding */}
+            <div className="hidden lg:flex lg:w-1/2 bg-[#0a0f1c] relative items-center justify-center p-12 overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#10367D] rounded-full blur-3xl"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#10367D] rounded-full blur-[120px] opacity-20"></div>
+                    <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#74b4da] rounded-full blur-3xl"></div>
+                </div>
 
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-[10px] flex items-center justify-center p-2 mb-6 md:mb-8 shadow-xl shadow-black/10 overflow-hidden border border-black/5 relative z-10">
-                <img src="/assets/Novamart.png" alt="NovaMart" className="w-full h-full object-contain" />
+                <div className="relative z-10 w-full max-w-lg text-white">
+                    <div className="flex items-center gap-3 mb-16">
+                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                            <img src="/assets/Novamart.png" alt="NovaMart" className="w-8 h-8 object-contain" />
+                        </div>
+                        <span className="text-xl font-bold tracking-tight">NOVAMART</span>
+                    </div>
+
+                    <h1 className="text-5xl font-bold leading-tight mb-8">
+                        Connecting the global Supply Chain marketplace.
+                    </h1>
+
+                    <p className="text-lg text-gray-400 leading-relaxed mb-12">
+                        Join over 50,000+ businesses expanding their reach through NovaMart's seamless B2B and B2C ecosystem.
+                    </p>
+
+                    {/* Testimonial / Social Proof */}
+                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-12">
+                        <p className="text-gray-300 italic mb-4">"NovaMart transformed how we source materials. The verification process gives us 100% confidence in our partners."</p>
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-emerald-400"></div>
+                            <div className="text-sm">
+                                <div className="font-semibold text-white">Rahul Mehta</div>
+                                <div className="text-gray-500">Director, Mehta Textiles</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
+                        <span>© 2026 NovaMart International</span>
+                        <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                        <span>Secure Portal v4.2</span>
+                    </div>
+                </div>
             </div>
 
-            {/* Progress Bar */}
-            {step < 4 && (
-                <div className="w-full max-w-xl md:max-w-2xl bg-black/10 h-1.5 rounded-full mb-8 md:mb-12 overflow-hidden relative z-10">
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(step / 3) * 100}%` }}
-                        className="h-full bg-black shadow-lg shadow-black/20"
-                    />
+            {/* Right Panel - Register Form */}
+            <div className="w-full lg:w-1/2 bg-white flex flex-col items-center justify-center p-4 xs:p-8 sm:p-12 lg:p-24 overflow-y-auto relative">
+                {/* Mobile Back to Home Navigation */}
+                <div className="lg:hidden absolute top-6 left-6 flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-2 group">
+                        <div className="w-8 h-8 p-1 rounded-full border border-black flex items-center justify-center bg-white shadow-sm">
+                            <img src="/assets/Novamart.png" alt="N" className="w-full h-full object-contain" />
+                        </div>
+                        <span className="text-xs font-black text-foreground tracking-tighter italic">NovaMart</span>
+                    </Link>
                 </div>
-            )}
 
-            <main className="w-full max-w-4xl relative z-10">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={step}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        {renderStep()}
-                    </motion.div>
-                </AnimatePresence>
-            </main>
+                {/* Progress Bar */}
+                {step < 4 && (
+                    <div className="w-full max-w-md mb-8">
+                        <div className="flex justify-between text-[10px] sm:text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+                            <span className={step >= 1 ? "text-primary" : ""}>Role</span>
+                            <span className={step >= 2 ? "text-primary" : ""}>Basic</span>
+                            <span className={step >= 3 ? "text-primary" : ""}>Business</span>
+                        </div>
+                        <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(step / 3) * 100}%` }}
+                                className="h-full bg-primary"
+                                transition={{ duration: 0.3 }}
+                            />
+                        </div>
+                    </div>
+                )}
 
-            {step > 1 && step < 4 && (
-                <button
-                    onClick={prevStep}
-                    className="mt-6 md:mt-8 flex items-center gap-2 text-black/40 font-black hover:text-black transition-colors relative z-10 uppercase tracking-widest text-[9px]"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back Previous
-                </button>
-            )}
+                <div className="w-full max-w-md relative z-10">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={step}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {renderStep()}
+                        </motion.div>
+                    </AnimatePresence>
+
+                    {step > 1 && step < 4 && (
+                        <button
+                            onClick={prevStep}
+                            className="mt-6 flex items-center gap-2 text-gray-400 font-semibold hover:text-gray-900 transition-colors text-xs uppercase tracking-wide"
+                        >
+                            <ArrowLeft className="w-3 h-3" />
+                            Back
+                        </button>
+                    )}
+
+                    <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+                        <p className="text-sm text-gray-500">
+                            Already have an account?{' '}
+                            <Link href="/auth/login" className="text-primary font-bold hover:underline">
+                                Login Now
+                            </Link>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Terms Modal */}
+            <PolicyModal
+                isOpen={showTermsModal}
+                onClose={() => setShowTermsModal(false)}
+                policyKey={role ? `terms-${role.toLowerCase()}` as any : "terms-of-service"}
+            />
         </div>
     );
 }

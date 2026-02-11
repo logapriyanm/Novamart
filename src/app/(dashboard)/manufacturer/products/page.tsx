@@ -130,9 +130,54 @@ export default function ProductMaster() {
                 </button>
             </div>
 
-            {/* Product Table */}
-            <div className="bg-white rounded-[15px] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+            {/* Product List - Mobile Card View & Desktop Table View */}
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
+                {/* Mobile View: Cards */}
+                <div className="md:hidden divide-y divide-slate-100">
+                    {isLoading ? (
+                        <div className="px-6 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">Syncing Catalog...</div>
+                    ) : products.length === 0 ? (
+                        <div className="px-6 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">No Products Active</div>
+                    ) : products.map((product) => (
+                        <div key={product.id} className="p-4 space-y-4">
+                            <div className="flex items-start gap-4">
+                                <div className="w-16 h-16 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                                    <img src={product.images?.[0]} alt="" className="w-full h-full object-cover rounded-[10px]" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <h4 className="text-sm font-bold text-[#1E293B] truncate">{product.name}</h4>
+                                        <span className={`inline-flex px-2 py-0.5 rounded-[10px] text-[8px] font-black uppercase tracking-widest shrink-0 ${product.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' :
+                                            product.status === 'PENDING' ? 'bg-amber-50 text-amber-600' :
+                                                'bg-slate-100 text-slate-400'
+                                            }`}>
+                                            {product.status}
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">{product.category}</p>
+                                    <p className="text-sm font-black text-primary mt-2">₹{Number(product.basePrice).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">Product ID: {product.id.substring(0, 8)}...</span>
+                                <div className="flex items-center gap-1">
+                                    <Link href={`/manufacturer/products/edit/${product.id}`} className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-[10px] text-[10px] font-bold hover:bg-slate-100 transition-all flex items-center gap-1.5">
+                                        <FaEdit className="w-3 h-3" /> Edit
+                                    </Link>
+                                    <button
+                                        onClick={() => handleDelete(product.id)}
+                                        className="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-[10px] text-[10px] font-bold hover:bg-rose-100 transition-all flex items-center gap-1.5"
+                                    >
+                                        <FaTrash className="w-3 h-3" /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Desktop View: Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-100">
@@ -155,8 +200,8 @@ export default function ProductMaster() {
                                 <tr key={product.id} className="group hover:bg-slate-50 transition-all">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                                                <img src={product.images?.[0]} alt="" className="w-full h-full object-cover rounded-lg" />
+                                            <div className="w-8 h-8 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                                                <img src={product.images?.[0]} alt="" className="w-full h-full object-cover rounded-[10px]" />
                                             </div>
                                             <div>
                                                 <h4 className="text-xs font-bold text-[#1E293B]">{product.name}</h4>
@@ -168,7 +213,7 @@ export default function ProductMaster() {
                                         <span className="text-xs font-bold text-[#1E293B]">₹{Number(product.basePrice).toLocaleString()}</span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest ${product.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' :
+                                        <span className={`inline-flex px-2 py-0.5 rounded-[10px] text-[9px] font-bold uppercase tracking-widest ${product.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' :
                                             product.status === 'PENDING' ? 'bg-amber-50 text-amber-600' :
                                                 'bg-slate-100 text-slate-400'
                                             }`}>
@@ -198,13 +243,13 @@ export default function ProductMaster() {
                 <div className="p-6 border-t border-slate-50 flex items-center justify-between bg-slate-50/30">
                     <p className="text-xs font-bold text-slate-500">Showing {products.length} products</p>
                     <div className="flex items-center gap-2">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50" disabled>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50" disabled>
                             <FaChevronLeft className="w-3 h-3" />
                         </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0F6CBD] text-white text-xs font-black shadow-md shadow-blue-500/20">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-[10px] bg-[#0F6CBD] text-white text-xs font-black shadow-md shadow-blue-500/20">
                             1
                         </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50" disabled>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50" disabled>
                             <FaChevronRight className="w-3 h-3" />
                         </button>
                     </div>

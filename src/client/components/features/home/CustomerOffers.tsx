@@ -62,15 +62,15 @@ const offers = [
 
 export default function CustomerOffers() {
     return (
-        <section className="py-24 relative overflow-hidden">
+        <section className="py-10 relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-indigo-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-blue-50 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2" />
 
-            <div className="max-w-[1600px] mx-auto px-4 lg:px-8 relative">
+            <div className="max-w-[1300px] mx-auto px-4 lg:px-8 relative">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                     <div className="max-w-3xl">
-                        <motion.div
+                        {/* <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -78,7 +78,7 @@ export default function CustomerOffers() {
                         >
                             <FaGift className="w-4 h-4" />
                             <span className="text-xs font-black uppercase tracking-widest">Rewards Program</span>
-                        </motion.div>
+                        </motion.div> */}
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -86,8 +86,8 @@ export default function CustomerOffers() {
                             transition={{ delay: 0.1 }}
                             className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
                         >
-                            🎁 Customer Offers
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">in NovaMart</span>
+                            🎁 Customer Offers in 
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600"> NovaMart</span>
                         </motion.h2>
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}

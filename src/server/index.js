@@ -20,9 +20,10 @@ import productRoutes from './routes/products/productRoutes.js';
 import notificationRoutes from './routes/notifications.js';
 import mongodbRoutes from './routes/mongodb.js';
 import homeRoutes from './routes/home/homeRoutes.js';
+import cmsRoutes from './routes/home/cmsRoutes.js';
 import reviewRoutes from './routes/review/reviewRoutes.js';
 import notificationService from './services/notificationService.js';
-import { Message, Chat } from './models/index.js';
+import { Message, Chat, User } from './models/index.js';
 import ordersRouter from './routes/orders/index.js';
 import paymentRoutes from './routes/payments/index.js';
 import cartRoutes from './routes/cart/cartRoutes.js';
@@ -36,6 +37,8 @@ import poolingRoutes from './routes/pooling/poolingRoutes.js';
 import collaborationRoutes from './routes/collaboration/collaborationRoutes.js';
 import customManufacturingRoutes from './routes/customManufacturing/customManufacturingRoutes.js';
 import customEscrowRoutes from './routes/customEscrow/customEscrowRoutes.js';
+import wishlistRoutes from './routes/wishlistRoutes.js';
+import sellerRoutes from './routes/sellers/sellerRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -61,8 +64,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/auth', authRoutes);
-
-// app.use('/api/', authRateLimiter); // Temporarily commented out
 
 // Socket.IO Logic
 io.use(async (socket, next) => {
@@ -158,6 +159,7 @@ io.on('connection', (socket) => {
 
 // API Routes
 
+// Register API routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/manufacturer', manufacturerRoutes);
 app.use('/api/dealer', dealerRoutes);
@@ -169,6 +171,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/mongodb', mongodbRoutes);
 
+app.use('/api/cms', cmsRoutes);
 app.use('/api/home', homeRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/orders', ordersRouter);
@@ -183,12 +186,14 @@ app.use('/api/pooling', poolingRoutes);
 app.use('/api/collaboration', collaborationRoutes);
 app.use('/api/custom-manufacturing', customManufacturingRoutes);
 app.use('/api/custom-escrow', customEscrowRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/sellers', sellerRoutes);
 
 // Health check route
 app.get('/', (req, res) => {
     res.json({
         status: 'OK',
-        message: 'NovaMart API v1.0.1 (AUDIT_ACTIVE)',
+        message: 'NovaMart API v1.0.1',
         db: 'MongoDB (Mongoose)'
     });
 });

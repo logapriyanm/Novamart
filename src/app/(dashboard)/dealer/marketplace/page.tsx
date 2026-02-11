@@ -81,7 +81,7 @@ export default function DealerMarketplace() {
                     </p>
                 </div>
                 <Link href="/dealer/sourcing">
-                    <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-xl font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                    <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-[10px] font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
                         <FaBoxOpen />
                         Go to Sourcing Terminal
                     </button>
@@ -89,7 +89,7 @@ export default function DealerMarketplace() {
             </div>
 
             {/* Search & Filters */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-[10px] shadow-sm border border-slate-100">
                 <div className="flex-1 relative w-full">
                     <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
@@ -97,7 +97,7 @@ export default function DealerMarketplace() {
                         placeholder="Search manufacturers by name or location..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F6CBD]/20 focus:border-[#0F6CBD] transition-all font-medium text-sm"
+                        className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F6CBD]/20 focus:border-[#0F6CBD] transition-all font-medium text-sm"
                     />
                 </div>
             </div>
@@ -108,7 +108,7 @@ export default function DealerMarketplace() {
                     <button
                         key={cat}
                         onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-                        className={`p-6 rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-pointer group text-left ${selectedCategory === cat
+                        className={`p-6 rounded-[10px] border shadow-sm hover:shadow-md transition-all cursor-pointer group text-left ${selectedCategory === cat
                             ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-500/20'
                             : 'bg-white border-slate-100'
                             }`}
@@ -143,7 +143,7 @@ export default function DealerMarketplace() {
                         <p className="text-slate-400 font-bold text-sm">Loading manufacturer directory...</p>
                     </div>
                 ) : filteredManufacturers.length === 0 ? (
-                    <div className="py-12 flex flex-col items-center justify-center bg-white rounded-[2rem] border border-dashed border-slate-200 text-center">
+                    <div className="py-12 flex flex-col items-center justify-center bg-white rounded-[10px] border border-dashed border-slate-200 text-center">
                         <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                             <FaIndustry className="w-6 h-6 text-slate-300" />
                         </div>
@@ -188,15 +188,15 @@ function ManufacturerCard({ manufacturer, onRequestAccess }: { manufacturer: any
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg transition-all overflow-hidden"
+            className="bg-white rounded-[10px] border border-slate-100 shadow-sm hover:shadow-lg transition-all overflow-hidden"
         >
             {/* Header */}
             <div className="p-6 border-b border-slate-100">
                 <div className="flex items-start gap-4">
                     {/* Logo */}
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-100 rounded-[10px] flex items-center justify-center flex-shrink-0">
                         {manufacturer.logo ? (
-                            <img src={manufacturer.logo} alt={manufacturer.companyName} className="w-full h-full object-cover rounded-xl" />
+                            <img src={manufacturer.logo} alt={manufacturer.companyName} className="w-full h-full object-cover rounded-[10px]" />
                         ) : (
                             <FaIndustry className="text-[#0F6CBD] text-2xl" />
                         )}
@@ -230,7 +230,7 @@ function ManufacturerCard({ manufacturer, onRequestAccess }: { manufacturer: any
                     <p className="text-xs font-black text-slate-600 uppercase tracking-wider mb-3">Sample Products</p>
                     <div className="grid grid-cols-3 gap-2">
                         {manufacturer.products.slice(0, 3).map((product: any) => (
-                            <div key={product.id} className="bg-white rounded-lg p-2 border border-slate-100">
+                            <div key={product.id} className="bg-white rounded-[10px] p-2 border border-slate-100">
                                 <div className="aspect-square bg-slate-100 rounded-md mb-2 overflow-hidden">
                                     {product.images?.[0] ? (
                                         <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
@@ -252,7 +252,7 @@ function ManufacturerCard({ manufacturer, onRequestAccess }: { manufacturer: any
             <div className="p-4">
                 <button
                     onClick={() => onRequestAccess(manufacturer)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#0F6CBD] text-white rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#0F6CBD] text-white rounded-[10px] font-black text-sm uppercase tracking-wider hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20"
                 >
                     <FaHandshake />
                     Request Access
@@ -315,7 +315,7 @@ function RequestAccessModal({ manufacturer, onClose }: { manufacturer: any; onCl
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+                className="bg-white rounded-[10px] shadow-2xl max-w-md w-full overflow-hidden"
             >
                 {/* Header */}
                 <div className="p-6 bg-gradient-to-r from-[#0F6CBD] to-blue-600 text-white">
@@ -338,7 +338,7 @@ function RequestAccessModal({ manufacturer, onClose }: { manufacturer: any; onCl
                             type="number"
                             value={formData.expectedQuantity}
                             onChange={(e) => setFormData({ ...formData, expectedQuantity: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F6CBD]/20 focus:border-[#0F6CBD]"
+                            className="w-full px-4 py-2 rounded-[10px] border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F6CBD]/20 focus:border-[#0F6CBD]"
                             placeholder="e.g., 100 units"
                             required
                         />
@@ -379,7 +379,7 @@ function RequestAccessModal({ manufacturer, onClose }: { manufacturer: any; onCl
                         <textarea
                             value={formData.message}
                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F6CBD]/20 focus:border-[#0F6CBD] h-24 resize-none"
+                            className="w-full px-4 py-2 rounded-[10px] border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F6CBD]/20 focus:border-[#0F6CBD] h-24 resize-none"
                             placeholder="Tell the manufacturer about your business..."
                         />
                     </div>
@@ -387,7 +387,7 @@ function RequestAccessModal({ manufacturer, onClose }: { manufacturer: any; onCl
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#0F6CBD] text-white rounded-xl font-black text-sm uppercase tracking-wider hover:bg-[#0F6CBD]/90 transition-all shadow-lg disabled:opacity-50"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#0F6CBD] text-white rounded-[10px] font-black text-sm uppercase tracking-wider hover:bg-[#0F6CBD]/90 transition-all shadow-lg disabled:opacity-50"
                     >
                         <FaPaperPlane />
                         {loading ? 'Sending...' : 'Send Request'}

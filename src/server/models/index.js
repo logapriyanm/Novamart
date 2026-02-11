@@ -31,6 +31,7 @@ import Chat from './Chat.js';
 import Message from './Message.js';
 import Review from './Review.js';
 import RatingsSummary from './RatingsSummary.js';
+import Wishlist from './Wishlist.js';
 import Dispute from './Dispute.js';
 import SupportTicket from './SupportTicket.js';
 import Notification from './Notification.js';
@@ -48,6 +49,7 @@ import GroupParticipant from './GroupParticipant.js';
 import CustomProductRequest from './CustomProductRequest.js';
 import ProductionMilestone from './ProductionMilestone.js';
 import CustomOrderEscrow from './CustomOrderEscrow.js';
+import HomePageCMS from './HomePageCMS.js';
 // Removed HomepageConfig
 
 export {
@@ -101,7 +103,9 @@ export {
     GroupParticipant,
     CustomProductRequest,
     ProductionMilestone,
-    CustomOrderEscrow
+    CustomOrderEscrow,
+    Wishlist,
+    HomePageCMS
 };
 
 export default {
@@ -155,5 +159,7 @@ export default {
     GroupParticipant,
     CustomProductRequest,
     ProductionMilestone,
-    CustomOrderEscrow
+    CustomOrderEscrow,
+    Wishlist,
+    HomePageCMS
 };

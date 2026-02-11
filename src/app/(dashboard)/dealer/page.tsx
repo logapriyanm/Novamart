@@ -160,7 +160,7 @@ export default function DealerDashboard() {
                             <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-2 opacity-80">Membership Cluster</p>
                             <h3 className="text-xl font-black mb-1 tracking-tight">Platinum Dealer</h3>
                             <p className="text-[10px] font-bold text-indigo-100/60 mb-8 uppercase tracking-widest">Validated thru Dec 2026</p>
-                            <button className="px-6 py-2.5 bg-white text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-[8px] hover:bg-indigo-50 active:scale-[0.98] transition-all shadow-sm">
+                            <button className="px-6 py-2.5 bg-white text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-[10px] hover:bg-indigo-50 active:scale-[0.98] transition-all shadow-sm">
                                 Upgrade Plan
                             </button>
                         </div>
@@ -186,7 +186,7 @@ function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
                 </div>
             </div>
             <div className="mt-6 flex items-center gap-2">
-                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[6px] border border-slate-100 shadow-sm`}>
+                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[10px] border border-slate-100 shadow-sm`}>
                     {trend}
                 </span>
                 <span className="text-[10px] font-bold text-slate-400">vs week 4</span>

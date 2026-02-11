@@ -3,21 +3,30 @@ import systemEvents, { EVENTS } from '../../lib/systemEvents.js';
 import auditService from '../../services/audit.js';
 
 /**
- * Product Approval Queue
+ * Toggle Product Visibility/Status
  */
 export const approveProduct = async (req, res) => {
     const { id } = req.params;
-    const { isApproved, rejectionReason } = req.body;
+    const { isApproved, status, rejectionReason } = req.body;
 
     try {
         const oldProduct = await Product.findById(id);
+
+        // Determine new status: 
+        // If status explicitly provided (like 'DISABLED' for blocking), use it.
+        // Otherwise use isApproved boolean logic.
+        let newStatus = status;
+        if (!newStatus) {
+            newStatus = isApproved ? 'APPROVED' : 'REJECTED';
+        }
+
         const product = await Product.findByIdAndUpdate(id, {
-            isApproved,
-            status: isApproved ? 'APPROVED' : 'REJECTED',
-            rejectionReason: isApproved ? null : rejectionReason
+            isApproved: newStatus === 'APPROVED',
+            status: newStatus,
+            rejectionReason: newStatus === 'REJECTED' ? rejectionReason : null
         }, { new: true });
 
-        await auditService.logAction('PRODUCT_APPROVAL', 'PRODUCT', id, {
+        await auditService.logAction('PRODUCT_STATUS_CHANGE', 'PRODUCT', id, {
             userId: req.user._id,
             oldData: oldProduct,
             newData: product,
@@ -26,7 +35,8 @@ export const approveProduct = async (req, res) => {
         });
 
         // Emit System Event
-        systemEvents.emit(isApproved ? EVENTS.PRODUCT.APPROVED : EVENTS.PRODUCT.REJECTED, {
+        const eventType = newStatus === 'APPROVED' ? EVENTS.PRODUCT.APPROVED : EVENTS.PRODUCT.REJECTED;
+        systemEvents.emit(eventType, {
             productId: id,
             productName: product.name,
             manufacturerId: product.manufacturerId
@@ -34,11 +44,11 @@ export const approveProduct = async (req, res) => {
 
         res.json({
             success: true,
-            message: isApproved ? 'Product Approved' : 'Product Rejected',
+            message: `Product status updated to ${newStatus}`,
             data: product
         });
     } catch (error) {
-        res.status(400).json({ success: false, error: 'PRODUCT_APPROVAL_FAILED' });
+        res.status(400).json({ success: false, error: 'PRODUCT_STATUS_UPDATE_FAILED' });
     }
 };
 

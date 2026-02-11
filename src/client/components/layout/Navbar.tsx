@@ -109,10 +109,10 @@ export default function Navbar() {
                             <Menu className="w-6 h-6 text-foreground/60" />
                         </button>
                         <Link href="/" className="flex items-center gap-2 group">
-                            <div className="relative w-12 h-12 p-2 rounded-full border-2 border-black overflow-hidden flex items-center justify-center bg-white shadow-sm group-hover:shadow-md transition-all">
-                                <img src="/assets/Novamart.png" alt="NovaMart" className="w-8 h-8 object-contain" />
+                            <div className="relative w-10 h-10 sm:w-12 sm:h-12 p-1.5 sm:p-2 rounded-full border-2 border-black overflow-hidden flex items-center justify-center bg-white shadow-sm group-hover:shadow-md transition-all shrink-0">
+                                <img src="/assets/Novamart.png" alt="NovaMart" className="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
                             </div>
-                            <span className="text-2xl font-black text-foreground tracking-tighter hidden sm:block">
+                            <span className="text-xl sm:text-2xl font-black text-foreground tracking-tighter italic hidden xs:block sm:block">
                                 NovaMart
                             </span>
                         </Link>
@@ -121,10 +121,6 @@ export default function Navbar() {
 
                     {/* Actions - Right */}
                     <div className="flex items-center gap-6 lg:gap-8">
-                        <Link href="/products" className="btn-primary hidden lg:flex">
-                            <FaBox className="w-4 h-4" />
-                            <span>Products</span>
-                        </Link>
 
 
                         <div className="flex-1 max-w-2xl hidden md:flex items-center mx-4 lg:mx-8">
@@ -153,6 +149,10 @@ export default function Navbar() {
                                 </button>
                             </form>
                         </div>
+                        <Link href="/products" className="btn-secondary hidden lg:flex">
+                            <FaBox className="w-4 h-4" />
+                            <span>Products</span>
+                        </Link>
 
 
 
@@ -240,23 +240,23 @@ export default function Navbar() {
                                             )}
 
                                             <div className="px-2 space-y-1">
-                                                <Link href={profilePath} onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
+                                                <Link href={profilePath} onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <HiOutlineUser className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
                                                     <span className="text-xs font-bold uppercase tracking-widest">My Profile</span>
                                                 </Link>
-                                                <Link href="/wishlist" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
+                                                <Link href="/wishlist" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <FaHeart className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
                                                     <span className="text-xs font-bold uppercase tracking-widest">My Wishlist</span>
                                                 </Link>
-                                                <Link href="/customer/reviews" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
+                                                <Link href="/customer/reviews" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <FaStar className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
                                                     <span className="text-xs font-bold uppercase tracking-widest">My Reviews</span>
                                                 </Link>
-                                                <Link href="/profile?tab=orders" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
+                                                <Link href="/profile?tab=orders" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <FaClipboardList className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
                                                     <span className="text-xs font-bold uppercase tracking-widest">Order History</span>
                                                 </Link>
-                                                <Link href="/profile?tab=complaints" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
+                                                <Link href="/profile?tab=complaints" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <FaHeadset className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
                                                     <span className="text-xs font-bold uppercase tracking-widest">Disputes & Complaints</span>
                                                 </Link>
@@ -277,7 +277,7 @@ export default function Navbar() {
                                                             <HiOutlineUserCircle className="w-4 h-4 text-background/80" />
                                                             <span className="text-xs font-bold uppercase tracking-widest text-left">Sign In</span>
                                                         </Link>
-                                                       
+
                                                     </div>
                                                 )}
                                             </div>
@@ -299,7 +299,7 @@ export default function Navbar() {
                             {sidebarContext && (
                                 <button
                                     onClick={sidebarContext.toggleCategorySidebar}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all duration-200 shrink-0 border-2 ${sidebarContext.isCategorySidebarOpen
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] text-xs font-bold uppercase tracking-wider transition-all duration-200 shrink-0 border-2 ${sidebarContext.isCategorySidebarOpen
                                         ? 'bg-primary text-background border-primary'
                                         : 'bg-background border-foreground/10 text-foreground/60 hover:border-primary hover:bg-primary/5'
                                         }`}
@@ -327,7 +327,7 @@ export default function Navbar() {
                                             <Link
                                                 key={i}
                                                 href={cat.href}
-                                                className={`px-4 py-2 text-xs font-bold whitespace-nowrap transition-all rounded-lg flex items-center gap-2 ${isActive
+                                                className={`px-4 py-2 text-xs font-bold whitespace-nowrap transition-all rounded-[10px] flex items-center gap-2 ${isActive
                                                     ? 'bg-primary text-background shadow-md shadow-primary/20'
                                                     : 'text-foreground/60 hover:text-primary hover:bg-background'
                                                     }`}
@@ -343,16 +343,15 @@ export default function Navbar() {
                 </div>
             )}
 
-            {/* Mobile Search - Visible only on small screens below top row */}
             <div className="md:hidden px-4 pb-4 bg-background">
-                <form onSubmit={handleSearch} className="flex items-center bg-surface rounded-xl px-4 py-2 gap-3 border border-foreground/5 focus-within:border-black/20 transition-colors">
+                <form onSubmit={handleSearch} className="flex items-center bg-surface rounded-[10px] px-4 py-1.5 gap-3 border-2 border-black/10 focus-within:border-black transition-all shadow-sm">
                     <Search className="w-4 h-4 text-foreground/40" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search for products..."
-                        className="bg-transparent text-sm w-full h-10 focus:outline-none font-medium text-foreground placeholder:text-foreground/30"
+                        className="bg-transparent text-sm w-full h-9 focus:outline-none font-medium text-foreground placeholder:text-foreground/30"
                     />
                 </form>
             </div>
@@ -380,7 +379,7 @@ export default function Navbar() {
                                     <span className="text-xl font-black text-primary">Menu</span>
                                     <div className="flex items-center gap-2">
                                         {isAuthenticated && <NotificationBell />}
-                                        <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-surface rounded-xl border border-foreground/5">
+                                        <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-surface rounded-[10px] border border-foreground/5">
                                             <X className="w-5 h-5 text-foreground" />
                                         </button>
                                     </div>
@@ -396,6 +395,23 @@ export default function Navbar() {
                                         <FaHeadset className="w-5 h-5 text-foreground/20" />
                                         Contact Support
                                     </Link>
+
+                                    {/* Mobile Categories - NEW RESPONSIVE FIX */}
+                                    <div className="pt-6 border-t border-foreground/5">
+                                        <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest mb-4">Product Categories</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {mainCategories.map((cat, i) => (
+                                                <Link
+                                                    key={i}
+                                                    href={cat.href}
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                    className="px-3 py-2 bg-surface border border-foreground/5 rounded-[10px] text-[10px] font-bold text-foreground/60 hover:text-primary hover:border-primary/20 transition-all text-center"
+                                                >
+                                                    {cat.name}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
 
                                     {isAuthenticated ? (
                                         <>
@@ -433,7 +449,7 @@ export default function Navbar() {
                                         <Link href="/auth/login" className="btn-primary" onClick={() => setIsMobileMenuOpen(false)}>
                                             Sign In
                                         </Link>
-                                       
+
                                     </div>
                                 )}
                             </div>

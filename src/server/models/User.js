@@ -7,8 +7,7 @@ const UserSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['ADMIN', 'MANUFACTURER', 'DEALER', 'CUSTOMER'],
-        required: true,
-        index: true
+        required: true
     },
     adminRole: {
         type: String,
@@ -17,8 +16,7 @@ const UserSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['ACTIVE', 'PENDING', 'UNDER_VERIFICATION', 'SUSPENDED'],
-        default: 'PENDING',
-        index: true
+        default: 'PENDING'
     },
     mfaEnabled: { type: Boolean, default: false },
     avatar: { type: String },

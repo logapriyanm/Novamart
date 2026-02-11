@@ -1,11 +1,13 @@
 import express from 'express';
 import authenticate from '../../middleware/auth.js';
+import authorize from '../../middleware/rbac.js';
 import * as cartController from '../../controllers/cartController.js';
 
 const router = express.Router();
 
-// All cart routes require authentication
+// All cart routes require authentication and CUSTOMER role
 router.use(authenticate);
+router.use(authorize(['CUSTOMER']));
 
 // Get cart
 router.get('/', cartController.getCart);

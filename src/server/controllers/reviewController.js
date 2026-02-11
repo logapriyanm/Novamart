@@ -23,7 +23,7 @@ export const submitProductReview = async (req, res) => {
         }
 
         const review = await reviewService.submitProductReview({
-            orderItemId,
+            orderId: order._id,
             productId,
             customerId: customer._id,
             rating,

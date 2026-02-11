@@ -109,16 +109,21 @@ const LOGGED_IN_SLIDES = [
     }
 ];
 
-export default function HeroSection() {
+interface HeroSectionProps {
+    slides?: any[];
+}
+
+export default function HeroSection({ slides: cmsSlides }: HeroSectionProps) {
     const { isAuthenticated } = useAuth();
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const slides = isAuthenticated ? LOGGED_IN_SLIDES : GUEST_SLIDES;
+    const defaultSlides = isAuthenticated ? LOGGED_IN_SLIDES : GUEST_SLIDES;
+    const slides = cmsSlides && cmsSlides.length > 0 ? cmsSlides : defaultSlides;
 
-    // Reset index when auth state changes to avoid out of bounds
+    // Reset index when auth state or slides change to avoid out of bounds
     useEffect(() => {
         setCurrentIndex(0);
-    }, [isAuthenticated]);
+    }, [isAuthenticated, slides.length]);
 
     const slideNext = useCallback(() => {
         setCurrentIndex((prev) => (prev + 1) % slides.length);
@@ -153,14 +158,14 @@ export default function HeroSection() {
                             className="absolute inset-0 w-full h-full flex flex-col md:flex-row bg-gradient-to-r from-slate-50 to-slate-100/50"
                         >
                             {/* Content Side (Left) */}
-                            <div className="relative z-20 w-full md:w-[55%] p-8 md:p-12 lg:p-16 flex flex-col justify-center items-start space-y-6">
+                            <div className="relative z-20 w-full md:w-[55%] p-6 xs:p-8 md:p-12 lg:p-16 flex flex-col justify-center items-start space-y-4 xs:space-y-6">
 
                                 {/* Tag */}
                                 <motion.div
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.2 }}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/50 backdrop-blur-sm border border-white/40 text-slate-800"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[9px] xs:text-[10px] font-black uppercase tracking-widest bg-white/50 backdrop-blur-sm border border-white/40 text-slate-800"
                                 >
                                     <FaGift className="w-3 h-3" />
                                     {currentSlide.tag}
@@ -172,13 +177,13 @@ export default function HeroSection() {
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.3 }}
                                 >
-                                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.05] tracking-tight">
+                                    <h1 className="text-3xl xs:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.1] tracking-tight">
                                         {currentSlide.title} <br />
                                         <span className="text-[#10367D]">
                                             {currentSlide.highlight}
                                         </span>
                                     </h1>
-                                    <p className="mt-4 text-sm md:text-base font-medium text-slate-600 max-w-lg leading-relaxed">
+                                    <p className="mt-4 text-xs xs:text-sm md:text-base font-medium text-slate-600 max-w-lg leading-relaxed line-clamp-2 xs:line-clamp-none">
                                         {currentSlide.description}
                                     </p>
                                 </motion.div>
@@ -188,37 +193,37 @@ export default function HeroSection() {
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.4 }}
-                                    className="flex items-center gap-4 py-2"
+                                    className="flex items-center gap-4 py-1 xs:py-2"
                                 >
                                     <div>
-                                        <div className="text-2xl font-black text-[#10367D]">
+                                        <div className="text-xl xs:text-2xl font-black text-[#10367D]">
                                             {currentSlide.discount}
                                         </div>
-                                        <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                                        <div className="text-[9px] xs:text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                                             {currentSlide.subText}
                                         </div>
                                     </div>
-                                   
+
                                 </motion.div>
 
                                 {/* Buttons */}
-                                {/* <motion.div
+                                <motion.div
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.5 }}
-                                    className="flex flex-wrap gap-4 pt-2"
+                                    className="flex flex-wrap gap-3 xs:gap-4 pt-2"
                                 >
-                                    <Link href={currentSlide.ctaLink} className="px-8 py-4 rounded-xl font-bold text-xs uppercase tracking-widest text-white shadow-lg shadow-[#10367D]/30 transition-transform hover:scale-105 active:scale-95 bg-[#10367D]">
+                                    <Link href={currentSlide.ctaLink} className="px-6 xs:px-8 py-3 xs:py-4 rounded-[10px] font-bold text-[10px] xs:text-xs uppercase tracking-widest text-white shadow-lg shadow-[#10367D]/30 transition-transform hover:scale-105 active:scale-95 bg-[#10367D]">
                                         {currentSlide.ctaText}
                                     </Link>
-                                    <button className="px-8 py-4 bg-white/80 backdrop-blur-sm border border-white/50 rounded-xl font-bold text-xs uppercase tracking-widest text-slate-600 hover:bg-white transition-colors">
+                                    <button className="px-6 xs:px-8 py-3 xs:py-4 bg-white/80 backdrop-blur-sm border border-white/50 rounded-[10px] font-bold text-[10px] xs:text-xs uppercase tracking-widest text-slate-600 hover:bg-white transition-colors">
                                         {currentSlide.secondaryCta}
                                     </button>
-                                </motion.div> */}
+                                </motion.div>
                             </div>
 
                             {/* Image Side (Right) */}
-                            <div className="relative w-full md:w-[45%] h-64 md:h-full overflow-hidden">
+                            <div className="relative w-full md:w-[45%] h-48 xs:h-64 md:h-full overflow-hidden">
                                 {/* The Gradient Mask/Blur Effect */}
                                 <div className="absolute inset-y-0 left-0 w-32 md:w-64 z-10 bg-gradient-to-r from-slate-50 via-slate-50/80 to-transparent"></div>
 
@@ -244,10 +249,10 @@ export default function HeroSection() {
                                     initial={{ y: -20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.6 }}
-                                    className="absolute top-6 right-6 z-20 bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg flex items-center gap-2 shadow-xl border border-white/50"
+                                    className="absolute top-4 right-4 xs:top-6 xs:right-6 z-20 bg-white/90 backdrop-blur-md px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg flex items-center gap-2 shadow-xl border border-white/50"
                                 >
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[10px] font-bold text-slate-800 uppercase tracking-widest">Free Premium Shipping</span>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-[9px] xs:text-[10px] font-bold text-slate-800 uppercase tracking-widest">Free Premium Shipping</span>
                                 </motion.div>
                             </div>
                         </motion.div>

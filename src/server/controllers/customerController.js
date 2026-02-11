@@ -2,6 +2,7 @@ import customerService from '../services/customer.js';
 import orderService from '../services/order.js';
 import disputeService from '../services/dispute.js';
 import { Customer } from '../models/index.js';
+import logger from '../lib/logger.js';
 
 /**
  * Browsing & Discovery
@@ -15,7 +16,7 @@ export const getProducts = async (req, res) => {
             data: products
         });
     } catch (error) {
-        console.error('Get Products Error:', error);
+        logger.error('Get Products Error:', error);
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_PRODUCTS' });
     }
 };

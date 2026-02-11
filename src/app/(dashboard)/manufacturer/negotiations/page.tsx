@@ -89,9 +89,9 @@ export default function ManufacturerNegotiations() {
                             animate={{ opacity: 1, y: 0 }}
                             className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-6 hover:shadow-md transition-all"
                         >
-                            <div className="flex items-start justify-between">
+                            <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
                                 <div className="flex items-start gap-4 flex-1">
-                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl flex items-center justify-center">
+                                    <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-100 rounded-[10px] flex items-center justify-center">
                                         <FaStore className="text-[#0F6CBD] text-2xl" />
                                     </div>
 
@@ -115,9 +115,9 @@ export default function ManufacturerNegotiations() {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-slate-50 pt-4 sm:pt-0">
                                     <span
-                                        className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider ${negotiation.status === 'OPEN'
+                                        className={`px-4 py-2 rounded-[10px] text-xs font-black uppercase tracking-wider ${negotiation.status === 'OPEN'
                                             ? 'bg-blue-50 text-blue-600 border border-blue-100'
                                             : negotiation.status === 'ACCEPTED'
                                                 ? 'bg-green-50 text-green-600 border border-green-100'
@@ -130,7 +130,7 @@ export default function ManufacturerNegotiations() {
                                     </span>
 
                                     <Link href={`/manufacturer/negotiations/${negotiation._id}`}>
-                                        <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-xl font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                                        <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-[10px] font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
                                             {negotiation.status === 'OPEN' ? 'Negotiate' : 'View Details'}
                                             <FaArrowRight className="w-3 h-3" />
                                         </button>
@@ -140,7 +140,8 @@ export default function ManufacturerNegotiations() {
                         </motion.div>
                     ))}
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

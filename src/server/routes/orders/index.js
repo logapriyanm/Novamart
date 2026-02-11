@@ -10,6 +10,7 @@ import {
     simulateDelivery
 } from '../../controllers/orders/orderController.js';
 import authenticate from '../../middleware/auth.js';
+import authorize from '../../middleware/rbac.js';
 
 const router = express.Router();
 
@@ -17,13 +18,13 @@ const router = express.Router();
 router.use(authenticate);
 
 // Routes
-router.post('/', createOrder);
-router.get('/', getOrders);
-router.get('/my', getMyOrders);
-router.get('/:id', getOrderById);
-router.get('/:id/payment', getOrderById); // Reusing getOrderById for now, or create dedicated controller
-router.patch('/:id/status', updateOrderStatus);
-router.post('/:id/dispute', raiseDispute);
-router.post('/:id/simulate-delivery', simulateDelivery);
+router.post('/', authorize(['CUSTOMER']), createOrder);
+router.get('/', authorize(['ADMIN', 'DEALER']), getOrders);
+router.get('/my', authorize(['CUSTOMER']), getMyOrders);
+router.get('/:id', getOrderById); // Ownership checked in service
+router.get('/:id/payment', getOrderById);
+router.patch('/:id/status', authorize(['ADMIN', 'DEALER']), updateOrderStatus);
+router.post('/:id/dispute', authorize(['CUSTOMER']), raiseDispute);
+router.post('/:id/simulate-delivery', authorize(['ADMIN', 'DEALER']), simulateDelivery);
 
 export default router;

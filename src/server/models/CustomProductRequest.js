@@ -86,7 +86,7 @@ CustomProductRequestSchema.virtual('escrow', {
 // Indexes for efficient queries
 CustomProductRequestSchema.index({ manufacturerId: 1, status: 1 });
 CustomProductRequestSchema.index({ dealerId: 1, status: 1 });
-CustomProductRequestSchema.index({ collaborationGroupId: 1 });
+
 CustomProductRequestSchema.index({ createdAt: -1 });
 
 export default mongoose.models.CustomProductRequest || mongoose.model('CustomProductRequest', CustomProductRequestSchema);

@@ -15,6 +15,7 @@ interface WishlistItemProps {
     image: string;
     status?: 'Price Dropped' | 'Low Stock' | 'In Stock';
     dealerId?: string;
+    onRemove?: (id: string) => void;
 }
 
 export default function WishlistCard({
@@ -25,7 +26,8 @@ export default function WishlistCard({
     originalPrice,
     image,
     status,
-    dealerId
+    dealerId,
+    onRemove
 }: WishlistItemProps) {
     return (
         <motion.div
@@ -50,7 +52,13 @@ export default function WishlistCard({
             </div>
 
             {/* Remove Button */}
-            <button className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors">
+            <button
+                onClick={(e) => {
+                    e.preventDefault();
+                    onRemove?.(id);
+                }}
+                className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+            >
                 <FaTrash className="w-3 h-3" />
             </button>
 

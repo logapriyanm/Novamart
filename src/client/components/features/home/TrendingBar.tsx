@@ -24,12 +24,11 @@ export default function TrendingBar() {
     // Hide component strictly for logged-out users
     // We wait for loading to finish to prevent content flash (optional, but good UX)
     if (isLoading) return null;
-    if (!user) return null;
 
     return (
-        <div className="max-w-7xl mx-auto px-6 mt-40">
+        <div className="max-w-7xl mx-auto px-4 xs:px-6 mt-20 xs:mt-32 md:mt-40">
             {/* Trending Categories Section */}
-            <div id="trending-appliances" className="bg-white rounded-[10px] p-8 lg:p-12 border border-foreground/10 relative -mt-20 z-40 shadow-xl shadow-black/5">
+            <div id="trending-appliances" className="bg-white rounded-[10px] p-6 xs:p-8 lg:p-12 border border-foreground/10 relative -mt-12 xs:-mt-16 md:-mt-20 z-40 shadow-xl shadow-black/5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 md:mb-12 gap-6 sm:gap-0">
                     <div>
                         <h2 className="text-2xl md:text-3xl font-black text-black tracking-tight uppercase italic">Trending Appliances <span className="text-black/40 font-bold text-lg ml-2 block sm:inline">in Your Location</span></h2>

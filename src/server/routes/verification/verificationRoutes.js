@@ -1,6 +1,7 @@
 import express from 'express';
 import { uploadDocument, getMyDocuments, verifyDocument } from '../../controllers/verificationController.js';
-import { authenticateUser, authorizeRoles } from '../../middleware/auth.js';
+import { authenticateUser } from '../../middleware/auth.js';
+import authorize from '../../middleware/rbac.js';
 import multer from 'multer';
 import path from 'path';
 
@@ -22,7 +23,7 @@ router.post('/upload', authenticateUser, upload.single('document'), uploadDocume
 router.get('/my-documents', authenticateUser, getMyDocuments);
 
 // Admin Routes
-router.put('/:documentId/verify', authenticateUser, authorizeRoles('ADMIN'), verifyDocument);
-router.put('/:documentId/verify/:subDocId', authenticateUser, authorizeRoles('ADMIN'), verifyDocument);
+router.put('/:documentId/verify', authenticateUser, authorize(['ADMIN']), verifyDocument);
+router.put('/:documentId/verify/:subDocId', authenticateUser, authorize(['ADMIN']), verifyDocument);
 
 export default router;

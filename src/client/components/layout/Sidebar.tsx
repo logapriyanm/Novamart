@@ -31,6 +31,8 @@ import {
     FaWallet as WalletIcon,
     FaCrown,
     FaHandshake,
+    FaDesktop,
+    FaSearch,
     FaArrowRight as ArrowRight
 } from 'react-icons/fa';
 
@@ -40,10 +42,11 @@ const adminMenuItems = [
     { name: 'Users', icon: FaUsers, path: '/admin/users' },
     { name: 'Manufacturers', icon: FaIndustry, path: '/admin/manufacturers' },
     { name: 'Dealers', icon: DealersIcon, path: '/admin/dealers' },
-    { name: 'Products', icon: ProductsIcon, path: '/admin/products' },
+    { name: 'Product Management', icon: ProductsIcon, path: '/admin/products' },
     { name: 'Orders', icon: LogisticsIcon, path: '/admin/orders' },
     { name: 'Finance', icon: WalletIcon, path: '/admin/finance' },
     { name: 'Disputes', icon: DisputesIcon, path: '/admin/disputes' },
+    { name: 'Home CMS', icon: FaSearch, path: '/admin/cms' },
     { name: 'Settings', icon: SettingsIcon, path: '/admin/settings' },
 ];
 
@@ -171,7 +174,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
             >
                 {/* Logo Section */}
                 <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center p-4' : 'gap-3'}`}>
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-sm flex-shrink-0 border border-foreground/10">
+                    <div className="w-10 h-10 bg-white rounded-[10px] flex items-center justify-center p-1.5 shadow-sm flex-shrink-0 border border-foreground/10">
                         <img src="/assets/Novamart.png" alt="N" className="w-full h-full object-contain" />
                     </div>
                     {!isCollapsed && (

@@ -7,6 +7,7 @@ import manufacturerService from '../services/manufacturer.js';
 import stockAllocationService from '../services/stockAllocationService.js';
 import auditService from '../services/audit.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
+import logger from '../lib/logger.js';
 
 /**
  * Handle Dealer Application (Approve/Reject)
@@ -39,7 +40,7 @@ export const handleDealerNetwork = async (req, res) => {
                     : 'Your partnership request was not approved at this time. You can reach out to the manufacturer for more details.',
                 link: status === 'APPROVED' ? '/dealer/inventory' : '/dealer/marketplace'
             };
-            console.log('DEBUG: Notification.create payload:', JSON.stringify(notifyPayload, null, 2));
+            logger.debug('Notification.create payload: %o', notifyPayload);
             await Notification.create(notifyPayload);
         }
 
@@ -161,7 +162,7 @@ export const getManufacturerStats = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Stats Error:', error);
+        logger.error('Stats Error:', error);
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_ANALYTICS' });
     }
 };
@@ -294,7 +295,7 @@ export const getAllManufacturers = async (req, res) => {
             data: activeManufacturers
         });
     } catch (error) {
-        console.error('Error fetching manufacturers:', error);
+        logger.error('Error fetching manufacturers:', error);
         res.status(500).json({
             success: false,
             error: 'Failed to fetch manufacturers'

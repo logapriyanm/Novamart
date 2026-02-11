@@ -14,7 +14,7 @@ export interface OrderCreateData {
 
 export const orderService = {
     async createOrder(data: OrderCreateData): Promise<ApiResponse<any>> {
-        return apiClient.post<ApiResponse<any>>('/orders/create', data);
+        return apiClient.post<ApiResponse<any>>('/orders', data);
     },
 
     async getOrderById(id: string): Promise<ApiResponse<any>> {

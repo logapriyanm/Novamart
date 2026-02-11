@@ -1,165 +1,175 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+    FaCheck,
+    FaTimes,
     FaStar,
-    FaShieldAlt,
-    FaSearch,
-    FaArrowLeft,
-    FaCheckCircle,
-    FaTimesCircle,
-    FaExclamationTriangle,
-    FaUserEdit,
-    FaCommentSlash
+    FaUser,
+    FaStore,
+    FaBox,
+    FaFilter,
+    FaExclamationTriangle
 } from 'react-icons/fa';
-import Link from 'next/link';
+import { toast } from 'sonner';
+import { adminService } from '@/lib/api/services/admin.service';
+import { WhiteCard, StatusBadge } from '@/client/components/features/dashboard/DashboardUI';
 
-const flaggedReviews = [
-    { id: 'REV-4401', user: 'Ankit P.', product: 'PowerMix 500', rating: 1, text: 'Terrible product refused to work after 2 days!!!', flag: 'Potential Spam', date: '2026-02-06' },
-    { id: 'REV-4402', user: 'Sanjay S.', product: 'EcoCool Fridge', rating: 5, text: 'BEST SERVICE EVER DEFINITELY BUY FROM THIS DEALER', flag: 'Incentivized suspected', date: '2026-02-05' },
-    { id: 'REV-4403', user: 'Neha R.', product: 'Smart Iron', rating: 2, text: 'Delivery was late by 10 days, product is okay.', flag: 'Logistic Complaint', date: '2026-02-04' },
-];
+export default function AdminReviewsPage() {
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [filter, setFilter] = useState('PENDING');
 
-export default function ReviewGovernancePanel() {
-    const [selectedReview, setSelectedReview] = useState<any>(null);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const fetchReviews = async () => {
+        try {
+            const data = await adminService.getPendingReviews();
+            setReviews(data || []);
+        } catch (error) {
+            toast.error('Failed to load reviews');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-    const handleAction = () => {
-        setIsProcessing(true);
-        setTimeout(() => {
-            setIsProcessing(false);
-            setSelectedReview(null);
-        }, 1200);
+    useEffect(() => {
+        fetchReviews();
+    }, []);
+
+    const handleModerate = async (reviewId: string, type: string, status: string) => {
+        try {
+            await adminService.moderateReview(reviewId, type, status);
+            toast.success(`Review ${status.toLowerCase()}ed`);
+            fetchReviews();
+        } catch (error) {
+            toast.error('Moderation failed');
+        }
     };
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12">
-            {/* Header */}
-            <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
-                    <FaArrowLeft className="w-3 h-3" />
-                    Back to Mission Control
-                </Link>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">Social <span className="text-[#10367D]">Governance</span></h1>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Review Moderation & Trust Index Audit</p>
-                    </div>
-                    <div className="px-5 py-2.5 bg-amber-50 border border-amber-100 rounded-xl">
-                        <span className="text-sm font-black text-amber-600">{flaggedReviews.length} Flagged Reviews Awaiting Audit</span>
-                    </div>
-                </div>
+        <div className="space-y-10 pb-20 animate-fade-in">
+            <div>
+                <h1 className="text-3xl font-black text-slate-800 tracking-tight">Review Moderation</h1>
+                <p className="text-slate-400 font-bold mt-2">
+                    Maintain platform integrity by reviewing and approving customer feedback.
+                </p>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                {/* Review Stream */}
-                <div className="xl:col-span-7 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-                    <div className="p-8 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
-                        <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-widest">Flagged Content Stream</h2>
-                        <div className="relative w-48">
-                            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-3 h-3" />
-                            <input type="text" placeholder="Filter by ID..." className="w-full bg-white border border-slate-100 rounded-xl py-2 pl-9 pr-4 text-xs focus:outline-none" />
-                        </div>
+            {/* Stats Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <WhiteCard className="p-8 flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-1">Pending Approval</p>
+                        <h4 className="text-3xl font-black text-slate-800 italic">{reviews.filter(r => r.status === 'PENDING').length}</h4>
                     </div>
+                    <div className="w-14 h-14 bg-amber-50 rounded-[10px] flex items-center justify-center text-amber-500 border border-amber-100">
+                        <FaExclamationTriangle className="w-6 h-6" />
+                    </div>
+                </WhiteCard>
+                {/* Add more stats as needed */}
+            </div>
 
-                    <div className="divide-y divide-slate-50">
-                        {flaggedReviews.map((rev) => (
-                            <div
-                                key={rev.id}
-                                onClick={() => setSelectedReview(rev)}
-                                className={`p-8 hover:bg-slate-50 cursor-pointer transition-all ${selectedReview?.id === rev.id ? 'bg-[#10367D]/5 border-l-4 border-[#10367D]' : ''}`}
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-[#1E293B] flex flex-col items-center justify-center text-white">
-                                            <span className="text-xs font-black">{rev.rating}</span>
-                                            <FaStar className="w-3 h-3 text-amber-400" />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-sm font-black text-[#1E293B]">{rev.user} <span className="text-slate-400 font-bold ml-2">• On {rev.product}</span></h4>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Case {rev.id} • {rev.date}</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-amber-100 text-amber-700 rounded-md border border-amber-200">{rev.flag}</span>
-                                </div>
-                                <p className="mt-4 text-xs font-medium text-slate-600 line-clamp-2 leading-relaxed italic">"{rev.text}"</p>
-                            </div>
-                        ))}
-                    </div>
+            {/* Controls */}
+            <div className="flex items-center justify-between bg-white p-4 rounded-[10px] border border-slate-100 shadow-sm">
+                <div className="flex gap-2">
+                    {['PENDING', 'APPROVED', 'REJECTED'].map((s) => (
+                        <button
+                            key={s}
+                            onClick={() => setFilter(s)}
+                            className={`px-6 py-2.5 rounded-[10px] text-[10px] font-black uppercase tracking-widest transition-all ${filter === s ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                        >
+                            {s}
+                        </button>
+                    ))}
                 </div>
+                <button className="w-12 h-12 bg-slate-900 text-white rounded-[10px] flex items-center justify-center hover:bg-black transition-all shadow-lg shadow-black/10">
+                    <FaFilter className="w-4 h-4" />
+                </button>
+            </div>
 
-                {/* Audit Action Panel */}
-                <div className="xl:col-span-5 relative">
-                    <AnimatePresence mode="wait">
-                        {selectedReview ? (
-                            <motion.div
-                                key={selectedReview.id}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                className="bg-[#1E293B] rounded-[3rem] p-10 lg:p-12 text-white shadow-2xl sticky top-28 overflow-hidden"
-                            >
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-[#10367D]/10 blur-2xl rounded-full" />
+            {/* Review List */}
+            <div className="space-y-6">
+                {isLoading ? (
+                    <div className="p-20 text-center text-slate-300 font-black uppercase tracking-widest text-xs animate-pulse">Scanning database...</div>
+                ) : reviews.filter(r => r.status === filter).length === 0 ? (
+                    <div className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-dashed border-slate-200 rounded-[10px]">No reviews found in this category.</div>
+                ) : reviews.filter(r => r.status === filter).map((review) => (
+                    <WhiteCard key={review._id} className="p-8 hover:shadow-xl transition-all border-none overflow-hidden relative group">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                                <h3 className="text-xl font-black mb-10 flex items-center gap-3">
-                                    <FaShieldAlt className="text-[#10367D]" />
-                                    Trust Moderation
-                                </h3>
-
-                                <div className="space-y-8">
-                                    <div className="p-6 bg-white/5 rounded-2xl border border-white/10 italic text-sm text-slate-300 leading-relaxed">
-                                        "{selectedReview.text}"
+                        <div className="flex flex-col lg:flex-row gap-10">
+                            {/* Reviewer & Meta */}
+                            <div className="w-full lg:w-64 space-y-6 shrink-0">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+                                        <FaUser />
                                     </div>
-
-                                    <div className="space-y-4">
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Audit Context</p>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                                                <p className="text-[8px] font-black text-slate-500 uppercase mb-1">Reason for Flag</p>
-                                                <p className="text-[10px] font-black text-amber-400">{selectedReview.flag}</p>
-                                            </div>
-                                            <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                                                <p className="text-[8px] font-black text-slate-500 uppercase mb-1">User Trust Score</p>
-                                                <p className="text-[10px] font-black text-emerald-400">84/100</p>
-                                            </div>
+                                    <div>
+                                        <p className="text-xs font-black text-slate-900 uppercase italic tracking-tight">{review.customerId?.name || 'Anonymous'}</p>
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Customer</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center ${review.type === 'PRODUCT' ? 'bg-blue-50 text-blue-500' : 'bg-purple-50 text-purple-500'}`}>
+                                            {review.type === 'PRODUCT' ? <FaBox className="w-3.5 h-3.5" /> : <FaStore className="w-3.5 h-3.5" />}
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 italic">{review.type} Review</span>
+                                    </div>
+                                    <div className="pl-1">
+                                        <div className="flex text-amber-400 gap-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <FaStar key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-current' : 'text-slate-100'}`} />
+                                            ))}
                                         </div>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <div className="pt-6 space-y-4">
+                            {/* Content */}
+                            <div className="flex-1 space-y-4">
+                                <div className="p-6 bg-slate-50 rounded-[10px] border border-slate-100/50">
+                                    <p className="text-sm font-medium text-slate-700 leading-relaxed italic">
+                                        "{review.comment || (review.rating >= 4 ? 'Default positive feedback.' : 'No comment provided.')}"
+                                    </p>
+                                </div>
+
+                                {review.type === 'SELLER' && (
+                                    <div className="flex flex-wrap gap-6 px-2">
+                                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Delivery: <span className="text-slate-800 ml-1">{review.deliveryRating || 'N/A'}</span></div>
+                                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Packaging: <span className="text-slate-800 ml-1">{review.packagingRating || 'N/A'}</span></div>
+                                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Support: <span className="text-slate-800 ml-1">{review.communicationRating || 'N/A'}</span></div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="w-full lg:w-48 flex lg:flex-col items-center justify-center gap-4 shrink-0">
+                                {review.status === 'PENDING' ? (
+                                    <>
                                         <button
-                                            onClick={handleAction}
-                                            disabled={isProcessing}
-                                            className="w-full py-5 bg-[#10367D] hover:bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+                                            onClick={() => handleModerate(review._id, review.type, 'APPROVED')}
+                                            className="w-full h-14 bg-emerald-500 text-white rounded-[10px] flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all font-mono"
                                         >
-                                            {isProcessing ? 'Updating Trust Signals...' : 'Confirm Content Validity'}
+                                            <FaCheck className="w-3 h-3" /> Approve
                                         </button>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <button
-                                                onClick={handleAction}
-                                                disabled={isProcessing}
-                                                className="py-4 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all"
-                                            >
-                                                Suppress Review
-                                            </button>
-                                            <button className="py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-2xl font-black text-[9px] uppercase tracking-widest transition-all">
-                                                Warning User
-                                            </button>
-                                        </div>
+                                        <button
+                                            onClick={() => handleModerate(review._id, review.type, 'REJECTED')}
+                                            className="w-full h-14 bg-slate-100 text-slate-400 rounded-[10px] flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 transition-all border border-transparent"
+                                        >
+                                            <FaTimes className="w-3 h-3" /> Hide
+                                        </button>
+                                    </>
+                                ) : (
+                                    <div className={`px-8 py-4 rounded-[10px] border ${review.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'} text-[10px] font-black uppercase tracking-[0.2em]`}>
+                                        {review.status}
                                     </div>
-                                </div>
-                            </motion.div>
-                        ) : (
-                            <div className="h-[600px] border-2 border-dashed border-slate-100 rounded-[3rem] flex flex-col items-center justify-center p-12 text-center text-slate-400">
-                                <FaCommentSlash className="w-12 h-12 text-slate-100 mb-6" />
-                                <h4 className="text-sm font-black uppercase tracking-widest mb-2">Audit Flagged Feedback</h4>
-                                <p className="text-[10px] font-bold leading-relaxed max-w-[200px]">Protect ecosystem trust by moderating suspicious or non-compliant customer feedback.</p>
+                                )}
                             </div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                        </div>
+                    </WhiteCard>
+                ))}
             </div>
         </div>
     );
 }
-

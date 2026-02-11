@@ -1,4 +1,5 @@
 import { CollaborationGroup, GroupParticipant, Dealer, User } from '../models/index.js';
+import logger from '../lib/logger.js';
 import notificationService from '../services/notificationService.js';
 
 /**
@@ -80,7 +81,7 @@ export const createGroup = async (req, res) => {
             message: 'Collaboration group created successfully'
         });
     } catch (error) {
-        console.error('Create Group Error:', error);
+        logger.error('Create Group Error:', error);
         res.status(500).json({
             success: false,
             error: 'GROUP_CREATION_FAILED',
@@ -128,7 +129,7 @@ export const getMyGroups = async (req, res) => {
             data: groupsWithCounts
         });
     } catch (error) {
-        console.error('Get My Groups Error:', error);
+        logger.error('Get My Groups Error:', error);
         res.status(500).json({
             success: false,
             error: 'FETCH_GROUPS_FAILED',
@@ -190,7 +191,7 @@ export const getGroupDetails = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Get Group Details Error:', error);
+        logger.error('Get Group Details Error:', error);
         res.status(500).json({
             success: false,
             error: 'FETCH_GROUP_FAILED',
@@ -299,7 +300,7 @@ export const inviteDealer = async (req, res) => {
             message: 'Dealer invited successfully'
         });
     } catch (error) {
-        console.error('Invite Dealer Error:', error);
+        logger.error('Invite Dealer Error:', error);
         res.status(500).json({
             success: false,
             error: 'INVITATION_FAILED',
@@ -385,7 +386,7 @@ export const joinGroup = async (req, res) => {
             data: { group, participant }
         });
     } catch (error) {
-        console.error('Join Group Error:', error);
+        logger.error('Join Group Error:', error);
         res.status(500).json({
             success: false,
             error: 'JOIN_FAILED',
@@ -457,7 +458,7 @@ export const leaveGroup = async (req, res) => {
             message: 'Successfully left collaboration group'
         });
     } catch (error) {
-        console.error('Leave Group Error:', error);
+        logger.error('Leave Group Error:', error);
         res.status(500).json({
             success: false,
             error: 'LEAVE_FAILED',
@@ -539,7 +540,7 @@ export const lockGroup = async (req, res) => {
             data: group
         });
     } catch (error) {
-        console.error('Lock Group Error:', error);
+        logger.error('Lock Group Error:', error);
         res.status(500).json({
             success: false,
             error: 'LOCK_FAILED',
@@ -607,7 +608,7 @@ export const cancelGroup = async (req, res) => {
             message: 'Collaboration group cancelled successfully'
         });
     } catch (error) {
-        console.error('Cancel Group Error:', error);
+        logger.error('Cancel Group Error:', error);
         res.status(500).json({
             success: false,
             error: 'CANCEL_FAILED',

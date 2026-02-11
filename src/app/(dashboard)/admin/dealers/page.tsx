@@ -138,8 +138,8 @@ export default function DealerApprovalPanel() {
             {/* Hero Stats Section */}
             <div className="max-w-[1600px] mx-auto px-6 mb-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-                        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                    <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm flex items-center gap-5">
+                        <div className="w-12 h-12 bg-blue-50 rounded-[10px] flex items-center justify-center text-blue-600">
                             <FaStore className="w-6 h-6" />
                         </div>
                         <div>
@@ -182,13 +182,13 @@ export default function DealerApprovalPanel() {
                 {/* Left: Directory List */}
                 <div className="xl:col-span-7 space-y-6">
                     {/* Filter & Search Bar */}
-                    <div className="bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="flex bg-slate-50 p-1.5 rounded-2xl gap-1 overflow-x-auto">
+                    <div className="bg-white p-4 rounded-[10px] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex bg-slate-50 p-1.5 rounded-[10px] gap-1 overflow-x-auto">
                             {['ALL', 'PENDING', 'VERIFIED', 'SUSPENDED'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setFilterTab(tab as any)}
-                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterTab === tab ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+                                    className={`px-6 py-2 rounded-[10px] text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterTab === tab ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
                                 >
                                     {tab}
                                 </button>
@@ -199,7 +199,7 @@ export default function DealerApprovalPanel() {
                             <input
                                 type="text"
                                 placeholder="Search by GST or Business..."
-                                className="w-full bg-slate-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-300"
+                                className="w-full bg-slate-50 border-none rounded-[10px] py-2.5 pl-10 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-300"
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                             />
@@ -209,7 +209,7 @@ export default function DealerApprovalPanel() {
                     {/* Registry Content */}
                     <div className="space-y-4">
                         {isLoading ? (
-                            <div className="bg-white p-20 rounded-[3rem] text-center border border-slate-100 shadow-sm">
+                            <div className="bg-white p-20 rounded-[10px] text-center border border-slate-100 shadow-sm">
                                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
                                 <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">Syncing Retail Network...</p>
                             </div>
@@ -225,19 +225,19 @@ export default function DealerApprovalPanel() {
                                         layout
                                         key={dlr.id}
                                         onClick={() => setSelectedRequest(dlr)}
-                                        className={`group relative bg-white p-6 rounded-[2.2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer ${selectedRequest?.id === dlr.id ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''}`}
+                                        className={`group relative bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer ${selectedRequest?.id === dlr.id ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''}`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-6">
-                                                <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-all group-hover:scale-110 ${dlr.user?.status === 'SUSPENDED' ? 'bg-rose-50 text-rose-600' : dlr.isVerified ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                                                <div className={`w-16 h-16 rounded-[10px] flex items-center justify-center transition-all group-hover:scale-110 ${dlr.user?.status === 'SUSPENDED' ? 'bg-rose-50 text-rose-600' : dlr.isVerified ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
                                                     <FaStore className="w-8 h-8" />
                                                 </div>
                                                 <div>
                                                     <h4 className="text-lg font-black text-slate-900 leading-tight mb-1">{dlr.businessName || 'Unnamed Entity'}</h4>
                                                     <div className="flex flex-wrap items-center gap-2">
-                                                        <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-lg border border-blue-100">GST: {dlr.gstNumber || 'N/A'}</span>
+                                                        <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-[10px] border border-blue-100">GST: {dlr.gstNumber || 'N/A'}</span>
                                                         {dlr.isVerified && (
-                                                            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 flex items-center gap-1.5">
+                                                            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-1 rounded-[10px] border border-emerald-100 flex items-center gap-1.5">
                                                                 <FaShieldAlt className="w-3 h-3" /> Verified
                                                             </span>
                                                         )}
@@ -254,7 +254,7 @@ export default function DealerApprovalPanel() {
                                                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Location</p>
                                                     <p className="text-[10px] font-black text-slate-600 truncate max-w-[120px]">{dlr.city || 'Unknown'}</p>
                                                 </div>
-                                                <button className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                                <button className="w-10 h-10 rounded-[10px] bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
                                                     <FaArrowRight className="w-3 h-3" />
                                                 </button>
                                             </div>
@@ -275,7 +275,7 @@ export default function DealerApprovalPanel() {
                                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                className="bg-[#1E293B] rounded-[3rem] p-8 text-white shadow-2xl sticky top-8 overflow-hidden group"
+                                className="bg-[#1E293B] rounded-[10px] p-8 text-white shadow-2xl sticky top-8 overflow-hidden group"
                             >
                                 {/* Decorative Gradient */}
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[100px] pointer-events-none" />
@@ -286,7 +286,7 @@ export default function DealerApprovalPanel() {
                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mt-1">High-Trust Enrollment Protocol</p>
                                     </div>
                                     <div className="text-right">
-                                        <div className="px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                                        <div className="px-3 py-1 bg-white/5 rounded-[10px] border border-white/10">
                                             <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">ID: {selectedRequest.id?.slice(0, 8)}</span>
                                         </div>
                                     </div>
@@ -299,7 +299,7 @@ export default function DealerApprovalPanel() {
                                             <FaMapMarkerAlt className="w-3 h-3 text-blue-400" />
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Operational Base</p>
                                         </div>
-                                        <div className="p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-md space-y-6">
+                                        <div className="p-6 bg-white/5 rounded-[10px] border border-white/10 backdrop-blur-md space-y-6">
                                             <div>
                                                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Business Address</p>
                                                 <p className="text-sm font-bold leading-relaxed pr-8">{selectedRequest.businessAddress || 'N/A'}</p>
@@ -327,7 +327,7 @@ export default function DealerApprovalPanel() {
                                             <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-3">Linked Partner</p>
                                             <div className="relative">
                                                 <select
-                                                    className="w-full bg-slate-800 border-none rounded-xl py-3 px-4 text-xs font-black focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                                                    className="w-full bg-slate-800 border-none rounded-[10px] py-3 px-4 text-xs font-black focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
                                                     value={selectedRequest.approvedBy?.id || ''}
                                                     onChange={(e) => handleLinkManufacturer(e.target.value)}
                                                 >
@@ -341,8 +341,8 @@ export default function DealerApprovalPanel() {
                                                 </div>
                                             </div>
                                             {selectedRequest.approvedBy && (
-                                                <div className="mt-4 flex items-center gap-3 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                                <div className="mt-4 flex items-center gap-3 p-3 bg-blue-500/10 rounded-[10px] border border-blue-500/20">
+                                                    <div className="w-8 h-8 rounded-[10px] bg-blue-500/20 flex items-center justify-center text-blue-400">
                                                         <FaShieldAlt className="w-4 h-4" />
                                                     </div>
                                                     <div>
@@ -361,7 +361,7 @@ export default function DealerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleAction(selectedRequest.id, false)}
                                                     disabled={isVerifying}
-                                                    className="group/btn relative py-5 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
+                                                    className="group/btn relative py-5 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
                                                 >
                                                     {isVerifying ? 'Processing...' : 'Revoke Status'}
                                                 </button>
@@ -369,7 +369,7 @@ export default function DealerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleAction(selectedRequest.id, true)}
                                                     disabled={isVerifying}
-                                                    className="group/btn relative py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
+                                                    className="group/btn relative py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
                                                 >
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shine" />
                                                     <div className="flex items-center justify-center gap-3">
@@ -406,7 +406,7 @@ export default function DealerApprovalPanel() {
                                 </div>
                             </motion.div>
                         ) : (
-                            <div className="h-[700px] border-2 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center justify-center p-12 text-center text-slate-400 bg-white">
+                            <div className="h-[700px] border-2 border-dashed border-slate-200 rounded-[10px] flex flex-col items-center justify-center p-12 text-center text-slate-400 bg-white">
                                 <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-6 shadow-sm">
                                     <FaStore className="w-10 h-10 text-slate-200" />
                                 </div>
@@ -427,7 +427,7 @@ export default function DealerApprovalPanel() {
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[100] bg-white/40 backdrop-blur-sm flex items-center justify-center"
                     >
-                        <div className="p-8 bg-white rounded-[3rem] shadow-2xl border border-slate-100 flex flex-col items-center gap-4">
+                        <div className="p-8 bg-white rounded-[10px] shadow-2xl border border-slate-100 flex flex-col items-center gap-4">
                             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full" />
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Syncing Network State...</p>
                         </div>

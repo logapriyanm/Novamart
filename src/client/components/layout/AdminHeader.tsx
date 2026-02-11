@@ -17,8 +17,8 @@ export default function AdminHeader() {
                     <span className="text-sm font-black text-foreground tracking-tighter">NovaMart</span>
                 </div>
 
-                {/* Center: Search Bar */}
-                <div className="flex-1 max-w-2xl mx-auto">
+                {/* Center: Search Bar - Responsive Fix: Hidden on mobile/tablet to give room */}
+                <div className="flex-1 max-w-2xl mx-auto hidden lg:block">
                     <div className="relative">
                         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/40" />
                         <input

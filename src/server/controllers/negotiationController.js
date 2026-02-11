@@ -88,7 +88,7 @@ export const createNegotiation = async (req, res) => {
 
         res.status(201).json({ success: true, data: negotiation });
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ success: false, error: 'Failed to start negotiation' });
     }
 };
@@ -119,7 +119,7 @@ export const getNegotiations = async (req, res) => {
 
         res.json({ success: true, data: negotiations });
     } catch (error) {
-        console.error('Failed to fetch negotiations:', error);
+        logger.error('Failed to fetch negotiations:', error);
         res.status(500).json({ message: 'Failed to fetch negotiations', error: error.message });
     }
 };
@@ -230,6 +230,19 @@ export const updateNegotiation = async (req, res) => {
                 });
             }
 
+            // New: Handle Structured Offer
+            if (req.body.offerDetails) {
+                const { price, quantity, timeline, note } = req.body.offerDetails;
+                await Message.create({
+                    chatId: chat._id,
+                    message: note || `Proposed ₹${price} for ${quantity} units`,
+                    messageType: 'OFFER',
+                    senderId: userId,
+                    senderRole: role,
+                    metadata: { price, quantity, timeline }
+                });
+            }
+
             await Chat.findByIdAndUpdate(chat._id, {
                 lastMessage: {
                     text: message || systemMsgText,
@@ -319,7 +332,7 @@ export const getSingleNegotiation = async (req, res) => {
 
         res.json({ success: true, data: negotiation });
     } catch (error) {
-        console.error('Get negotiation error:', error);
+        logger.error('Get negotiation error:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch negotiation' });
     }
 };

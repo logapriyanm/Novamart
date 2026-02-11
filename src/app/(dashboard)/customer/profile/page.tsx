@@ -93,7 +93,7 @@ function ProfileContent() {
         switch (activeTab) {
             case 'profile':
                 return (
-                    <Card className="p-8 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[2.5rem]">
+                    <Card className="p-8 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px]">
                         <div className="flex flex-col md:flex-row gap-8 items-center md:items-start mb-10">
                             <div className="relative">
                                 <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-slate-50 bg-slate-100 flex items-center justify-center shadow-inner">
@@ -116,7 +116,7 @@ function ProfileContent() {
                             <div className="flex-1 text-center md:text-left">
                                 <div className="flex items-center justify-center md:justify-between mb-4">
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight">Personal Information</h3>
-                                    <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+                                    <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
                                         <FaEdit className="w-3 h-3" /> Edit Profile
                                     </button>
                                 </div>
@@ -130,7 +130,7 @@ function ProfileContent() {
                                 { label: 'Phone Number', value: user?.phone || '+91 98765 43210', icon: FaComments },
                                 { label: 'Primary Address', value: user?.address || '123 Enterprise Way, Tech City, 560001', icon: FaMapMarkerAlt },
                             ].map((field, idx) => (
-                                <div key={idx} className="space-y-2 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
+                                <div key={idx} className="space-y-2 p-6 bg-slate-50/50 rounded-[10px] border border-slate-100">
                                     <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                         <field.icon className="w-3 h-3 text-blue-600" />
                                         {field.label}
@@ -147,17 +147,17 @@ function ProfileContent() {
                         {loading ? (
                             <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Orders...</div>
                         ) : orders.length === 0 ? (
-                            <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-3xl">No orders found.</div>
+                            <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-[10px]">No orders found.</div>
                         ) : (
                             orders.map((order: any, idx: number) => (
-                                <Card key={order.id || idx} className="p-6 border-none shadow-lg shadow-blue-600/5 bg-white rounded-3xl flex items-center gap-6 group hover:translate-x-2 transition-all duration-300 cursor-pointer" onClick={() => router.push(`/customer/orders`)}>
-                                    <div className="w-20 h-20 bg-slate-50 rounded-2xl p-2 shrink-0 border border-slate-100 flex items-center justify-center">
+                                <Card key={order.id || idx} className="p-6 border-none shadow-lg shadow-blue-600/5 bg-white rounded-[10px] flex items-center gap-6 group hover:translate-x-2 transition-all duration-300 cursor-pointer" onClick={() => router.push(`/customer/orders`)}>
+                                    <div className="w-20 h-20 bg-slate-50 rounded-[10px] p-2 shrink-0 border border-slate-100 flex items-center justify-center">
                                         <FaBox className="w-8 h-8 text-slate-300" />
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{order.id ? `NM-${order.id.slice(0, 5).toUpperCase()}` : 'ORDER'}</p>
                                         <h4 className="font-black text-slate-800 mb-2">{order.items?.[0]?.linkedProduct?.name || `Order #${order.id.slice(0, 5)}`} {order.items?.length > 1 && `+ ${order.items.length - 1} more`}</h4>
-                                        <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+                                        <span className={`px-3 py-1 rounded-[10px] text-[9px] font-black uppercase tracking-widest ${order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
                                             {order.status}
                                         </span>
                                     </div>
@@ -172,7 +172,7 @@ function ProfileContent() {
                 );
             case 'complaints':
                 return (
-                    <Card className="p-12 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[2.5rem] text-center space-y-6">
+                    <Card className="p-12 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px] text-center space-y-6">
                         <div className="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
                             <FaHeadset className="w-8 h-8" />
                         </div>
@@ -180,7 +180,7 @@ function ProfileContent() {
                             <h3 className="text-2xl font-black text-slate-800 tracking-tight">Need Assistance?</h3>
                             <p className="text-slate-400 text-sm font-bold mt-2">Our technical experts are available 24/7 to resolve your issues.</p>
                         </div>
-                        <button className="px-10 py-4 bg-blue-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all transform active:scale-95">
+                        <button className="px-10 py-4 bg-blue-600 text-white rounded-[10px] text-[11px] font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all transform active:scale-95">
                             Open New Support Ticket
                         </button>
                     </Card>
@@ -191,12 +191,12 @@ function ProfileContent() {
                         {loading ? (
                             <div className="col-span-2 p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Reviews...</div>
                         ) : reviews.length === 0 ? (
-                            <div className="col-span-2 p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-3xl">No reviews found.</div>
+                            <div className="col-span-2 p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-[10px]">No reviews found.</div>
                         ) : (
                             reviews.map((review: any, i: number) => (
-                                <Card key={review.id || i} className="p-6 border-none shadow-lg shadow-blue-600/5 bg-white rounded-3xl space-y-4">
+                                <Card key={review.id || i} className="p-6 border-none shadow-lg shadow-blue-600/5 bg-white rounded-[10px] space-y-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-slate-50 rounded-xl overflow-hidden">
+                                        <div className="w-12 h-12 bg-slate-50 rounded-[10px] overflow-hidden">
                                             {review.product?.images?.[0] && <img src={review.product.images[0]} className="w-full h-full object-cover" />}
                                         </div>
                                         <div>
@@ -214,7 +214,7 @@ function ProfileContent() {
                 );
             case 'wishlist':
                 return (
-                    <Card className="p-12 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[2.5rem] text-center space-y-4">
+                    <Card className="p-12 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px] text-center space-y-4">
                         <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
                             <FaHeart className="w-8 h-8" />
                         </div>
@@ -224,17 +224,77 @@ function ProfileContent() {
                 );
             case 'billing':
                 return (
-                    <Card className="p-12 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[2.5rem] text-center space-y-4">
-                        <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <FaMapMarkerAlt className="w-8 h-8" />
-                        </div>
-                        <h3 className="text-xl font-black text-slate-800">Address & Billing</h3>
-                        <p className="text-slate-400 text-sm font-bold">You can manage your addresses and payment methods during checkout. A dedicated manager is coming soon.</p>
-                    </Card>
+                    <div className="space-y-6">
+                        <Card className="p-8 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px]">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-[10px] flex items-center justify-center">
+                                    <FaMapMarkerAlt className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-800 tracking-tight">Shipping Address</h3>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Manage your delivery location</p>
+                                </div>
+                            </div>
+
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                setLoading(true);
+                                const formData = new FormData(e.currentTarget);
+                                const address = formData.get('address') as string;
+                                try {
+                                    await apiClient.put('/customer/profile', { section: 'account', data: { address } });
+                                    toast.success('Address updated successfully');
+                                    // Optionally refresh user context here
+                                    window.location.reload();
+                                } catch (err) {
+                                    toast.error('Failed to update address');
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }}>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-1 block">Primary Address</label>
+                                        <textarea
+                                            name="address"
+                                            defaultValue={user?.address}
+                                            className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-h-[100px]"
+                                            placeholder="Enter your full shipping address..."
+                                        />
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="px-8 py-3 bg-slate-900 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-black transition-all disabled:opacity-50"
+                                        >
+                                            {loading ? 'Saving...' : 'Update Address'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </Card>
+
+                        <Card className="p-8 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px] opacity-60">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-[10px] flex items-center justify-center">
+                                    <FaCheckCircle className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-800 tracking-tight">Payment Methods</h3>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Secured by Razorpay</p>
+                                </div>
+                            </div>
+                            <p className="text-sm font-bold text-slate-500 italic">
+                                Saved cards and UPI IDs are managed securely via our payment gateway during checkout.
+                                We do not store sensitive payment information on our servers.
+                            </p>
+                        </Card>
+                    </div>
                 );
             case 'chats':
                 return (
-                    <Card className="p-12 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[2.5rem] text-center">
+                    <Card className="p-12 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px] text-center">
                         <FaComments className="w-16 h-16 text-slate-200 mx-auto mb-6" />
                         <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter">No Active Conversations</h3>
                         <p className="text-slate-400 text-sm font-bold mt-2">Start a chat with a dealer to discuss bulk orders.</p>

@@ -25,7 +25,7 @@ export const getEscrow = async (req, res) => {
         res.json({ success: true, data: escrow });
 
     } catch (error) {
-        console.error('Get Escrow Error:', error);
+        logger.error('Get Escrow Error:', error);
         res.status(500).json({ success: false, error: error.message || 'Failed to fetch escrow' });
     }
 };
@@ -94,7 +94,7 @@ export const confirmDelivery = async (req, res) => {
         }
 
     } catch (error) {
-        console.error('Confirm Delivery Error:', error);
+        logger.error('Confirm Delivery Error:', error);
         res.status(500).json({ success: false, error: error.message || 'Failed to confirm delivery' });
     }
 };
@@ -142,7 +142,7 @@ export const requestRefund = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Request Refund Error:', error);
+        logger.error('Request Refund Error:', error);
         res.status(500).json({ success: false, error: error.message || 'Failed to request refund' });
     }
 };
@@ -205,7 +205,7 @@ export const adminReleaseEscrow = async (req, res) => {
         }
 
     } catch (error) {
-        console.error('Admin Release Escrow Error:', error);
+        logger.error('Admin Release Escrow Error:', error);
         res.status(500).json({ success: false, error: error.message || 'Failed to release escrow' });
     }
 };
@@ -372,7 +372,7 @@ export const autoReleaseEscrow = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Auto Release Escrow Error:', error);
+        logger.error('Auto Release Escrow Error:', error);
         res.status(500).json({ success: false, error: error.message || 'Failed to auto-release escrows' });
     }
 };

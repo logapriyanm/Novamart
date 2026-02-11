@@ -203,7 +203,7 @@ function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
                 </div>
             </div>
             <div className="mt-6 flex items-center gap-2">
-                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[6px] border border-slate-100 shadow-sm`}>
+                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[10px] border border-slate-100 shadow-sm`}>
                     {trend}
                 </span>
             </div>

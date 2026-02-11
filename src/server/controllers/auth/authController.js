@@ -17,6 +17,7 @@ import logger from '../../lib/logger.js';
 import crypto from 'crypto';
 import emailService from '../../services/emailService.js';
 
+
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const getJwtSecret = () => process.env.JWT_SECRET || 'supersecret';
 const getRefreshSecret = () => process.env.REFRESH_SECRET || 'superrefreshsecret';
@@ -39,7 +40,7 @@ const generateTokens = (user) => {
     return { accessToken, refreshToken };
 };
 
-import fs from 'fs';
+
 
 export const register = async (req, res) => {
     const { email, phone, password, role, ...profileData } = req.body;
@@ -135,12 +136,7 @@ export const register = async (req, res) => {
         const message = error.code === 11000 ? 'DUPLICATE_ENTRY' : 'REGISTRATION_FAILED';
         const details = error.message;
 
-        console.log('--- REGISTRATION ERROR ---');
-        console.log('Message:', error.message);
-        console.log('Code:', error.code);
-        console.log('KeyPattern:', error.keyPattern);
-        console.log('KeyValue:', error.keyValue);
-        console.log('--------------------------');
+
 
         logger.error('❌ Registration Error Details:', {
             message: error.message,
@@ -163,7 +159,7 @@ export const login = async (req, res) => {
 
     try {
         const user = await User.findOne({ email });
-        console.log(`DEBUG: User found in login - Email: ${email}, Role: ${user?.role}, ID: ${user?._id}`);
+        logger.debug('User found in login - Email: %s, Role: %s, ID: %s', email, user?.role, user?._id);
         if (!user || (user.password && !(await bcrypt.compare(password, user.password)))) {
             return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
         }

@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
 import { useAuth } from '../../../context/AuthContext';
+import { PolicyModal } from '../../ui/PolicyModal';
 // import { useSnackbar } from '../../../context/SnackbarContext';
 
 export default function LoginForm() {
@@ -37,15 +38,18 @@ export default function LoginForm() {
     const [loginMethod, setLoginMethod] = useState<'phone' | 'email'>('phone');
     const [authMode, setAuthMode] = useState<'otp' | 'password'>('password');
     const [showPassword, setShowPassword] = useState(false);
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
+    const [errors, setErrors] = useState<{ [key: string]: string | undefined }>({});
     const [formData, setFormData] = useState({
         identifier: '',
         password: '',
         otp: ''
     });
+    const [showTermsModal, setShowTermsModal] = useState(false);
 
-    const [errors, setErrors] = useState<{ identifier?: string; password?: string; otp?: string; general?: string }>({});
+    // ... existing login logic ...
 
     const validateFields = () => {
         const newErrors: typeof errors = {};
@@ -61,6 +65,8 @@ export default function LoginForm() {
 
         if (authMode === 'password' && !formData.password) newErrors.password = 'Password is required';
         if (authMode === 'otp' && otpSent && (!formData.otp || formData.otp.length !== 6)) newErrors.otp = 'Six-digit OTP is required';
+
+        if (!agreedToTerms) newErrors.general = 'You must agree to the Terms and Conditions to continue.';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -121,53 +127,58 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="bg-white/40 backdrop-blur-xl border border-black/10 rounded-[10px] p-6 sm:p-8 lg:p-10 shadow-2xl shadow-black/5">
-            <div className="text-center flex mb-10">
-                <div className="w-20 h-15 bg-white rounded-4xl flex items-center justify-center p-2 mx-auto mb-6 shadow-xl shadow-black/10 overflow-hidden border border-black/5">
-                    <img src="/assets/Novamart.png" alt="NovaMart" className="w-full h-full object-contain" />
-                </div>
-                <h1 className="text-xl font-black text-black tracking-tight italic uppercase"> Continue your journey with NovaMart</h1>
-
+        <div className="w-full">
+            <div className="mb-10 text-left">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    Continue your journey with NovaMart
+                </h2>
+                <p className="text-gray-500">
+                    Access your personalized commerce dashboard.
+                </p>
             </div>
 
             {/* Method Switcher */}
-            <div className="flex bg-black/5 p-1.5 rounded-[10px] mb-8">
+            <div className="flex bg-gray-100 p-1.5 rounded-[10px] mb-8">
                 <button
                     onClick={() => { setLoginMethod('phone'); setOtpSent(false); }}
-                    className={`flex-1 py-3 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all ${loginMethod === 'phone' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-black/40 hover:text-black'}`}
+                    className={`flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all ${loginMethod === 'phone' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
                 >
                     Phone
                 </button>
                 <button
                     onClick={() => { setLoginMethod('email'); setOtpSent(false); setAuthMode('password'); }}
-                    className={`flex-1 py-3 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all ${loginMethod === 'email' ? 'bg-black text-white shadow-lg shadow-black/20' : 'text-black/40 hover:text-black'}`}
+                    className={`flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all ${loginMethod === 'email' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
                 >
                     Email
                 </button>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6">
-                <div className="space-y-1">
-                    <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 block">
                         {loginMethod === 'phone' ? 'Phone Number' : 'Email Address'}
                     </label>
                     <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                             {loginMethod === 'phone' ? <Phone className="w-5 h-5" /> : <Mail className="w-5 h-5" />}
                         </div>
                         <input
                             type="text"
                             name="identifier"
                             autoComplete={loginMethod === 'phone' ? "tel" : "email"}
-                            placeholder={loginMethod === 'phone' ? "+91 00000 00000" : "name@company.com"}
-                            className={`w-full bg-white/60 border ${errors.identifier ? 'border-rose-500' : 'border-black/10'} rounded-[10px] py-4 pl-12 pr-4 text-sm font-bold focus:outline-none focus:border-black transition-all`}
+                            placeholder={loginMethod === 'phone' ? "Enter your mobile number" : "name@company.com"}
+                            className={`w-full bg-white border ${errors.identifier ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] py-3 pl-12 pr-4 text-sm transition-all focus:ring-1 focus:outline-none placeholder:text-gray-400 text-gray-900`}
                             value={formData.identifier}
                             onChange={e => {
-                                setFormData({ ...formData, identifier: e.target.value });
+                                let value = e.target.value;
+                                if (loginMethod === 'phone') {
+                                    value = value.replace(/\D/g, '').slice(0, 10);
+                                }
+                                setFormData({ ...formData, identifier: value });
                                 if (errors.identifier) setErrors({ ...errors, identifier: undefined });
                             }}
                         />
-                        {errors.identifier && <p className="text-rose-500 text-[9px] font-black uppercase tracking-tighter mt-1 ml-1">{errors.identifier}</p>}
+                        {errors.identifier && <p className="text-red-500 text-xs mt-1 ml-1">{errors.identifier}</p>}
                     </div>
                 </div>
 
@@ -180,10 +191,15 @@ export default function LoginForm() {
                             exit={{ opacity: 0, y: -10 }}
                             className="space-y-6"
                         >
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">Secure Password</label>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-sm font-medium text-gray-700">Secure Password</label>
+                                    <Link href="/auth/forgot-password">
+                                        <button type="button" className="text-xs font-semibold text-primary hover:text-primary/80">Forgot Password?</button>
+                                    </Link>
+                                </div>
                                 <div className="relative">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                                         <Lock className="w-5 h-5" />
                                     </div>
                                     <input
@@ -191,7 +207,7 @@ export default function LoginForm() {
                                         name="password"
                                         autoComplete="current-password"
                                         placeholder="••••••••"
-                                        className={`w-full bg-white/60 border ${errors.password ? 'border-rose-500' : 'border-black/10'} rounded-[10px] py-4 pl-12 pr-12 text-sm focus:outline-none focus:border-black transition-all`}
+                                        className={`w-full bg-white border ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] py-3 pl-12 pr-12 text-sm transition-all focus:ring-1 focus:outline-none text-gray-900`}
                                         value={formData.password}
                                         onChange={e => {
                                             setFormData({ ...formData, password: e.target.value });
@@ -201,37 +217,47 @@ export default function LoginForm() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-black/20 hover:text-black transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                                     >
                                         {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
                                     </button>
-                                    {errors.password && <p className="text-rose-500 text-[9px] font-black uppercase tracking-tighter mt-1 ml-1">{errors.password}</p>}
+                                    {errors.password && <p className="text-red-500 text-xs mt-1 ml-1">{errors.password}</p>}
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between px-2">
-                                <Link href="/auth/forgot-password">
-                                    <button type="button" className="text-[10px] font-black text-black uppercase tracking-wider hover:underline underline-offset-4">Forgot Password?</button>
-                                </Link>
-                                {loginMethod === 'phone' && (
+                            {loginMethod === 'phone' && (
+                                <div className="flex justify-end">
                                     <button
                                         type="button"
                                         onClick={() => setAuthMode('otp')}
-                                        className="text-[10px] font-black text-black uppercase tracking-wider hover:underline underline-offset-4 flex items-center gap-1.5"
+                                        className="text-xs font-semibold text-primary hover:text-primary/80 flex items-center gap-1.5"
                                     >
                                         <Smartphone className="w-3 h-3" />
                                         Login via OTP
                                     </button>
-                                )}
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="terms-and-conditions"
+                                    checked={agreedToTerms}
+                                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                    className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                />
+                                <label htmlFor="terms-and-conditions" className="text-xs text-gray-500">
+                                    I agree to the <button type="button" onClick={() => setShowTermsModal(true)} className="text-primary hover:underline">Terms and Conditions</button>
+                                </label>
                             </div>
 
                             <button
                                 type="submit"
-                                disabled={isLoading || !formData.identifier || !formData.password}
-                                className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-[10px]"
+                                disabled={isLoading || !formData.identifier || !formData.password || !agreedToTerms}
+                                className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                             >
                                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Enter Secure Portal'}
-                                {!isLoading && <ArrowRight className="w-5 h-5" />}
+                                {!isLoading && <ArrowRight className="w-4 h-4" />}
                             </button>
                         </motion.div>
                     ) : (
@@ -244,36 +270,49 @@ export default function LoginForm() {
                         >
                             {otpSent ? (
                                 <div className="space-y-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">One-Time Password</label>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-700 block">One-Time Password</label>
                                         <div className="relative">
-                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                                                 <Smartphone className="w-5 h-5" />
                                             </div>
                                             <input
                                                 type="text"
                                                 placeholder="0 0 0 0 0 0"
-                                                className="w-full bg-white/60 border border-black/10 rounded-[10px] py-4 pl-12 pr-4 text-sm tracking-[0.5em] font-black focus:outline-none focus:border-black transition-all"
+                                                className="w-full bg-white border border-gray-200 focus:border-primary focus:ring-primary rounded-[10px] py-3 pl-12 pr-4 text-sm tracking-[0.5em] font-bold transition-all focus:ring-1 focus:outline-none text-gray-900"
                                                 value={formData.otp}
                                                 onChange={e => setFormData({ ...formData, otp: e.target.value })}
                                             />
                                         </div>
                                     </div>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="terms-and-conditions-otp"
+                                            checked={agreedToTerms}
+                                            onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                        />
+                                        <label htmlFor="terms-and-conditions-otp" className="text-xs text-gray-500">
+                                            I agree to the <button type="button" onClick={() => setShowTermsModal(true)} className="text-primary hover:underline">Terms and Conditions</button>
+                                        </label>
+                                    </div>
+
                                     <button
                                         type="submit"
-                                        disabled={isLoading}
-                                        className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all uppercase tracking-widest text-[10px]"
+                                        disabled={isLoading || !agreedToTerms}
+                                        className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all text-sm"
                                     >
                                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Log In Securely'}
                                     </button>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-end px-2">
+                                    <div className="flex items-center justify-end">
                                         <button
                                             type="button"
                                             onClick={() => setAuthMode('password')}
-                                            className="text-[10px] font-black text-black uppercase tracking-wider hover:underline underline-offset-4 flex items-center gap-1.5"
+                                            className="text-xs font-semibold text-primary hover:text-primary/80 flex items-center gap-1.5"
                                         >
                                             <FaKey className="w-3 h-3" />
                                             Use Password
@@ -283,10 +322,10 @@ export default function LoginForm() {
                                         type="button"
                                         onClick={handleSendOTP}
                                         disabled={!formData.identifier || isLoading}
-                                        className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-[10px]"
+                                        className="w-full bg-primary/10 text-primary font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 hover:bg-primary/20 transition-all disabled:opacity-50 text-sm"
                                     >
                                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send OTP Code'}
-                                        {!isLoading && <ArrowRight className="w-5 h-5" />}
+                                        {!isLoading && <ArrowRight className="w-4 h-4" />}
                                     </button>
                                 </div>
                             )}
@@ -300,32 +339,37 @@ export default function LoginForm() {
                 )}
             </form>
 
-            <div className="mt-2 pt-8 border-black/10 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                <div className="flex flex-col gap-6">
-                    <div className="relative flex items-center gap-4">
-                        <div className="flex-1 h-px bg-black/10" />
-                        <span className="text-[9px] font-black text-black/40">OR SECURE SOCIAL ACCESS</span>
-                        <div className="flex-1 h-px bg-black/10" />
-                    </div>
+            <div className="mt-8">
+                <div className="relative flex items-center gap-4 mb-6">
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">OR SECURE SOCIAL ACCESS</span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                </div>
 
-                    <div className="flex justify-center">
-                        <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={() => toast.error('Google authentication failed')}
-                            useOneTap
-                            theme="outline"
-                            shape="pill"
-                            size="large"
-                            text="continue_with"
-                        />
-                    </div>
+                <div className="flex justify-center mb-6">
+                    <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={() => toast.error('Google authentication failed')}
+                        useOneTap
+                        theme="outline"
+                        shape="rectangular"
+                        size="large"
+                        width="100%"
+                        text="continue_with"
+                    />
+                </div>
 
-                    <div className="pt-2 flex items-center justify-center gap-2">
-                        <span>New to NovaMart?</span>
-                        <Link href="/auth/register" className="text-black font-black hover:underline uppercase italic">Register Now</Link>
-                    </div>
+                <div className="flex items-center justify-center gap-2 text-sm">
+                    <span className="text-gray-500">New to NovaMart?</span>
+                    <Link href="/auth/register" className="text-primary font-bold hover:underline">Register Now</Link>
                 </div>
             </div>
+            {/* Terms Modal */}
+            <PolicyModal
+                isOpen={showTermsModal}
+                onClose={() => setShowTermsModal(false)}
+                policyKey="terms-of-service"
+            />
         </div>
     );
 }

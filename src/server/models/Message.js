@@ -22,8 +22,12 @@ const MessageSchema = new mongoose.Schema({
     },
     messageType: {
         type: String,
-        enum: ['TEXT', 'SYSTEM', 'FILE'],
+        enum: ['TEXT', 'SYSTEM', 'FILE', 'OFFER', 'DEAL_UPDATE'],
         default: 'TEXT'
+    },
+    metadata: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
     },
     readBy: [{
         userId: String,

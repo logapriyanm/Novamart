@@ -4,12 +4,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
     FaStar as Star,
-    FaShieldAlt as ShieldCheck,
-    FaShippingFast as Truck,
-    FaTools as Tools,
-    FaUserCheck as UserCheck,
-    FaArrowRight,
-    FaHeart
+    FaHeart,
+    FaCheckCircle,
+    FaShippingFast as Truck
 } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
@@ -18,13 +15,12 @@ import { toast } from 'sonner';
 import OptimizedImage from './OptimizedImage';
 
 interface ProductCardProps {
-    id: string; // Product ID
-    inventoryId?: string; // Inventory ID for cart (optional for previews)
+    id: string;
+    inventoryId?: string;
     name: string;
     price: number;
     originalPrice?: number;
     image: string;
-    hoverImage?: string;
     rating: number;
     reviewsCount?: number;
     brand: string;
@@ -49,18 +45,16 @@ export default function CustomerProductCard({
     price,
     originalPrice = price * 1.2,
     image,
-    hoverImage,
     rating,
     reviewsCount = 124,
     brand,
-    spec = 'Premium Series',
+    spec,
     seller,
     highlights
 }: ProductCardProps) {
     const router = useRouter();
     const { isAuthenticated } = useAuth();
     const { addToCart } = useCart();
-    // const { showSnackbar } = useSnackbar();
     const [isWishlisted, setIsWishlisted] = React.useState(false);
 
     const handleWishlist = (e: React.MouseEvent) => {
@@ -79,107 +73,92 @@ export default function CustomerProductCard({
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-surface border border-foreground/10 rounded-[10px] overflow-hidden group transition-all duration-300 flex flex-col h-full relative text-foreground shadow-sm hover:shadow-xl hover:-translate-y-1"
+            className="bg-white border border-slate-100 rounded-[10px] overflow-hidden group transition-all duration-300 flex flex-col h-full relative text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1"
         >
-            {/* 1️⃣ Product Image Container */}
+            {/* Image Container */}
             <div
-                className="aspect-square relative overflow-hidden bg-background/50 cursor-pointer group-hover:bg-background transition-colors duration-500"
+                className="aspect-square relative overflow-hidden bg-slate-50/50 cursor-pointer group-hover:bg-white transition-colors duration-500 p-4 xs:p-6 flex items-center justify-center"
                 onClick={() => router.push(`/products/${id}`)}
             >
-                <div className="w-full h-full relative p-8">
+                <div className="w-full h-full relative">
                     <OptimizedImage
                         src={image}
                         alt={name}
                         width={400}
                         height={400}
-                        className={`w-full h-full object-contain transition-all duration-700 ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
+                        className="w-full h-full object-contain transition-all duration-700 group-hover:scale-110"
                     />
-                    {hoverImage && (
-                        <OptimizedImage
-                            src={hoverImage}
-                            alt={`${name} hover`}
-                            width={400}
-                            height={400}
-                            className="absolute inset-0 w-full h-full object-contain p-8 opacity-0 group-hover:opacity-100 transition-all duration-700 scale-105"
-                        />
+                </div>
+
+                {/* Badges Overlay */}
+                <div className="absolute top-3 left-3 flex flex-col gap-2">
+                    {originalPrice > price && (
+                        <div className="bg-emerald-500 text-white px-2 py-1 rounded-[5px] text-[8px] font-black uppercase tracking-widest shadow-sm">
+                            {Math.round((1 - price / originalPrice) * 100)}% Discount
+                        </div>
                     )}
-                </div>
-
-                {/* Quick Actions Overlay */}
-                <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-center gap-2 bg-gradient-to-t from-black/10 to-transparent">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            // Quick View functionality can be implemented in future
-                        }}
-                        className="bg-white text-black text-[10px] font-bold px-4 py-2 rounded-full shadow-lg hover:bg-black hover:text-white transition-colors uppercase tracking-widest"
-                    >
-                        Quick View
-                    </button>
-                </div>
-
-                <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
-                    <button
-                        onClick={handleWishlist}
-                        className={`w-9 h-9 rounded-[10px] flex items-center justify-center transition-all ${isWishlisted ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-white/80 text-foreground/40 border border-foreground/10 hover:text-foreground backdrop-blur-sm'}`}
-                        aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                        title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-                    >
-                        <FaHeart className={`w-3.5 h-3.5 ${isWishlisted ? 'fill-current' : ''}`} />
-                    </button>
-                    {price > 40000 && (
-                        <div className="bg-rose-500 text-white px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg shadow-rose-500/20">
-                            Limited Deal
+                    {seller.isVerified && (
+                        <div className="bg-blue-600 text-white p-1 rounded-full shadow-md" title="Authorized Dealer">
+                            <FaCheckCircle className="w-3 h-3" />
                         </div>
                     )}
                 </div>
+
+                {/* Wishlist Button */}
+                <button
+                    onClick={handleWishlist}
+                    className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isWishlisted ? 'bg-rose-500 text-white shadow-lg' : 'bg-white/80 text-slate-400 border border-slate-100 hover:text-slate-900 backdrop-blur-sm shadow-sm'}`}
+                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                    <FaHeart className={`w-3 h-3 ${isWishlisted ? 'fill-current' : ''}`} />
+                </button>
+
+                {/* Shipping Highlight */}
+                {highlights.freeDelivery && (
+                    <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-slate-100 px-2 py-1 rounded-[5px] flex items-center gap-1.5 shadow-sm">
+                        <Truck className="w-2.5 h-2.5 text-slate-600" />
+                        <span className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">Fast Delivery</span>
+                    </div>
+                )}
             </div>
 
-            <div className="p-6 flex flex-col flex-1 bg-surface">
-                {/* 4️⃣ Product Name */}
-                <div className="flex items-center justify-between mb-1 gap-2">
-                    <span className="text-[10px] font-black text-primary uppercase tracking-widest truncate">
+            {/* Content Section */}
+            <div className="p-4 flex flex-col flex-1 bg-white border-t border-slate-50">
+                <div className="mb-2">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
                         {brand}
                     </span>
-                    {seller.isVerified && (
-                        <div className="flex items-center gap-1 shrink-0">
-                            <img src="/verify.png" className="w-3.5 h-3.5 object-contain" alt="Verified" />
-                        </div>
-                    )}
+                    <h3
+                        className="font-bold text-slate-800 text-sm leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[2.5rem] cursor-pointer mt-1"
+                        onClick={() => router.push(`/products/${id}`)}
+                    >
+                        {name}
+                    </h3>
                 </div>
-                <h3
-                    className="font-black text-foreground text-sm leading-tight mb-3 group-hover:text-black transition-colors line-clamp-2 min-h-[2.5rem] cursor-pointer italic uppercase"
-                    onClick={() => router.push(`/products/${id}`)}
-                >
-                    {name}
-                </h3>
 
-                {/* 5️⃣ Ratings */}
-                <div className="flex items-center gap-2 mb-4">
+                {/* Ratings */}
+                <div className="flex items-center gap-1.5 mb-4">
                     <div className="flex items-center gap-0.5">
                         <Star className="text-amber-400 fill-current w-3 h-3" />
-                        <span className="text-[11px] font-black text-foreground">{rating}</span>
+                        <span className="text-[11px] font-black text-slate-900">{rating}</span>
                     </div>
-                    <span className="text-[11px] font-bold text-foreground/40">({reviewsCount.toLocaleString()} reviews)</span>
+                    <span className="text-[11px] font-bold text-slate-300">({reviewsCount})</span>
                 </div>
 
-                <div className="flex items-center gap-3 mb-5">
-                    <span className="text-2xl font-black text-foreground">₹{price.toLocaleString()}</span>
-                    <div className="flex flex-col">
-                        <span className="text-[10px] text-foreground/40 line-through font-bold">₹{originalPrice.toLocaleString()}</span>
-                        <span className="text-[10px] font-black text-black uppercase tracking-widest">
-                            {Math.round((1 - price / originalPrice) * 100)}% OFF
-                        </span>
+                {/* Price Section */}
+                <div className="mt-auto pt-4 flex flex-col gap-4">
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-xl font-black text-slate-900">₹{price.toLocaleString()}</span>
+                        {originalPrice > price && (
+                            <span className="text-xs text-slate-400 line-through font-medium">₹{originalPrice.toLocaleString()}</span>
+                        )}
                     </div>
-                </div>
 
-                {/* 8️⃣ Primary CTA */}
-                <div className="mt-auto">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
                             if (!inventoryId || !seller.id) {
-                                alert('This product is currently out of stock or unavailable for purchase.');
+                                toast.error('This product is unavailable.');
                                 return;
                             }
                             addToCart({
@@ -191,11 +170,10 @@ export default function CustomerProductCard({
                                 quantity: 1,
                                 sellerId: seller.id,
                                 sellerName: seller.name,
-                                region: 'West'
+                                region: 'National'
                             });
                         }}
-                        className="btn-primary w-full py-4 text-[11px] tracking-[0.2em]"
-                        aria-label={`Add ${name} to cart`}
+                        className="w-full py-3 bg-slate-900 text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-md active:scale-95"
                     >
                         Add to Cart
                     </button>

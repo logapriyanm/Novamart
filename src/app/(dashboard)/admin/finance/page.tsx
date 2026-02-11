@@ -74,7 +74,7 @@ export default function FinanceDashboard() {
             </div>
 
             {/* Escrow Vault */}
-            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-10 border-b border-slate-50 bg-[#10367D] text-white flex items-center justify-between">
                     <div>
                         <h2 className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
@@ -85,7 +85,7 @@ export default function FinanceDashboard() {
                             Funds held securely until delivery confirmation
                         </p>
                     </div>
-                    <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/10">
+                    <div className="p-4 bg-white/10 rounded-[10px] backdrop-blur-sm border border-white/10">
                         <p className="text-[9px] font-black uppercase text-blue-200">Total Held Value</p>
                         <p className="text-2xl font-black">₹{orders.reduce((acc, o) => acc + Number(o.totalAmount), 0).toLocaleString()}</p>
                     </div>
@@ -115,13 +115,13 @@ export default function FinanceDashboard() {
                                         <div className="flex items-center justify-end gap-3">
                                             <button
                                                 onClick={() => handleRefund(order.id)}
-                                                className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all"
+                                                className="px-4 py-2 bg-rose-50 text-rose-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all"
                                             >
                                                 <FaHistory className="inline mr-1" /> Refund
                                             </button>
                                             <button
                                                 onClick={() => handleRelease(order.id)}
-                                                className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all"
+                                                className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all"
                                             >
                                                 <FaUnlockAlt className="inline mr-1" /> Release
                                             </button>

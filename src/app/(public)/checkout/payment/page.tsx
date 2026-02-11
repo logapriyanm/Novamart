@@ -194,7 +194,7 @@ export default function PaymentPage() {
 
                     {/* Escrow Notice */}
                     <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[10px] p-6 mb-10 flex items-start gap-4">
-                        <div className="w-10 h-10 bg-emerald-500/10 rounded-[5px] flex items-center justify-center text-emerald-600 shrink-0">
+                        <div className="w-10 h-10 bg-emerald-500/10 rounded-[10px] flex items-center justify-center text-emerald-600 shrink-0">
                             <HiOutlineShieldCheck className="w-6 h-6" />
                         </div>
                         <div>

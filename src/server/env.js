@@ -1,3 +1,2 @@
 import dotenv from 'dotenv';
 dotenv.config();
-console.log('✅ Environment variables loaded via src/server/env.js');

@@ -104,15 +104,15 @@ const testimonials = [
 
 export default function Testimonials() {
     return (
-        <div className="max-w-7xl mx-auto px-6 mt-32 mb-32">
-            <div className="text-center mb-16">
-                <h2 className="text-3xl lg:text-4xl font-black text-foreground tracking-tight">Trusted by Industry Leaders</h2>
-                <p className="text-foreground/50 font-medium mt-4 max-w-2xl mx-auto">See what our partners and customers are saying about their experience with NovaMart.</p>
+        <div className="max-w-7xl mx-auto px-4 xs:px-6 mt-20 sm:mt-32 mb-20 sm:mb-32">
+            <div className="text-center mb-12 sm:mb-16">
+                <h2 className="text-2xl xs:text-3xl lg:text-4xl font-black text-foreground tracking-tight uppercase italic underline-offset-8">Trusted by <span className="text-foreground/40">Industry Leaders</span></h2>
+                <p className="text-sm xs:text-base text-foreground/50 font-medium mt-4 max-w-2xl mx-auto">See what our partners and customers are saying about their experience with NovaMart.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 auto-rows-auto">
                 {testimonials.map((item) => (
-                    <div key={item.id} className={`bg-white rounded-[10px] p-8 border border-foreground/10 hover:border-black/20 transition-all duration-300 relative overflow-hidden ${item.cols} ${item.rows}`}>
+                    <div key={item.id} className={`bg-white rounded-[10px] p-6 xs:p-8 border border-foreground/10 hover:border-black/20 transition-all duration-300 relative overflow-hidden ${item.cols} ${item.rows}`}>
 
                         {/* Service Card (Centered with arrows) */}
                         {item.variant === 'service-card' && (
@@ -159,17 +159,17 @@ export default function Testimonials() {
 
                         {/* Photo Split Card */}
                         {item.variant === 'photo-split' && (
-                            <div className="flex items-center gap-6 h-full">
+                            <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-6 h-full text-center sm:text-left">
                                 <div className="flex-1">
-                                    <FaQuoteLeft className="text-xl text-foreground mb-3" />
-                                    <h3 className="text-sm font-black text-foreground mb-2">{item.title}</h3>
-                                    <p className="text-[10px] text-foreground/40 leading-relaxed mb-4">{item.text}</p>
+                                    <FaQuoteLeft className="text-lg xs:text-xl text-foreground mb-3 mx-auto sm:mx-0" />
+                                    <h3 className="text-sm font-black text-foreground mb-2 italic uppercase">{item.title}</h3>
+                                    <p className="text-[11px] xs:text-[12px] text-foreground/40 leading-relaxed mb-4">{item.text}</p>
                                     <div>
-                                        <p className="text-[10px] font-bold text-foreground">{item.author}</p>
-                                        <p className="text-[8px] text-foreground/40">{item.role}</p>
+                                        <p className="text-xs font-black text-foreground italic">{item.author}</p>
+                                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-tighter">{item.role}</p>
                                     </div>
                                 </div>
-                                <div className="w-24 h-full rounded-[10px] overflow-hidden flex-shrink-0">
+                                <div className="w-full sm:w-24 h-32 sm:h-auto rounded-[10px] overflow-hidden flex-shrink-0">
                                     <img src={item.image} alt={item.author} className="w-full h-full object-cover" />
                                 </div>
                             </div>
@@ -182,11 +182,11 @@ export default function Testimonials() {
                                     <FaHeart className="text-xs text-rose-500" />
                                     <span className="text-[10px] font-bold text-foreground/60">{item.likes} Like</span>
                                 </div>
-                                <div className="flex items-start gap-8 px-4">
+                                <div className="flex items-start gap-4 sm:gap-8 px-2 sm:px-4 mt-6 sm:mt-0">
                                     <div className="flex-1 text-center">
-                                        <h3 className="text-xl font-black text-foreground mb-3">{item.title}</h3>
-                                        <p className="text-xs text-foreground/40 leading-relaxed max-w-lg mx-auto mb-6">{item.text}</p>
-                                        <span className="text-xs font-bold text-foreground block">{item.author}</span>
+                                        <h3 className="text-lg xs:text-xl font-black text-foreground mb-3 italic uppercase">{item.title}</h3>
+                                        <p className="text-[13px] xs:text-sm text-foreground/40 leading-relaxed max-w-lg mx-auto mb-6">{item.text}</p>
+                                        <span className="text-xs xs:text-sm font-black text-foreground italic block">{item.author}</span>
                                     </div>
                                 </div>
                                 <div className="flex justify-center mt-6 -space-x-2">
@@ -203,8 +203,8 @@ export default function Testimonials() {
                                     <FaQuoteRight className="text-xl text-black" />
                                 </div>
                                 <div className="mb-8">
-                                    <p className="text-[10px] uppercase tracking-widest text-foreground/40 mb-2">What People Say</p>
-                                    <h3 className="text-2xl font-black text-foreground leading-tight">
+                                    <p className="text-[9px] xs:text-[10px] uppercase tracking-widest text-foreground/40 mb-2">What People Say</p>
+                                    <h3 className="text-xl xs:text-2xl font-black text-foreground leading-tight italic uppercase">
                                         {item.text}
                                     </h3>
                                 </div>

@@ -1,5 +1,6 @@
 import express from 'express';
 import authenticate from '../../middleware/auth.js';
+import authorize from '../../middleware/rbac.js';
 import { requirePROorHigher, checkSubscriptionExpiry } from '../../middleware/subscriptionMiddleware.js';
 import {
     createCustomRequest,
@@ -26,10 +27,10 @@ router.get('/requests/:id', requirePROorHigher, getRequestDetails);
 router.put('/requests/:id', requirePROorHigher, updateRequest);
 router.delete('/requests/:id', requirePROorHigher, cancelRequest);
 
-// Manufacturer routes (no subscription required)
-router.get('/incoming', getIncomingRequests);
-router.post('/requests/:id/respond', respondToRequest);
-router.post('/requests/:id/milestones', updateMilestone);
-router.get('/requests/:id/milestones', getMilestones);
+// Manufacturer routes (no subscription required, but role restricted)
+router.get('/incoming', authorize(['MANUFACTURER']), getIncomingRequests);
+router.post('/requests/:id/respond', authorize(['MANUFACTURER']), respondToRequest);
+router.post('/requests/:id/milestones', authorize(['MANUFACTURER']), updateMilestone);
+router.get('/requests/:id/milestones', authorize(['MANUFACTURER']), getMilestones);
 
 export default router;

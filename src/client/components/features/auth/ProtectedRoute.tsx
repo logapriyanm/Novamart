@@ -19,14 +19,14 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         if (!isLoading) {
             if (!isAuthenticated) {
                 // Redirect to login if not authenticated
-                console.log(`🔒 Access denied to ${pathname}. Redirecting to login.`);
+
                 router.replace(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
                 return;
             }
 
             if (allowedRoles && user && !allowedRoles.includes(user.role)) {
                 // Redirect to appropriate dashboard if role doesn't match
-                console.log(`🚫 Role mismatch for ${pathname}. User: ${user.role}, Allowed: ${allowedRoles.join(', ')}`);
+
                 switch (user.role) {
                     case 'ADMIN': router.replace('/admin/dashboard'); break;
                     case 'MANUFACTURER': router.replace('/manufacturer/dashboard'); break;

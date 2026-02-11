@@ -6,14 +6,15 @@ import {
     getPaymentStatus
 } from '../../controllers/paymentController.js';
 import authenticate from '../../middleware/auth.js';
+import authorize from '../../middleware/rbac.js';
 
 const router = express.Router();
 
 // Create Razorpay order
-router.post('/create-order', authenticate, createPaymentOrder);
+router.post('/create-order', authenticate, authorize(['CUSTOMER']), createPaymentOrder);
 
 // Verify payment
-router.post('/verify', authenticate, verifyPayment);
+router.post('/verify', authenticate, authorize(['CUSTOMER']), verifyPayment);
 
 // Get payment status
 router.get('/status/:orderId', authenticate, getPaymentStatus);

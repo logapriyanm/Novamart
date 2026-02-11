@@ -54,7 +54,7 @@ export const getCart = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Get Cart Error:', error);
+        logger.error('Get Cart Error:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch cart' });
     }
 };
@@ -119,7 +119,7 @@ export const addToCart = async (req, res) => {
         await cart.save();
         res.json({ success: true, data: cart });
     } catch (error) {
-        console.error('Add to Cart Error:', error);
+        logger.error('Add to Cart Error:', error);
         res.status(500).json({ success: false, error: 'Failed to add item to cart' });
     }
 };
@@ -155,7 +155,7 @@ export const updateCartItem = async (req, res) => {
 
         res.json({ success: true, data: cart });
     } catch (error) {
-        console.error('Update Cart Item Error:', error);
+        logger.error('Update Cart Item Error:', error);
         res.status(500).json({ success: false, error: 'Failed to update cart item' });
     }
 };
@@ -177,7 +177,7 @@ export const removeFromCart = async (req, res) => {
 
         res.json({ success: true, message: 'Item removed from cart' });
     } catch (error) {
-        console.error('Remove from Cart Error:', error);
+        logger.error('Remove from Cart Error:', error);
         res.status(500).json({ success: false, error: 'Failed to remove item' });
     }
 };

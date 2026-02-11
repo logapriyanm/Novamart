@@ -1,48 +1,56 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FaHeart, FaBookmark, FaPlus, FaFilter, FaLaptopHouse, FaUtensils, FaTools, FaThLarge } from 'react-icons/fa';
 import WishlistCard from '@/client/components/features/wishlist/WishlistCard';
 import WishlistSidebar from '@/client/components/features/wishlist/WishlistSidebar';
 import { wishlistService } from '@/lib/api/services/wishlist.service';
-import { useEffect } from 'react';
 import RecentlySaved from '@/client/components/features/wishlist/RecentlySaved';
-
-
+import { toast } from 'sonner';
 
 export default function WishlistPage() {
     const [activeTab, setActiveTab] = useState<'wishlist' | 'saved'>('wishlist');
     const [items, setItems] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchWishlist = async () => {
-            try {
-                const data = await wishlistService.getWishlist();
-                // Map to UI format if needed
-                const adapted = data.map(p => ({
-                    id: p.id,
-                    name: p.name,
-                    brand: p.brand || 'NovaMart',
-                    price: p.basePrice,
-                    image: p.images?.[0] || 'https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=400',
-                    status: (p.inventory?.[0]?.stock < 10 ? 'Low Stock' : undefined) as any
-                }));
-                setItems(adapted);
-            } catch (error) {
-                console.error('Failed to fetch wishlist:', error);
-                // Fallback to mock for UI demonstration if needed or just empty
-                // setItems(wishlistItems); 
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const fetchWishlist = async () => {
+        setIsLoading(true);
+        try {
+            const data = await wishlistService.getWishlist();
+            const adapted = data.map((p: any) => ({
+                id: p._id || p.id,
+                name: p.name,
+                brand: 'NovaMart', // Default brand if missing
+                price: p.basePrice,
+                image: p.images?.[0] || 'https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=400',
+                status: ((p as any).inventory?.[0]?.stock < 10 ? 'Low Stock' : undefined) as any
+            }));
+            setItems(adapted);
+        } catch (error) {
+            console.error('Failed to fetch wishlist:', error);
+            toast.error('Failed to load wishlist');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchWishlist();
     }, []);
 
-    const displayItems = items;
+    const handleRemove = async (productId: string) => {
+        try {
+            await wishlistService.removeFromWishlist(productId);
+            setItems(prev => prev.filter(item => item.id !== productId));
+            toast.success('Removed from wishlist');
+        } catch (error) {
+            console.error('Failed to remove from wishlist:', error);
+            toast.error('Failed to remove item');
+        }
+    };
+
+    const displayItems = activeTab === 'wishlist' ? items : []; // Only show wishlist items for now
 
     return (
         <div className="min-h-screen bg-[#F8FAFC] pt-32 pb-20">
@@ -67,14 +75,14 @@ export default function WishlistPage() {
                                 className={`flex items-center gap-2 pb-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'wishlist' ? 'border-black text-black' : 'border-transparent text-foreground/20 hover:text-foreground/40'}`}
                             >
                                 <FaHeart className={activeTab === 'wishlist' ? 'text-black' : 'text-foreground/10'} />
-                                My Wishlist
+                                My Wishlist ({items.length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('saved')}
                                 className={`flex items-center gap-2 pb-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'saved' ? 'border-black text-black' : 'border-transparent text-foreground/20 hover:text-foreground/40'}`}
                             >
                                 <FaBookmark className={activeTab === 'saved' ? 'text-black' : 'text-foreground/10'} />
-                                Saved for Later (12)
+                                Saved for Later (0)
                             </button>
                         </div>
 
@@ -97,17 +105,31 @@ export default function WishlistPage() {
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {isLoading ? (
-                                <div className="col-span-full py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
-                                    Loading your collection...
+                        {isLoading ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="h-[420px] bg-white rounded-[10px] animate-pulse border border-slate-100" />
+                                ))}
+                            </div>
+                        ) : activeTab === 'wishlist' && displayItems.length === 0 ? (
+                            <div className="col-span-full py-20 text-center">
+                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <FaHeart className="text-slate-200 text-2xl" />
                                 </div>
-                            ) : displayItems.map((item) => (
-                                <div key={item.id} className="h-[420px]"> {/* Fixed height for alignment */}
-                                    <WishlistCard {...item} />
-                                </div>
-                            ))}
-                        </div>
+                                <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">Your wishlist is empty</p>
+                                <Link href="/products" className="inline-block mt-4 text-[#10367D] font-black uppercase tracking-widest text-[10px] hover:underline">
+                                    Browse Products
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {displayItems.map((item) => (
+                                    <div key={item.id} className="h-[420px]">
+                                        <WishlistCard {...item} onRemove={handleRemove} />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Recentely Saved Section */}
                         <RecentlySaved onMoveToCart={(id) => {

@@ -35,4 +35,11 @@ const ProductSchema = new mongoose.Schema({
 ProductSchema.index({ name: 'text', description: 'text' });
 ProductSchema.index({ category: 1, status: 1 });
 
+// Virtual for Inventory
+ProductSchema.virtual('inventory', {
+    ref: 'Inventory',
+    localField: '_id',
+    foreignField: 'productId'
+});
+
 export default mongoose.models.Product || mongoose.model('Product', ProductSchema);

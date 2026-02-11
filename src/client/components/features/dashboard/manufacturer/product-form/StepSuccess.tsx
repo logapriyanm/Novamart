@@ -17,15 +17,15 @@ export default function StepSuccess() {
             </div>
 
             {/* Main Card */}
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl max-w-4xl w-full overflow-hidden relative z-10">
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-xl max-w-4xl w-full overflow-hidden relative z-10">
 
                 {/* Header Section */}
                 <div className="text-center p-12 pb-8 border-b border-slate-50">
-                    <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                    <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[10px] flex items-center justify-center mx-auto mb-6 shadow-sm">
                         <FaCheck className="w-8 h-8" />
                     </div>
                     <h1 className="text-3xl font-black text-[#1E293B] mb-3">Product Submitted for Approval</h1>
-                    <span className="inline-block bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6">
+                    <span className="inline-block bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-[10px] mb-6">
                         Order #PRD-9823
                     </span>
                     <p className="text-sm font-medium text-slate-500 max-w-lg mx-auto leading-relaxed">
@@ -46,7 +46,7 @@ export default function StepSuccess() {
 
                             {/* Step 1: Submitted */}
                             <div className="relative flex gap-4">
-                                <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 z-10 shrink-0">
+                                <div className="w-8 h-8 rounded-[10px] bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200 z-10 shrink-0">
                                     <FaCheck className="w-3 h-3" />
                                 </div>
                                 <div>
@@ -57,7 +57,7 @@ export default function StepSuccess() {
 
                             {/* Step 2: Admin Review */}
                             <div className="relative flex gap-4">
-                                <div className="w-8 h-8 rounded-full bg-[#0F6CBD] text-white flex items-center justify-center shadow-md shadow-blue-200 z-10 shrink-0">
+                                <div className="w-8 h-8 rounded-[10px] bg-[#0F6CBD] text-white flex items-center justify-center shadow-md shadow-blue-200 z-10 shrink-0">
                                     <FaSyncAlt className="w-3 h-3 animate-spin-slow" />
                                 </div>
                                 <div>
@@ -68,7 +68,7 @@ export default function StepSuccess() {
 
                             {/* Step 3: Quality Check */}
                             <div className="relative flex gap-4 opacity-50">
-                                <div className="w-8 h-8 rounded-full bg-white border-2 border-slate-200 text-slate-300 flex items-center justify-center z-10 shrink-0">
+                                <div className="w-8 h-8 rounded-[10px] bg-white border-2 border-slate-200 text-slate-300 flex items-center justify-center z-10 shrink-0">
                                     <FaShieldAlt className="w-3 h-3" />
                                 </div>
                                 <div>
@@ -79,7 +79,7 @@ export default function StepSuccess() {
 
                             {/* Step 4: Live */}
                             <div className="relative flex gap-4 opacity-50">
-                                <div className="w-8 h-8 rounded-full bg-white border-2 border-slate-200 text-slate-300 flex items-center justify-center z-10 shrink-0">
+                                <div className="w-8 h-8 rounded-[10px] bg-white border-2 border-slate-200 text-slate-300 flex items-center justify-center z-10 shrink-0">
                                     <FaBox className="w-3 h-3" />
                                 </div>
                                 <div>
@@ -101,11 +101,11 @@ export default function StepSuccess() {
                         </p>
 
                         <div className="space-y-3">
-                            <Link href="/manufacturer" className="w-full py-4 bg-[#0F6CBD] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
+                            <Link href="/manufacturer" className="w-full py-4 bg-[#0F6CBD] text-white rounded-[10px] text-xs font-black uppercase tracking-widest hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
                                 <FaThLarge className="w-3 h-3" /> Go to Dashboard
                             </Link>
 
-                            <button onClick={() => window.location.reload()} className="w-full py-4 bg-white border border-slate-200 text-[#1E293B] rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2">
+                            <button onClick={() => window.location.reload()} className="w-full py-4 bg-white border border-slate-200 text-[#1E293B] rounded-[10px] text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2">
                                 <FaPlus className="w-3 h-3" /> Create Another Product
                             </button>
                         </div>

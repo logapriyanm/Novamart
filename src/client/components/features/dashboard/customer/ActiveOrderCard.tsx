@@ -28,7 +28,7 @@ export default function ActiveOrderCard() {
 
     if (loading) {
         return (
-            <div className="bg-white p-8 rounded-[20px] shadow-sm border border-slate-100 flex items-center justify-center h-48 animate-pulse">
+            <div className="bg-white p-8 rounded-[10px] shadow-sm border border-slate-100 flex items-center justify-center h-48 animate-pulse">
                 <div className="text-slate-400 text-xs font-bold uppercase tracking-widest">Loading Active Order...</div>
             </div>
         );
@@ -36,7 +36,7 @@ export default function ActiveOrderCard() {
 
     if (!activeOrder) {
         return (
-            <div className="bg-white p-8 rounded-[20px] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="bg-white p-8 rounded-[10px] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center space-y-4">
                 <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
                     <FaShoppingBag className="w-8 h-8" />
                 </div>
@@ -46,7 +46,7 @@ export default function ActiveOrderCard() {
                 </div>
                 <button
                     onClick={() => router.push('/products')}
-                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-colors"
+                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-colors"
                 >
                     Browse Products
                 </button>
@@ -95,7 +95,7 @@ export default function ActiveOrderCard() {
     const progress = currentStepIndex === -1 ? 100 : (currentStepIndex / (steps.length - 1)) * 100;
 
     return (
-        <div className="bg-white p-8 rounded-[20px] shadow-sm border border-slate-100 space-y-8">
+        <div className="bg-white p-8 rounded-[10px] shadow-sm border border-slate-100 space-y-8">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -149,9 +149,9 @@ export default function ActiveOrderCard() {
             </div>
 
             {/* Footer */}
-            <div className="bg-slate-50 rounded-xl p-4 flex items-center justify-between border border-slate-100">
+            <div className="bg-slate-50 rounded-[10px] p-4 flex items-center justify-between border border-slate-100">
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-slate-400 shadow-sm border border-slate-100">
+                    <div className="w-10 h-10 bg-white rounded-[10px] flex items-center justify-center text-slate-400 shadow-sm border border-slate-100">
                         <FaMapMarkerAlt className="w-4 h-4" />
                     </div>
                     <div>

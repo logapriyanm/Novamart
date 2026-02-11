@@ -2,15 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaCommentAlt, FaTimes, FaPaperPlane, FaUserCircle, FaStore, FaLock } from 'react-icons/fa';
-import io from 'socket.io-client';
-
-// Use current origin for socket if developing locally
-const socket = io(typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') : 'http://localhost:5000', {
-    auth: {
-        token: typeof window !== 'undefined' ? localStorage.getItem('token') : null
-    }
-});
+import { FaCommentAlt, FaTimes, FaPaperPlane, FaStore, FaLock } from 'react-icons/fa';
+import { Socket, io } from 'socket.io-client';
 
 interface Message {
     senderId: string;
@@ -27,24 +20,51 @@ export default function ChatWidget({ productId, dealerId, dealerName, contextTyp
     const [chatId, setChatId] = useState<string | null>(null);
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef<null | HTMLDivElement>(null);
+    const socketRef = useRef<Socket | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
 
+    // Lazy Socket Connection
     useEffect(() => {
-        if (isOpen && chatId) {
-            socket.emit('join-room', chatId);
+        if (typeof window !== 'undefined') {
+            const socketUrl = window.location.origin.replace('3000', '5000');
+            const token = localStorage.getItem('auth_token');
+
+            if (!socketRef.current) {
+                socketRef.current = io(socketUrl, {
+                    auth: { token },
+                    transports: ['websocket', 'polling']
+                });
+
+                socketRef.current.on('connect', () => {
+                    // Socket connected
+                });
+
+                socketRef.current.on('connect_error', (err) => {
+                    console.error('❌ Socket Connection Error:', err.message);
+                });
+
+                socketRef.current.on('chat:message', (msg: Message) => {
+                    setMessages(prev => [...prev, msg]);
+                });
+            }
         }
-    }, [isOpen, chatId]);
+
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
+        };
+    }, []);
 
     useEffect(() => {
-        const handleMessage = (msg: Message) => {
-            setMessages(prev => [...prev, msg]);
-        };
-        socket.on('chat:message', handleMessage);
-        return () => { socket.off('chat:message', handleMessage); };
-    }, []);
+        if (isOpen && chatId && socketRef.current) {
+            socketRef.current.emit('join-room', chatId);
+        }
+    }, [isOpen, chatId]);
 
     useEffect(scrollToBottom, [messages]);
 
@@ -53,7 +73,7 @@ export default function ChatWidget({ productId, dealerId, dealerName, contextTyp
         if (chatId) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('auth_token');
             const res = await fetch('/api/chat/create', {
                 method: 'POST',
                 headers: {
@@ -84,7 +104,7 @@ export default function ChatWidget({ productId, dealerId, dealerName, contextTyp
     };
 
     const sendMessage = () => {
-        if (!input.trim() || !chatId || sending) return;
+        if (!input.trim() || !chatId || sending || !socketRef.current) return;
 
         setSending(true);
         const payload = {
@@ -93,7 +113,7 @@ export default function ChatWidget({ productId, dealerId, dealerName, contextTyp
             messageType: 'TEXT'
         };
 
-        socket.emit('chat:message', payload);
+        socketRef.current.emit('chat:message', payload);
         setInput('');
         setTimeout(() => setSending(false), 500); // Debounce
     };
@@ -220,4 +240,3 @@ export default function ChatWidget({ productId, dealerId, dealerName, contextTyp
         </div>
     );
 }
-

@@ -1,4 +1,5 @@
 import { CustomOrderEscrow, CustomProductRequest, GroupParticipant, Dealer, Manufacturer } from '../models/index.js';
+import logger from '../lib/logger.js';
 import notificationService from '../services/notificationService.js';
 
 /**
@@ -113,7 +114,7 @@ export const createEscrow = async (req, res) => {
             message: 'Escrow created successfully'
         });
     } catch (error) {
-        console.error('Create Escrow Error:', error);
+        logger.error('Create Escrow Error:', error);
         res.status(500).json({
             success: false,
             error: 'ESCROW_CREATION_FAILED',
@@ -194,7 +195,7 @@ export const payAdvance = async (req, res) => {
             message: 'Advance payment recorded successfully'
         });
     } catch (error) {
-        console.error('Pay Advance Error:', error);
+        logger.error('Pay Advance Error:', error);
         res.status(500).json({
             success: false,
             error: 'PAYMENT_FAILED',
@@ -283,7 +284,7 @@ export const payBalance = async (req, res) => {
             message: 'Balance payment recorded successfully'
         });
     } catch (error) {
-        console.error('Pay Balance Error:', error);
+        logger.error('Pay Balance Error:', error);
         res.status(500).json({
             success: false,
             error: 'PAYMENT_FAILED',
@@ -358,7 +359,7 @@ export const releaseToManufacturer = async (req, res) => {
             message: 'Payment released to manufacturer successfully'
         });
     } catch (error) {
-        console.error('Release Payment Error:', error);
+        logger.error('Release Payment Error:', error);
         res.status(500).json({
             success: false,
             error: 'RELEASE_FAILED',
@@ -400,7 +401,7 @@ export const getEscrowStatus = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Get Escrow Status Error:', error);
+        logger.error('Get Escrow Status Error:', error);
         res.status(500).json({
             success: false,
             error: 'FETCH_ESCROW_FAILED',

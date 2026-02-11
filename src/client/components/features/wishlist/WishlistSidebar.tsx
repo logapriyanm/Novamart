@@ -79,24 +79,12 @@ export default function WishlistSidebar() {
                 </Link>
             </div>
 
-            {/* Wishlist Overview */}
+            {/* Share / Team Access */}
             <div className="bg-black/5 rounded-[10px] p-6 border border-black/10">
-                <h3 className="font-black text-black text-[11px] uppercase tracking-widest italic mb-4">Wishlist Overview</h3>
-
-                <div className="space-y-3 mb-6">
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                        <span className="text-foreground/40 italic">Total Collections</span>
-                        <span className="text-black">4</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                        <span className="text-foreground/40 italic">Items Pending Dealer</span>
-                        <span className="text-black">8</span>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest pt-3 border-t border-black/10">
-                        <span className="text-foreground/40 italic">Estimated Total Value</span>
-                        <span className="text-black text-sm">$4,856.00</span>
-                    </div>
-                </div>
+                <h3 className="font-black text-black text-[11px] uppercase tracking-widest italic mb-2">Team Collection</h3>
+                <p className="text-[9px] text-foreground/40 font-black uppercase tracking-widest mb-6 leading-relaxed italic">
+                    Share this list with your procurement team for collaborative review.
+                </p>
 
                 <button
                     onClick={handleShare}

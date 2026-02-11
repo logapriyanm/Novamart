@@ -1,3 +1,5 @@
+import logger from '../lib/logger.js';
+
 /**
  * Specialized RBAC Middleware
  * @param {string[]} allowedRoles - Roles allowed (e.g., ADMIN, DEALER)

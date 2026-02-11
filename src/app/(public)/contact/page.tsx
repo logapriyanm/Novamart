@@ -54,7 +54,7 @@ export default function ContactPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl lg:text-7xl font-black text-foreground mb-6 tracking-tight leading-tight italic uppercase"
+                        className="text-3xl sm:text-5xl lg:text-7xl font-black text-foreground mb-6 tracking-tight leading-tight italic uppercase"
                     >
                         Let's Talk <span className="text-transparent bg-clip-text bg-gradient-to-r from-black to-foreground/60">Growth</span>
                     </motion.h1>
@@ -78,7 +78,7 @@ export default function ContactPage() {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.3 + (i * 0.1) }}
-                                    className="bg-white/60 backdrop-blur-md p-8 rounded-[10px] border border-black/10 group hover:border-black/30 transition-all"
+                                    className="bg-white/60 backdrop-blur-md p-6 xs:p-8 rounded-[10px] border border-black/10 group hover:border-black/30 transition-all"
                                 >
                                     <div className={`w-12 h-12 rounded-[5px] ${method.bg} ${method.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                                         <method.icon className="w-6 h-6" />
@@ -109,7 +109,7 @@ export default function ContactPage() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.4 }}
-                        className="lg:col-span-7 bg-white/80 backdrop-blur-2xl p-10 lg:p-14 rounded-[10px] border border-black/10 shadow-2xl shadow-black/5"
+                        className="lg:col-span-7 bg-white/80 backdrop-blur-2xl p-6 xs:p-10 lg:p-14 rounded-[10px] border border-black/10 shadow-2xl shadow-black/5"
                     >
                         <form className="space-y-8">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">

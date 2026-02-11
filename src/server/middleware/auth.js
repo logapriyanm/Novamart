@@ -15,7 +15,7 @@ const authenticate = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, getJwtSecret());
-        // console.log('DEBUG: Decoded token:', decoded);
+
 
         // 1. Verify User exists and is not suspended
         const user = await User.findById(decoded.id)
@@ -24,7 +24,7 @@ const authenticate = async (req, res, next) => {
             .populate('manufacturer');
 
         if (!user) {
-            console.log('DEBUG: User not found for ID:', decoded.id);
+            logger.warn('User not found for ID: %s', decoded.id);
             return res.status(401).json({ error: 'USER_NOT_FOUND' });
         }
 

@@ -5,7 +5,7 @@ import { FaArrowRight } from 'react-icons/fa';
 
 export default function RecommendedBanner() {
     return (
-        <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-slate-100 to-slate-200 p-8 md:p-12">
+        <div className="relative overflow-hidden rounded-[10px] bg-gradient-to-br from-slate-100 to-slate-200 p-8 md:p-12">
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 h-full">
                 <div className="max-w-lg space-y-6">
                     <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full">
@@ -19,15 +19,15 @@ export default function RecommendedBanner() {
                     </p>
 
                     <div className="flex gap-4 pt-4">
-                        <div className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
-                            <img src="https://images.unsplash.com/photo-1618384887929-16ec33caa9ea?q=80&w=100" alt="Mouse" className="w-12 h-12 rounded-lg object-cover" />
+                        <div className="flex items-center gap-3 bg-white p-3 rounded-[10px] shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1618384887929-16ec33caa9ea?q=80&w=100" alt="Mouse" className="w-12 h-12 rounded-[10px] object-cover" />
                             <div>
                                 <p className="text-xs font-black text-[#1E293B]">Ergo Pro Mouse</p>
                                 <p className="text-[10px] font-bold text-[#0F6CBD]">₹79.99</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
-                            <img src="https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=100" alt="Keyboard" className="w-12 h-12 rounded-lg object-cover" />
+                        <div className="flex items-center gap-3 bg-white p-3 rounded-[10px] shadow-sm">
+                            <img src="https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=100" alt="Keyboard" className="w-12 h-12 rounded-[10px] object-cover" />
                             <div>
                                 <p className="text-xs font-black text-[#1E293B]">Mechanical Keyboard</p>
                                 <p className="text-[10px] font-bold text-[#0F6CBD]">₹129.99</p>
@@ -37,7 +37,7 @@ export default function RecommendedBanner() {
                 </div>
 
                 {/* Banner Image / Right Side */}
-                <div className="relative w-full md:w-1/2 aspect-video md:aspect-auto md:h-64 rounded-xl overflow-hidden shadow-2xl skew-x-[-3deg] md:rotate-2 hover:rotate-0 transition-transform duration-500 border-4 border-white">
+                <div className="relative w-full md:w-1/2 aspect-video md:aspect-auto md:h-64 rounded-[10px] overflow-hidden shadow-2xl skew-x-[-3deg] md:rotate-2 hover:rotate-0 transition-transform duration-500 border-4 border-white">
                     <img
                         src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=800"
                         alt="Workspace Setup"

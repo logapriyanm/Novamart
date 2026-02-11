@@ -62,7 +62,7 @@ export default function DealerRelationshipPortal() {
 
             {/* Network Analytics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="bg-[#1E293B] rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+                <div className="bg-[#1E293B] rounded-[10px] p-10 text-white shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-[#10367D]/10 blur-2xl rounded-full" />
                     <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-8 opacity-60 flex items-center gap-3">
                         <FaStore className="w-4 h-4 text-[#10367D]" />
@@ -74,7 +74,7 @@ export default function DealerRelationshipPortal() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div className="bg-white rounded-[10px] p-10 border border-slate-100 shadow-sm flex flex-col justify-between">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
                         <FaChartLine className="w-4 h-4 text-emerald-500" />
                         Network Throughput
@@ -85,7 +85,7 @@ export default function DealerRelationshipPortal() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div className="bg-white rounded-[10px] p-10 border border-slate-100 shadow-sm flex flex-col justify-between">
                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
                         <FaStar className="w-4 h-4 text-amber-500" />
                         Ecosystem Trust
@@ -98,7 +98,7 @@ export default function DealerRelationshipPortal() {
             </div>
 
             {/* Dealer Directory */}
-            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
                     <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-widest">Authorized Dealer Ledger</h2>
                     <div className="flex items-center gap-3 text-[10px] font-black text-[#10367D] uppercase tracking-widest">
@@ -122,7 +122,7 @@ export default function DealerRelationshipPortal() {
                                 <tr key={dealer.id} className="hover:bg-slate-50 group transition-colors">
                                     <td className="px-10 py-6">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#10367D] group-hover:text-white transition-all">
+                                            <div className="w-12 h-12 rounded-[10px] bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-[#10367D] group-hover:text-white transition-all">
                                                 <FaStore className="w-5 h-5" />
                                             </div>
                                             <div>
@@ -142,7 +142,7 @@ export default function DealerRelationshipPortal() {
                                         <span className={`text-xs font-black ${parseFloat(dealer.returns) > 1 ? 'text-rose-500' : 'text-emerald-500'}`}>{dealer.returns}</span>
                                     </td>
                                     <td className="px-10 py-6 text-right">
-                                        <button className="w-10 h-10 rounded-xl bg-[#10367D]/5 text-[#10367D] flex items-center justify-center hover:bg-[#10367D] hover:text-white transition-all ml-auto focus:shadow-lg">
+                                        <button className="w-10 h-10 rounded-[10px] bg-[#10367D]/5 text-[#10367D] flex items-center justify-center hover:bg-[#10367D] hover:text-white transition-all ml-auto focus:shadow-lg">
                                             <FaChevronRight className="w-3 h-3" />
                                         </button>
                                     </td>

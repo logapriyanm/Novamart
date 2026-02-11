@@ -87,7 +87,7 @@ export default function DealerSubscriptionPage() {
             </div>
 
             {currentSub && (
-                <div className="bg-[#10367D] text-white p-8 rounded-[2.5rem] shadow-2xl shadow-[#10367D]/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
+                <div className="bg-[#10367D] text-white p-8 rounded-[10px] shadow-2xl shadow-[#10367D]/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                         {getIcon(currentSub.plan.name)}
                     </div>
@@ -118,11 +118,11 @@ export default function DealerSubscriptionPage() {
                     <div className="flex flex-col gap-3">
                         <button
                             onClick={handleCancel}
-                            className="px-8 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                            className="px-8 py-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-[10px] text-[10px] font-black uppercase tracking-widest transition-all"
                         >
                             Cancel Subscription
                         </button>
-                        <div className="bg-white/10 p-6 rounded-[2rem] flex items-center justify-center">
+                        <div className="bg-white/10 p-6 rounded-[10px] flex items-center justify-center">
                             {getIcon(currentSub.plan.name)}
                         </div>
                     </div>
@@ -136,7 +136,7 @@ export default function DealerSubscriptionPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        className={`relative bg-white rounded-[3rem] p-10 border hover:shadow-2xl transition-all duration-500 group ${currentSub?.planId === plan.id ? 'border-[#10367D] ring-8 ring-[#10367D]/5' : 'border-slate-100'
+                        className={`relative bg-white rounded-[10px] p-10 border hover:shadow-2xl transition-all duration-500 group ${currentSub?.planId === plan.id ? 'border-[#10367D] ring-8 ring-[#10367D]/5' : 'border-slate-100'
                             }`}
                     >
                         {plan.name === 'PRO' && (
@@ -145,7 +145,7 @@ export default function DealerSubscriptionPage() {
                             </div>
                         )}
 
-                        <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500 ${getColor(plan.name)}`}>
+                        <div className={`w-20 h-20 rounded-[10px] flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500 ${getColor(plan.name)}`}>
                             {getIcon(plan.name)}
                         </div>
 
@@ -158,11 +158,11 @@ export default function DealerSubscriptionPage() {
                         <div className="space-y-4 mb-10">
                             {/* Visual Benefits */}
                             <div className="grid grid-cols-2 gap-3 mb-6">
-                                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-100">
+                                <div className="p-3 rounded-[10px] bg-emerald-50 border border-emerald-100">
                                     <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest">Wholesale Off</p>
                                     <p className="text-lg font-black text-emerald-700">{plan.wholesaleDiscount}%</p>
                                 </div>
-                                <div className="p-3 rounded-2xl bg-blue-50 border border-blue-100">
+                                <div className="p-3 rounded-[10px] bg-blue-50 border border-blue-100">
                                     <p className="text-[8px] font-black text-blue-600 uppercase tracking-widest">Price Margin</p>
                                     <p className="text-lg font-black text-blue-700">+{plan.marginBoost}%</p>
                                 </div>
@@ -181,7 +181,7 @@ export default function DealerSubscriptionPage() {
                         <button
                             onClick={() => handleSubscribe(plan.id)}
                             disabled={currentSub?.planId === plan.id}
-                            className={`w-full py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${currentSub?.planId === plan.id
+                            className={`w-full py-5 rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] transition-all ${currentSub?.planId === plan.id
                                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                 : 'bg-black text-white hover:bg-[#10367D] shadow-xl hover:shadow-2xl shadow-black/5'
                                 }`}
@@ -192,12 +192,12 @@ export default function DealerSubscriptionPage() {
                 ))}
             </div>
 
-            <div className="mt-16 bg-white border border-slate-100 rounded-[2.5rem] p-10 flex items-center justify-between">
+            <div className="mt-16 bg-white border border-slate-100 rounded-[10px] p-10 flex items-center justify-between">
                 <div>
                     <h4 className="text-xl font-black text-[#1E293B] italic uppercase tracking-tight">Need a custom <span className="text-[#10367D]">Volume Plan?</span></h4>
                     <p className="text-sm font-bold text-slate-500 mt-2">Connecting high-volume distributors with manufacturing nodes directly.</p>
                 </div>
-                <button className="px-8 py-4 bg-[#10367D]/5 text-[#10367D] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#10367D]/10 transition-all border border-[#10367D]/10">
+                <button className="px-8 py-4 bg-[#10367D]/5 text-[#10367D] rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-[#10367D]/10 transition-all border border-[#10367D]/10">
                     Contact Node Admin
                 </button>
             </div>

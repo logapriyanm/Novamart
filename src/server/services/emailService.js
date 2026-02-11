@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import logger from '../lib/logger.js';
 
 // Create email transporter
 const createTransporter = () => {
@@ -28,13 +29,10 @@ const createTransporter = () => {
     }
 
     // Fallback: Logger transporter for development/testing
-    console.warn('⚠️ No email credentials found. Falling back to Logger transporter.');
+    logger.warn('No email credentials found. Falling back to mock transporter.');
     return {
         sendMail: async (options) => {
-            console.log('\n--- 📧 [MOCK EMAIL SENT] ---');
-            console.log(`To: ${options.to}`);
-            console.log(`Subject: ${options.subject}`);
-            console.log('----------------------------\n');
+            logger.info('[MOCK EMAIL] To: %s | Subject: %s', options.to, options.subject);
             return { messageId: `mock-${Date.now()}` };
         }
     };
@@ -296,10 +294,10 @@ export const sendEmail = async (to, template) => {
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent:', info.messageId);
+        logger.info('Email sent: %s', info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (error) {
-        console.error('Email send error:', error);
+        logger.error('Email send error:', error);
         return { success: false, error: error.message };
     }
 };
@@ -331,7 +329,7 @@ export const sendOrderConfirmation = async (order) => {
 
         return await sendEmail(customerEmail, template);
     } catch (error) {
-        console.error('Order confirmation email error:', error);
+        logger.error('Order confirmation email error:', error);
         return { success: false, error: error.message };
     }
 };
@@ -358,7 +356,7 @@ export const sendPaymentConfirmation = async (payment, order) => {
 
         return await sendEmail(customerEmail, template);
     } catch (error) {
-        console.error('Payment confirmation email error:', error);
+        logger.error('Payment confirmation email error:', error);
         return { success: false, error: error.message };
     }
 };

@@ -16,6 +16,8 @@ import {
     FaTimes,
     FaCheckCircle,
     FaInfoCircle,
+    FaStar,
+    FaStore
 } from 'react-icons/fa';
 import { WhiteCard, TrackingBadge, StatusBadge, Stepper } from '@/client/components/features/dashboard/DashboardUI';
 
@@ -28,9 +30,14 @@ export default function MyOrders() {
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
     const [isTrackingOpen, setIsTrackingOpen] = useState(false);
     const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+    const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [disputeReason, setDisputeReason] = useState('');
     const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
-    // const { showSnackbar } = useSnackbar();
+
+    const handleOpenReview = (order: any) => {
+        setSelectedOrder(order);
+        setIsReviewOpen(true);
+    };
 
     const fetchOrders = async () => {
         try {
@@ -46,6 +53,10 @@ export default function MyOrders() {
                 status: order.status,
                 currentStep: getStepFromStatus(order.status),
                 items: order.items.map((item: any) => `${item.linkedProduct?.name || 'Product'} (${item.quantity})`),
+                rawItems: order.items.map((item: any) => ({
+                    id: item.linkedProduct?._id || item.productId,
+                    name: item.linkedProduct?.name || 'Product'
+                })),
                 date: new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
             }));
 
@@ -128,7 +139,7 @@ export default function MyOrders() {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-lg bg-white rounded-[10px] shadow-2xl overflow-hidden"
                         >
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                                 <div>
@@ -143,7 +154,7 @@ export default function MyOrders() {
                                 <Stepper currentStep={getStepFromStatus(selectedOrder.status)} />
 
                                 {selectedOrder.shipmentTracking && (
-                                    <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100/50 flex items-center justify-between">
+                                    <div className="p-6 bg-blue-50/50 rounded-[10px] border border-blue-100/50 flex items-center justify-between">
                                         <div>
                                             <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Carrier: {selectedOrder.shipmentTracking.carrier}</p>
                                             <p className="text-sm font-black text-slate-800 tracking-tight">ID: {selectedOrder.shipmentTracking.trackingNumber}</p>
@@ -182,7 +193,7 @@ export default function MyOrders() {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-lg bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-lg bg-white rounded-[10px] shadow-2xl overflow-hidden"
                         >
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                                 <div>
@@ -194,7 +205,7 @@ export default function MyOrders() {
                                 </button>
                             </div>
                             <div className="p-8 space-y-6">
-                                <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100 flex items-start gap-4">
+                                <div className="p-6 bg-amber-50 rounded-[10px] border border-amber-100 flex items-start gap-4">
                                     <FaInfoCircle className="text-amber-600 shrink-0 mt-1" />
                                     <p className="text-xs font-bold text-amber-700 leading-relaxed">
                                         Submitting a return request will freeze the payment in escrow. Our team will review your reason and evidence to process the refund.
@@ -206,18 +217,36 @@ export default function MyOrders() {
                                         value={disputeReason}
                                         onChange={(e) => setDisputeReason(e.target.value)}
                                         placeholder="Please describe why you want to return this product (e.g. wrong item, damaged, not as described)..."
-                                        className="w-full p-6 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[150px] transition-all"
+                                        className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[150px] transition-all"
                                     />
                                 </div>
                                 <button
                                     onClick={submitDispute}
                                     disabled={isSubmittingDispute}
-                                    className="w-full py-5 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10 hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
+                                    className="w-full py-5 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10 hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
                                 >
                                     {isSubmittingDispute ? 'Submitting...' : 'Submit Return Request'}
                                 </button>
                             </div>
                         </motion.div>
+                    </div>
+                )}
+                {/* Review & Rating Modal */}
+                {isReviewOpen && selectedOrder && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            onClick={() => setIsReviewOpen(false)}
+                            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+                        />
+                        <ReviewModal
+                            order={selectedOrder}
+                            onClose={() => setIsReviewOpen(false)}
+                            onSuccess={() => {
+                                setIsReviewOpen(false);
+                                fetchOrders();
+                            }}
+                        />
                     </div>
                 )}
             </AnimatePresence>
@@ -242,7 +271,7 @@ export default function MyOrders() {
                     <input
                         type="text"
                         placeholder="Search by Order ID or Item..."
-                        className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white transition-all"
+                        className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-[10px] text-xs font-bold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white transition-all"
                     />
                 </div>
                 {[
@@ -250,12 +279,12 @@ export default function MyOrders() {
                     { label: 'Date: Last 30 Days' },
                     { label: 'Dealer: All Dealers' },
                 ].map((filter, i) => (
-                    <button key={i} className="px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-3 text-xs font-black text-slate-600 hover:bg-white hover:shadow-sm transition-all">
+                    <button key={i} className="px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-[10px] flex items-center gap-3 text-xs font-black text-slate-600 hover:bg-white hover:shadow-sm transition-all">
                         {filter.label}
                         <ChevronDown className="w-3 h-3 text-slate-400" />
                     </button>
                 ))}
-                <button className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center hover:bg-black transition-all">
+                <button className="w-12 h-12 bg-slate-900 text-white rounded-[10px] flex items-center justify-center hover:bg-black transition-all">
                     <Filter className="w-4 h-4" />
                 </button>
             </WhiteCard>
@@ -263,14 +292,14 @@ export default function MyOrders() {
             {/* Orders List */}
             <div className="space-y-8">
                 {orders.length === 0 ? (
-                    <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-3xl">No orders found. Start shopping!</div>
+                    <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-[10px]">No orders found. Start shopping!</div>
                 ) : orders.map((order) => (
                     <WhiteCard key={order.id} className="p-0 border-none shadow-xl shadow-blue-600/5 overflow-hidden">
                         <div className="p-8 space-y-8">
                             {/* Card Header */}
                             <div className="flex flex-wrap justify-between items-start gap-6">
                                 <div className="flex items-center gap-5">
-                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${order.status === 'CANCELLED' ? 'bg-slate-100' : 'bg-blue-50'} border border-slate-100`}>
+                                    <div className={`w-14 h-14 rounded-[10px] flex items-center justify-center ${order.status === 'CANCELLED' ? 'bg-slate-100' : 'bg-blue-50'} border border-slate-100`}>
                                         <Package className={`w-6 h-6 ${order.status === 'CANCELLED' ? 'text-slate-400' : 'text-blue-600'}`} />
                                     </div>
                                     <div>
@@ -306,7 +335,7 @@ export default function MyOrders() {
                             )}
 
                             {order.status === 'CANCELLED' && (
-                                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                                <div className="p-6 bg-slate-50 rounded-[10px] border border-slate-100 flex items-center justify-between">
                                     <p className="text-[11px] font-bold text-slate-500 italic">Canceled on {order.date}</p>
                                     <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Re-order Items</button>
                                 </div>
@@ -321,22 +350,32 @@ export default function MyOrders() {
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <button className="px-6 py-3 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
+                                    <button className="px-6 py-3 border border-slate-100 rounded-[10px] text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
                                         <Invoice className="w-3 h-3" /> Invoice
                                     </button>
-                                    <button onClick={() => handleTrackOrder(order.id)} className="px-6 py-3 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all">
+                                    <button onClick={() => handleTrackOrder(order.id)} className="px-6 py-3 border border-slate-100 rounded-[10px] text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all">
                                         View Details
                                     </button>
                                     {order.status !== 'CANCELLED' && order.status !== 'DISPUTED' && (
-                                        <button
-                                            onClick={order.status === 'DELIVERED' ? () => handleOpenDispute(order) : () => handleTrackOrder(order.id)}
-                                            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
-                                        >
-                                            {order.status === 'DELIVERED' ? 'Request Return' : 'Track Order'}
-                                        </button>
+                                        <div className="flex items-center gap-3">
+                                            {order.status === 'DELIVERED' && (
+                                                <button
+                                                    onClick={() => handleOpenReview(order)}
+                                                    className="px-6 py-3 bg-white border border-blue-600 text-blue-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition-all shadow-sm"
+                                                >
+                                                    Rate Items
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={order.status === 'DELIVERED' ? () => handleOpenDispute(order) : () => handleTrackOrder(order.id)}
+                                                className="px-6 py-3 bg-blue-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+                                            >
+                                                {order.status === 'DELIVERED' ? 'Request Return' : 'Track Order'}
+                                            </button>
+                                        </div>
                                     )}
                                     {order.status === 'DISPUTED' && (
-                                        <div className="px-6 py-3 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                                        <div className="px-6 py-3 bg-amber-50 text-amber-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest border border-amber-100">
                                             Return Requested
                                         </div>
                                     )}
@@ -354,8 +393,8 @@ export default function MyOrders() {
                     { title: 'Refund Policy', desc: 'You have 30 days from delivery to request a full refund for any item.', icon: Undo, link: 'View Policy', color: 'bg-slate-900 text-white dark-card' },
                     { title: 'Buyer Protection', desc: "Every purchase is secured by NovaMart's fraud protection program.", icon: Shield, link: 'Learn More', color: 'bg-amber-50 text-amber-700' },
                 ].map((item, i) => (
-                    <div key={i} className={`p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/2 space-y-6 ${item.color.includes('dark-card') ? 'bg-slate-900 text-white' : item.color.split(' ')[0] + ' bg-opacity-50'}`}>
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${item.color.includes('dark-card') ? 'bg-white/10' : item.color}`}>
+                    <div key={i} className={`p-8 rounded-[10px] border border-slate-100 shadow-xl shadow-blue-600/2 space-y-6 ${item.color.includes('dark-card') ? 'bg-slate-900 text-white' : item.color.split(' ')[0] + ' bg-opacity-50'}`}>
+                        <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${item.color.includes('dark-card') ? 'bg-white/10' : item.color}`}>
                             <item.icon className="w-5 h-5" />
                         </div>
                         <div className="space-y-2">
@@ -372,5 +411,164 @@ export default function MyOrders() {
                 ))}
             </div>
         </div>
+    );
+}
+
+function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () => void, onSuccess: () => void }) {
+    const [step, setStep] = useState(1); // 1: Products, 2: Seller
+    const [ratings, setRatings] = useState<any>({});
+    const [sellerRating, setSellerRating] = useState({ rating: 5, delivery: 5, packaging: 5, communication: 5, comment: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        try {
+            // 1. Submit Product Reviews
+            const productReviewPromises = order.rawItems.map((item: any, i: number) => {
+                if (!ratings[i]?.rating) return null;
+                return apiClient.post('/reviews/product', {
+                    productId: item.id,
+                    orderId: order.id,
+                    rating: ratings[i].rating,
+                    comment: ratings[i].comment
+                });
+            }).filter(Boolean);
+
+            // 2. Submit Seller Review
+            const sellerReviewPromise = apiClient.post('/reviews/seller', {
+                orderId: order.id,
+                dealerId: order.dealerId,
+                rating: sellerRating.rating,
+                delivery: sellerRating.delivery,
+                packaging: sellerRating.packaging,
+                communication: sellerRating.communication,
+                comment: sellerRating.comment
+            });
+
+            await Promise.all([...productReviewPromises, sellerReviewPromise]);
+
+            toast.success('Thank you for your feedback!');
+            onSuccess();
+        } catch (error) {
+            toast.error('Failed to submit reviews');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative w-full max-w-2xl bg-white rounded-[10px] shadow-2xl overflow-hidden"
+        >
+            <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                <div>
+                    <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">
+                        {step === 1 ? 'Rate Products' : `Rate ${order.dealer}`}
+                    </h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Order NM-{order.id.slice(0, 5).toUpperCase()}</p>
+                </div>
+                <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
+                    <FaTimes />
+                </button>
+            </div>
+
+            <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                {step === 1 ? (
+                    <div className="space-y-8">
+                        {order.items.map((item: string, i: number) => (
+                            <div key={i} className="p-6 bg-slate-50 rounded-[10px] border border-slate-100 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-xs font-black text-slate-800 italic uppercase">{item}</p>
+                                    <div className="flex gap-1">
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                            <button
+                                                key={star}
+                                                onClick={() => setRatings({ ...ratings, [i]: { ...ratings[i], rating: star } })}
+                                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${ratings[i]?.rating >= star ? 'bg-amber-400 text-white shadow-md' : 'bg-white text-slate-200'}`}
+                                            >
+                                                <FaStar className="w-3 h-3" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <textarea
+                                    placeholder="What did you like or dislike about this item?"
+                                    onChange={(e) => setRatings({ ...ratings, [i]: { ...ratings[i], comment: e.target.value } })}
+                                    className="w-full p-4 bg-white border border-slate-100 rounded-[10px] text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 min-h-[80px]"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="space-y-10">
+                        <div className="space-y-6">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-center">Overall Experience</h4>
+                            <div className="flex justify-center gap-4">
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <button
+                                        key={star}
+                                        onClick={() => setSellerRating({ ...sellerRating, rating: star })}
+                                        className={`w-14 h-14 rounded-[10px] flex items-center justify-center transition-all ${sellerRating.rating >= star ? 'bg-blue-600 text-white scale-110 shadow-xl' : 'bg-slate-50 text-slate-200'}`}
+                                    >
+                                        <FaStar className="w-6 h-6" />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {[
+                                { label: 'Delivery', key: 'delivery' },
+                                { label: 'Packaging', key: 'packaging' },
+                                { label: 'Support', key: 'communication' }
+                            ].map(sub => (
+                                <div key={sub.key} className="p-5 bg-slate-50 rounded-[10px] border border-slate-100 space-y-3">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">{sub.label}</p>
+                                    <div className="flex justify-center gap-1">
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                            <button
+                                                key={star}
+                                                onClick={() => setSellerRating({ ...sellerRating, [sub.key]: star })}
+                                                className={`transition-colors ${sellerRating[sub.key] >= star ? 'text-emerald-500' : 'text-slate-200'}`}
+                                            >
+                                                <FaStar className="w-3 h-3" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <textarea
+                            placeholder="Share your experience with the delivery and service..."
+                            value={sellerRating.comment}
+                            onChange={(e) => setSellerRating({ ...sellerRating, comment: e.target.value })}
+                            className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[120px] transition-all"
+                        />
+                    </div>
+                )}
+            </div>
+
+            <div className="p-8 border-t border-slate-50 flex gap-4">
+                {step === 2 && (
+                    <button
+                        onClick={() => setStep(1)}
+                        className="px-8 py-4 bg-slate-100 text-slate-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                    >
+                        Back
+                    </button>
+                )}
+                <button
+                    onClick={step === 1 ? () => setStep(2) : handleSubmit}
+                    disabled={isSubmitting}
+                    className="flex-1 py-4 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
+                >
+                    {isSubmitting ? 'Submitting...' : step === 1 ? 'Next: Rate Seller' : 'Submit Review'}
+                </button>
+            </div>
+        </motion.div>
     );
 }

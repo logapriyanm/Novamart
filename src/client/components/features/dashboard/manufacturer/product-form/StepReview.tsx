@@ -94,7 +94,7 @@ export default function StepReview() {
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Images ({productData.images.length})</p>
                     <div className="flex gap-2">
                         {productData.images.length > 0 ? productData.images.map((img, idx) => (
-                            <img key={idx} src={img} alt={`Product ${idx}`} className="w-16 h-16 object-cover rounded-lg border border-slate-200" />
+                            <img key={idx} src={img} alt={`Product ${idx}`} className="w-16 h-16 object-cover rounded-[10px] border border-slate-200" />
                         )) : <span className="text-xs text-slate-400 italic">No images uploaded.</span>}
                     </div>
                 </div>
@@ -114,7 +114,7 @@ export default function StepReview() {
             </div>
 
             {/* Compliance Section (Interactive) */}
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8">
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-8">
                 <div className="flex items-center gap-3 mb-6">
                     <FaShieldAlt className="w-5 h-5 text-[#0F6CBD]" />
                     <h3 className="text-sm font-black text-[#1E293B] uppercase tracking-widest">Compliance & Certifications</h3>
@@ -139,10 +139,10 @@ export default function StepReview() {
                                     updateProductData({ certifications: [...certs, cert] });
                                 }
                             }}
-                            className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${(productData.certifications || []).includes(cert) ? 'border-[#0F6CBD] bg-blue-50/50' : 'border-slate-100 hover:border-blue-200'
+                            className={`flex items-center gap-3 p-3 rounded-[10px] border-2 cursor-pointer transition-all ${(productData.certifications || []).includes(cert) ? 'border-[#0F6CBD] bg-blue-50/50' : 'border-slate-100 hover:border-blue-200'
                                 }`}
                         >
-                            <div className={`w-5 h-5 rounded flex items-center justify-center border ${(productData.certifications || []).includes(cert) ? 'bg-[#0F6CBD] border-[#0F6CBD] text-white' : 'border-slate-300 bg-white'
+                            <div className={`w-5 h-5 rounded-[10px] flex items-center justify-center border ${(productData.certifications || []).includes(cert) ? 'bg-[#0F6CBD] border-[#0F6CBD] text-white' : 'border-slate-300 bg-white'
                                 }`}>
                                 {(productData.certifications || []).includes(cert) && <FaCheckCircle className="w-3 h-3" />}
                             </div>
@@ -154,8 +154,8 @@ export default function StepReview() {
             </div>
 
             {/* Product Snapshot Card */}
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 flex flex-col md:flex-row gap-8 items-center md:items-start">
-                <div className="w-32 h-32 bg-slate-50 rounded-xl border border-slate-100 p-2 shrink-0 overflow-hidden">
+            <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-6 flex flex-col md:flex-row gap-8 items-center md:items-start">
+                <div className="w-32 h-32 bg-slate-50 rounded-[10px] border border-slate-100 p-2 shrink-0 overflow-hidden">
                     {productData.images[0] ? (
                         <img src={productData.images[0]} alt="Product Preview" className="w-full h-full object-contain" />
                     ) : (
@@ -166,7 +166,7 @@ export default function StepReview() {
                 </div>
 
                 <div className="flex-1 space-y-2">
-                    <span className="bg-blue-50 text-blue-600 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded">Draft Status</span>
+                    <span className="bg-blue-50 text-blue-600 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[10px]">Draft Status</span>
                     <h3 className="text-xl font-black text-[#1E293B]">{productData.name || 'Untitled Product'}</h3>
                     <p className="text-xs font-bold text-slate-500">Category: <span className="text-[#1E293B]">{productData.category || 'N/A'}</span></p>
                     <div className="pt-2">
@@ -179,13 +179,13 @@ export default function StepReview() {
             {/* Accordion Sections */}
             <div className="space-y-4">
                 {sections.map((section) => (
-                    <div key={section.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div key={section.id} className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                         <button
                             onClick={() => toggleSection(section.id)}
                             className="w-full flex items-center justify-between p-6 hover:bg-slate-50 transition-colors"
                         >
                             <div className="flex items-center gap-4">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${openSection === section.id ? 'bg-[#0F6CBD] text-white' : 'bg-blue-50 text-[#0F6CBD]'}`}>
+                                <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center ${openSection === section.id ? 'bg-[#0F6CBD] text-white' : 'bg-blue-50 text-[#0F6CBD]'}`}>
                                     <section.icon className="w-4 h-4" />
                                 </div>
                                 <span className={`text-sm font-black ${openSection === section.id ? 'text-[#0F6CBD]' : 'text-[#1E293B]'}`}>{section.id}</span>
@@ -214,7 +214,7 @@ export default function StepReview() {
             </div>
 
             {/* Info Box */}
-            <div className="bg-blue-50 rounded-2xl p-6 flex gap-4 border-l-4 border-[#0F6CBD]">
+            <div className="bg-blue-50 rounded-[10px] p-6 flex gap-4 border-l-4 border-[#0F6CBD]">
                 <FaInfoCircle className="w-5 h-5 text-[#0F6CBD] shrink-0 mt-0.5" />
                 <div>
                     <h4 className="text-xs font-black text-[#0F6CBD] mb-1">Review Timeline Notice</h4>

@@ -7,10 +7,11 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from '@/client/context/AuthContext';
 import { SidebarProvider } from '@/client/context/SidebarContext';
 import { CartProvider } from '@/client/context/CartContext';
-// import { SnackbarProvider } from '@/client/context/SnackbarContext';
+
 import { NotificationProvider } from '@/client/context/NotificationContext';
 import { TrackingProvider } from '@/client/context/TrackingContext';
 import FCMHandler from '@/client/components/utils/FCMHandler';
+import InstructionButton from '@/client/components/layout/InstructionButton';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -79,7 +80,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={inter.className}>
+            <body className={inter.className} suppressHydrationWarning>
 
                 <AuthProvider>
                     <TrackingProvider>
@@ -120,6 +121,7 @@ export default function RootLayout({
                                             <main className="relative z-10">
                                                 {children}
                                             </main>
+                                            <InstructionButton />
                                         </div>
                                         <Toaster richColors position="top-right" />
                                     </GoogleOAuthProvider>

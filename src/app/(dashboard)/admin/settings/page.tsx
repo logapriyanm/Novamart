@@ -66,7 +66,7 @@ export default function PlatformSettingsPortal() {
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="px-8 py-3 bg-[#10367D] text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-3"
+                        className="px-8 py-3 bg-[#10367D] text-white text-xs font-black uppercase tracking-widest rounded-[10px] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-3"
                     >
                         {isSaving ? 'Deploying Changes...' : 'Save System Parameters'}
                     </button>
@@ -76,7 +76,7 @@ export default function PlatformSettingsPortal() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 {/* Core System Toggles */}
                 <div className="lg:col-span-8 space-y-8">
-                    <div className="bg-white rounded-[3rem] p-10 lg:p-12 border border-slate-100 shadow-sm">
+                    <div className="bg-white rounded-[10px] p-10 lg:p-12 border border-slate-100 shadow-sm">
                         <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-[0.2em] mb-10 flex items-center gap-4">
                             <FaMicrochip className="text-[#10367D]" />
                             Operational Overrides
@@ -86,7 +86,7 @@ export default function PlatformSettingsPortal() {
                             {/* Maintenance Mode */}
                             <button
                                 onClick={() => toggleSetting('maintenanceMode')}
-                                className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4 text-left hover:bg-slate-100 transition-colors w-full"
+                                className="p-8 bg-slate-50 rounded-[10px] border border-slate-100 space-y-4 text-left hover:bg-slate-100 transition-colors w-full"
                             >
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xs font-black text-[#1E293B] uppercase tracking-widest">Maintenance Mode</h3>
@@ -100,7 +100,7 @@ export default function PlatformSettingsPortal() {
                             {/* Strict KYC */}
                             <button
                                 onClick={() => toggleSetting('strictKYC')}
-                                className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4 text-left hover:bg-slate-100 transition-colors w-full"
+                                className="p-8 bg-slate-50 rounded-[10px] border border-slate-100 space-y-4 text-left hover:bg-slate-100 transition-colors w-full"
                             >
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xs font-black text-[#1E293B] uppercase tracking-widest">Strict KYC Gate</h3>
@@ -114,7 +114,7 @@ export default function PlatformSettingsPortal() {
                             {/* Escrow Hold */}
                             <button
                                 onClick={() => toggleSetting('escrowHold')}
-                                className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4 text-left hover:bg-slate-100 transition-colors w-full"
+                                className="p-8 bg-slate-50 rounded-[10px] border border-slate-100 space-y-4 text-left hover:bg-slate-100 transition-colors w-full"
                             >
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xs font-black text-[#1E293B] uppercase tracking-widest">Escrow Hold-All</h3>
@@ -128,7 +128,7 @@ export default function PlatformSettingsPortal() {
                             {/* Debug Logging */}
                             <button
                                 onClick={() => toggleSetting('debugLogging')}
-                                className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4 text-left hover:bg-slate-100 transition-colors w-full"
+                                className="p-8 bg-slate-50 rounded-[10px] border border-slate-100 space-y-4 text-left hover:bg-slate-100 transition-colors w-full"
                             >
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xs font-black text-[#1E293B] uppercase tracking-widest">Debug Logging</h3>
@@ -141,16 +141,16 @@ export default function PlatformSettingsPortal() {
                         </div>
                     </div>
 
-                    <div className="bg-rose-50 rounded-[2.5rem] p-10 border border-rose-100 flex items-start gap-6">
-                        <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-600 flex-shrink-0">
+                    <div className="bg-rose-50 rounded-[10px] p-10 border border-rose-100 flex items-start gap-6">
+                        <div className="w-14 h-14 rounded-[10px] bg-rose-500/10 flex items-center justify-center text-rose-600 flex-shrink-0">
                             <FaExclamationTriangle className="w-7 h-7" />
                         </div>
                         <div>
                             <h4 className="text-sm font-black text-rose-800 uppercase tracking-widest mb-2">Destructive Protocol Center</h4>
                             <p className="text-[11px] font-bold text-rose-700 leading-relaxed mb-6">These actions affect the fundamental platform state and cannot be undone without manual database intervention.</p>
                             <div className="flex gap-4">
-                                <button onClick={() => toast.warning('Audit Buffer Flushed!')} className="px-6 py-3 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 active:scale-95 transition-all">Flush Audit Buffer</button>
-                                <button onClick={() => toast.warning('API Tokens Reset!')} className="px-6 py-3 bg-white border border-rose-200 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">Reset All API Tokens</button>
+                                <button onClick={() => toast.warning('Audit Buffer Flushed!')} className="px-6 py-3 bg-rose-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-600/20 active:scale-95 transition-all">Flush Audit Buffer</button>
+                                <button onClick={() => toast.warning('API Tokens Reset!')} className="px-6 py-3 bg-white border border-rose-200 text-rose-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">Reset All API Tokens</button>
                             </div>
                         </div>
                     </div>
@@ -158,7 +158,7 @@ export default function PlatformSettingsPortal() {
 
                 {/* API & Cloud Settings */}
                 <div className="lg:col-span-4 space-y-8">
-                    <div className="bg-[#1E293B] rounded-[3rem] p-10 text-white shadow-2xl overflow-hidden relative group">
+                    <div className="bg-[#1E293B] rounded-[10px] p-10 text-white shadow-2xl overflow-hidden relative group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-[#10367D]/10 blur-2xl rounded-full" />
                         <h3 className="text-sm font-black uppercase tracking-[0.2em] mb-10 opacity-60 flex items-center gap-3">
                             <FaNetworkWired className="w-4 h-4 text-[#10367D]" />
@@ -168,27 +168,27 @@ export default function PlatformSettingsPortal() {
                         <div className="space-y-8">
                             <div className="space-y-3">
                                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Escrow Gateway ID</label>
-                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 text-xs font-bold tracking-wider">
+                                <div className="p-4 bg-white/5 rounded-[10px] border border-white/10 text-xs font-bold tracking-wider">
                                     RZP_LIVE_9901_ZAA
                                 </div>
                             </div>
                             <div className="space-y-3">
                                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Auth Salt Level</label>
-                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                                <div className="flex items-center justify-between p-4 bg-white/5 rounded-[10px] border border-white/10">
                                     <span className="text-xs font-bold text-[#10367D]">RATING: PARANOID</span>
                                     <FaShieldAlt className="w-4 h-4 text-emerald-500" />
                                 </div>
                             </div>
                             <div className="space-y-3">
                                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">System Version</label>
-                                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 text-xs font-black text-[#10367D]">
+                                <div className="p-4 bg-white/5 rounded-[10px] border border-white/10 text-xs font-black text-[#10367D]">
                                     NovaMart Engine v4.8.2-Stable
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100">
+                    <div className="bg-white rounded-[10px] p-8 border border-slate-100">
                         <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">Database Health</h3>
                         <div className="space-y-4">
                             <div className="flex items-center justify-between text-[10px] font-bold">

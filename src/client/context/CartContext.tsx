@@ -170,7 +170,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
         try {
             await cartService.removeFromCart(cartItemId);
-            await cartService.removeFromCart(cartItemId);
             await fetchCart(); // Refresh cart
             toast.success('Item removed from cart');
         } catch (error) {

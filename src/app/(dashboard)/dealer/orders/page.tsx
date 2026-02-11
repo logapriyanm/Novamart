@@ -119,7 +119,7 @@ export default function DealerOrderManagement() {
                                 <button
                                     key={f}
                                     onClick={() => setFilter(f)}
-                                    className={`px-3 py-1.5 rounded-[6px] text-[10px] font-bold uppercase tracking-wide transition-all ${filter === f ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                    className={`px-3 py-1.5 rounded-[10px] text-[10px] font-bold uppercase tracking-wide transition-all ${filter === f ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                                 >
                                     {f}
                                 </button>
@@ -140,13 +140,13 @@ export default function DealerOrderManagement() {
                                 className={`p-5 hover:bg-slate-50 transition-all cursor-pointer flex items-center justify-between group ${selectedOrder?.id === order.id ? 'bg-indigo-50/10 border-l-4 border-l-indigo-600' : ''}`}
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-[8px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:scale-105 transition-all">
+                                    <div className="w-10 h-10 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:scale-105 transition-all">
                                         <FaBoxOpen className="w-4 h-4" />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h4 className="text-sm font-bold text-slate-900">{order.displayId}</h4>
-                                            <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-[4px] ${order.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>{order.status}</span>
+                                            <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-[10px] ${order.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>{order.status}</span>
                                         </div>
                                         <p className="text-xs font-medium text-slate-500 mt-0.5">{order.customer}</p>
                                     </div>
@@ -181,7 +181,7 @@ export default function DealerOrderManagement() {
                                     <h3 className="text-xl font-bold tracking-tight">{selectedOrder.displayId}</h3>
                                     <p className="text-xs text-slate-400 font-medium mt-1">Customer Transaction</p>
 
-                                    <div className="flex items-center gap-3 mt-6 p-3 bg-white/5 rounded-[8px] border border-white/10">
+                                    <div className="flex items-center gap-3 mt-6 p-3 bg-white/5 rounded-[10px] border border-white/10">
                                         <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white shrink-0">
                                             <FaUserCircle className="w-4 h-4" />
                                         </div>
@@ -197,12 +197,12 @@ export default function DealerOrderManagement() {
                                         <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center justify-between">
                                             <span>Shipping Destination</span>
                                         </h4>
-                                        <div className="bg-slate-50 p-4 rounded-[8px] border border-slate-200 text-xs font-medium text-slate-700 leading-relaxed">
+                                        <div className="bg-slate-50 p-4 rounded-[10px] border border-slate-200 text-xs font-medium text-slate-700 leading-relaxed">
                                             {selectedOrder.address}
                                         </div>
                                     </div>
 
-                                    <div className="p-4 bg-white border border-slate-200 rounded-[8px] space-y-3 shadow-sm">
+                                    <div className="p-4 bg-white border border-slate-200 rounded-[10px] space-y-3 shadow-sm">
                                         <div className="flex justify-between items-center text-xs text-slate-500">
                                             <span>Subtotal</span>
                                             <span className="font-semibold text-slate-900">{selectedOrder.totalFormatted}</span>
@@ -242,7 +242,7 @@ export default function DealerOrderManagement() {
                                     <button
                                         onClick={handleDispatch}
                                         disabled={selectedOrder.rawStatus !== 'PAID'}
-                                        className={`w-full py-3 rounded-[8px] font-bold text-xs uppercase tracking-wide shadow-sm transition-all flex items-center justify-center gap-2 ${selectedOrder.rawStatus === 'PAID'
+                                        className={`w-full py-3 rounded-[10px] font-bold text-xs uppercase tracking-wide shadow-sm transition-all flex items-center justify-center gap-2 ${selectedOrder.rawStatus === 'PAID'
                                             ? 'bg-slate-900 text-white hover:bg-slate-800'
                                             : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                                             }`}
@@ -253,7 +253,7 @@ export default function DealerOrderManagement() {
 
                                     <Link
                                         href={`/dealer/messages?chatId=${selectedOrder.id}`}
-                                        className="w-full py-3 bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600 rounded-[8px] uppercase tracking-wide hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                                        className="w-full py-3 bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600 rounded-[10px] uppercase tracking-wide hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
                                     >
                                         <FaCommentAlt className="w-3 h-3" />
                                         Chat with Customer
@@ -262,7 +262,7 @@ export default function DealerOrderManagement() {
                                     {selectedOrder.rawStatus === 'SHIPPED' && (
                                         <button
                                             onClick={handleSimulateDelivery}
-                                            className="w-full py-3 bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600 rounded-[8px] uppercase tracking-wide hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-3 bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600 rounded-[10px] uppercase tracking-wide hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
                                         >
                                             <FaTruck className="w-3 h-3 animate-pulse" />
                                             Simulate Journey (Dev)
@@ -271,7 +271,7 @@ export default function DealerOrderManagement() {
 
                                     <button
                                         onClick={handleInvoice}
-                                        className="w-full py-3 bg-white border border-slate-200 text-xs font-bold text-slate-600 rounded-[8px] uppercase tracking-wide hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                                        className="w-full py-3 bg-white border border-slate-200 text-xs font-bold text-slate-600 rounded-[10px] uppercase tracking-wide hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
                                     >
                                         <FaFileInvoice className="w-3 h-3" />
                                         Tax Invoice

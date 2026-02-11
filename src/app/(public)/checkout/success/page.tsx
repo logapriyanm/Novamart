@@ -129,7 +129,7 @@ export default function OrderSuccessPage() {
                                     transition={{ delay: idx * 0.1 }}
                                     className="flex items-start gap-8 relative z-10"
                                 >
-                                    <div className={`w-12 h-12 rounded-[5px] flex items-center justify-center shadow-sm border-2 transition-all ${item.status === 'completed' ? 'bg-black border-black text-white' :
+                                    <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center shadow-sm border-2 transition-all ${item.status === 'completed' ? 'bg-black border-black text-white' :
                                         item.status === 'active' ? 'bg-white border-black text-black' :
                                             'bg-white border-foreground/5 text-foreground/20'
                                         }`}>
@@ -155,7 +155,7 @@ export default function OrderSuccessPage() {
                             <div className="absolute right-0 top-0 w-40 h-40 bg-white/5 blur-3xl rounded-full -mr-20 -mt-20 group-hover:scale-125 transition-transform duration-700" />
 
                             <div className="flex items-center justify-between mb-8">
-                                <div className="w-14 h-14 bg-white/10 rounded-[5px] flex items-center justify-center">
+                                <div className="w-14 h-14 bg-white/10 rounded-[10px] flex items-center justify-center">
                                     <HiOutlineShieldCheck className="w-8 h-8" />
                                 </div>
                                 <div className="bg-white/10 px-4 py-1.5 rounded-full border border-white/20 text-[9px] font-black uppercase tracking-widest">
@@ -179,13 +179,13 @@ export default function OrderSuccessPage() {
                         {/* Actions */}
                         <div className="grid grid-cols-2 gap-4">
                             <button className="bg-white border border-foreground/5 p-6 rounded-[10px] flex flex-col items-center justify-center gap-3 hover:bg-surface transition-all group">
-                                <div className="p-3 rounded-[5px] bg-foreground/5 text-foreground/40 group-hover:bg-foreground/10 group-hover:text-foreground transition-all">
+                                <div className="p-3 rounded-[10px] bg-foreground/5 text-foreground/40 group-hover:bg-foreground/10 group-hover:text-foreground transition-all">
                                     <HiOutlinePrinter className="w-5 h-5" />
                                 </div>
                                 <span className="text-[9px] font-black uppercase tracking-widest text-foreground/40">Download Receipt</span>
                             </button>
                             <button className="bg-white border border-foreground/5 p-6 rounded-[10px] flex flex-col items-center justify-center gap-3 hover:bg-surface transition-all group">
-                                <div className="p-3 rounded-[5px] bg-foreground/5 text-foreground/40 group-hover:bg-foreground/10 group-hover:text-foreground transition-all">
+                                <div className="p-3 rounded-[10px] bg-foreground/5 text-foreground/40 group-hover:bg-foreground/10 group-hover:text-foreground transition-all">
                                     <HiOutlineShare className="w-5 h-5" />
                                 </div>
                                 <span className="text-[9px] font-black uppercase tracking-widest text-foreground/40">Share Details</span>

@@ -131,7 +131,7 @@ export default function BestsellerSlider() {
     };
 
     return (
-        <section className="py-20 overflow-hidden relative min-h-[700px] flex flex-col justify-center">
+        <section className="py-0 overflow-hidden relative min-h-[600px] flex flex-col justify-center">
             <div className="max-w-[1600px] mx-auto px-8 w-full">
 
 

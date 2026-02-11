@@ -102,7 +102,7 @@ export default function OrderOversightPanel() {
                             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1.5">{stat.label}</p>
                             <h3 className="text-2xl font-bold text-slate-900">{stat.value}</h3>
                         </div>
-                        <div className={`w-10 h-10 rounded-[8px] ${stat.bg} ${stat.color} flex items-center justify-center`}>
+                        <div className={`w-10 h-10 rounded-[10px] ${stat.bg} ${stat.color} flex items-center justify-center`}>
                             <stat.icon className="w-5 h-5" />
                         </div>
                     </div>
@@ -124,10 +124,10 @@ export default function OrderOversightPanel() {
                                 placeholder="Search Orders..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-white border border-slate-200 rounded-[8px] py-2 pl-9 pr-4 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                                className="w-full bg-white border border-slate-200 rounded-[10px] py-2 pl-9 pr-4 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
                             />
                         </div>
-                        <button className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[8px] hover:bg-slate-800 transition-all shadow-sm">Filter</button>
+                        <button className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[10px] hover:bg-slate-800 transition-all shadow-sm">Filter</button>
                     </div>
                 </div>
 
@@ -163,7 +163,7 @@ export default function OrderOversightPanel() {
                                         {order.dealer?.businessName || 'Verified Seller'}
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-[4px] text-xs font-bold uppercase tracking-wide ${order.status === 'DELIVERED' || order.status === 'SHIPPED' ? 'bg-emerald-50 text-emerald-700' :
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-[10px] text-xs font-bold uppercase tracking-wide ${order.status === 'DELIVERED' || order.status === 'SHIPPED' ? 'bg-emerald-50 text-emerald-700' :
                                             order.status === 'CANCELLED' ? 'bg-rose-50 text-rose-700' :
                                                 'bg-blue-50 text-blue-700'
                                             }`}>
@@ -179,7 +179,7 @@ export default function OrderOversightPanel() {
                                             {order.status === 'PAID' && (
                                                 <button
                                                     onClick={() => handleUpdateStatus(order.id, 'SHIP')}
-                                                    className="w-8 h-8 rounded-[6px] bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                                                    className="w-8 h-8 rounded-[10px] bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                                                     title="Mark Shipped"
                                                 >
                                                     <FaShippingFast className="w-3.5 h-3.5" />
@@ -188,13 +188,13 @@ export default function OrderOversightPanel() {
                                             {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
                                                 <button
                                                     onClick={() => handleUpdateStatus(order.id, 'CANCEL')}
-                                                    className="w-8 h-8 rounded-[6px] bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                                                    className="w-8 h-8 rounded-[10px] bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                                                     title="Cancel Order"
                                                 >
                                                     <FaBan className="w-3.5 h-3.5" />
                                                 </button>
                                             )}
-                                            <button className="w-8 h-8 rounded-[6px] bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                                            <button className="w-8 h-8 rounded-[10px] bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-sm">
                                                 <FaEye className="w-3.5 h-3.5" />
                                             </button>
                                         </div>

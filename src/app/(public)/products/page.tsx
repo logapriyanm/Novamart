@@ -10,8 +10,9 @@ export async function generateMetadata(
     { searchParams }: Props,
     parent: ResolvingMetadata
 ): Promise<Metadata> {
-    const category = searchParams.cat as string;
-    const query = searchParams.q as string;
+    const sParams = await searchParams;
+    const category = sParams.cat as string;
+    const query = sParams.q as string;
 
     let title = 'Shop Quality Products | Wholesale & Retail – NovaMart';
     let description = 'Browse our extensive collection of high-quality products across various industrial and consumer categories. Secure payments and wholesale pricing.';
@@ -38,8 +39,9 @@ export async function generateMetadata(
     };
 }
 
-export default function ProductsPage({ searchParams }: Props) {
-    const category = searchParams.cat as string;
+export default async function ProductsPage({ searchParams }: Props) {
+    const sParams = await searchParams;
+    const category = sParams.cat as string;
     const description = category
         ? `Find the best deals on ${category} on NovaMart. Browse verified sellers and manufacturers for wholesale ${category}.`
         : 'Browse our extensive collection of high-quality products across various industrial and consumer categories.';

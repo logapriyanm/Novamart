@@ -41,7 +41,7 @@ export default function ManufacturerOrderControl() {
                 <div className="xl:col-span-7 bg-white rounded-[10px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                     <div className="p-6 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <span className="p-2 bg-white text-indigo-600 rounded-[8px] shadow-sm border border-slate-200">
+                            <span className="p-2 bg-white text-indigo-600 rounded-[10px] shadow-sm border border-slate-200">
                                 <FaIndustry className="w-4 h-4" />
                             </span>
                             <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wide">Distribution Ledger</h2>
@@ -62,7 +62,7 @@ export default function ManufacturerOrderControl() {
                                     <div>
                                         <div className="flex items-center gap-3">
                                             <h4 className="text-base font-bold text-slate-900">{order.id}</h4>
-                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-[4px] ${order.status === 'Payment Pending' ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-[10px] ${order.status === 'Payment Pending' ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
                                                 }`}>{order.status}</span>
                                         </div>
                                         <p className="text-xs font-medium text-slate-500 mt-1">{order.dealer} • {order.qty} Units</p>
@@ -92,7 +92,7 @@ export default function ManufacturerOrderControl() {
                                     {/* Mobile Back Button */}
                                     <button
                                         onClick={() => setSelectedOrder(null)}
-                                        className="absolute top-6 right-6 p-2 bg-white/10 rounded-full text-white xl:hidden hover:bg-white/20"
+                                        className="absolute top-6 right-6 p-2 bg-white/10 rounded-[10px] text-white xl:hidden hover:bg-white/20"
                                     >
                                         <FaTimesCircle className="w-5 h-5" />
                                     </button>
@@ -109,7 +109,7 @@ export default function ManufacturerOrderControl() {
                                                 <p className="text-lg font-bold text-white">{selectedOrder.total}</p>
                                             </div>
                                         </div>
-                                        <div className="w-8 h-8 rounded-[8px] bg-white/10 flex items-center justify-center">
+                                        <div className="w-8 h-8 rounded-[10px] bg-white/10 flex items-center justify-center">
                                             <FaInfoCircle className="text-slate-300 w-4 h-4" />
                                         </div>
                                     </div>
@@ -128,7 +128,7 @@ export default function ManufacturerOrderControl() {
                                                 <p className="text-sm font-semibold text-slate-900">Remittance_Advice_4401.pdf</p>
                                                 <p className="text-xs text-slate-500 mt-0.5">Uploaded Feb 06, 14:24</p>
                                             </div>
-                                            <button className="px-4 py-2 bg-white border border-slate-200 text-xs font-semibold text-indigo-600 uppercase tracking-wide rounded-[8px] shadow-sm hover:bg-slate-50 transition-all">View Full Scan</button>
+                                            <button className="px-4 py-2 bg-white border border-slate-200 text-xs font-semibold text-indigo-600 uppercase tracking-wide rounded-[10px] shadow-sm hover:bg-slate-50 transition-all">View Full Scan</button>
                                         </div>
                                     </div>
 

@@ -45,12 +45,12 @@ export default function CartPage() {
 
     return (
         <div className="min-h-screen pt-24 pb-24 bg-background">
-            <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+            <div className="max-w-[1400px] mx-auto px-4 xs:px-6 lg:px-12">
                 <div className="flex items-end justify-between mb-8">
                     <div>
-                        <h1 className="text-5xl font-black text-foreground tracking-tight flex items-baseline gap-4 leading-none">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground tracking-tight flex items-baseline gap-2 sm:gap-4 leading-none">
                             Your Cart
-                            <span className="text-foreground/20 text-xl font-bold">({cart.length} Items)</span>
+                            <span className="text-foreground/20 text-base sm:text-xl font-bold">({cart.length})</span>
                         </h1>
                     </div>
                     <button
@@ -61,7 +61,7 @@ export default function CartPage() {
                     </button>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 items-start">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-12 items-start">
                     {/* Cart Items List */}
                     <div className="xl:col-span-8 space-y-4">
                         <AnimatePresence mode="popLayout">
@@ -72,7 +72,7 @@ export default function CartPage() {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    className="bg-white rounded-[10px] p-6 lg:p-8 border border-foreground/[0.03] shadow-sm flex flex-col md:flex-row gap-8 items-center group hover:border-black/20 transition-all"
+                                    className="bg-white rounded-[10px] p-4 xs:p-6 lg:p-8 border border-foreground/[0.03] shadow-sm flex flex-col md:flex-row gap-6 md:gap-8 items-center group hover:border-black/20 transition-all"
                                 >
                                     {/* Product Image */}
                                     <div className="w-40 h-40 bg-background rounded-[10px] p-4 flex-shrink-0 flex items-center justify-center relative overflow-hidden">
@@ -86,20 +86,20 @@ export default function CartPage() {
                                             <div className="flex flex-col md:flex-row md:items-center gap-3 justify-center md:justify-start">
                                                 <h3 className="text-2xl font-black text-foreground tracking-tight italic uppercase">{item.name}</h3>
                                                 <div className="flex items-center gap-2 justify-center md:justify-start">
-                                                    <div className="bg-black/5 text-black px-2.5 py-1 rounded-[5px] text-[9px] font-black uppercase tracking-[0.1em] border border-black/10 flex items-center gap-1.5">
+                                                    <div className="bg-black/5 text-black px-2 py-0.5 xs:px-2.5 xs:py-1 rounded-[10px] text-[8px] xs:text-[9px] font-black uppercase tracking-[0.1em] border border-black/10 flex items-center gap-1.5">
                                                         <HiOutlineCheckCircle className="w-3 h-3" />
-                                                        Dealer: {item.sellerName}
+                                                        {item.sellerName}
                                                     </div>
-                                                    <div className="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-[5px] text-[9px] font-black uppercase tracking-[0.1em] border border-emerald-100 flex items-center gap-1.5">
+                                                    <div className="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-[10px] text-[9px] font-black uppercase tracking-[0.1em] border border-emerald-100 flex items-center gap-1.5">
                                                         <HiOutlineShieldCheck className="w-3 h-3" />
                                                         Escrow Protected
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                                                <span className="text-[10px] font-black text-foreground/20 uppercase tracking-[0.15em] py-1 px-3 border border-foreground/5 rounded-[5px]">Official Dealer</span>
+                                                <span className="text-[10px] font-black text-foreground/20 uppercase tracking-[0.15em] py-1 px-3 border border-foreground/5 rounded-[10px]">Official Dealer</span>
                                                 {item.quantity >= 10 && (
-                                                    <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.15em] py-1 px-3 border border-black/10 rounded-[5px]">Wholesale Volume</span>
+                                                    <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.15em] py-1 px-3 border border-black/10 rounded-[10px]">Wholesale Volume</span>
                                                 )}
                                             </div>
                                         </div>
@@ -141,9 +141,9 @@ export default function CartPage() {
                                     </div>
 
                                     {/* Final Price for Item */}
-                                    <div className="md:text-right md:min-w-[120px]">
-                                        <p className="text-3xl font-black text-black tracking-tight italic">
-                                            ₹{(item.price * item.quantity).toLocaleString()}.00
+                                    <div className="md:text-right md:min-w-[120px] w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-foreground/[0.03]">
+                                        <p className="text-2xl sm:text-3xl font-black text-black tracking-tight italic">
+                                            ₹{(item.price * item.quantity).toLocaleString()}
                                         </p>
                                     </div>
                                 </motion.div>
@@ -153,8 +153,8 @@ export default function CartPage() {
 
                     {/* Order Summary Sidebar */}
                     <div className="xl:col-span-4 lg:sticky lg:top-32 space-y-6">
-                        <div className="bg-white rounded-[10px] p-8 lg:p-10 border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02]">
-                            <h3 className="text-2xl font-black text-foreground mb-8 tracking-tight italic uppercase">Order Summary</h3>
+                        <div className="bg-white rounded-[10px] p-6 xs:p-8 lg:p-10 border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02]">
+                            <h3 className="text-xl sm:text-2xl font-black text-foreground mb-6 xs:mb-8 tracking-tight italic uppercase">Order Summary</h3>
 
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between items-center">
@@ -163,23 +163,21 @@ export default function CartPage() {
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[11px] font-black text-foreground/40 uppercase tracking-[0.15em]">Shipping Estimate</span>
-                                    <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-[5px] uppercase tracking-[0.15em]">Free</span>
+                                    <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-[10px] uppercase tracking-[0.15em]">Free</span>
                                 </div>
                                 <div className="flex justify-between items-center pb-6 border-b border-foreground/[0.03]">
                                     <span className="text-[11px] font-black text-foreground/40 uppercase tracking-[0.15em]">Tax Estimate</span>
                                     <span className="text-lg font-black text-foreground">₹{taxEstimate.toLocaleString()}.00</span>
                                 </div>
 
-                                <div className="pt-2 flex justify-between items-center">
-                                    <div className="space-y-1">
-                                        <span className="text-2xl font-black text-foreground tracking-tight uppercase italic">Total</span>
-                                        <div className="flex items-center gap-1.5 text-foreground/20">
-                                            <HiOutlineShieldCheck className="w-4 h-4" />
-                                            <span className="text-[9px] font-black uppercase tracking-widest">Protected by Escrow Service</span>
-                                        </div>
+                                <div className="space-y-1">
+                                    <span className="text-xl sm:text-2xl font-black text-foreground tracking-tight uppercase italic">Total</span>
+                                    <div className="hidden sm:flex items-center gap-1.5 text-foreground/20">
+                                        <HiOutlineShieldCheck className="w-4 h-4" />
+                                        <span className="text-[9px] font-black uppercase tracking-widest">Protected by Escrow Service</span>
                                     </div>
-                                    <span className="text-4xl font-black text-black tracking-tight">₹{finalTotal.toLocaleString()}.00</span>
                                 </div>
+                                <span className="text-3xl sm:text-4xl font-black text-black tracking-tight">₹{finalTotal.toLocaleString()}</span>
                             </div>
 
                             <Link href="/checkout">
@@ -195,17 +193,17 @@ export default function CartPage() {
                             <div className="mt-8 pt-8 border-t border-foreground/[0.03]">
                                 <p className="text-center text-[9px] font-bold text-foreground/30 uppercase tracking-[0.15em] mb-6">Guaranteed safe & secure checkout</p>
                                 <div className="flex justify-center gap-6 opacity-30 grayscale hover:grayscale-0 transition-all cursor-default">
-                                    <div className="w-10 h-10 bg-surface rounded-[5px] flex items-center justify-center"><HiOutlineShieldCheck className="w-6 h-6" /></div>
-                                    <div className="w-10 h-10 bg-surface rounded-[5px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">SSL</div>
-                                    <div className="w-10 h-10 bg-surface rounded-[5px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">PCI</div>
-                                    <div className="w-10 h-10 bg-surface rounded-[5px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">AES</div>
+                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center"><HiOutlineShieldCheck className="w-6 h-6" /></div>
+                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">SSL</div>
+                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">PCI</div>
+                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">AES</div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Info Box */}
-                        <div className="bg-black/5 rounded-[10px] p-10 border border-foreground/5 flex gap-6">
-                            <div className="w-12 h-12 bg-black/10 rounded-[5px] flex items-center justify-center text-black shrink-0">
+                        <div className="bg-black/5 rounded-[10px] p-6 xs:p-10 border border-foreground/5 flex gap-4 xs:gap-6">
+                            <div className="w-12 h-12 bg-black/10 rounded-[10px] flex items-center justify-center text-black shrink-0">
                                 <HiOutlineInformationCircle className="w-7 h-7" />
                             </div>
                             <div className="space-y-3">

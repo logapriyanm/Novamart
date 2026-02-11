@@ -151,7 +151,7 @@ export const createCustomRequest = async (req, res) => {
             message: 'Custom product request created successfully'
         });
     } catch (error) {
-        console.error('Create Custom Request Error:', error);
+        logger.error('Create Custom Request Error:', error);
         res.status(500).json({
             success: false,
             error: 'REQUEST_CREATION_FAILED',
@@ -254,7 +254,7 @@ export const getRequestDetails = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Get Request Details Error:', error);
+        logger.error('Get Request Details Error:', error);
         res.status(500).json({
             success: false,
             error: 'FETCH_REQUEST_FAILED',
@@ -315,7 +315,7 @@ export const updateRequest = async (req, res) => {
             message: 'Custom request updated successfully'
         });
     } catch (error) {
-        console.error('Update Request Error:', error);
+        logger.error('Update Request Error:', error);
         res.status(500).json({
             success: false,
             error: 'UPDATE_FAILED',
@@ -425,7 +425,7 @@ export const getIncomingRequests = async (req, res) => {
             data: requests
         });
     } catch (error) {
-        console.error('Get Incoming Requests Error:', error);
+        logger.error('Get Incoming Requests Error:', error);
         res.status(500).json({
             success: false,
             error: 'FETCH_REQUESTS_FAILED',
@@ -534,7 +534,7 @@ export const respondToRequest = async (req, res) => {
             message: accepted ? 'Request approved successfully' : 'Request rejected'
         });
     } catch (error) {
-        console.error('Respond to Request Error:', error);
+        logger.error('Respond to Request Error:', error);
         res.status(500).json({
             success: false,
             error: 'RESPONSE_FAILED',
@@ -671,7 +671,7 @@ export const getMilestones = async (req, res) => {
             data: milestones
         });
     } catch (error) {
-        console.error('Get Milestones Error:', error);
+        logger.error('Get Milestones Error:', error);
         res.status(500).json({
             success: false,
             error: 'FETCH_MILESTONES_FAILED',

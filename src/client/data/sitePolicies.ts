@@ -92,16 +92,95 @@ export const policyContent = {
         `
     },
     'terms-of-service': {
-        title: 'Terms of Service',
+        title: 'Platform Terms of Service',
         content: `
-            <h3 class="text-lg font-bold mb-2">Platform Usage Terms</h3>
-            <p class="mb-4">By accessing NovaMart, you agree to these terms.</p>
-            <ul class="list-disc pl-5 space-y-2">
-                <li><strong>Eligibility:</strong> You must be a registered business entity to use B2B features.</li>
-                <li><strong>Account Security:</strong> You are responsible for maintaining the confidentiality of your credentials.</li>
-                <li><strong>Prohibited Items:</strong> Listing of illegal, counterfeit, or hazardous goods is strictly banned.</li>
-                <li><strong>Termination:</strong> We reserve the right to suspend accounts violating our policies.</li>
-            </ul>
+            <div class="space-y-6">
+                <p class="italic font-bold text-foreground/80 mb-6 text-sm">Welcome to NovaMart. These general terms apply to all participants in our ecosystem to ensure safe and transparent trade.</p>
+                
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">1. Fair Usage Policy</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Users must maintain a high standard of professional conduct. Any attempt to circumvent platform escrow or messaging systems will lead to account suspension."</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">2. Account Responsibility</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"You are responsible for all activity on your account. Credentials must be stored securely and never shared with unauthorized third parties."</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">3. Privacy & Compliance</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"We adhere to strict data localization and protection laws. By using the platform, you agree to our data processing frameworks for order fulfillment."</p>
+                </div>
+            </div>
+        `
+    },
+    'terms-manufacturer': {
+        title: 'Manufacturer Governance Agreement',
+        content: `
+            <div class="space-y-6">
+                <p class="italic font-bold text-foreground/80 mb-6 text-sm">As a Manufacturer on NovaMart, you are the backbone of our supply chain. These terms govern your production and listing standards.</p>
+                
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">1. Inventory Authenticity</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Manufacturers must only list authentic, certified goods. Listing of counterfeit or substandard items results in immediate permanent ban and forfeiture of pending escrow."</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">2. Production SLAs</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"You agree to acknowledge orders within 24 hours and ship within the timeline specified in your product listing. Frequent delays impact your trust score."</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">3. Quality Assurance</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"All items must meet BIS/ISO standards as mentioned. You are responsible for return costs if a manufacturing defect is verified by an auditor."</p>
+                </div>
+            </div>
+        `
+    },
+    'terms-dealer': {
+        title: 'Dealer Distribution Agreement',
+        content: `
+            <div class="space-y-6">
+                <p class="italic font-bold text-foreground/80 mb-6 text-sm">Dealers act as our trusted retail partners. These terms ensure fair distribution and customer service standards.</p>
+                
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">1. Retail Pricing Integrity</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Dealers must adhere to MSRP guidelines set by manufacturers. Predatory pricing or price-gouging during shortages is strictly prohibited."</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">2. Allocation Management</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Allocated inventory must be moved efficiently. Reselling NovaMart-allocated stock to unauthorized B2B entities is a violation of the partnership."</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">3. Post-Sale Support</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Dealers are the first point of contact for end-customers. You must handle initial returns and relay verified defects to the manufacturer through the portal."</p>
+                </div>
+            </div>
+        `
+    },
+    'terms-customer': {
+        title: 'Customer Purchase Agreement',
+        content: `
+            <div class="space-y-6">
+                <p class="italic font-bold text-foreground/80 mb-6 text-sm">Welcome to the NovaMart elite shopping experience. These terms protect your purchases and escrow safety.</p>
+                
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">1. Escrow Protection</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Your payments are kept in a secure escrow layer. Funds are only transferred to the seller after you confirm delivery and quality via the portal."</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">2. Refund Eligibility</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Refunds are guaranteed for damaged or incorrect goods if reported within 48 hours. 'Change of mind' returns are subject to a restocking fee."</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">3. Identity Verification</h4>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Individuals must provide accurate delivery information. Attempting to use fraudulent payment methods will result in immediate law enforcement reporting."</p>
+                </div>
+            </div>
         `
     },
     'refund-policy': {

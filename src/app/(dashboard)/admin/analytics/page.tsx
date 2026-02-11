@@ -30,7 +30,7 @@ const StrategicIntel = () => {
                         <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">Strategic <span className="text-[#10367D]">Intel</span></h1>
                         <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Macro-Economic Platform Health Analytics</p>
                     </div>
-                    <button className="px-6 py-3 bg-[#10367D] text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-2">
+                    <button className="px-6 py-3 bg-[#10367D] text-white text-[10px] font-black uppercase tracking-widest rounded-[10px] shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-2">
                         <FaSync className="w-3 h-3" />
                         Refresh Global Data
                     </button>
@@ -44,11 +44,11 @@ const StrategicIntel = () => {
                     { label: 'Merchant Growth', value: '542', change: '+9.4%', isUp: true },
                     { label: 'Dispute Ratio', value: '0.42%', change: '-0.02%', isUp: false },
                 ].map((stat) => (
-                    <div key={stat.label} className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm">
+                    <div key={stat.label} className="bg-white rounded-[10px] p-10 border border-slate-100 shadow-sm">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">{stat.label}</p>
                         <div className="flex items-end justify-between">
                             <h3 className="text-4xl font-black text-[#1E293B]">{stat.value}</h3>
-                            <div className={`flex items-center gap-1 text-[10px] font-black uppercase px-2 py-1 rounded-lg ${stat.isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                            <div className={`flex items-center gap-1 text-[10px] font-black uppercase px-2 py-1 rounded-[10px] ${stat.isUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
                                 {stat.isUp ? <FaArrowUp /> : <FaArrowDown />}
                                 {stat.change}
                             </div>
@@ -59,7 +59,7 @@ const StrategicIntel = () => {
 
             {/* Strategic Panels */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-8 bg-[#1E293B] rounded-[4rem] p-12 text-white relative overflow-hidden">
+                <div className="lg:col-span-8 bg-[#1E293B] rounded-[10px] p-12 text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-[#10367D]/20 blur-[100px] rounded-full" />
                     <div className="relative z-10 flex flex-col h-full justify-between gap-12">
                         <div>
@@ -78,7 +78,7 @@ const StrategicIntel = () => {
                                     initial={{ height: 0 }}
                                     animate={{ height: `${h}%` }}
                                     transition={{ delay: i * 0.05 }}
-                                    className="flex-1 bg-gradient-to-t from-[#10367D] to-blue-400 rounded-t-xl opacity-60 hover:opacity-100 transition-opacity"
+                                    className="flex-1 bg-gradient-to-t from-[#10367D] to-blue-400 rounded-t-[10px] opacity-60 hover:opacity-100 transition-opacity"
                                 />
                             ))}
                         </div>
@@ -97,7 +97,7 @@ const StrategicIntel = () => {
                 </div>
 
                 <div className="lg:col-span-4 space-y-8">
-                    <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm">
+                    <div className="bg-white rounded-[10px] p-10 border border-slate-100 shadow-sm">
                         <h3 className="text-sm font-black text-[#1E293B] uppercase tracking-widest mb-8 flex items-center gap-3">
                             <FaChartPie className="text-[#10367D]" />
                             Category Dominance
@@ -122,13 +122,13 @@ const StrategicIntel = () => {
                         </div>
                     </div>
 
-                    <div className="bg-[#10367D] rounded-[3.5rem] p-10 text-white shadow-2xl shadow-[#10367D]/30 flex flex-col items-center text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
+                    <div className="bg-[#10367D] rounded-[10px] p-10 text-white shadow-2xl shadow-[#10367D]/30 flex flex-col items-center text-center">
+                        <div className="w-16 h-16 rounded-[10px] bg-white/10 flex items-center justify-center mb-6">
                             <FaUserShield className="w-8 h-8" />
                         </div>
                         <h3 className="text-lg font-black tracking-tight mb-2">Platform Power Reserve</h3>
                         <p className="text-[10px] font-bold text-blue-200 leading-relaxed max-w-[200px] uppercase tracking-widest">Escrow Hold-Index is currently at 98% Safety Compliance.</p>
-                        <button className="mt-8 px-8 py-3 bg-white text-[#10367D] text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">Export Insight</button>
+                        <button className="mt-8 px-8 py-3 bg-white text-[#10367D] text-[10px] font-black uppercase tracking-widest rounded-[10px] hover:scale-105 transition-all">Export Insight</button>
                     </div>
                 </div>
             </div>

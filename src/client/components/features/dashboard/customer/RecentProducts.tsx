@@ -39,8 +39,8 @@ export default function RecentProducts() {
                 <div className="h-8 w-48 bg-slate-100 rounded animate-pulse" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 h-64 animate-pulse">
-                            <div className="h-40 bg-slate-100 rounded-xl mb-4" />
+                        <div key={i} className="bg-white p-4 rounded-[10px] shadow-sm border border-slate-100 h-64 animate-pulse">
+                            <div className="h-40 bg-slate-100 rounded-[10px] mb-4" />
                             <div className="h-4 w-3/4 bg-slate-100 rounded mb-2" />
                             <div className="h-4 w-1/2 bg-slate-100 rounded" />
                         </div>
@@ -63,8 +63,8 @@ export default function RecentProducts() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {products.map((product) => (
-                    <div key={product.id} className="bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 group hover:shadow-md transition-all">
-                        <div className="aspect-square bg-slate-50 rounded-xl mb-4 overflow-hidden relative">
+                    <div key={product.id} className="bg-white p-4 rounded-[10px] shadow-sm border border-slate-100 group hover:shadow-md transition-all">
+                        <div className="aspect-square bg-slate-50 rounded-[10px] mb-4 overflow-hidden relative">
                             {product.images && product.images[0] ? (
                                 <img
                                     src={product.images[0]}

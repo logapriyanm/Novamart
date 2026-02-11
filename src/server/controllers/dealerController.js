@@ -4,6 +4,7 @@
  */
 
 import dealerService from '../services/dealer.js';
+import logger from '../lib/logger.js';
 import stockAllocationService from '../services/stockAllocationService.js';
 import orderService from '../services/order.js';
 import auditService from '../services/audit.js';
@@ -293,7 +294,7 @@ export const getPublicDealerProfile = async (req, res) => {
             data: publicProfile
         });
     } catch (error) {
-        console.error('Error fetching dealer profile:', error);
+        logger.error('Error fetching dealer profile:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch dealer profile' });
     }
 };

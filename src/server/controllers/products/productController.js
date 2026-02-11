@@ -110,8 +110,11 @@ export const bulkImportProducts = async (req, res) => {
         const manufacturer = await Manufacturer.findOne({ userId: req.user.id });
         if (!manufacturer) return res.status(403).json({ error: 'Manufacturer profile not found' });
 
-        const created = await productService.bulkImport(manufacturer._id, req.body.products);
-        res.json({ success: true, message: `Successfully imported ${created.count} products`, count: created.count });
+        const shouldAutoApprove = manufacturer.isVerified === true;
+        const created = await productService.bulkImport(manufacturer._id, req.body.products, shouldAutoApprove);
+        const message = shouldAutoApprove ? `Successfully imported and published ${created.count} products` : `Successfully imported ${created.count} products (pending review)`;
+
+        res.json({ success: true, message, count: created.count });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
     }

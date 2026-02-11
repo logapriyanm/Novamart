@@ -6,6 +6,7 @@
 import crypto from 'crypto';
 import notificationService from '../../services/notificationService.js';
 import { User } from '../../models/index.js';
+import logger from '../../lib/logger.js';
 
 // In-memory or Redis-based OTP store (In-memory for simplicity in this project)
 const otpStore = new Map();
@@ -57,7 +58,7 @@ export const sendOTP = async (req, res) => {
         });
     } else {
         // For guest/new user OTP, log directly until registration
-        console.log(`[AUTH-GUEST] OTP for ${phone}: ${otp}`);
+        logger.debug('[AUTH-GUEST] OTP for %s: %s', phone, otp);
     }
 
     res.json({ success: true, message: 'OTP_SENT_SUCCESSFULLY', expiresAt: '5m' });

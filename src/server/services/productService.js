@@ -3,14 +3,12 @@
  * Logic for catalog management, search, and manufacturer offerings.
  */
 
+import mongoose from 'mongoose';
 import { Product, Manufacturer, Inventory, User, Review, AuditLog } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import logger from '../lib/logger.js';
 
 class ProductService {
-    /**
-     * Create a new product.
-     */
     /**
      * Create a new product.
      */
@@ -120,7 +118,7 @@ class ProductService {
             query.category = new RegExp(`^${category}$`, 'i');
         }
 
-        if (subCategory && subCategory !== 'all') {
+        if (subCategory && subCategory !== 'all' && subCategory !== 'null') {
             const normalizedSubCategory = subCategory.toLowerCase().replace(/\s+/g, '-');
             query.$or = [
                 { 'specifications.subCategory': subCategory },
@@ -168,7 +166,11 @@ class ProductService {
                 query.manufacturerId = { $in: manufacturerIds };
             } else if (Object.keys(mfgQuery).length > 0 || networkOnly === 'true') {
                 // Return empty if filters provided but no manufacturers match
-                return { products: [], pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 } };
+                return {
+                    products: [],
+                    pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 },
+                    debug: { query, rawCount: 0 }
+                };
             }
         }
 
@@ -269,8 +271,16 @@ class ProductService {
             ...product,
             id: product._id,
             manufacturer: product.manufacturerId,
-            inventory,
-            reviews
+            inventory: inventory.map(inv => ({
+                ...inv,
+                id: inv._id,
+                dealer: inv.dealerId
+            })),
+            reviews: reviews.map(rev => ({
+                ...rev,
+                id: rev._id,
+                customer: rev.customerId
+            }))
         };
 
         if (userId) {
@@ -298,10 +308,7 @@ class ProductService {
         }, { new: true });
     }
 
-    /**
-     * Manufacturer: Update product.
-     */
-    async updateProduct(id, manufacturerId, data) {
+    async updateProduct(id, manufacturerId, data, shouldAutoApprove = false) {
         const product = await Product.findById(id);
         if (!product || product.manufacturerId.toString() !== manufacturerId.toString()) {
             throw new Error('UNAUTHORIZED_PRODUCT_ACCESS');
@@ -316,8 +323,8 @@ class ProductService {
         if (basePrice) updateData.basePrice = parseFloat(basePrice);
         if (moq) updateData.moq = parseInt(moq);
 
-        // Reset to PENDING if critical fields change
-        if (product.status === 'APPROVED' && (updateData.basePrice !== product.basePrice || updateData.name !== product.name)) {
+        // Reset to PENDING if critical fields change AND manufacturer is NOT verified
+        if (!shouldAutoApprove && product.status === 'APPROVED' && (updateData.basePrice !== product.basePrice || updateData.name !== product.name)) {
             updateData.status = 'PENDING';
             updateData.isApproved = false;
         }
@@ -340,7 +347,8 @@ class ProductService {
     /**
      * Bulk Import.
      */
-    async bulkImport(manufacturerId, products) {
+    async bulkImport(manufacturerId, products, shouldAutoApprove = false) {
+        const initialStatus = shouldAutoApprove ? 'APPROVED' : 'PENDING';
         const validProducts = products.map(p => ({
             manufacturerId,
             name: p.name,
@@ -348,8 +356,8 @@ class ProductService {
             basePrice: parseFloat(p.basePrice) || 0,
             moq: parseInt(p.moq) || 1,
             category: p.category,
-            status: 'PENDING',
-            isApproved: false,
+            status: initialStatus,
+            isApproved: shouldAutoApprove,
             specifications: p.specifications || {},
             images: p.images || []
         }));
