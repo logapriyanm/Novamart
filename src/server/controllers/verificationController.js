@@ -1,17 +1,13 @@
-import prisma from '../lib/prisma.js';
+import { KYCDocument, User } from '../models/index.js';
 
 export const uploadDocument = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const { type } = req.body;
-
-        // In a real scenario, Multer would upload to Cloudinary/S3 and provide a URL.
-        // For this implementation, we might receive a URL directly or mocking the upload.
-        // Assuming the file middleware puts the file in req.file (if using multer)
+        const userId = req.user._id;
+        const role = req.user.role;
+        const { type, number } = req.body;
 
         let url = req.body.url;
         if (req.file) {
-            // Mocking file upload URL if local
             url = `/uploads/${req.file.filename}`;
         }
 
@@ -19,25 +15,31 @@ export const uploadDocument = async (req, res) => {
             return res.status(400).json({ message: 'Document URL or File is required' });
         }
 
-        const document = await prisma.document.create({
-            data: {
+        let kycDoc = await KYCDocument.findOne({ userId });
+        if (!kycDoc) {
+            kycDoc = new KYCDocument({
                 userId,
-                type,
-                url,
-                status: 'PENDING'
-            }
-        });
-
-        // Auto-update User status to UNDER_VERIFICATION if this is their first doc
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (user.status === 'PENDING') {
-            await prisma.user.update({
-                where: { id: userId },
-                data: { status: 'UNDER_VERIFICATION' }
+                role,
+                documents: []
             });
         }
 
-        res.status(201).json({ success: true, data: document });
+        kycDoc.documents.push({
+            type,
+            number: number || 'N/A',
+            fileUrl: url,
+            verified: false
+        });
+
+        await kycDoc.save();
+
+        const user = await User.findById(userId);
+        if (user.status === 'PENDING') {
+            user.status = 'UNDER_VERIFICATION';
+            await user.save();
+        }
+
+        res.status(201).json({ success: true, data: kycDoc });
     } catch (error) {
         console.error('Upload Error:', error);
         res.status(500).json({ message: 'Failed to upload document' });
@@ -46,12 +48,9 @@ export const uploadDocument = async (req, res) => {
 
 export const getMyDocuments = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const documents = await prisma.document.findMany({
-            where: { userId },
-            orderBy: { createdAt: 'desc' }
-        });
-        res.json({ success: true, data: documents });
+        const userId = req.user._id;
+        const kycDoc = await KYCDocument.findOne({ userId }).sort({ createdAt: -1 });
+        res.json({ success: true, data: kycDoc ? kycDoc.documents : [] });
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch documents' });
     }
@@ -59,30 +58,32 @@ export const getMyDocuments = async (req, res) => {
 
 export const verifyDocument = async (req, res) => {
     try {
-        const { documentId } = req.params;
-        const { status, feedback } = req.body; // status: VERIFIED | REJECTED
+        const { documentId, subDocId } = req.params; // Using params to identify specific doc in array
+        const { status, feedback } = req.body;
 
-        const document = await prisma.document.update({
-            where: { id: documentId },
-            data: {
-                status,
-                feedback
+        const kycDoc = await KYCDocument.findById(documentId);
+        if (!kycDoc) return res.status(404).json({ message: 'KYC Record not found' });
+
+        if (subDocId) {
+            const doc = kycDoc.documents.id(subDocId);
+            if (doc) {
+                doc.verified = status === 'VERIFIED';
             }
-        });
-
-        // Check if all Documents for this user are Verified
-        // If so, update User status to ACTIVE (Verified)
-        // This logic depends on required documents per Role.
-        // For MVP, we can just check if *any* doc is verified or all uploaded ones.
-
-        // Let's implement a simple check: If this doc is verified, check if user has other pending docs.
-
-        if (status === 'VERIFIED') {
-            // Emitting notification to user could happen here
         }
 
-        res.json({ success: true, data: document });
+        kycDoc.status = status;
+        // Optionally update individual doc status if needed
+        await kycDoc.save();
+
+        if (status === 'APPROVE' || status === 'APPROVED') {
+            // Logic to update User status to ACTIVE if all docs verified
+            // For now simple update
+            await User.findByIdAndUpdate(kycDoc.userId, { status: 'ACTIVE' });
+        }
+
+        res.json({ success: true, data: kycDoc });
     } catch (error) {
+        console.error('Verify Doc Error:', error);
         res.status(500).json({ message: 'Failed to verify document' });
     }
 };

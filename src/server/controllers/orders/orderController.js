@@ -1,17 +1,25 @@
 import orderService from '../../services/order.js';
 import logger from '../../lib/logger.js';
+import shipmentService from '../../services/shipmentService.js';
+import disputeService from '../../services/dispute.js';
+import { Customer } from '../../models/index.js';
 
 export const createOrder = async (req, res) => {
     try {
         const { dealerId, items, shippingAddress } = req.body;
-        const customerId = req.user?.customer?.id;
+        const userId = req.user._id;
+
+        // Ensure we have the customer profile _id
+        let customerId;
+        if (req.user.role === 'CUSTOMER') {
+            const customer = await Customer.findOne({ userId });
+            if (!customer) throw new Error('Customer profile required');
+            customerId = customer._id;
+        }
+
         if (!customerId) {
             return res.status(403).json({ success: false, error: 'Customer profile required for orders.' });
         }
-
-        // Items in req.body might be [{inventoryId, quantity}]
-        // OrderService.createOrder expects [{productId, quantity, price}]
-        // We might need a small shim or update OrderService to handle inventoryId
 
         const order = await orderService.createOrder(customerId, dealerId, items, shippingAddress);
         res.status(201).json({ success: true, data: order });
@@ -22,8 +30,8 @@ export const createOrder = async (req, res) => {
 
 export const getOrders = async (req, res) => {
     try {
-        const userRole = req.user?.role;
-        const userId = req.user?.id;
+        const userRole = req.user.role;
+        const userId = req.user._id;
         const orders = await orderService.getOrders(userRole, userId, req.query);
         res.json({ success: true, data: orders });
     } catch (error) {
@@ -33,7 +41,7 @@ export const getOrders = async (req, res) => {
 
 export const getMyOrders = async (req, res) => {
     try {
-        const userId = req.user?.id;
+        const userId = req.user._id;
         const orders = await orderService.getOrders('CUSTOMER', userId);
         res.json({ success: true, data: orders });
     } catch (error) {
@@ -44,8 +52,8 @@ export const getMyOrders = async (req, res) => {
 export const getOrderById = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user?.id;
-        const userRole = req.user?.role;
+        const userId = req.user._id;
+        const userRole = req.user.role;
         const order = await orderService.getOrderById(id, userId, userRole);
         res.json({ success: true, data: order });
     } catch (error) {
@@ -64,14 +72,11 @@ export const updateOrderStatus = async (req, res) => {
     }
 };
 
-import shipmentService from '../../services/shipmentService.js';
-import disputeService from '../../services/dispute.js';
-
 export const raiseDispute = async (req, res) => {
     try {
         const { id } = req.params;
         const { reason } = req.body;
-        const userId = req.user.id;
+        const userId = req.user._id;
 
         const dispute = await disputeService.raiseDispute(id, userId, {
             reason,
@@ -87,7 +92,6 @@ export const raiseDispute = async (req, res) => {
 export const simulateDelivery = async (req, res) => {
     try {
         const { id } = req.params;
-        // This is an async action that runs in background
         shipmentService.simulateJourney(id);
         res.json({ success: true, message: 'Delivery simulation started' });
     } catch (error) {

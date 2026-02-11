@@ -1,17 +1,14 @@
-import prisma from '../lib/prisma.js';
+import { User } from '../models/index.js';
 
 /**
  * Update FCM Token for Push Notifications
  */
 export const updateFCMToken = async (req, res) => {
     const { fcmToken } = req.body;
-    const userId = req.user.id; // From auth middleware
+    const userId = req.user._id;
 
     try {
-        await prisma.user.update({
-            where: { id: userId },
-            data: { fcmToken }
-        });
+        await User.findByIdAndUpdate(userId, { fcmToken });
 
         res.json({
             success: true,

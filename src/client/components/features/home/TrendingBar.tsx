@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { FaChevronRight as ChevronRight } from 'react-icons/fa';
+import { useAuth } from '../../../context/AuthContext';
 
 const categories = [
     { name: 'Air Conditioners', image: '/assets/trendingAppliance/Air-Conditionar.jpeg' },
@@ -13,11 +14,18 @@ const categories = [
     { name: 'Induction Cooktops', image: '/assets/trendingAppliance/Induction.jpg' },
     { name: 'Dishwashers', image: '/assets/trendingAppliance/Dishwasher.jpg' },
     { name: 'Air Purifiers', image: '/assets/trendingAppliance/Air-Purifiers.jpg' },
-    { name: 'Water Heaters', image: 'https://images.unsplash.com/photo-1595191830227-705914b03335?q=80&w=2070&auto=format&fit=crop' },
+    { name: 'Water Heaters', image: '/assets/trendingAppliance/Water_heater.jpg' },
     { name: 'Smart TVs', image: '/assets/trendingAppliance/TV.jpeg' },
 ];
 
 export default function TrendingBar() {
+    const { user, isLoading } = useAuth();
+
+    // Hide component strictly for logged-out users
+    // We wait for loading to finish to prevent content flash (optional, but good UX)
+    if (isLoading) return null;
+    if (!user) return null;
+
     return (
         <div className="max-w-7xl mx-auto px-6 mt-40">
             {/* Trending Categories Section */}

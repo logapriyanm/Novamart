@@ -3,7 +3,12 @@
  * Logic for manufacturers to allocate stock, set dealer-specific pricing and MOQ.
  */
 
-import prisma from '../lib/prisma.js';
+import Product from '../models/Product.js';
+import Manufacturer from '../models/Manufacturer.js';
+import Inventory from '../models/Inventory.js';
+import User from '../models/User.js';
+import ManufacturerDealerBlock from '../models/ManufacturerDealerBlock.js';
+import mongoose from 'mongoose';
 
 class StockAllocationService {
     /**
@@ -12,134 +17,98 @@ class StockAllocationService {
      */
     async allocateStock(mfgId, { productId, dealerId, region, quantity, dealerBasePrice, dealerMoq, maxMargin }) {
         // 1. Verify Product Ownership
-        const product = await prisma.product.findUnique({
-            where: { id: productId }
-        });
+        const product = await Product.findById(productId);
 
-        if (!product || product.manufacturerId !== mfgId) {
+        if (!product || product.manufacturerId.toString() !== mfgId.toString()) {
             throw new Error('UNAUTHORIZED_PRODUCT_ALLOCATION');
         }
 
         // 2. Ensure Dealer is in network (Approved)
-        const manufacturer = await prisma.manufacturer.findUnique({
-            where: { id: mfgId },
-            include: { dealersApproved: { where: { id: dealerId } } }
-        });
+        const manufacturer = await Manufacturer.findById(mfgId);
 
-        if (manufacturer.dealersApproved.length === 0) {
-            // Automatically add to network if allocating stock (relationship established via negotiation)
-            await prisma.manufacturer.update({
-                where: { id: mfgId },
-                data: {
-                    dealersApproved: { connect: { id: dealerId } }
-                }
+        if (!manufacturer.approvedBy?.includes(dealerId)) {
+            // Automatically add to network if allocating stock
+            await Manufacturer.findByIdAndUpdate(mfgId, {
+                $addToSet: { approvedBy: dealerId }
             });
         }
 
-        // 3. Check if dealer is blocked (Phase 8 integration)
-        const isBlocked = await prisma.manufacturerDealerBlock.findUnique({
-            where: {
-                manufacturerId_dealerId: {
-                    manufacturerId: mfgId,
-                    dealerId: dealerId
-                }
-            }
+        // 3. Check if dealer is blocked (Logic simplified for Mongoose)
+        // Note: Blocked logic in MongoDB will depend on how ManufacturerDealerBlock is implemented.
+        // For now, mirroring Prisma flow.
+        // 3. Check if dealer is blocked
+        const isBlocked = await ManufacturerDealerBlock.findOne({
+            manufacturerId: mfgId,
+            dealerId: dealerId,
+            isActive: true
         });
 
-        if (isBlocked && isBlocked.isActive) {
+        if (isBlocked) {
             throw new Error('DEALER_IS_BLOCKED');
         }
 
         // 4. Update or Create Inventory Record
-        return await prisma.inventory.upsert({
-            where: {
-                // Find by product, dealer, and region
-                id: (await prisma.inventory.findFirst({
-                    where: { productId, dealerId, region }
-                }))?.id || 'new-allocation'
-            },
-            update: {
-                allocatedStock: { increment: quantity },
+        const query = { productId, dealerId, region };
+        const existingInventory = await Inventory.findOne(query);
+
+        if (existingInventory) {
+            return await Inventory.findByIdAndUpdate(existingInventory._id, {
+                $inc: { allocatedStock: quantity },
                 dealerBasePrice: dealerBasePrice || product.basePrice,
                 dealerMoq: dealerMoq || 1,
-                maxMargin: maxMargin || 20, // Default 20% max margin if not specified
+                maxMargin: maxMargin || 20,
                 isAllocated: true,
-                // If dealer hasn't set a retail price yet, initialize it
-                price: (await prisma.inventory.findFirst({ where: { productId, dealerId, region } }))?.price || dealerBasePrice || product.basePrice
-            },
-            create: {
+                price: existingInventory.price || dealerBasePrice || product.basePrice
+            }, { new: true });
+        } else {
+            return await Inventory.create({
                 productId,
                 dealerId,
                 region,
-                stock: 0, // Current physical stock
+                stock: 0,
                 allocatedStock: quantity,
                 dealerBasePrice: dealerBasePrice || product.basePrice,
                 dealerMoq: dealerMoq || 1,
                 maxMargin: maxMargin || 20,
                 isAllocated: true,
                 price: dealerBasePrice || product.basePrice
-            }
-        });
+            });
+        }
     }
 
     /**
      * Get all allocations for a manufacturer across their dealer network.
      */
     async getManufacturerAllocations(mfgId) {
-        return await prisma.inventory.findMany({
-            where: {
-                product: { manufacturerId: mfgId },
-                isAllocated: true
-            },
-            include: {
-                dealer: {
-                    select: {
-                        id: true,
-                        businessName: true,
-                        city: true,
-                        subscriptions: {
-                            where: { status: 'ACTIVE' },
-                            include: { plan: true },
-                            take: 1
-                        }
-                    }
-                },
-                product: {
-                    select: {
-                        id: true,
-                        name: true,
-                        basePrice: true,
-                        images: true
-                    }
-                }
-            },
-            orderBy: { listedAt: 'desc' }
-        });
-    }
+        const products = await Product.find({ manufacturerId: mfgId }).select('_id');
+        const productIds = products.map(p => p._id);
 
+        return await Inventory.find({
+            productId: { $in: productIds },
+            isAllocated: true
+        })
+            .populate('dealerId', 'businessName city')
+            .populate('productId', 'name basePrice images')
+            .sort({ listedAt: -1 })
+            .lean();
+    }
 
     /**
      * Update an existing allocation's parameters.
      */
     async updateAllocation(mfgId, allocationId, updateData) {
-        const inventory = await prisma.inventory.findUnique({
-            where: { id: allocationId },
-            include: { product: true }
-        });
+        const inventory = await Inventory.findById(allocationId).populate('productId');
 
-        if (!inventory || inventory.product.manufacturerId !== mfgId) {
+        if (!inventory || inventory.productId.manufacturerId.toString() !== mfgId.toString()) {
             throw new Error('UNAUTHORIZED_ALLOCATION_UPDATE');
         }
 
-        return await prisma.inventory.update({
-            where: { id: allocationId },
-            data: {
-                allocatedStock: updateData.allocatedStock,
-                dealerBasePrice: updateData.dealerBasePrice,
-                dealerMoq: updateData.dealerMoq,
-                maxMargin: updateData.maxMargin
-            }
-        });
+        return await Inventory.findByIdAndUpdate(allocationId, {
+            allocatedStock: updateData.allocatedStock,
+            dealerBasePrice: updateData.dealerBasePrice,
+            dealerMoq: updateData.dealerMoq,
+            maxMargin: updateData.maxMargin
+        }, { new: true });
     }
 
     /**
@@ -147,44 +116,32 @@ class StockAllocationService {
      * Does not delete the record but removes allocation status and limits.
      */
     async revokeAllocation(mfgId, allocationId) {
-        const inventory = await prisma.inventory.findUnique({
-            where: { id: allocationId },
-            include: { product: true }
-        });
+        const inventory = await Inventory.findById(allocationId).populate('productId');
 
-        if (!inventory || inventory.product.manufacturerId !== mfgId) {
+        if (!inventory || inventory.productId.manufacturerId.toString() !== mfgId.toString()) {
             throw new Error('UNAUTHORIZED_ALLOCATION_REVOKE');
         }
 
-        return await prisma.inventory.update({
-            where: { id: allocationId },
-            data: {
-                isAllocated: false,
-                isListed: false, // Auto-delist if allocation is revoked
-                allocatedStock: 0
-            }
-        });
+        return await Inventory.findByIdAndUpdate(allocationId, {
+            isAllocated: false,
+            isListed: false,
+            allocatedStock: 0
+        }, { new: true });
     }
 
     /**
      * Get allocations for a specific dealer (for dealer dashboard).
      */
     async getDealerAllocations(dealerId) {
-        return await prisma.inventory.findMany({
-            where: {
-                dealerId,
-                isAllocated: true
-            },
-            include: {
-                product: {
-                    include: {
-                        manufacturer: {
-                            select: { businessType: true, companyName: true }
-                        }
-                    }
-                }
-            }
-        });
+        return await Inventory.find({
+            dealerId,
+            isAllocated: true
+        })
+            .populate({
+                path: 'productId',
+                populate: { path: 'manufacturerId', select: 'companyName businessType' }
+            })
+            .lean();
     }
 }
 

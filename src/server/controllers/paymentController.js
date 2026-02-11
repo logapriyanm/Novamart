@@ -1,10 +1,10 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import prisma from '../lib/prisma.js';
+import { Order, Payment } from '../models/index.js';
 import paymentService from '../services/paymentService.js';
 import logger from '../lib/logger.js';
 
-// Initialize Razorpay (ensure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are in .env)
+// Initialize Razorpay
 const razorpay = process.env.RAZORPAY_KEY_ID ? new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
@@ -19,23 +19,17 @@ export const createPaymentOrder = async (req, res) => {
             return res.status(400).json({ success: false, error: 'Order ID is required' });
         }
 
-        // Fetch order
-        const order = await prisma.order.findUnique({
-            where: { id: orderId },
-            include: { items: true }
-        });
+        const order = await Order.findById(orderId);
 
         if (!order) {
             return res.status(404).json({ success: false, error: 'Order not found' });
         }
 
-        // Check if already paid
         if (order.status !== 'CREATED') {
             return res.status(400).json({ success: false, error: 'Order already processed' });
         }
 
         if (!razorpay) {
-            // SECURITY: Block mock payments in production
             if (process.env.NODE_ENV === 'production') {
                 return res.status(503).json({
                     success: false,
@@ -43,30 +37,23 @@ export const createPaymentOrder = async (req, res) => {
                 });
             }
 
-            // Mock mode if Razorpay not configured (DEV ONLY)
             const mockOrderId = `mock_order_${Date.now()}`;
 
-            // Create payment record
-            await prisma.payment.upsert({
-                where: { orderId: order.id },
-                update: {
+            await Payment.findOneAndUpdate(
+                { orderId: order._id },
+                {
                     razorpayOrderId: mockOrderId,
                     amount: order.totalAmount,
                     status: 'PENDING'
                 },
-                create: {
-                    orderId: order.id,
-                    razorpayOrderId: mockOrderId,
-                    amount: order.totalAmount,
-                    status: 'PENDING'
-                }
-            });
+                { upsert: true }
+            );
 
             return res.json({
                 success: true,
                 data: {
                     razorpayOrderId: mockOrderId,
-                    amount: Number(order.totalAmount) * 100, // paise
+                    amount: Number(order.totalAmount) * 100,
                     currency: 'INR',
                     key: 'mock_key',
                     isMock: true
@@ -74,32 +61,25 @@ export const createPaymentOrder = async (req, res) => {
             });
         }
 
-        // Create Razorpay order
         const razorpayOrder = await razorpay.orders.create({
-            amount: Number(order.totalAmount) * 100, // Convert to paise
+            amount: Math.round(Number(order.totalAmount) * 100),
             currency: 'INR',
-            receipt: order.id,
+            receipt: order._id.toString(),
             notes: {
-                orderId: order.id,
-                customerId: order.customerId
+                orderId: order._id.toString(),
+                customerId: order.customerId.toString()
             }
         });
 
-        // Create/Update payment record
-        await prisma.payment.upsert({
-            where: { orderId: order.id },
-            update: {
+        await Payment.findOneAndUpdate(
+            { orderId: order._id },
+            {
                 razorpayOrderId: razorpayOrder.id,
                 amount: order.totalAmount,
                 status: 'PENDING'
             },
-            create: {
-                orderId: order.id,
-                razorpayOrderId: razorpayOrder.id,
-                amount: order.totalAmount,
-                status: 'PENDING'
-            }
-        });
+            { upsert: true }
+        );
 
         res.json({
             success: true,
@@ -126,16 +106,15 @@ export const verifyPayment = async (req, res) => {
             return res.status(400).json({ success: false, error: 'Order ID required' });
         }
 
-        // For mock payments, skip real signature verification
         if (razorpay_order_id && razorpay_order_id.startsWith('mock_')) {
             const { order, payment } = await paymentService.processPaymentSuccess({
                 orderId,
                 razorpayPaymentId: razorpay_payment_id || 'mock_payment',
                 method: 'MOCK'
             });
-            // Send email for mock too if needed, or just return
+
             import('../services/emailService.js').then((module) => {
-                module.sendPaymentConfirmation(payment, order).catch(err =>
+                module.default.sendPaymentConfirmation(payment, order).catch(err =>
                     logger.error('Failed to send payment confirmation email:', err)
                 );
             }).catch(() => { });
@@ -143,12 +122,10 @@ export const verifyPayment = async (req, res) => {
             return res.json({ success: true, data: { order, payment } });
         }
 
-        // Real Razorpay verification
         if (!razorpay_payment_id || !razorpay_signature) {
             return res.status(400).json({ success: false, error: 'Missing payment details' });
         }
 
-        // Verify signature
         const body = razorpay_order_id + '|' + razorpay_payment_id;
         const expectedSignature = crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -162,12 +139,11 @@ export const verifyPayment = async (req, res) => {
         const { order, payment } = await paymentService.processPaymentSuccess({
             orderId,
             razorpayPaymentId: razorpay_payment_id,
-            method: 'CARD' // Razorpay handles method details, we can enrich later via API if needed
+            method: 'CARD'
         });
 
-        // Send payment confirmation email (non-blocking)
         import('../services/emailService.js').then((module) => {
-            module.sendPaymentConfirmation(payment, order).catch(err =>
+            module.default.sendPaymentConfirmation(payment, order).catch(err =>
                 logger.error('Failed to send payment confirmation email:', err)
             );
         }).catch(() => { });
@@ -238,14 +214,11 @@ export const getPaymentStatus = async (req, res) => {
     try {
         const { orderId } = req.params;
 
-        const payment = await prisma.payment.findUnique({
-            where: { orderId },
-            include: {
-                order: {
-                    include: { escrow: true }
-                }
-            }
-        });
+        const payment = await Payment.findOne({ orderId })
+            .populate({
+                path: 'orderId',
+                populate: { path: 'escrow' }
+            });
 
         if (!payment) {
             return res.status(404).json({ success: false, error: 'Payment not found' });

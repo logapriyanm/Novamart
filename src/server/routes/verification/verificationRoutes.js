@@ -22,6 +22,7 @@ router.post('/upload', authenticateUser, upload.single('document'), uploadDocume
 router.get('/my-documents', authenticateUser, getMyDocuments);
 
 // Admin Routes
-router.put('/:documentId/verify', authenticateUser, authorizeRoles(['ADMIN']), verifyDocument);
+router.put('/:documentId/verify', authenticateUser, authorizeRoles('ADMIN'), verifyDocument);
+router.put('/:documentId/verify/:subDocId', authenticateUser, authorizeRoles('ADMIN'), verifyDocument);
 
 export default router;

@@ -1,20 +1,16 @@
 /**
  * Audit Service
- * Centralized logging for transactional (Postgres) and behavior (MongoDB) logs.
+ * Centralized logging for transactional and behavior logs.
  */
 
-import prisma from '../lib/prisma.js';
-import { Tracking, FraudSignal, DemandHeatmap } from '../models/index.js';
+import { Tracking, FraudSignal, DemandHeatmap, AuditLog } from '../models/index.js';
 
 class AuditService {
     async logAction(action, entity, entityId, { userId, oldData, newData, reason, req }) {
         try {
-            // Import the model dynamically or ensure it's loaded from models/index.js
-            const { AuditLog } = await import('../models/index.js');
-
             return await AuditLog.create({
                 actorId: userId || 'ANONYMOUS',
-                role: 'SYSTEM', // Default role, can be refined based on context
+                role: 'SYSTEM', // Default role
                 action: action,
                 entity: entityId,
                 ip: req?.ip,
@@ -75,8 +71,7 @@ class AuditService {
         return this.trackEvent('SEARCH', {
             query,
             region,
-            resultsCount,
-            timestamp: new Date()
+            resultsCount
         }, userId);
     }
 

@@ -3,155 +3,136 @@
  * Logic for dealer network management, allocations, and analytics.
  */
 
-import prisma from '../lib/prisma.js';
+import { Manufacturer, Dealer, User, DealerRequest, Order, Escrow, Product } from '../models/index.js';
 import userService from './userService.js';
+import mongoose from 'mongoose';
 
 class ManufacturerService {
     /**
      * Approve or Reject a Dealer's request to join the network.
      */
-    /**
-     * Approve or Reject a Dealer's request to join the network.
-     */
     async handleDealerRequest(mfgId, dealerId, status) {
-        return await prisma.$transaction(async (tx) => {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
             const requestStatus = status === 'APPROVED' ? 'APPROVED' : 'REJECTED';
 
-            // 1. Upsert the DealerRequest record (Create if handling an implicit request)
-            const request = await tx.dealerRequest.upsert({
-                where: {
-                    dealerId_manufacturerId: {
-                        dealerId,
-                        manufacturerId: mfgId
-                    }
-                },
-                update: { status: requestStatus },
-                create: {
-                    dealerId,
-                    manufacturerId: mfgId,
-                    status: requestStatus,
-                    message: 'Auto-created upon approval'
-                }
-            });
+            // 1. Upsert the DealerRequest record
+            await DealerRequest.findOneAndUpdate(
+                { dealerId, manufacturerId: mfgId },
+                { status: requestStatus, message: 'Updated via dashboard' },
+                { upsert: true, session }
+            );
 
-            // 2. If approved, connect in the many-to-many relation AND verify the dealer globally if needed
+            // 2. If approved, connect in the many-to-many relation
             if (status === 'APPROVED') {
-                await tx.manufacturer.update({
-                    where: { id: mfgId },
-                    data: {
-                        dealersApproved: { connect: { id: dealerId } }
-                    }
-                });
+                await Manufacturer.findByIdAndUpdate(mfgId, {
+                    $addToSet: { approvedBy: dealerId }
+                }, { session });
 
-                // Optionally mark dealer as verified globally if this is the main authority
-                const dealer = await tx.dealer.update({
-                    where: { id: dealerId },
-                    data: { isVerified: true },
-                    select: { userId: true }
-                });
+                // Mark dealer as verified globally if this is the main authority
+                const dealer = await Dealer.findByIdAndUpdate(dealerId, { isVerified: true }, { session });
 
-                // Ensure the User is ACTIVE so they can access the platform
-                await tx.user.update({
-                    where: { id: dealer.userId },
-                    data: { status: 'ACTIVE' }
-                });
+                // Ensure the User is ACTIVE
+                await User.findByIdAndUpdate(dealer.userId, { status: 'ACTIVE' }, { session });
             } else {
-                await tx.manufacturer.update({
-                    where: { id: mfgId },
-                    data: {
-                        dealersApproved: { disconnect: { id: dealerId } }
-                    }
-                });
+                await Manufacturer.findByIdAndUpdate(mfgId, {
+                    $pull: { approvedBy: dealerId }
+                }, { session });
             }
 
+            await session.commitTransaction();
             return { mfgId, dealerId, status: requestStatus };
-        });
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
      * Get pending or processed dealer requests for a manufacturer.
-     * INCLUDES: Explicit requests AND Orphaned unverified dealers (Implicit Requests)
      */
     async getDealerRequests(mfgId, statusFilter = 'PENDING') {
-        const requests = await prisma.dealerRequest.findMany({
-            where: {
-                manufacturerId: mfgId,
-                status: statusFilter
-            },
-            include: {
-                dealer: {
-                    include: {
-                        user: { select: { email: true, phone: true } }
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        const requests = await DealerRequest.find({
+            manufacturerId: mfgId,
+            status: statusFilter
+        })
+            .populate({
+                path: 'dealerId',
+                populate: { path: 'userId', select: 'email phone' }
+            })
+            .sort({ createdAt: -1 })
+            .lean();
 
-        // If filtering for PENDING, also fetch dealers who have NO requests and are unverified
+        // Format to match old output (dealer instead of dealerId)
+        const formattedRequests = requests.map(r => ({
+            ...r,
+            id: r._id,
+            dealer: r.dealerId
+        }));
+
         if (statusFilter === 'PENDING') {
-            const implicitDealers = await prisma.dealer.findMany({
-                where: {
-                    isVerified: false,
-                    partnershipRequests: { none: { manufacturerId: mfgId } } // Not already requested/handled
-                },
-                include: {
-                    user: { select: { email: true, phone: true } }
-                }
-            });
+            const explicitDealerIds = requests.map(r => r.dealerId?._id);
+
+            const implicitDealers = await Dealer.find({
+                isVerified: false,
+                _id: { $nin: explicitDealerIds }
+            })
+                .populate('userId', 'email phone createdAt')
+                .lean();
 
             const implicitRequests = implicitDealers.map(dealer => ({
-                id: `temp-${dealer.id}`,
-                dealerId: dealer.id,
+                id: `temp-${dealer._id}`,
+                dealerId: dealer._id,
                 manufacturerId: mfgId,
                 status: 'PENDING',
                 message: 'New Registration (Pending Verification)',
-                createdAt: dealer.user?.createdAt || new Date(), // Fallback to now if user relation issue, but strictly dealer should have created at
-                dealer: dealer
+                createdAt: dealer.userId?.createdAt || new Date(),
+                dealer: {
+                    ...dealer,
+                    user: dealer.userId
+                }
             }));
 
-            return [...requests, ...implicitRequests];
+            return [...formattedRequests, ...implicitRequests];
         }
 
-        return requests;
+        return formattedRequests;
     }
-
 
     /**
      * Get Sales Analytics for Manufacturer.
      */
     async getSalesAnalytics(mfgId) {
-        // Find all orders involving dealers associated with this manufacturer
-        const orders = await prisma.order.findMany({
-            where: {
-                dealer: { approvedBy: { some: { id: mfgId } } },
-                status: 'SETTLED'
-            },
-            include: { items: { include: { linkedProduct: true } } }
-        });
+        const orders = await Order.find({
+            status: 'SETTLED',
+            'items.product': { $exists: true } // Simplified check
+        }).populate('items.product').lean();
 
-        // Calculate Revenue, Volumes, and Regional distribution
         let totalRevenue = 0;
         const regionalSales = {};
         const productStats = {};
 
         for (const order of orders) {
+            let orderHasMfgItems = false;
             for (const item of order.items) {
-                // Only count items belonging to this manufacturer
-                if (item.linkedProduct.manufacturerId === mfgId) {
+                if (item.product?.manufacturerId?.toString() === mfgId.toString()) {
+                    orderHasMfgItems = true;
                     const lineTotal = Number(item.price) * item.quantity;
                     totalRevenue += lineTotal;
 
-                    const region = item.linkedProduct.category; // Using category as proxy for region
+                    const region = item.product.category || 'General';
                     regionalSales[region] = (regionalSales[region] || 0) + lineTotal;
-                    productStats[item.productId] = (productStats[item.productId] || 0) + item.quantity;
+                    productStats[item.product._id] = (productStats[item.product._id] || 0) + item.quantity;
                 }
             }
         }
 
         return {
             totalRevenue,
-            totalOrders: orders.length,
+            totalOrders: orders.filter(o => o.items.some(i => i.product?.manufacturerId?.toString() === mfgId.toString())).length,
             regionalSales,
             topProducts: Object.entries(productStats)
                 .sort((a, b) => b[1] - a[1])
@@ -163,38 +144,35 @@ class ManufacturerService {
      * Credit & Escrow Tracking.
      */
     async getCreditStatus(mfgId) {
-        const escrows = await prisma.escrow.findMany({
-            where: {
-                order: { items: { some: { linkedProduct: { manufacturerId: mfgId } } } },
-                status: { in: ['HOLD', 'FROZEN'] }
-            },
-            include: {
-                order: {
-                    include: {
-                        items: {
-                            where: { linkedProduct: { manufacturerId: mfgId } }
-                        }
-                    }
-                }
-            }
-        });
+        const escrows = await Escrow.find({
+            status: { $in: ['HOLD', 'FROZEN'] }
+        }).populate({
+            path: 'orderId',
+            populate: { path: 'items.product' }
+        }).lean();
 
-        // Sum up only the portions of these escrows belonging to the manufacturer
         let pendingSettle = 0;
         let frozenCount = 0;
 
         for (const escrow of escrows) {
-            for (const item of escrow.order.items) {
-                pendingSettle += Number(item.price) * item.quantity;
+            if (!escrow.orderId) continue;
+
+            let mfgItemsInOrder = false;
+            for (const item of escrow.orderId.items) {
+                if (item.product?.manufacturerId?.toString() === mfgId.toString()) {
+                    mfgItemsInOrder = true;
+                    pendingSettle += Number(item.price) * item.quantity;
+                }
             }
-            if (escrow.status === 'FROZEN') {
+
+            if (mfgItemsInOrder && escrow.status === 'FROZEN') {
                 frozenCount++;
             }
         }
 
         return {
             pendingSettlement: pendingSettle,
-            activeHoldRecords: escrows.length,
+            activeHoldRecords: escrows.filter(e => e.orderId?.items.some(i => i.product?.manufacturerId?.toString() === mfgId.toString())).length,
             frozenCount
         };
     }
@@ -203,17 +181,16 @@ class ManufacturerService {
      * Get full Manufacturer Profile.
      */
     async getProfile(mfgId) {
-        return await prisma.manufacturer.findUnique({
-            where: { id: mfgId },
-            include: { user: { select: { email: true, status: true, mfaEnabled: true } }, dealersApproved: true }
-        });
+        return await Manufacturer.findById(mfgId)
+            .populate('userId', 'email status mfaEnabled')
+            .populate('approvedBy');
     }
 
     /**
      * Update Manufacturer Profile Sections.
      */
     async updateProfile(mfgId, section, data) {
-        const mfg = await prisma.manufacturer.findUnique({ where: { id: mfgId } });
+        const mfg = await Manufacturer.findById(mfgId);
         if (!mfg) throw new Error('MANUFACTURER_NOT_FOUND');
 
         return await userService.updateFullProfile(mfg.userId, 'MANUFACTURER', section, data);

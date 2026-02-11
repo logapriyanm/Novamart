@@ -1,9 +1,9 @@
 /**
  * Review Service
- * Handles product and seller reviews.
+ * Handles product and seller reviews using Mongoose levels
  */
 
-import prisma from '../lib/prisma.js';
+import { Review, Product, Dealer, Order } from '../models/index.js';
 import logger from '../lib/logger.js';
 
 class ReviewService {
@@ -12,19 +12,18 @@ class ReviewService {
      */
     async submitProductReview({ orderItemId, productId, customerId, rating, comment, images }) {
         try {
-            // 1. Create Review
-            const review = await prisma.productReview.create({
-                data: {
-                    item: { connect: { id: orderItemId } },
-                    product: { connect: { id: productId } },
-                    customer: { connect: { id: customerId } },
-                    rating,
-                    comment,
-                    images
-                }
+            const review = await Review.create({
+                type: 'PRODUCT',
+                productId,
+                customerId,
+                orderId: null, // orderItemId not stored directly in Review model usually, but can be added if needed
+                rating,
+                comment,
+                images,
+                status: 'PENDING'
             });
 
-            // 2. Update Product Stats (Async)
+            // Async update - don't block
             this.updateProductRating(productId);
 
             return review;
@@ -39,21 +38,20 @@ class ReviewService {
      */
     async submitSellerReview({ orderId, dealerId, customerId, rating, delivery, packaging, communication, comment }) {
         try {
-            // 1. Create Review
-            const review = await prisma.sellerReview.create({
-                data: {
-                    order: { connect: { id: orderId } },
-                    dealer: { connect: { id: dealerId } },
-                    customer: { connect: { id: customerId } },
-                    rating, // Overall
-                    deliveryRating: delivery,
-                    packagingRating: packaging,
-                    communicationRating: communication,
-                    comment
-                }
+            const review = await Review.create({
+                type: 'SELLER',
+                dealerId,
+                customerId,
+                orderId,
+                rating,
+                deliveryRating: delivery,
+                packagingRating: packaging,
+                communicationRating: communication,
+                comment,
+                status: 'PENDING'
             });
 
-            // 2. Update Dealer Stats (Async)
+            // Async update
             this.updateDealerRating(dealerId);
 
             return review;
@@ -65,48 +63,48 @@ class ReviewService {
 
     /**
      * Recalculate and update product rating.
-     * Only includes APPROVED reviews.
      */
     async updateProductRating(productId) {
-        const aggregations = await prisma.productReview.aggregate({
-            where: {
-                productId,
-                status: 'APPROVED'
-            },
-            _avg: { rating: true },
-            _count: { rating: true }
-        });
-
-        await prisma.product.update({
-            where: { id: productId },
-            data: {
-                averageRating: aggregations._avg.rating || 0,
-                reviewCount: aggregations._count.rating || 0
+        const stats = await Review.aggregate([
+            { $match: { productId: productId, type: 'PRODUCT', status: 'APPROVED' } },
+            {
+                $group: {
+                    _id: '$productId',
+                    avgRating: { $avg: '$rating' },
+                    count: { $sum: 1 }
+                }
             }
-        });
+        ]);
+
+        if (stats.length > 0) {
+            await Product.findByIdAndUpdate(productId, {
+                averageRating: stats[0].avgRating,
+                reviewCount: stats[0].count
+            });
+        }
     }
 
     /**
      * Recalculate and update dealer rating.
-     * Only includes APPROVED reviews.
      */
     async updateDealerRating(dealerId) {
-        const aggregations = await prisma.sellerReview.aggregate({
-            where: {
-                dealerId,
-                status: 'APPROVED'
-            },
-            _avg: { rating: true },
-            _count: { rating: true }
-        });
-
-        await prisma.dealer.update({
-            where: { id: dealerId },
-            data: {
-                averageRating: aggregations._avg.rating || 0,
-                reviewCount: aggregations._count.rating || 0
+        const stats = await Review.aggregate([
+            { $match: { dealerId: dealerId, type: 'SELLER', status: 'APPROVED' } },
+            {
+                $group: {
+                    _id: '$dealerId',
+                    avgRating: { $avg: '$rating' },
+                    count: { $sum: 1 }
+                }
             }
-        });
+        ]);
+
+        if (stats.length > 0) {
+            await Dealer.findByIdAndUpdate(dealerId, {
+                averageRating: stats[0].avgRating,
+                reviewCount: stats[0].count
+            });
+        }
     }
 
     /**
@@ -114,18 +112,12 @@ class ReviewService {
      */
     async moderateReview(type, reviewId, status) {
         try {
-            let review;
-            if (type === 'PRODUCT') {
-                review = await prisma.productReview.update({
-                    where: { id: reviewId },
-                    data: { status }
-                });
+            const review = await Review.findByIdAndUpdate(reviewId, { status }, { new: true });
+            if (!review) throw new Error('Review not found');
+
+            if (review.type === 'PRODUCT') {
                 await this.updateProductRating(review.productId);
-            } else if (type === 'SELLER') {
-                review = await prisma.sellerReview.update({
-                    where: { id: reviewId },
-                    data: { status }
-                });
+            } else {
                 await this.updateDealerRating(review.dealerId);
             }
             return review;
@@ -140,14 +132,12 @@ class ReviewService {
      */
     async getPendingReviews() {
         try {
-            const productReviews = await prisma.productReview.findMany({
-                where: { status: 'PENDING' },
-                include: { product: true, customer: true }
-            });
-            const sellerReviews = await prisma.sellerReview.findMany({
-                where: { status: 'PENDING' },
-                include: { dealer: true, customer: true }
-            });
+            const productReviews = await Review.find({ type: 'PRODUCT', status: 'PENDING' })
+                .populate('productId')
+                .populate('customerId');
+            const sellerReviews = await Review.find({ type: 'SELLER', status: 'PENDING' })
+                .populate('dealerId')
+                .populate('customerId');
             return { productReviews, sellerReviews };
         } catch (error) {
             logger.error('Get Pending Reviews Error:', error);
@@ -160,20 +150,9 @@ class ReviewService {
      */
     async getCustomerReviews(customerId) {
         try {
-            const reviews = await prisma.productReview.findMany({
-                where: { customerId },
-                include: {
-                    product: {
-                        select: {
-                            id: true,
-                            name: true,
-                            images: true
-                        }
-                    }
-                },
-                orderBy: { createdAt: 'desc' }
-            });
-            return reviews;
+            return await Review.find({ customerId })
+                .populate('productId', 'name images')
+                .sort({ createdAt: -1 });
         } catch (error) {
             logger.error('Get Customer Reviews Error:', error);
             throw new Error('Failed to fetch customer reviews');

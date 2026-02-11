@@ -3,41 +3,43 @@
  * Handles GST invoice generation and tax breakdowns.
  */
 
-import prisma from '../lib/prisma.js';
+import { Order, Customer, Dealer } from '../models/index.js';
 
 class InvoiceService {
     /**
      * Generate metadata for a GST Invoice.
      */
     async generateInvoiceData(orderId) {
-        const order = await prisma.order.findUnique({
-            where: { id: orderId },
-            include: {
-                customer: { include: { user: true } },
-                dealer: { include: { user: true } },
-                items: { include: { linkedProduct: true } }
-            }
-        });
+        const order = await Order.findById(orderId)
+            .populate({
+                path: 'customerId',
+                populate: { path: 'userId' }
+            })
+            .populate({
+                path: 'dealerId',
+                populate: { path: 'userId' }
+            })
+            .populate('items.productId');
 
         if (!order) throw new Error('Order not found');
 
-        // Tax Breakdown (JSON for frontend rendering)
+        // Tax Breakdown
         const subtotal = Number(order.totalAmount);
         const taxAmount = Number(order.taxAmount);
         const total = subtotal + taxAmount;
 
         const invoiceData = {
-            invoiceNumber: `INV-${order.id.slice(0, 8).toUpperCase()}`,
+            invoiceNumber: `INV-${order._id.toString().slice(0, 8).toUpperCase()}`,
             date: new Date(),
             billingDetails: {
-                customerName: order.customer.name,
-                customerPhone: order.customer.user.phone,
-                dealerName: order.dealer.businessName,
-                dealerGst: order.dealer.gstNumber,
-                dealerAddress: order.dealer.businessAddress
+                customerName: order.customerId?.name || 'Customer',
+                customerPhone: order.customerId?.userId?.phone,
+                dealerName: order.dealerId?.businessName,
+                dealerGst: order.dealerId?.gstNumber,
+                dealerAddress: order.dealerId?.businessAddress
             },
             items: order.items.map(item => ({
-                name: item.linkedProduct.name,
+                name: item.productId?.name || 'Product',
                 hsn: "8481", // Mock HSN code
                 quantity: item.quantity,
                 unitPrice: Number(item.price),
@@ -46,16 +48,15 @@ class InvoiceService {
             financials: {
                 subtotal,
                 taxAmount,
-                taxRate: "18%", // Fetched from rule previously
+                taxRate: "18%",
                 total
             },
             footer: "Computer generated invoice. No signature required."
         };
 
-        // Update order with invoice URL/ID (Mock for now)
-        await prisma.order.update({
-            where: { id: orderId },
-            data: { invoiceUrl: `/api/orders/${orderId}/invoice` }
+        // Update order with invoice URL
+        await Order.findByIdAndUpdate(orderId, {
+            invoiceUrl: `/api/orders/${orderId}/invoice`
         });
 
         return invoiceData;

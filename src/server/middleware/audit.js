@@ -3,7 +3,6 @@
  * Records critical actions to the immutable audit log.
  */
 
-import prisma from '../lib/prisma.js';
 
 const auditLog = (action, entity) => {
     return async (req, res, next) => {
@@ -13,11 +12,10 @@ const auditLog = (action, entity) => {
             const body = req.body;
             const user = req.user;
 
-            // Only log if successful or if it's a critical action
-            // Use auditService instead of direct prisma access to avoid errors with non-existent models
+            // Use auditService instead of direct database access
             import('../services/audit.js').then(({ default: auditService }) => {
                 auditService.logAction(action, entity, body?.id || req.params?.id || 'N/A', {
-                    userId: user?.id,
+                    userId: user?._id,
                     oldData: {},
                     newData: body,
                     reason: req.headers['x-audit-reason'] || 'Routine operation',

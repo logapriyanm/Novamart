@@ -13,6 +13,7 @@ class ApiClient {
     private refreshToken: string | null = null;
     private isRefreshing = false;
     private refreshPromise: Promise<any> | null = null;
+    private onAuthError: (() => void) | null = null;
 
     private constructor() {
         if (typeof window !== 'undefined') {
@@ -51,6 +52,10 @@ class ApiClient {
     // Compatibility method
     public setToken(token: string | null) {
         this.setTokens(token, this.refreshToken);
+    }
+
+    public setAuthErrorCallback(callback: () => void) {
+        this.onAuthError = callback;
     }
 
     public getToken(): string | null {
@@ -134,6 +139,9 @@ class ApiClient {
                 })
                 .catch(err => {
                     this.setTokens(null, null);
+                    if (this.onAuthError) {
+                        this.onAuthError();
+                    }
                     throw err;
                 })
                 .finally(() => {

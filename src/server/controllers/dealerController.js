@@ -8,13 +8,12 @@ import stockAllocationService from '../services/stockAllocationService.js';
 import orderService from '../services/order.js';
 import auditService from '../services/audit.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
-import prisma from '../lib/prisma.js';
 
 /**
  * Get Local Inventory (Retail Listings)
  */
 export const getMyInventory = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     try {
         const inventory = await dealerService.getInventory(dealerId);
         res.json({
@@ -30,7 +29,7 @@ export const getMyInventory = async (req, res) => {
  * Get Specific Inventory Asset Details
  */
 export const getInventoryItem = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     const { id } = req.params;
     try {
         const item = await dealerService.getInventoryItem(id, dealerId);
@@ -44,7 +43,7 @@ export const getInventoryItem = async (req, res) => {
  * Get Allocated Products from Manufacturers (Phase 4)
  */
 export const getMyAllocations = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     try {
         const allocations = await stockAllocationService.getDealerAllocations(dealerId);
         res.json({ success: true, data: allocations });
@@ -57,7 +56,7 @@ export const getMyAllocations = async (req, res) => {
  * Update Retail Pricing
  */
 export const updatePrice = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     const { inventoryId, price } = req.body;
     try {
         const result = await dealerService.updateRetailPrice(inventoryId, dealerId, price);
@@ -82,7 +81,7 @@ export const updatePrice = async (req, res) => {
  * Update Stock Levels
  */
 export const updateStock = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     const { inventoryId, stock } = req.body;
     try {
         const result = await dealerService.updateStock(inventoryId, dealerId, stock);
@@ -107,7 +106,7 @@ export const updateStock = async (req, res) => {
  * Toggle Product Visibility (Go Live)
  */
 export const toggleListing = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     const { inventoryId, isListed } = req.body;
     try {
         const result = await dealerService.toggleListing(inventoryId, dealerId, isListed);
@@ -125,7 +124,7 @@ export const toggleListing = async (req, res) => {
  * Dashboard & Reports
  */
 export const getDealerStats = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     try {
         const stats = await dealerService.getSalesReport(dealerId);
         res.json({
@@ -173,7 +172,7 @@ export const shipOrder = async (req, res) => {
  * Sourcing & Inventory Creation
  */
 export const sourceProduct = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     const { productId, region, stock, price } = req.body;
     try {
         const inventory = await dealerService.sourceProduct(dealerId, productId, region, stock, price);
@@ -203,7 +202,7 @@ export const requestSettlement = async (req, res) => {
  * Profile Management
  */
 export const getMyProfile = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     try {
         const profile = await dealerService.getProfile(dealerId);
         res.json({
@@ -216,7 +215,7 @@ export const getMyProfile = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     const { section, data } = req.body;
     try {
         const result = await dealerService.updateProfile(dealerId, section, data);
@@ -250,42 +249,19 @@ export const getPublicDealerProfile = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const dealer = await prisma.dealer.findUnique({
-            where: { id },
-            include: {
-                user: {
-                    select: {
-                        createdAt: true // Member since
-                    }
-                },
-                sellerReviews: {
-                    select: {
-                        rating: true,
-                        comment: true,
-                        createdAt: true,
-                        customer: {
-                            select: { name: true }
-                        }
-                    },
-                    orderBy: { createdAt: 'desc' },
-                    take: 5
-                },
-                inventory: {
-                    where: { stock: { gt: 0 } },
-                    include: {
-                        product: {
-                            select: {
-                                id: true,
-                                name: true,
-                                images: true,
-                                basePrice: true,
-                                category: true
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        const { Dealer } = await import('../models/index.js');
+        const dealer = await Dealer.findById(id)
+            .populate('userId', 'createdAt')
+            .populate({
+                path: 'sellerReviews',
+                populate: { path: 'customerId', select: 'name' }
+            })
+            .populate({
+                path: 'inventory',
+                match: { stock: { $gt: 0 } },
+                populate: { path: 'productId', select: 'name images basePrice category' }
+            })
+            .lean();
 
         if (!dealer) {
             return res.status(404).json({ success: false, error: 'Dealer not found' });
@@ -293,20 +269,20 @@ export const getPublicDealerProfile = async (req, res) => {
 
         // Mask sensitive data
         const publicProfile = {
-            id: dealer.id,
+            id: dealer._id,
             businessName: dealer.businessName,
             city: dealer.city,
             state: dealer.state,
-            joinedAt: dealer.user.createdAt,
+            joinedAt: dealer.userId?.createdAt,
             stats: {
                 averageRating: dealer.averageRating,
                 reviewCount: dealer.reviewCount,
                 totalProducts: dealer.inventory.length
             },
-            reviews: dealer.sellerReviews,
-            inventory: dealer.inventory.map(item => ({
-                ...item.product, // Flatten product details
-                inventoryId: item.id,
+            reviews: dealer.sellerReviews || [],
+            inventory: (dealer.inventory || []).map(item => ({
+                ...item.productId, // Flatten product details
+                inventoryId: item._id,
                 price: item.price,
                 stock: item.stock
             }))
@@ -332,7 +308,7 @@ export const getManufacturers = async (req, res) => {
 };
 
 export const requestManufacturerAccess = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     const { manufacturerId, ...metadata } = req.body;
     try {
         const request = await dealerService.requestAccess(dealerId, manufacturerId, metadata);
@@ -347,7 +323,7 @@ export const requestManufacturerAccess = async (req, res) => {
 };
 
 export const getMyRequests = async (req, res) => {
-    const dealerId = req.user.dealer.id;
+    const dealerId = req.user.dealer?._id || req.user.dealer?.id;
     try {
         const requests = await dealerService.getMyAccessRequests(dealerId);
         res.json({ success: true, data: requests });

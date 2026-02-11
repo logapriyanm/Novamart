@@ -1,18 +1,17 @@
-import prisma from '../lib/prisma.js';
+import { PooledDemand, PoolParticipant } from '../models/index.js';
+import mongoose from 'mongoose';
 
 class PoolingService {
     /**
      * Create a new demand pool for a product.
      */
     async createPool(manufacturerId, productId, targetQuantity, expiresAt) {
-        return await prisma.pooledDemand.create({
-            data: {
-                manufacturerId,
-                productId,
-                targetQuantity,
-                expiresAt,
-                status: 'OPEN'
-            }
+        return await PooledDemand.create({
+            manufacturerId,
+            productId,
+            targetQuantity,
+            expiresAt,
+            status: 'OPEN'
         });
     }
 
@@ -20,81 +19,73 @@ class PoolingService {
      * Join an existing pool.
      */
     async joinPool(poolId, dealerId, quantity) {
-        return await prisma.$transaction(async (tx) => {
-            const pool = await tx.pooledDemand.findUnique({
-                where: { id: poolId }
-            });
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const pool = await PooledDemand.findById(poolId).session(session);
 
             if (!pool) throw new Error('POOL_NOT_FOUND');
             if (pool.status !== 'OPEN') throw new Error('POOL_NOT_OPEN');
             if (new Date() > new Date(pool.expiresAt)) throw new Error('POOL_EXPIRED');
 
-            // Upsert participation
-            const participant = await tx.poolParticipant.upsert({
-                where: {
-                    poolId_dealerId: { poolId, dealerId }
-                },
-                update: { quantity },
-                create: { poolId, dealerId, quantity }
-            });
+            // Mongoose upsert
+            const participant = await PoolParticipant.findOneAndUpdate(
+                { poolId, dealerId },
+                { quantity },
+                { upsert: true, new: true, session }
+            );
 
             // Update pool current quantity
-            const totalQuantity = await tx.poolParticipant.aggregate({
-                where: { poolId },
-                _sum: { quantity: true }
-            });
+            const totalQuantityResult = await PoolParticipant.aggregate([
+                { $match: { poolId: new mongoose.Types.ObjectId(poolId) } },
+                { $group: { _id: null, total: { $sum: '$quantity' } } }
+            ]).session(session);
 
-            await tx.pooledDemand.update({
-                where: { id: poolId },
-                data: { currentQuantity: totalQuantity._sum.quantity || 0 }
-            });
+            const totalQuantity = totalQuantityResult.length > 0 ? totalQuantityResult[0].total : 0;
 
+            await PooledDemand.findByIdAndUpdate(poolId, { currentQuantity: totalQuantity }, { session });
+
+            await session.commitTransaction();
             return participant;
-        });
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
      * Get available pools.
      */
     async getPools(filters = {}) {
-        const { status, manufacturerId, dealerId } = filters;
-        const where = {};
+        const { status, manufacturerId } = filters;
+        const query = {};
 
-        if (status) where.status = status;
-        if (manufacturerId) where.manufacturerId = manufacturerId;
+        if (status) query.status = status;
+        if (manufacturerId) query.manufacturerId = manufacturerId;
 
-        // If dealerId is provided, find pools they have NOT joined yet, or handle differently?
-        // For now, let's just return all open pools or filter by basic fields.
-
-        return await prisma.pooledDemand.findMany({
-            where,
-            include: {
-                product: true,
-                manufacturer: {
-                    include: { user: { select: { businessName: true } } } // Assuming businessName is on Manufacturer or User? Manufacturer has businessName usually.
-                },
-                participants: true
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        return await PooledDemand.find(query)
+            .populate('productId')
+            .populate({
+                path: 'manufacturerId',
+                populate: { path: 'userId', select: 'businessName email' }
+            })
+            .populate('participants')
+            .sort({ createdAt: -1 });
     }
 
     /**
      * Get details of a specific pool.
      */
     async getPoolDetails(poolId) {
-        return await prisma.pooledDemand.findUnique({
-            where: { id: poolId },
-            include: {
-                product: true,
-                manufacturer: true,
-                participants: {
-                    include: {
-                        dealer: true
-                    }
-                }
-            }
-        });
+        return await PooledDemand.findById(poolId)
+            .populate('productId')
+            .populate('manufacturerId')
+            .populate({
+                path: 'participants',
+                populate: { path: 'dealerId' }
+            });
     }
 }
 

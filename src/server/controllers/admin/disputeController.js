@@ -21,7 +21,7 @@ export const manualResolveDispute = async (req, res) => {
         const result = await disputeService.resolveDispute(disputeId, resolution, reason);
 
         await auditService.logAction('DISPUTE_RESOLUTION', 'DISPUTE', disputeId, {
-            userId: req.user.id,
+            userId: req.user._id,
             newData: { resolution },
             reason,
             req

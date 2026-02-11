@@ -64,7 +64,7 @@ export default function ManufacturerComplianceSettings() {
                                 <div className="absolute -bottom-2 -right-2">
                                     <CldUploadWidget
                                         uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                                        onSuccess={(res: any) => console.log('Manufacturer Logo Uploaded:', res.info.secure_url)}
+                                        onSuccess={(res: any) => { }}
                                     >
                                         {({ open }) => (
                                             <button
@@ -135,7 +135,7 @@ export default function ManufacturerComplianceSettings() {
                                         <span className="text-[9px] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-widest">{doc.status}</span>
                                         <CldUploadWidget
                                             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                                            onSuccess={(res: any) => console.log('Document Updated:', res.info.secure_url)}
+                                            onSuccess={(res: any) => { }}
                                         >
                                             {({ open }) => (
                                                 <button

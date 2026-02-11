@@ -36,15 +36,15 @@ router.get('/:collection', async (req, res) => {
 });
 
 /**
- * @api {patch} /api/mongodb/:collection/:id/status Update document status
+ * @api {patch} /api/mongodb/:collection/:id Update document
  */
-router.patch('/:collection/:id/status', async (req, res) => {
+router.patch('/:collection/:id', async (req, res) => {
     try {
         const { collection, id } = req.params;
-        const { status } = req.body;
+        const updateData = req.body;
         const actorId = req.headers['x-actor-id'] || 'ADMIN';
 
-        const doc = await mongoService.updateStatus(collection, id, status, actorId);
+        const doc = await mongoService.update(collection, id, updateData, actorId);
         res.json({ success: true, data: doc });
     } catch (error) {
         res.status(400).json({ error: error.message });

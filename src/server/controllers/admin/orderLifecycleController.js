@@ -1,4 +1,4 @@
-import prisma from '../../lib/prisma.js';
+import { Order } from '../../models/index.js';
 import orderService from '../../services/order.js';
 
 /**
@@ -44,16 +44,19 @@ export const auditInventory = async (req, res) => {
  */
 export const getAllOrders = async (req, res) => {
     try {
-        const orders = await prisma.order.findMany({
-            include: {
-                customer: { select: { name: true, email: true } },
-                dealer: { select: { businessName: true } },
-                items: { include: { linkedProduct: true } }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        const orders = await Order.find()
+            .populate('customerId', 'name email')
+            .populate('dealerId', 'businessName')
+            .populate('items.inventoryId')
+            .sort({ createdAt: -1 });
+
+        // Items in MongoDB Order model have inventoryId which might need further population
+        // The Prisma include was items { include { linkedProduct: true } }
+        // In Mongoose, we might need deep population
+
         res.json({ success: true, data: orders });
     } catch (error) {
+        console.error('Fetch Orders Error:', error);
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_ORDERS' });
     }
 };

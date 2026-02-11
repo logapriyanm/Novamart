@@ -8,8 +8,7 @@
     "dev:backend": "nodemon src/server/index.js",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "build": "next build",
-    "start": "next start",
-    "postinstall": "prisma generate"
+    "start": "next start"
   },
   "repository": {
     "type": "git",
@@ -24,8 +23,6 @@
   },
   "homepage": "https://github.com/logapriyanm/Novamart#readme",
   "dependencies": {
-    "@prisma/adapter-pg": "^5.22.0",
-    "@prisma/client": "^5.22.0",
     "@react-oauth/google": "^0.13.4",
     "axios": "^1.13.5",
     "bcryptjs": "^3.0.3",
@@ -48,8 +45,6 @@
     "next": "^16.1.6",
     "next-cloudinary": "^6.17.5",
     "nodemailer": "^8.0.1",
-    "pg": "^8.18.0",
-    "prisma": "^5.22.0",
     "razorpay": "^2.9.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

@@ -1,4 +1,4 @@
-import prisma from '../../lib/prisma.js';
+import { Product } from '../../models/index.js';
 import systemEvents, { EVENTS } from '../../lib/systemEvents.js';
 import auditService from '../../services/audit.js';
 
@@ -10,18 +10,15 @@ export const approveProduct = async (req, res) => {
     const { isApproved, rejectionReason } = req.body;
 
     try {
-        const oldProduct = await prisma.product.findUnique({ where: { id } });
-        const product = await prisma.product.update({
-            where: { id },
-            data: {
-                isApproved,
-                status: isApproved ? 'APPROVED' : 'REJECTED',
-                rejectionReason: isApproved ? null : rejectionReason
-            }
-        });
+        const oldProduct = await Product.findById(id);
+        const product = await Product.findByIdAndUpdate(id, {
+            isApproved,
+            status: isApproved ? 'APPROVED' : 'REJECTED',
+            rejectionReason: isApproved ? null : rejectionReason
+        }, { new: true });
 
         await auditService.logAction('PRODUCT_APPROVAL', 'PRODUCT', id, {
-            userId: req.user.id,
+            userId: req.user._id,
             oldData: oldProduct,
             newData: product,
             reason: rejectionReason,
@@ -47,11 +44,9 @@ export const approveProduct = async (req, res) => {
 
 export const getPendingProducts = async (req, res) => {
     try {
-        const products = await prisma.product.findMany({
-            where: { status: 'PENDING' },
-            include: { manufacturer: true },
-            orderBy: { updatedAt: 'desc' }
-        });
+        const products = await Product.find({ status: 'PENDING' })
+            .populate('manufacturerId')
+            .sort({ updatedAt: -1 });
         res.json({ success: true, data: products });
     } catch (error) {
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_PENDING_PRODUCTS' });
@@ -60,10 +55,9 @@ export const getPendingProducts = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
     try {
-        const products = await prisma.product.findMany({
-            include: { manufacturer: true },
-            orderBy: { id: 'desc' }
-        });
+        const products = await Product.find()
+            .populate('manufacturerId')
+            .sort({ createdAt: -1 });
         res.json({ success: true, data: products });
     } catch (error) {
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_PRODUCTS' });

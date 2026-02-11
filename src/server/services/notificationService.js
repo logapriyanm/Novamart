@@ -1,8 +1,7 @@
-import { Notification } from '../models/index.js';
+import { Notification, User } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import emailService from './emailService.js';
 import firebaseAdmin from '../lib/firebaseAdmin.js';
-import prisma from '../lib/prisma.js';
 import logger from '../lib/logger.js';
 
 class NotificationService {
@@ -50,10 +49,7 @@ class NotificationService {
         const results = {};
 
         // Fetch User to get FCM token and Contact Info
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { fcmToken: true, email: true, phone: true }
-        });
+        const user = await User.findById(userId).select('fcmToken email phone');
 
         // 1. Mandatory In-App Log (MongoDB)
         if (channels.includes('IN_APP')) {
@@ -65,10 +61,10 @@ class NotificationService {
                     message,
                     metadata
                 });
-                results.inApp = { success: true, id: notify.id };
+                results.inApp = { success: true, id: notify._id };
 
                 if (this.io) {
-                    this.io.to(userId).emit('notification:new', notify);
+                    this.io.to(userId.toString()).emit('notification:new', notify);
                 }
             } catch (error) {
                 logger.error('In-App Notification DB Error:', error);
@@ -125,25 +121,24 @@ class NotificationService {
     // --- Specific Event Handlers ---
 
     async handleOrderPlaced({ order, customerId, dealerId }) {
-        logger.info('[NotificationService] handleOrderPlaced triggered', { orderId: order?.id, customerId, dealerId });
+        const orderId = order?._id || order?.id;
+        logger.info('[NotificationService] handleOrderPlaced triggered', { orderId, customerId, dealerId });
 
-        // Notify Customer (Priority: WhatsApp + Email + Push)
         await this.sendNotification({
             userId: customerId,
             type: 'ORDER',
             title: 'Order Confirmed - NovaMart',
-            message: `Order #${order.id.slice(-8)} placed! Secured by NovaEscrow.`,
-            metadata: { orderId: order.id },
+            message: `Order #${orderId.toString().slice(-8)} placed! Secured by NovaEscrow.`,
+            metadata: { orderId: orderId.toString() },
             channels: ['WHATSAPP', 'EMAIL', 'PUSH', 'IN_APP']
         });
 
-        // Notify Dealer (Priority: Push + In-App)
         await this.sendNotification({
             userId: dealerId,
             type: 'ORDER',
             title: 'New Incoming Order',
-            message: `A new order #${order.id.slice(-8)} is awaiting fulfillment.`,
-            metadata: { orderId: order.id },
+            message: `A new order #${orderId.toString().slice(-8)} is awaiting fulfillment.`,
+            metadata: { orderId: orderId.toString() },
             channels: ['PUSH', 'IN_APP']
         });
     }
@@ -153,8 +148,8 @@ class NotificationService {
             userId,
             type: 'PAYMENT',
             title: 'Payment Confirmed',
-            message: `Payment for order #${orderId.slice(-8)} has been secured in NovaEscrow.`,
-            metadata: { orderId }
+            message: `Payment for order #${orderId.toString().slice(-8)} has been secured in NovaEscrow.`,
+            metadata: { orderId: orderId.toString() }
         });
     }
 
@@ -163,8 +158,8 @@ class NotificationService {
             userId,
             type: 'DELIVERY',
             title: 'Order Dispatched',
-            message: `Your order #${orderId.slice(-8)} is on the way! Tracking: ${trackingDetails}`,
-            metadata: { orderId }
+            message: `Your order #${orderId.toString().slice(-8)} is on the way! Tracking: ${trackingDetails}`,
+            metadata: { orderId: orderId.toString() }
         });
     }
 
@@ -173,9 +168,9 @@ class NotificationService {
             userId,
             type: 'DELIVERY',
             title: 'Order Delivered',
-            message: `Your order #${orderId.slice(-8)} has been delivered. Please verify to release funds.`,
-            metadata: { orderId },
-            channels: ['IN_APP', 'PUSH'] // Delivered is already high visible via push
+            message: `Your order #${orderId.toString().slice(-8)} has been delivered. Please verify to release funds.`,
+            metadata: { orderId: orderId.toString() },
+            channels: ['IN_APP', 'PUSH']
         });
     }
 
@@ -184,9 +179,9 @@ class NotificationService {
             userId: dealerId,
             type: 'PAYMENT',
             title: 'Funds Released',
-            message: `₹${amount} for order #${orderId.slice(-8)} has been released to your account.`,
-            metadata: { orderId },
-            channels: ['IN_APP', 'EMAIL', 'PUSH', 'WHATSAPP'] // WhatsApp for critical payout
+            message: `₹${amount} for order #${orderId.toString().slice(-8)} has been released to your account.`,
+            metadata: { orderId: orderId.toString() },
+            channels: ['IN_APP', 'EMAIL', 'PUSH', 'WHATSAPP']
         });
     }
 
@@ -206,7 +201,7 @@ class NotificationService {
             type: 'PRODUCT',
             title: `Product ${status}`,
             message: `Your product "${productName}" has been ${status.toLowerCase()} by the audit team.`,
-            metadata: { productId }
+            metadata: { productId: productId.toString() }
         });
     }
 
@@ -215,17 +210,15 @@ class NotificationService {
             userId: raisedByUserId,
             type: 'SECURITY',
             title: 'Dispute Raised',
-            message: `You have raised a dispute for order #${orderId.slice(-8)}. Reason: ${reason}`,
-            metadata: { disputeId, orderId }
+            message: `You have raised a dispute for order #${orderId.toString().slice(-8)}. Reason: ${reason}`,
+            metadata: { disputeId: disputeId.toString(), orderId: orderId.toString() }
         });
     }
 
     async handleDisputeResolved({ disputeId, orderId, resolution }) {
-        // This would ideally notify all parties, for now just generic
         logger.info(`[NotificationService] Dispute ${disputeId} resolved: ${resolution}`);
     }
 }
 
-// Singleton instance
 const notificationService = new NotificationService();
 export default notificationService;

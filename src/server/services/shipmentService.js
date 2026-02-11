@@ -3,9 +3,10 @@
  * Manages the logistics journey and delivery lifecycle.
  */
 
-import prisma from '../lib/prisma.js';
+import { Order, Escrow, Inventory } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import logger from '../lib/logger.js';
+import mongoose from 'mongoose';
 
 class ShipmentService {
     /**
@@ -39,52 +40,45 @@ class ShipmentService {
      * Update Shipment Status with side effects (Escrow release, inventory unlock).
      */
     async updateShipmentStatus(orderId, { status, reason, metadata }) {
-        return await prisma.$transaction(async (tx) => {
-            const currentOrder = await tx.order.findUnique({
-                where: { id: orderId },
-                include: { items: true, escrow: true }
-            });
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const currentOrder = await Order.findById(orderId).session(session);
 
             if (!currentOrder) throw new Error('Order not found');
 
             // 1. Logic for DELIVERED
             if (status === 'DELIVERED') {
-                if (currentOrder.escrow && currentOrder.escrow.status === 'HOLD') {
-                    await tx.escrow.update({
-                        where: { id: currentOrder.escrow.id },
-                        data: {
-                            status: 'RELEASED',
-                            releasedAt: new Date()
-                        }
-                    });
+                const escrow = await Escrow.findOne({ orderId }).session(session);
+                if (escrow && escrow.status === 'HOLD') {
+                    await Escrow.findByIdAndUpdate(escrow._id, {
+                        status: 'RELEASED',
+                        releasedAt: new Date()
+                    }, { session });
                 }
 
-                // Unlock inventory (Physical flow complete)
+                // Unlock inventory
                 for (const item of currentOrder.items) {
-                    if (item.inventoryId) {
-                        await tx.inventory.update({
-                            where: { id: item.inventoryId },
-                            data: { locked: { decrement: item.quantity } }
-                        });
-                    }
+                    await Inventory.findByIdAndUpdate(item.inventoryId, {
+                        $inc: { locked: -item.quantity }
+                    }, { session });
                 }
             }
 
             // 2. Update Order Status & Timeline
-            const updatedOrder = await tx.order.update({
-                where: { id: orderId },
-                data: {
-                    status,
+            const updatedOrder = await Order.findByIdAndUpdate(orderId, {
+                status,
+                $push: {
                     timeline: {
-                        create: {
-                            fromState: currentOrder.status,
-                            toState: status,
-                            reason: reason || 'System update',
-                            metadata: metadata || {}
-                        }
+                        fromState: currentOrder.status,
+                        toState: status,
+                        reason: reason || 'System update',
+                        metadata: metadata || {}
                     }
                 }
-            });
+            }, { session, new: true });
+
+            await session.commitTransaction();
 
             // 3. Emit Event
             if (status === 'DELIVERED') {
@@ -94,7 +88,12 @@ class ShipmentService {
             }
 
             return updatedOrder;
-        });
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 }
 

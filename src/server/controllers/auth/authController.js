@@ -1,6 +1,14 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import prisma from '../../lib/prisma.js';
+import mongoose from 'mongoose';
+import {
+    User,
+    Session,
+    Dealer,
+    Manufacturer,
+    Customer,
+    Badge
+} from '../../models/index.js';
 import systemEvents, { EVENTS } from '../../lib/systemEvents.js';
 import { OAuth2Client } from 'google-auth-library';
 import auditService from '../../services/audit.js';
@@ -10,85 +18,87 @@ import crypto from 'crypto';
 import emailService from '../../services/emailService.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
-const REFRESH_SECRET = process.env.REFRESH_SECRET || 'superrefreshsecret';
+const getJwtSecret = () => process.env.JWT_SECRET || 'supersecret';
+const getRefreshSecret = () => process.env.REFRESH_SECRET || 'superrefreshsecret';
 
 /**
  * Helper to generate access and refresh tokens
  */
 const generateTokens = (user) => {
+    const userId = user._id || user.id;
     const accessToken = jwt.sign(
-        { id: user.id, role: user.role, status: user.status },
-        JWT_SECRET,
+        { id: userId, role: user.role, status: user.status },
+        getJwtSecret(),
         { expiresIn: '1h' }
     );
     const refreshToken = jwt.sign(
-        { id: user.id },
-        REFRESH_SECRET,
+        { id: userId },
+        getRefreshSecret(),
         { expiresIn: '7d' }
     );
     return { accessToken, refreshToken };
 };
 
-/**
- * Register a new user
- */
+import fs from 'fs';
+
 export const register = async (req, res) => {
     const { email, phone, password, role, ...profileData } = req.body;
+    logger.info('DEBUG: Registering user - Email: %s, Role: %s', email, role);
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-        const result = await prisma.$transaction(async (tx) => {
-            const roleUpper = role.toUpperCase();
-            const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+        const roleUpper = role.toUpperCase();
+        logger.info('DEBUG: roleUpper: %s', roleUpper);
+        const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
-            const user = await tx.user.create({
-                data: {
-                    email,
-                    phone,
-                    password: hashedPassword,
-                    role: roleUpper,
-                    status: (roleUpper === 'CUSTOMER') ? 'ACTIVE' : 'PENDING'
-                }
-            });
+        const [user] = await User.create([{
+            email,
+            phone,
+            password: hashedPassword,
+            role: roleUpper,
+            status: (roleUpper === 'CUSTOMER') ? 'ACTIVE' : 'PENDING'
+        }], { session });
 
-            if (roleUpper === 'DEALER') {
-                const { businessName, gstNumber, businessAddress, bankDetails } = profileData;
-                await tx.dealer.create({
-                    data: { userId: user.id, businessName, gstNumber, businessAddress, bankDetails }
-                });
-            } else if (roleUpper === 'MANUFACTURER') {
-                const { companyName, registrationNo, factoryAddress, gstNumber, bankDetails, certifications } = profileData;
-                await tx.manufacturer.create({
-                    data: {
-                        userId: user.id,
-                        companyName,
-                        registrationNo,
-                        factoryAddress,
-                        gstNumber,
-                        bankDetails,
-                        certifications: certifications || []
-                    }
-                });
-            } else if (roleUpper === 'CUSTOMER') {
-                await tx.customer.create({
-                    data: { userId: user.id, name: profileData.name || email?.split('@')[0] || 'Customer' }
-                });
-            }
-            return user;
-        });
+        if (roleUpper === 'DEALER') {
+            const { businessName, gstNumber, businessAddress, bankDetails } = profileData;
+            await Dealer.create([{
+                userId: user._id,
+                businessName,
+                gstNumber,
+                businessAddress,
+                bankDetails
+            }], { session });
+        } else if (roleUpper === 'MANUFACTURER') {
+            const { companyName, registrationNo, factoryAddress, gstNumber, bankDetails, certifications } = profileData;
+            await Manufacturer.create([{
+                userId: user._id,
+                companyName,
+                registrationNo,
+                factoryAddress,
+                gstNumber,
+                bankDetails,
+                certifications: certifications || []
+            }], { session });
+        } else if (roleUpper === 'CUSTOMER') {
+            await Customer.create([{
+                userId: user._id,
+                name: profileData.name || email?.split('@')[0] || 'Customer'
+            }], { session });
+        }
 
-        const user = result;
+        await session.commitTransaction();
 
         // Audit Log
-        await auditService.logAction('USER_REGISTERED', 'USER', user.id, {
-            userId: user.id,
+        await auditService.logAction('USER_REGISTERED', 'USER', user._id, {
+            userId: user._id,
             newData: { role: user.role, status: user.status },
             req
         });
 
         // Emit System Event
         systemEvents.emit(EVENTS.AUTH.REGISTERED, {
-            userId: user.id,
+            userId: user._id,
             role: user.role,
             status: user.status
         });
@@ -96,19 +106,14 @@ export const register = async (req, res) => {
         const { accessToken, refreshToken } = generateTokens(user);
 
         // Save refresh token to DB
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { refreshToken }
-        });
+        await User.findByIdAndUpdate(user._id, { refreshToken });
 
-        await prisma.session.create({
-            data: {
-                userId: user.id,
-                token: accessToken,
-                ipAddress: req.ip,
-                device: req.headers['user-agent'],
-                expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1h
-            }
+        await Session.create({
+            userId: user._id,
+            token: accessToken,
+            ipAddress: req.ip,
+            device: req.headers['user-agent'],
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1h
         });
 
         res.status(201).json({
@@ -118,7 +123,7 @@ export const register = async (req, res) => {
                 token: accessToken,
                 refreshToken,
                 user: {
-                    id: user.id,
+                    id: user._id,
                     email: user.email,
                     role: user.role,
                     status: user.status
@@ -126,18 +131,27 @@ export const register = async (req, res) => {
             }
         });
     } catch (error) {
-        logger.error('❌ Registration Error:', error);
+        await session.abortTransaction();
+        const message = error.code === 11000 ? 'DUPLICATE_ENTRY' : 'REGISTRATION_FAILED';
+        const details = error.message;
 
-        let message = 'REGISTRATION_FAILED';
-        let details = error.message;
+        console.log('--- REGISTRATION ERROR ---');
+        console.log('Message:', error.message);
+        console.log('Code:', error.code);
+        console.log('KeyPattern:', error.keyPattern);
+        console.log('KeyValue:', error.keyValue);
+        console.log('--------------------------');
 
-        if (error.code === 'P2002') {
-            const field = error.meta?.target?.[0] || 'account';
-            message = 'DUPLICATE_ENTRY';
-            details = { [field]: `${field.toUpperCase()}_ALREADY_EXISTS` };
-        }
+        logger.error('❌ Registration Error Details:', {
+            message: error.message,
+            code: error.code,
+            keyPattern: error.keyPattern,
+            keyValue: error.keyValue
+        });
 
-        res.status(400).json({ error: message, details });
+        res.status(400).json({ success: false, error: message, details });
+    } finally {
+        session.endSession();
     }
 };
 
@@ -148,33 +162,29 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await User.findOne({ email });
+        console.log(`DEBUG: User found in login - Email: ${email}, Role: ${user?.role}, ID: ${user?._id}`);
         if (!user || (user.password && !(await bcrypt.compare(password, user.password)))) {
             return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
         }
 
         const { accessToken, refreshToken } = generateTokens(user);
 
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { refreshToken }
-        });
+        await User.findByIdAndUpdate(user._id, { refreshToken });
 
         // Clear existing sessions
-        await prisma.session.deleteMany({ where: { userId: user.id } });
+        await Session.deleteMany({ userId: user._id });
 
-        await prisma.session.create({
-            data: {
-                userId: user.id,
-                token: accessToken,
-                ipAddress: req.ip,
-                device: req.headers['user-agent'],
-                expiresAt: new Date(Date.now() + 60 * 60 * 1000)
-            }
+        await Session.create({
+            userId: user._id,
+            token: accessToken,
+            ipAddress: req.ip,
+            device: req.headers['user-agent'],
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000)
         });
 
-        await auditService.logAction('USER_LOGIN_EMAIL', 'USER', user.id, {
-            userId: user.id,
+        await auditService.logAction('USER_LOGIN_EMAIL', 'USER', user._id, {
+            userId: user._id,
             req
         });
 
@@ -184,7 +194,7 @@ export const login = async (req, res) => {
                 token: accessToken,
                 refreshToken,
                 user: {
-                    id: user.id,
+                    id: user._id,
                     email: user.email,
                     role: user.role,
                     status: user.status
@@ -209,32 +219,27 @@ export const loginWithPhone = async (req, res) => {
             return res.status(401).json({ error: 'INVALID_OR_EXPIRED_OTP' });
         }
 
-        const user = await prisma.user.findUnique({ where: { phone } });
+        const user = await User.findOne({ phone });
         if (!user) {
             return res.status(404).json({ error: 'USER_NOT_FOUND', message: 'No account linked to this phone number.' });
         }
 
         const { accessToken, refreshToken } = generateTokens(user);
 
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { refreshToken }
+        await User.findByIdAndUpdate(user._id, { refreshToken });
+
+        await Session.deleteMany({ userId: user._id });
+
+        await Session.create({
+            userId: user._id,
+            token: accessToken,
+            ipAddress: req.ip,
+            device: req.headers['user-agent'],
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000)
         });
 
-        await prisma.session.deleteMany({ where: { userId: user.id } });
-
-        await prisma.session.create({
-            data: {
-                userId: user.id,
-                token: accessToken,
-                ipAddress: req.ip,
-                device: req.headers['user-agent'],
-                expiresAt: new Date(Date.now() + 60 * 60 * 1000)
-            }
-        });
-
-        await auditService.logAction('USER_LOGIN_PHONE', 'USER', user.id, {
-            userId: user.id,
+        await auditService.logAction('USER_LOGIN_PHONE', 'USER', user._id, {
+            userId: user._id,
             req
         });
 
@@ -244,7 +249,7 @@ export const loginWithPhone = async (req, res) => {
                 token: accessToken,
                 refreshToken,
                 user: {
-                    id: user.id,
+                    id: user._id,
                     email: user.email,
                     role: user.role,
                     status: user.status
@@ -272,7 +277,7 @@ export const googleLogin = async (req, res) => {
         const payload = ticket.getPayload();
         const { email, name } = payload;
 
-        let user = await prisma.user.findUnique({ where: { email } });
+        let user = await User.findOne({ email });
 
         if (user) {
             if (user.role !== 'CUSTOMER') {
@@ -283,35 +288,30 @@ export const googleLogin = async (req, res) => {
                 });
             }
         } else {
-            user = await prisma.user.create({
-                data: {
-                    email,
-                    role: 'CUSTOMER',
-                    status: 'ACTIVE',
-                    customer: {
-                        create: { name: name || email.split('@')[0] }
-                    }
-                }
+            user = await User.create({
+                email,
+                role: 'CUSTOMER',
+                status: 'ACTIVE'
+            });
+
+            await Customer.create({
+                userId: user._id,
+                name: name || email.split('@')[0]
             });
         }
 
         const { accessToken, refreshToken } = generateTokens(user);
 
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { refreshToken }
-        });
+        await User.findByIdAndUpdate(user._id, { refreshToken });
 
-        await prisma.session.deleteMany({ where: { userId: user.id } });
+        await Session.deleteMany({ userId: user._id });
 
-        await prisma.session.create({
-            data: {
-                userId: user.id,
-                token: accessToken,
-                ipAddress: req.ip,
-                device: req.headers['user-agent'],
-                expiresAt: new Date(Date.now() + 60 * 60 * 1000)
-            }
+        await Session.create({
+            userId: user._id,
+            token: accessToken,
+            ipAddress: req.ip,
+            device: req.headers['user-agent'],
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000)
         });
 
         await auditService.logAction('USER_LOGIN_GOOGLE', 'USER', user.id, {
@@ -364,13 +364,15 @@ export const getCurrentUser = async (req, res) => {
  */
 export const refresh = async (req, res) => {
     const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(401).json({ error: 'REFRESH_TOKEN_REQUIRED' });
+    logger.info('DEBUG: Refreshing token for RT starting with: %s', refreshToken?.substring(0, 10));
+    if (!refreshToken) {
+        logger.info('DEBUG: No refresh token provided');
+        return res.status(401).json({ error: 'REFRESH_TOKEN_REQUIRED' });
+    }
 
     try {
-        const payload = jwt.verify(refreshToken, REFRESH_SECRET);
-        const user = await prisma.user.findUnique({
-            where: { id: payload.id }
-        });
+        const payload = jwt.verify(refreshToken, getRefreshSecret());
+        const user = await User.findById(payload.id);
 
         if (!user || user.refreshToken !== refreshToken) {
             return res.status(401).json({ error: 'INVALID_REFRESH_TOKEN' });
@@ -378,10 +380,18 @@ export const refresh = async (req, res) => {
 
         const tokens = generateTokens(user);
 
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { refreshToken: tokens.refreshToken }
+        // Update User's refresh token
+        await User.findByIdAndUpdate(user._id, { refreshToken: tokens.refreshToken });
+
+        // Create new session for the new access token
+        const newSession = await Session.create({
+            userId: user._id,
+            token: tokens.accessToken,
+            ipAddress: req.ip,
+            device: req.headers['user-agent'],
+            expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1h
         });
+        logger.info('DEBUG: New session created in DB for user: %s', user._id);
 
         res.json({
             success: true,
@@ -404,16 +414,11 @@ export const logout = async (req, res) => {
         const token = authHeader?.split(' ')[1];
 
         if (token) {
-            await prisma.session.deleteMany({
-                where: { token: token }
-            });
+            await Session.deleteMany({ token });
         }
 
         if (req.user) {
-            await prisma.user.update({
-                where: { id: req.user.id },
-                data: { refreshToken: null }
-            });
+            await User.findByIdAndUpdate(req.user._id, { refreshToken: null });
         }
 
         res.json({ success: true, message: 'LOGOUT_SUCCESSFUL' });
@@ -430,7 +435,7 @@ export const forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     try {
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await User.findOne({ email });
         if (!user) {
             // Industry standard: Don't reveal if user exists
             return res.json({ success: true, message: 'RESET_LINK_SENT_IF_ACCOUNT_EXISTS' });
@@ -441,12 +446,9 @@ export const forgotPassword = async (req, res) => {
         const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
         const tokenExpiry = new Date(Date.now() + 3600000); // 1 Hour
 
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                resetPasswordToken: hashedToken,
-                resetPasswordExpires: tokenExpiry
-            }
+        await User.findByIdAndUpdate(user._id, {
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: tokenExpiry
         });
 
         // Send Email
@@ -471,9 +473,7 @@ export const resetPassword = async (req, res) => {
     try {
         const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-        const user = await prisma.user.findUnique({
-            where: { resetPasswordToken: hashedToken }
-        });
+        const user = await User.findOne({ resetPasswordToken: hashedToken });
 
         if (!user || user.resetPasswordExpires < new Date()) {
             return res.status(400).json({ error: 'INVALID_OR_EXPIRED_TOKEN' });
@@ -482,13 +482,10 @@ export const resetPassword = async (req, res) => {
         // Hash New Password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                password: hashedPassword,
-                resetPasswordToken: null,
-                resetPasswordExpires: null
-            }
+        await User.findByIdAndUpdate(user._id, {
+            password: hashedPassword,
+            resetPasswordToken: null,
+            resetPasswordExpires: null
         });
 
         await auditService.logAction('PASSWORD_RESET_SUCCESSFUL', 'USER', user.id, { req });

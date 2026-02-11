@@ -4,6 +4,7 @@ import authenticate from '../../middleware/auth.js';
 import { sendOTP } from '../../controllers/auth/otpController.js';
 import { validateRegistration, validateLogin, validatePhoneLogin } from '../../middleware/validate.js';
 import { otpRateLimiter, loginRateLimiter, authRateLimiter } from '../../middleware/rateLimiter.js';
+import logger from '../../lib/logger.js';
 
 const router = express.Router();
 

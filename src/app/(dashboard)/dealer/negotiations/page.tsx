@@ -74,7 +74,7 @@ export default function DealerNegotiations() {
                     <FaSpinner className="w-8 h-8 text-[#0F6CBD] animate-spin" />
                 </div>
             ) : filteredNegotiations.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2rem] border border-dashed border-slate-200">
+                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[10px] border border-dashed border-slate-200">
                     <FaComments className="w-12 h-12 text-slate-100 mb-4" />
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                         No {filterStatus.toLowerCase()} negotiations found
@@ -84,10 +84,10 @@ export default function DealerNegotiations() {
                 <div className="space-y-4">
                     {filteredNegotiations.map((negotiation) => (
                         <motion.div
-                            key={negotiation.id}
+                            key={negotiation._id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 hover:shadow-md transition-all"
+                            className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-6 hover:shadow-md transition-all"
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-4 flex-1">
@@ -97,11 +97,11 @@ export default function DealerNegotiations() {
 
                                     <div className="flex-1">
                                         <h3 className="text-lg font-black text-slate-800">
-                                            {negotiation.manufacturer.companyName}
+                                            {negotiation.manufacturerId?.companyName || 'Unknown Manufacturer'}
                                         </h3>
                                         <p className="text-sm text-slate-500 font-bold mt-1 flex items-center gap-2">
                                             <FaBoxOpen className="w-3 h-3" />
-                                            {negotiation.product.name}
+                                            {negotiation.productId?.name || 'Unknown Product'}
                                         </p>
 
                                         <div className="flex items-center gap-4 mt-3 text-xs font-bold text-slate-600">
@@ -129,7 +129,7 @@ export default function DealerNegotiations() {
                                         {negotiation.status}
                                     </span>
 
-                                    <Link href={`/dealer/negotiations/${negotiation.id}`}>
+                                    <Link href={`/dealer/negotiations/${negotiation._id}`}>
                                         <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-xl font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
                                             Open Chat
                                             <FaArrowRight className="w-3 h-3" />

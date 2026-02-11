@@ -110,8 +110,7 @@ export default function CustomerProductCard({
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            // Trigger Quick View (Future Implementation)
-                            console.log('Quick View Triggered');
+                            // Quick View functionality can be implemented in future
                         }}
                         className="bg-white text-black text-[10px] font-bold px-4 py-2 rounded-full shadow-lg hover:bg-black hover:text-white transition-colors uppercase tracking-widest"
                     >

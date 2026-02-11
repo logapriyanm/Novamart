@@ -6,18 +6,18 @@ const notificationSchema = new mongoose.Schema({
         required: true,
         index: true
     },
-    type: {
-        type: String,
-        required: true,
-        enum: ['ORDER', 'PAYMENT', 'DELIVERY', 'KYC', 'PRODUCT', 'SECURITY', 'SYSTEM']
-    },
-    title: {
-        type: String,
-        required: true
-    },
     message: {
         type: String,
         required: true
+    },
+    link: {
+        type: String,
+        default: null
+    },
+    type: {
+        type: String,
+        required: true,
+        enum: ['ORDER', 'PAYMENT', 'DELIVERY', 'KYC', 'PRODUCT', 'SECURITY', 'SYSTEM', 'DEALER_REQUEST', 'PARTNERSHIP', 'NEGOTIATION_STARTED', 'NEGOTIATION_ACCEPTED', 'NEGOTIATION_REJECTED', 'NEGOTIATION_MESSAGE', 'NEGOTIATION_UPDATE', 'ORDER_FULFILLED', 'ORDER_PLACED']
     },
     metadata: {
         type: Object,

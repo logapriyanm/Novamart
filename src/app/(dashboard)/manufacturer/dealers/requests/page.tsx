@@ -5,7 +5,7 @@ import {
     FaUserCheck, FaStore, FaClock, FaMapMarkerAlt,
     FaCheck, FaTimes, FaFileExport, FaFilter,
     FaChevronLeft, FaChevronRight, FaExternalLinkAlt,
-    FaSpinner
+    FaSpinner, FaCommentDots
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,7 +26,6 @@ export default function DealerRequests() {
         setIsLoading(true);
         try {
             const response = await apiClient.get<any>(`/manufacturer/dealers/requests?status=${activeTab}`);
-            console.log('Fetched Requests:', response);
             setRequests(response || []);
         } catch (error: any) {
             toast.error(error.message || 'Failed to fetch requests');
@@ -176,6 +175,18 @@ export default function DealerRequests() {
                                                 Approve <FaCheck className="w-3 h-3" />
                                             </button>
                                         </div>
+                                    </div>
+                                )}
+
+                                {request.status === 'APPROVED' && (
+                                    <div className="flex flex-col justify-end items-end border-l border-slate-100 pl-8 md:pl-8 min-w-[200px]">
+                                        <Link
+                                            href={`/manufacturer/messages?id=${dealer.userId}`}
+                                            className="w-full py-3 px-4 bg-white border border-[#0F6CBD] text-[#0F6CBD] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <FaCommentDots className="w-3 h-3" />
+                                            Message Dealer
+                                        </Link>
                                     </div>
                                 )}
                             </motion.div>

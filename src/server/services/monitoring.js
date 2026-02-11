@@ -1,4 +1,4 @@
-import prisma from '../lib/prisma.js';
+import { Payment, Escrow, Inventory } from '../models/index.js';
 
 class MonitoringService {
     /**
@@ -32,21 +32,15 @@ class MonitoringService {
     async checkFailedPayments() {
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-        const failures = await prisma.payment.findMany({
-            where: {
-                status: 'FAILED',
-                createdAt: { gte: twentyFourHoursAgo }
-            },
-            include: { order: { select: { id: true, totalAmount: true } } },
-            take: 20
-        });
+        const failures = await Payment.find({
+            status: 'FAILED',
+            createdAt: { $gte: twentyFourHoursAgo }
+        }).populate('orderId', 'totalAmount')
+            .limit(20);
 
-        // If checks are simple, just return the list. 
-        // Real-world would check rate (failures / total) > threshold.
-        // Here we just alert on any logged failures for visibility.
         return failures.map(f => ({
             severity: 'HIGH',
-            message: `Payment Failed: ${f.order?.id} (Amount: ${f.amount})`,
+            message: `Payment Failed: ${f.orderId?._id} (Amount: ${f.amount})`,
             timestamp: f.createdAt
         }));
     }
@@ -57,19 +51,16 @@ class MonitoringService {
     async checkStuckEscrows() {
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-        const stuckEscrows = await prisma.escrow.findMany({
-            where: {
-                status: { in: ['HOLD', 'FROZEN'] },
-                updatedAt: { lt: sevenDaysAgo }
-            },
-            include: { order: { select: { id: true, status: true } } },
-            take: 20
-        });
+        const stuckEscrows = await Escrow.find({
+            status: { $in: ['HOLD', 'FROZEN'] },
+            updatedAt: { $lt: sevenDaysAgo }
+        }).populate('orderId', 'status')
+            .limit(20);
 
         return stuckEscrows.map(e => ({
             severity: 'MEDIUM',
-            message: `Escrow Stuck (${e.status}): Order ${e.order?.id} last updated ${e.updatedAt.toLocaleDateString()}`,
-            id: e.id
+            message: `Escrow Stuck (${e.status}): Order ${e.orderId?._id} last updated ${e.updatedAt.toLocaleDateString()}`,
+            id: e._id
         }));
     }
 
@@ -77,22 +68,19 @@ class MonitoringService {
      * Detect Negative Stock or Locked > Stock
      */
     async checkInventoryIntegrity() {
-        // Prisma doesn't support field comparison in where clause easily without raw query
-        // We will fetch potentially problematic items (e.g. locked > 0 or stock < 0) and filter in JS for safety
-        // Or use raw query for performance. Raw query is better.
-
         try {
-            const mismatches = await prisma.$queryRaw`
-                SELECT id, "productId", "dealerId", stock, locked 
-                FROM inventories 
-                WHERE stock < 0 OR locked > stock
-                LIMIT 20
-            `;
+            // Mongoose/MongoDB field comparison requires $expr
+            const mismatches = await Inventory.find({
+                $or: [
+                    { stock: { $lt: 0 } },
+                    { $expr: { $gt: ['$locked', '$stock'] } }
+                ]
+            }).limit(20);
 
             return mismatches.map(i => ({
                 severity: 'CRITICAL',
-                message: `Inventory Mismatch: Item ${i.id} (Stock: ${i.stock}, Locked: ${i.locked})`,
-                id: i.id
+                message: `Inventory Mismatch: Item ${i._id} (Stock: ${i.stock}, Locked: ${i.locked})`,
+                id: i._id
             }));
         } catch (error) {
             console.error('Inventory check failed:', error);

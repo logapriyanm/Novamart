@@ -34,21 +34,29 @@ class MongoService {
             .skip(options.skip || 0);
     }
 
-    async updateStatus(collectionName, id, status, actorId) {
+    async update(collectionName, id, updateData, actorId = 'SYSTEM') {
         const Model = models[collectionName];
         if (!Model) throw new Error(`Model ${collectionName} not found`);
 
-        const doc = await Model.findByIdAndUpdate(id, { status }, { new: true });
+        const doc = await Model.findByIdAndUpdate(id, updateData, { new: true });
+        console.log(`DEBUG: MongoService.update - Model: ${collectionName}, ID: ${id}, Result: ${doc ? 'SUCCESS' : 'NOT_FOUND'}`);
+        if (doc) {
+            console.log(`   New Data:`, JSON.stringify(updateData));
+        }
 
         await models.AuditLog.create({
             actorId,
-            role: 'MANAGER',
-            action: `UPDATED_STATUS_${collectionName.toUpperCase()}`,
+            role: 'SYSTEM',
+            action: `UPDATED_${collectionName.toUpperCase()}`,
             entity: id,
-            details: { newStatus: status }
+            details: { updateData }
         });
 
         return doc;
+    }
+
+    async updateStatus(collectionName, id, status, actorId) {
+        return this.update(collectionName, id, { status }, actorId);
     }
 
     // Deletion is strictly managed

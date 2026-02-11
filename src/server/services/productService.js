@@ -3,16 +3,18 @@
  * Logic for catalog management, search, and manufacturer offerings.
  */
 
-import prisma from '../lib/prisma.js';
+import { Product, Manufacturer, Inventory, User, Review, AuditLog } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import logger from '../lib/logger.js';
-import { getFiltersBySubCategory } from '../lib/applianceConfig.js';
 
 class ProductService {
     /**
      * Create a new product.
      */
-    async createProduct(manufacturerId, data) {
+    /**
+     * Create a new product.
+     */
+    async createProduct(manufacturerId, data, shouldAutoApprove = false) {
         const {
             name,
             description,
@@ -29,33 +31,65 @@ class ProductService {
         // 1. Validate Category (Slugify)
         const normalizedCategory = category ? category.toLowerCase().replace(/\s+/g, '-') : 'general';
 
-        // 2. Create Product (Defaults to PENDING for admin review)
-        const product = await prisma.product.create({
-            data: {
-                manufacturerId,
-                name,
-                description,
-                basePrice: parseFloat(basePrice) || 0,
-                moq: parseInt(moq) || 1,
-                category: normalizedCategory,
-                colors,
-                sizes,
-                images,
-                video,
-                specifications: specifications || {},
-                status: 'PENDING',
-                isApproved: false
-            }
+        // 2. Create Product
+        // If manufacturer is verified (shouldAutoApprove), defaults to APPROVED. Otherwise PENDING.
+        const initialStatus = shouldAutoApprove ? 'APPROVED' : 'PENDING';
+
+        const product = await Product.create({
+            manufacturerId,
+            name,
+            description,
+            basePrice: parseFloat(basePrice) || 0,
+            moq: parseInt(moq) || 1,
+            category: normalizedCategory,
+            colors,
+            sizes,
+            images,
+            video,
+            specifications: specifications || {},
+            status: initialStatus,
+            isApproved: shouldAutoApprove
         });
 
         // 3. Emit Event
         systemEvents.emit(EVENTS.PRODUCT.CREATED, {
-            productId: product.id,
+            productId: product._id,
             productName: product.name,
-            manufacturerId
+            manufacturerId,
+            status: initialStatus
         });
 
         return product;
+    }
+
+    // ... getAllProducts (unchanged) ...
+
+    /**
+     * Manufacturer: Update product.
+     */
+    async updateProduct(id, manufacturerId, data, shouldAutoApprove = false) {
+        const product = await Product.findById(id);
+        if (!product || product.manufacturerId.toString() !== manufacturerId.toString()) {
+            throw new Error('UNAUTHORIZED_PRODUCT_ACCESS');
+        }
+
+        const { basePrice, moq, specifications, ...other } = data;
+
+        const updateData = { ...other };
+        if (specifications) {
+            updateData.specifications = { ...(product.specifications || {}), ...specifications };
+        }
+        if (basePrice) updateData.basePrice = parseFloat(basePrice);
+        if (moq) updateData.moq = parseInt(moq);
+
+        // Reset to PENDING if critical fields change AND manufacturer is NOT trusted
+        // If shouldAutoApprove is true, we skip the revert to PENDING
+        if (!shouldAutoApprove && product.status === 'APPROVED' && (updateData.basePrice !== product.basePrice || updateData.name !== product.name)) {
+            updateData.status = 'PENDING';
+            updateData.isApproved = false;
+        }
+
+        return await Product.findByIdAndUpdate(id, updateData, { new: true });
     }
 
     /**
@@ -65,139 +99,140 @@ class ProductService {
         const {
             status, category, q, minPrice, maxPrice, sortBy,
             brands, rating, availability, verifiedOnly,
-            specFilters = [], subCategory, page = 1, limit = 20,
+            subCategory, page = 1, limit = 20,
             networkOnly
         } = filters;
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const take = parseInt(limit);
 
-        const conditions = [];
+        const query = {};
 
         // 1. Role-based Status Filtering
         if (userRole === 'ADMIN') {
-            if (status) conditions.push({ status });
+            if (status) query.status = status;
         } else {
-            conditions.push({ status: 'APPROVED' });
+            query.status = 'APPROVED';
         }
 
         // 2. Category & Subcategory
         if (category && category !== 'all') {
-            conditions.push({ category: { equals: category, mode: 'insensitive' } });
+            query.category = new RegExp(`^${category}$`, 'i');
         }
 
         if (subCategory && subCategory !== 'all') {
             const normalizedSubCategory = subCategory.toLowerCase().replace(/\s+/g, '-');
-            conditions.push({
-                OR: [
-                    { specifications: { path: ['subCategory'], equals: subCategory } },
-                    { specifications: { path: ['subCategory'], equals: normalizedSubCategory } }
-                ]
-            });
+            query.$or = [
+                { 'specifications.subCategory': subCategory },
+                { 'specifications.subCategory': normalizedSubCategory }
+            ];
         }
 
-        // 3. Search Query
+        // 3. Search Query (Text search)
         if (q) {
-            conditions.push({
-                OR: [
-                    { name: { contains: q, mode: 'insensitive' } },
-                    { description: { contains: q, mode: 'insensitive' } },
-                    { category: { contains: q, mode: 'insensitive' } },
-                    { manufacturer: { companyName: { contains: q, mode: 'insensitive' } } }
-                ]
-            });
+            query.$or = [
+                { name: { $regex: q, $options: 'i' } },
+                { description: { $regex: q, $options: 'i' } },
+                { category: { $regex: q, $options: 'i' } }
+            ];
         }
 
         // 4. Price & Rating
-        if (minPrice) conditions.push({ basePrice: { gte: parseFloat(minPrice) } });
-        if (maxPrice) conditions.push({ basePrice: { lte: parseFloat(maxPrice) } });
-        if (rating) conditions.push({ averageRating: { gte: parseFloat(rating) } });
-
-        // 5. Manufacturer Filters
-        const mfgFilter = { user: { status: { not: 'SUSPENDED' } } };
-        if (networkOnly === 'true' && dealerId) {
-            mfgFilter.dealersApproved = { some: { id: dealerId } };
+        if (minPrice || maxPrice) {
+            query.basePrice = {};
+            if (minPrice) query.basePrice.$gte = parseFloat(minPrice);
+            if (maxPrice) query.basePrice.$lte = parseFloat(maxPrice);
         }
+
+        if (rating) {
+            query.averageRating = { $gte: parseFloat(rating) };
+        }
+
+        // 5. Manufacturer Filters (Sub-query or Aggregation needed for networkOnly/verified)
+        // For simplicity in a single query, we'll use $in with matching manufacturer IDs
+        let manufacturerIds = [];
+        const mfgQuery = {};
+        if (verifiedOnly === 'true') mfgQuery.isVerified = true;
         if (brands) {
             const brandList = Array.isArray(brands) ? brands : brands.split(',');
-            mfgFilter.companyName = { in: brandList, mode: 'insensitive' };
+            mfgQuery.companyName = { $in: brandList.map(b => new RegExp(`^${b}$`, 'i')) };
         }
-        if (verifiedOnly === 'true') mfgFilter.isVerified = true;
 
-        conditions.push({ manufacturer: mfgFilter });
+        if (Object.keys(mfgQuery).length > 0 || (networkOnly === 'true' && dealerId)) {
+            const manufacturers = await Manufacturer.find(mfgQuery).select('_id approvedBy');
+            manufacturerIds = manufacturers
+                .filter(m => networkOnly !== 'true' || (dealerId && m.approvedBy?.includes(dealerId)))
+                .map(m => m._id);
+
+            if (manufacturerIds.length > 0) {
+                query.manufacturerId = { $in: manufacturerIds };
+            } else if (Object.keys(mfgQuery).length > 0 || networkOnly === 'true') {
+                // Return empty if filters provided but no manufacturers match
+                return { products: [], pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), pages: 0 } };
+            }
+        }
 
         // 6. Availability & Spec Filters
         if (availability?.includes('In Stock')) {
-            conditions.push({ inventory: { some: { stock: { gt: 0 } } } });
+            // This is complex in MongoDB without aggregation. We'll handle it via sub-query.
+            const productsWithInventory = await Inventory.distinct('productId', { stock: { $gt: 0 } });
+            query._id = { $in: productsWithInventory };
         }
 
-        // 7. Dynamic Spec Filters (Technical Filters)
-        // Expected format for specFilters in query: specs=capacity:500L,compressor:Inverter
+        // 7. Dynamic Spec Filters
         if (filters.specs) {
             const specsArray = filters.specs.split(',');
             specsArray.forEach(pair => {
                 const [key, value] = pair.split(':');
                 if (key && value) {
+                    const field = `specifications.${key}`;
                     if (value.includes('|')) {
-                        const values = value.split('|');
-                        conditions.push({
-                            OR: values.map(v => ({
-                                specifications: {
-                                    path: [key],
-                                    equals: v
-                                }
-                            }))
-                        });
+                        query[field] = { $in: value.split('|') };
                     } else {
-                        conditions.push({
-                            specifications: {
-                                path: [key],
-                                equals: value
-                            }
-                        });
+                        query[field] = value;
                     }
                 }
             });
         }
 
-        if (specFilters.length > 0) {
-            conditions.push(...specFilters);
-        }
-
-        const where = { AND: conditions };
-
         // Sorting
-        let orderBy = { updatedAt: 'desc' };
+        let sort = { updatedAt: -1 };
         if (sortBy) {
             switch (sortBy) {
-                case 'price-low': orderBy = { basePrice: 'asc' }; break;
-                case 'price-high': orderBy = { basePrice: 'desc' }; break;
-                case 'rating': orderBy = { averageRating: 'desc' }; break;
-                case 'newest': orderBy = { createdAt: 'desc' }; break;
-                case 'popularity': orderBy = { reviewCount: 'desc' }; break;
+                case 'price-low': sort = { basePrice: 1 }; break;
+                case 'price-high': sort = { basePrice: -1 }; break;
+                case 'rating': sort = { averageRating: -1 }; break;
+                case 'newest': sort = { createdAt: -1 }; break;
+                case 'popularity': sort = { reviewCount: -1 }; break;
             }
         }
 
         const [total, products] = await Promise.all([
-            prisma.product.count({ where }),
-            prisma.product.findMany({
-                where,
-                include: {
-                    manufacturer: { select: { companyName: true, isVerified: true } },
-                    inventory: {
-                        take: 1,
-                        where: { stock: { gt: 0 } },
-                        include: { dealer: { select: { businessName: true } } }
-                    }
-                },
-                orderBy,
-                skip,
-                take
-            })
+            Product.countDocuments(query),
+            Product.find(query)
+                .populate('manufacturerId', 'companyName isVerified logo')
+                .sort(sort)
+                .skip(skip)
+                .limit(take)
+                .lean()
         ]);
 
+        // Format to match old output (manufacturer vs manufacturerId)
+        const formattedProducts = await Promise.all(products.map(async (p) => {
+            const inventory = await Inventory.findOne({ productId: p._id, stock: { $gt: 0 } })
+                .populate('dealerId', 'businessName')
+                .lean();
+
+            return {
+                ...p,
+                id: p._id,
+                manufacturer: p.manufacturerId,
+                inventory: inventory ? [inventory] : []
+            };
+        }));
+
         return {
-            products,
+            products: formattedProducts,
             pagination: {
                 total,
                 page: parseInt(page),
@@ -211,95 +246,95 @@ class ProductService {
      * Get detailed product view.
      */
     async getProductById(id, userId = null) {
-        const product = await prisma.product.findUnique({
-            where: { id },
-            include: {
-                manufacturer: { select: { id: true, companyName: true, logo: true, isVerified: true } },
-                inventory: {
-                    where: { stock: { gt: 0 } },
-                    include: {
-                        dealer: { select: { id: true, businessName: true, averageRating: true, reviewCount: true } }
-                    }
-                },
-                reviews: {
-                    orderBy: { createdAt: 'desc' },
-                    take: 5,
-                    include: { customer: { select: { name: true } } }
-                }
-            }
-        });
+        if (!mongoose.Types.ObjectId.isValid(id)) return null;
 
-        if (product && userId) {
+        const product = await Product.findById(id)
+            .populate('manufacturerId', 'companyName logo isVerified')
+            .lean();
+
+        if (!product) return null;
+
+        const [inventory, reviews] = await Promise.all([
+            Inventory.find({ productId: id, stock: { $gt: 0 } })
+                .populate('dealerId', 'businessName averageRating reviewCount')
+                .lean(),
+            Review.find({ productId: id })
+                .sort({ createdAt: -1 })
+                .limit(5)
+                .populate('customerId', 'name')
+                .lean()
+        ]);
+
+        const formattedProduct = {
+            ...product,
+            id: product._id,
+            manufacturer: product.manufacturerId,
+            inventory,
+            reviews
+        };
+
+        if (userId) {
             // Async track view
-            prisma.userBehavior.create({
-                data: {
-                    userId,
-                    type: 'VIEW',
-                    targetId: id,
-                    metadata: { type: 'PRODUCT_VIEW', category: product.category }
-                }
+            AuditLog.create({
+                userId,
+                action: 'VIEW',
+                targetType: 'PRODUCT',
+                targetId: id,
+                metadata: { type: 'PRODUCT_VIEW', category: product.category }
             }).catch(e => logger.error('View tracking failed', e));
         }
 
-        return product;
+        return formattedProduct;
     }
 
     /**
      * Admin: Update product status.
      */
     async updateStatus(id, status, rejectionReason = null) {
-        return await prisma.product.update({
-            where: { id },
-            data: {
-                status,
-                rejectionReason: status === 'REJECTED' ? rejectionReason : null,
-                isApproved: status === 'APPROVED'
-            }
-        });
+        return await Product.findByIdAndUpdate(id, {
+            status,
+            rejectionReason: status === 'REJECTED' ? rejectionReason : null,
+            isApproved: status === 'APPROVED'
+        }, { new: true });
     }
 
     /**
      * Manufacturer: Update product.
      */
     async updateProduct(id, manufacturerId, data) {
-        const product = await prisma.product.findUnique({ where: { id } });
-        if (!product || product.manufacturerId !== manufacturerId) {
+        const product = await Product.findById(id);
+        if (!product || product.manufacturerId.toString() !== manufacturerId.toString()) {
             throw new Error('UNAUTHORIZED_PRODUCT_ACCESS');
         }
 
         const { basePrice, moq, specifications, ...other } = data;
-        const finalSpecs = { ...(product.specifications || {}), ...(specifications || {}) };
 
-        const newData = {
-            ...other,
-            specifications: finalSpecs
-        };
-
-        if (basePrice) newData.basePrice = parseFloat(basePrice);
-        if (moq) newData.moq = parseInt(moq);
+        const updateData = { ...other };
+        if (specifications) {
+            updateData.specifications = { ...(product.specifications || {}), ...specifications };
+        }
+        if (basePrice) updateData.basePrice = parseFloat(basePrice);
+        if (moq) updateData.moq = parseInt(moq);
 
         // Reset to PENDING if critical fields change
-        if (product.status === 'APPROVED' && (newData.basePrice !== product.basePrice || newData.name !== product.name)) {
-            newData.status = 'PENDING';
-            newData.isApproved = false;
+        if (product.status === 'APPROVED' && (updateData.basePrice !== product.basePrice || updateData.name !== product.name)) {
+            updateData.status = 'PENDING';
+            updateData.isApproved = false;
         }
 
-        return await prisma.product.update({
-            where: { id },
-            data: newData
-        });
+        return await Product.findByIdAndUpdate(id, updateData, { new: true });
     }
 
     /**
      * Manufacturer: Delete product.
      */
     async deleteProduct(id, manufacturerId) {
-        const product = await prisma.product.findUnique({ where: { id } });
-        if (!product || product.manufacturerId !== manufacturerId) {
+        const product = await Product.findById(id);
+        if (!product || product.manufacturerId.toString() !== manufacturerId.toString()) {
             throw new Error('UNAUTHORIZED_PRODUCT_ACCESS');
         }
 
-        return await prisma.product.delete({ where: { id } });
+        return await Product.findByIdAndDelete(id);
     }
 
     /**
@@ -319,29 +354,38 @@ class ProductService {
             images: p.images || []
         }));
 
-        return await prisma.product.createMany({ data: validProducts });
+        const result = await Product.insertMany(validProducts);
+        return { count: result.length };
     }
 
     /**
      * Get discovery filters based on current approved catalog.
      */
     async getDiscoveryFilters(category = null) {
-        const where = { status: 'APPROVED' };
+        const query = { status: 'APPROVED' };
         if (category && category !== 'all') {
-            where.category = { equals: category, mode: 'insensitive' };
+            query.category = new RegExp(`^${category}$`, 'i');
         }
 
-        const [priceAgg, brandsAgg, categoriesAgg] = await Promise.all([
-            prisma.product.aggregate({ where, _min: { basePrice: true }, _max: { basePrice: true } }),
-            prisma.product.findMany({ where, select: { manufacturer: { select: { companyName: true } } }, distinct: ['manufacturerId'] }),
-            prisma.product.groupBy({ by: ['category'], where: { status: 'APPROVED' }, _count: true })
+        const [priceRange, manufacturers, categories] = await Promise.all([
+            Product.aggregate([
+                { $match: query },
+                { $group: { _id: null, min: { $min: '$basePrice' }, max: { $max: '$basePrice' } } }
+            ]),
+            Product.distinct('manufacturerId', query),
+            Product.aggregate([
+                { $match: { status: 'APPROVED' } },
+                { $group: { _id: '$category', count: { $sum: 1 } } }
+            ])
         ]);
 
+        const brandNames = await Manufacturer.find({ _id: { $in: manufacturers } }).distinct('companyName');
+
         return {
-            minPrice: priceAgg._min.basePrice || 0,
-            maxPrice: priceAgg._max.basePrice || 100000,
-            brands: brandsAgg.map(p => p.manufacturer.companyName).filter(Boolean),
-            categories: categoriesAgg.map(c => ({ name: c.category, count: c._count }))
+            minPrice: priceRange[0]?.min || 0,
+            maxPrice: priceRange[0]?.max || 100000,
+            brands: brandNames,
+            categories: categories.map(c => ({ name: c._id, count: c.count }))
         };
     }
 }

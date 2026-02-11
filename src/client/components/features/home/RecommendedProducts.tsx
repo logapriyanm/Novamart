@@ -18,7 +18,14 @@ interface RecommendedProductsProps {
     products: Product[];
 }
 
+import { useAuth } from '@/client/hooks/useAuth';
+
 export default function RecommendedProducts({ title, products }: RecommendedProductsProps) {
+    const { user } = useAuth();
+
+    // Strict safeguard: Personalized products should only be visible to logged-in users
+    if (!user) return null;
+
     if (!products || products.length === 0) return null;
 
     return (

@@ -4,7 +4,7 @@ import { DemandHeatmap } from '../models/index.js';
 
 export const captureEvent = async (req, res) => {
     const { eventType, targetId, metadata } = req.body;
-    const userId = req.user?.id;
+    const userId = req.user?._id;
 
     try {
         await behaviorService.trackEvent(userId, eventType, targetId, {
@@ -14,6 +14,7 @@ export const captureEvent = async (req, res) => {
         });
         res.status(202).json({ success: true });
     } catch (error) {
+        console.error('Capture Event Error:', error);
         res.status(500).json({ error: 'TRACKING_FAILED' });
     }
 };
@@ -23,12 +24,13 @@ export const captureEvent = async (req, res) => {
  */
 export const triggerFraudSignal = async (req, res) => {
     const { signalType, details, severity } = req.body;
-    const userId = req.user?.id;
+    const userId = req.user?._id;
 
     try {
         await auditService.logSignal(signalType, details, severity, userId);
         res.status(201).json({ success: true, message: 'Signal logged', data: null });
     } catch (error) {
+        console.error('Fraud Signal Error:', error);
         res.status(500).json({ error: 'SIGNAL_LOG_FAILED' });
     }
 };

@@ -4,8 +4,8 @@
  */
 
 import crypto from 'crypto';
-import prisma from '../../lib/prisma.js';
 import notificationService from '../../services/notificationService.js';
+import { User } from '../../models/index.js';
 
 // In-memory or Redis-based OTP store (In-memory for simplicity in this project)
 const otpStore = new Map();
@@ -46,7 +46,7 @@ export const sendOTP = async (req, res) => {
     });
 
     // Priority Delivery via NotificationService
-    const user = await prisma.user.findUnique({ where: { phone } });
+    const user = await User.findOne({ phone });
     if (user) {
         await notificationService.sendNotification({
             userId: user.id,

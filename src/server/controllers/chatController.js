@@ -1,82 +1,87 @@
-import { Chat, Message } from '../models/index.js';
-import prisma from '../lib/prisma.js';
+import { Chat, Message, Dealer, Manufacturer, Order, Negotiation, DealerSubscription, Customer } from '../models/index.js';
+import mongoose from 'mongoose';
 
 const checkSubscription = async (userId, requiredTier = 'PRO') => {
-    const dealer = await prisma.dealer.findUnique({
-        where: { userId },
-        include: {
-            subscriptions: {
-                where: { status: 'ACTIVE' },
-                include: { plan: true },
-                orderBy: { endDate: 'desc' },
-                take: 1
-            }
-        }
-    });
-
+    const dealer = await Dealer.findOne({ userId });
     if (!dealer) return false;
-    const activeSub = dealer.subscriptions[0];
-    if (!activeSub) return false;
 
-    // Rank 1: BASIC, Rank 2: PRO, Rank 3: ENTERPRISE
+    const activeSub = await DealerSubscription.findOne({
+        dealerId: dealer._id,
+        status: 'ACTIVE'
+    }).populate('planId').sort({ endDate: -1 });
+
+    if (!activeSub || !activeSub.planId) return false;
+
     const tiers = { 'BASIC': 1, 'PRO': 2, 'ENTERPRISE': 3 };
-    return tiers[activeSub.plan.name] >= tiers[requiredTier];
+    return tiers[activeSub.planId.name] >= tiers[requiredTier];
 };
 
 export const createChat = async (req, res) => {
     try {
         const { type, contextId, receiverId, receiverRole } = req.body;
-        const senderId = req.user.id;
+        const senderId = req.user._id;
         const senderRole = req.user.role;
 
-        // 1. Validate Roles (Strict Governance)
         if (senderRole === 'CUSTOMER' && receiverRole !== 'DEALER') {
             return res.status(403).json({ message: 'Customers can only chat with Dealers' });
         }
 
-        // 2. Subscription Gating (B2B/Manufacturer Only)
-        if (senderRole === 'DEALER' && receiverRole === 'MANUFACTURER') {
-            // Only gate Dealer-Manufacturer chats, not Customer-Dealer
-            const hasAccess = await checkSubscription(senderId, 'PRO');
-            if (!hasAccess) {
-                return res.status(403).json({
-                    message: 'B2B Chat with Manufacturers requires a PRO or ENTERPRISE subscription.',
-                    code: 'SUBSCRIPTION_REQUIRED'
-                });
+        if ((senderRole === 'DEALER' && receiverRole === 'MANUFACTURER') ||
+            (senderRole === 'MANUFACTURER' && receiverRole === 'DEALER')) {
+
+            const dealerId = senderRole === 'DEALER' ? req.user.dealer?._id : (await Dealer.findOne({ userId: receiverId }))?._id;
+            const mfrId = senderRole === 'MANUFACTURER' ? req.user.manufacturer?._id : (await Manufacturer.findOne({ userId: receiverId }))?._id;
+
+            if (!dealerId || !mfrId) {
+                return res.status(404).json({ message: 'Dealer or Manufacturer profile not found' });
+            }
+
+            const dealer = await Dealer.findById(dealerId);
+            if (type !== 'NEGOTIATION') {
+                const isApproved = dealer?.approvedBy?.some(id => id.toString() === mfrId.toString());
+                if (!isApproved) {
+                    return res.status(403).json({
+                        message: 'Official partnership required to initiate chat.',
+                        code: 'PARTNERSHIP_REQUIRED'
+                    });
+                }
+            }
+
+            if (senderRole === 'DEALER') {
+                const hasAccess = await checkSubscription(senderId, 'PRO');
+                if (!hasAccess) {
+                    return res.status(403).json({
+                        message: 'B2B Chat with Manufacturers requires a PRO or ENTERPRISE subscription.',
+                        code: 'SUBSCRIPTION_REQUIRED'
+                    });
+                }
             }
         }
 
-        // 2. Order Gating (Crucial)
-        if (type === 'ORDER' && senderRole === 'CUSTOMER') {
-            const order = await prisma.order.findUnique({
-                where: { id: contextId },
-                include: { items: true }
-            });
+        if (type === 'ORDER') {
+            const order = await Order.findById(contextId);
+            if (!order) return res.status(404).json({ message: 'Order not found' });
 
-            if (!order) {
-                return res.status(404).json({ message: 'Order not found' });
-            }
+            const customer = await Customer.findOne({ userId: senderRole === 'CUSTOMER' ? senderId : receiverId });
+            const dealer = await Dealer.findOne({ userId: senderRole === 'DEALER' ? senderId : receiverId });
 
-            if (order.customerId !== req.user.customer.id) {
-                return res.status(403).json({ message: 'Unauthorized: You can only chat about your own orders' });
-            }
-
-            // Optional: Check if dealer involves in this order
-            // (Order is one-to-one Dealer-Customer in this schema, so verify dealerId)
-            // receiverId is userId, order.dealerId is dealer profile id.
-            // Need to map receiverId (User) to Dealer or vice versa.
-            // For now, assuming receiverId passed from frontend is the Dealer User ID.
-            // Let's verify via Dealer model.
-            const dealer = await prisma.dealer.findUnique({
-                where: { userId: receiverId }
-            });
-
-            if (!dealer || dealer.id !== order.dealerId) {
-                return res.status(403).json({ message: 'Unauthorized: Seller does not belong to this order' });
+            if (order.customerId.toString() !== customer?._id.toString() || order.dealerId.toString() !== dealer?._id.toString()) {
+                return res.status(403).json({ message: 'Unauthorized: Participation in order required' });
             }
         }
 
-        // 2. Check for existing open chat of same type and context
+        if (type === 'NEGOTIATION') {
+            const negotiation = await Negotiation.findById(contextId);
+            if (!negotiation) return res.status(404).json({ message: 'Negotiation not found' });
+
+            const dealer = await Dealer.findOne({ userId: senderRole === 'DEALER' ? senderId : receiverId });
+            const mfr = await Manufacturer.findOne({ userId: senderRole === 'MANUFACTURER' ? senderId : receiverId });
+
+            if (negotiation.dealerId.toString() !== dealer?._id.toString() || negotiation.manufacturerId.toString() !== mfr?._id.toString()) {
+                return res.status(403).json({ message: 'Unauthorized: Participation in negotiation required' });
+            }
+        }
+
         let chat = await Chat.findOne({
             type,
             contextId,
@@ -104,10 +109,16 @@ export const createChat = async (req, res) => {
 
 export const getChatList = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const chats = await Chat.find({
-            'participants.userId': userId
-        }).sort({ updatedAt: -1 });
+        const userId = req.user._id;
+        const userRole = req.user.role;
+
+        let query = { 'participants.userId': userId };
+
+        if (userRole === 'ADMIN') {
+            query = {};
+        }
+
+        const chats = await Chat.find(query).sort({ updatedAt: -1 });
 
         res.json({ success: true, data: chats });
     } catch (error) {
@@ -118,17 +129,20 @@ export const getChatList = async (req, res) => {
 export const getMessages = async (req, res) => {
     try {
         const { chatId } = req.params;
-        const userId = req.user.id;
+        const userId = req.user._id;
+        const userRole = req.user.role;
 
         const chat = await Chat.findById(chatId);
         if (!chat) return res.status(404).json({ message: 'Chat not found' });
 
-        const isParticipant = chat.participants.some(p => p.userId === userId);
-        if (!isParticipant) return res.status(403).json({ message: 'Unauthorized' });
+        const isParticipant = chat.participants.some(p => p.userId.toString() === userId.toString());
+        if (!isParticipant && userRole !== 'ADMIN') {
+            return res.status(403).json({ message: 'Unauthorized: Participation or Admin role required' });
+        }
 
         const messages = await Message.find({ chatId })
             .sort({ createdAt: 1 })
-            .limit(50);
+            .limit(100);
 
         res.json({ success: true, data: messages });
     } catch (error) {
@@ -139,13 +153,16 @@ export const getMessages = async (req, res) => {
 export const closeChat = async (req, res) => {
     try {
         const { chatId } = req.params;
-        const userId = req.user.id;
+        const userId = req.user._id;
+        const userRole = req.user.role;
 
         const chat = await Chat.findById(chatId);
         if (!chat) return res.status(404).json({ message: 'Chat not found' });
 
-        const isParticipant = chat.participants.some(p => p.userId === userId);
-        if (!isParticipant) return res.status(403).json({ message: 'Unauthorized' });
+        const isParticipant = chat.participants.some(p => p.userId.toString() === userId.toString());
+        if (!isParticipant && userRole !== 'ADMIN') {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
 
         const updatedChat = await Chat.findByIdAndUpdate(chatId, {
             status: 'CLOSED',

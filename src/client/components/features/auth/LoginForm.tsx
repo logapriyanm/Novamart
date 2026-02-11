@@ -49,12 +49,14 @@ export default function LoginForm() {
 
     const validateFields = () => {
         const newErrors: typeof errors = {};
+        const trimmedIdentifier = formData.identifier.trim();
+
         if (loginMethod === 'email') {
-            if (!formData.identifier) newErrors.identifier = 'Email is required';
-            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.identifier)) newErrors.identifier = 'Invalid email format';
+            if (!trimmedIdentifier) newErrors.identifier = 'Email is required';
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedIdentifier)) newErrors.identifier = 'Invalid email format';
         } else {
-            if (!formData.identifier) newErrors.identifier = 'Phone number is required';
-            else if (!/^[6-9]\d{9}$/.test(formData.identifier)) newErrors.identifier = 'Invalid Indian phone number';
+            if (!trimmedIdentifier) newErrors.identifier = 'Phone number is required';
+            else if (!/^[6-9]\d{9}$/.test(trimmedIdentifier)) newErrors.identifier = 'Invalid Indian phone number';
         }
 
         if (authMode === 'password' && !formData.password) newErrors.password = 'Password is required';
@@ -72,11 +74,12 @@ export default function LoginForm() {
         setErrors({});
 
         try {
+            const trimmedIdentifier = formData.identifier.trim();
             if (loginMethod === 'phone') {
-                await loginWithPhone(formData.identifier, formData.otp);
+                await loginWithPhone(trimmedIdentifier, formData.otp);
             } else {
                 await login({
-                    email: formData.identifier,
+                    email: trimmedIdentifier,
                     password: formData.password
                 });
             }

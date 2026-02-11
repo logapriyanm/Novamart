@@ -10,7 +10,8 @@ import {
     FaRegClock,
     FaTruck,
     FaFileInvoice,
-    FaTimesCircle
+    FaTimesCircle,
+    FaCommentAlt
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -249,6 +250,14 @@ export default function DealerOrderManagement() {
                                         <FaTruck className="w-3 h-3" />
                                         {selectedOrder.rawStatus === 'PAID' ? 'Initialize Dispatch' : 'Dispatch Active'}
                                     </button>
+
+                                    <Link
+                                        href={`/dealer/messages?chatId=${selectedOrder.id}`}
+                                        className="w-full py-3 bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600 rounded-[8px] uppercase tracking-wide hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <FaCommentAlt className="w-3 h-3" />
+                                        Chat with Customer
+                                    </Link>
 
                                     {selectedOrder.rawStatus === 'SHIPPED' && (
                                         <button

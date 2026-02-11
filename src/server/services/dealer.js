@@ -3,38 +3,36 @@
  * Logic for regional inventory, retail pricing, and fulfillment.
  */
 
-import prisma from '../lib/prisma.js';
+import { Inventory, Product, Dealer, MarginRule, Manufacturer, DealerRequest, Notification, User, DealerSubscription } from '../models/index.js';
 import userService from './userService.js';
+import mongoose from 'mongoose';
 
 class DealerService {
     /**
      * Get Dealer's localized inventory.
      */
+    async getInventory(dealerId) {
+        return await Inventory.find({ dealerId })
+            .populate('productId')
+            .lean();
+    }
+
     /**
      * Get specific inventory item with details.
      */
     async getInventoryItem(inventoryId, dealerId) {
-        const inv = await prisma.inventory.findUnique({
-            where: { id: inventoryId },
-            include: {
-                product: {
-                    include: { manufacturer: { select: { companyName: true } } }
-                }
-            }
-        });
+        const inv = await Inventory.findById(inventoryId)
+            .populate({
+                path: 'productId',
+                populate: { path: 'manufacturerId', select: 'companyName' }
+            })
+            .lean();
 
-        if (!inv || inv.dealerId !== dealerId) {
+        if (!inv || inv.dealerId.toString() !== dealerId.toString()) {
             throw new Error('UNAUTHORIZED_INVENTORY_ACCESS');
         }
 
         return inv;
-    }
-
-    async getInventory(dealerId) {
-        return await prisma.inventory.findMany({
-            where: { dealerId },
-            include: { product: true }
-        });
     }
 
     /**
@@ -42,34 +40,24 @@ class DealerService {
      * Ensures price fits within manufacturer constraints or platform rules.
      */
     async updateRetailPrice(inventoryId, dealerId, newPrice) {
-        const inv = await prisma.inventory.findUnique({
-            where: { id: inventoryId },
-            include: { product: true }
-        });
+        const inv = await Inventory.findById(inventoryId).populate('productId');
 
-        if (!inv || inv.dealerId !== dealerId) {
+        if (!inv || inv.dealerId.toString() !== dealerId.toString()) {
             throw new Error('UNAUTHORIZED_INVENTORY_ACCESS');
         }
 
         const requestedPrice = Number(newPrice);
-        const wholesalePrice = Number(inv.dealerBasePrice || inv.product.basePrice);
+        const wholesalePrice = Number(inv.dealerBasePrice || inv.productId.basePrice);
 
         // Fetch Dealer's active subscription for benefits
-        const dealer = await prisma.dealer.findUnique({
-            where: { id: dealerId },
-            include: {
-                subscriptions: {
-                    where: { status: 'ACTIVE' },
-                    include: { plan: true },
-                    take: 1
-                }
-            }
-        });
+        const activeSub = await DealerSubscription.findOne({
+            dealerId,
+            status: 'ACTIVE'
+        }).populate('planId');
 
-        const activeSub = dealer?.subscriptions[0];
-        const boost = Number(activeSub?.plan?.marginBoost || 0);
+        const boost = Number(activeSub?.planId?.marginBoost || 0);
 
-        // 1. Check Manufacturer's Max Margin (Phase 4 & 5)
+        // 1. Check Manufacturer's Max Margin
         if (inv.isAllocated && inv.maxMargin) {
             const maxAllowed = wholesalePrice * (1 + (Number(inv.maxMargin) + boost) / 100);
             if (requestedPrice > maxAllowed) {
@@ -78,8 +66,9 @@ class DealerService {
         }
 
         // 2. Check Platform Margin Rule (Fallback)
-        const rule = await prisma.marginRule.findFirst({
-            where: { category: inv.product.category, isActive: true }
+        const rule = await MarginRule.findOne({
+            category: inv.productId.category,
+            isActive: true
         });
 
         if (rule) {
@@ -89,11 +78,7 @@ class DealerService {
             }
         }
 
-
-        return await prisma.inventory.update({
-            where: { id: inventoryId },
-            data: { price: requestedPrice }
-        });
+        return await Inventory.findByIdAndUpdate(inventoryId, { price: requestedPrice }, { new: true });
     }
 
 
@@ -101,39 +86,29 @@ class DealerService {
      * Toggle public listing status.
      */
     async toggleListing(inventoryId, dealerId, isListed) {
-        const inv = await prisma.inventory.findUnique({
-            where: { id: inventoryId }
-        });
+        const inv = await Inventory.findById(inventoryId);
 
-        if (!inv || inv.dealerId !== dealerId) {
+        if (!inv || inv.dealerId.toString() !== dealerId.toString()) {
             throw new Error('UNAUTHORIZED_INVENTORY_ACCESS');
         }
 
-        return await prisma.inventory.update({
-            where: { id: inventoryId },
-            data: {
-                isListed,
-                listedAt: isListed ? new Date() : inv.listedAt
-            }
-        });
+        return await Inventory.findByIdAndUpdate(inventoryId, {
+            isListed,
+            listedAt: isListed ? new Date() : inv.listedAt
+        }, { new: true });
     }
 
     /**
      * Update Stock Levels.
      */
     async updateStock(inventoryId, dealerId, newStock) {
-        const inv = await prisma.inventory.findUnique({
-            where: { id: inventoryId }
-        });
+        const inv = await Inventory.findById(inventoryId);
 
-        if (!inv || inv.dealerId !== dealerId) {
+        if (!inv || inv.dealerId.toString() !== dealerId.toString()) {
             throw new Error('UNAUTHORIZED_INVENTORY_ACCESS');
         }
 
-        return await prisma.inventory.update({
-            where: { id: inventoryId },
-            data: { stock: Number(newStock) }
-        });
+        return await Inventory.findByIdAndUpdate(inventoryId, { stock: Number(newStock) }, { new: true });
     }
 
     /**
@@ -142,10 +117,7 @@ class DealerService {
      */
     async sourceProduct(dealerId, productId, region, quantity, initialPrice) {
         // 0. Profile Completion Gating
-        const dealer = await prisma.dealer.findUnique({
-            where: { id: dealerId },
-            include: { subscriptions: { where: { status: 'ACTIVE' }, include: { plan: true } } }
-        });
+        const dealer = await Dealer.findById(dealerId);
         const isComplete = dealer?.businessName &&
             dealer?.gstNumber &&
             dealer?.businessAddress &&
@@ -155,16 +127,13 @@ class DealerService {
             throw new Error('PROFILE_INCOMPLETE: Please complete your Business Info, GST, Address, and Bank sections before sourcing products.');
         }
 
-        // 1. Verify allocation exists (Phase 4 & 5 Requirement)
-        const allocation = await prisma.inventory.findFirst({
-            where: {
-                dealerId,
-                productId,
-                region,
-                isAllocated: true
-            },
-            include: { product: true }
-        });
+        // 1. Verify allocation exists
+        const allocation = await Inventory.findOne({
+            dealerId,
+            productId,
+            region,
+            isAllocated: true
+        }).populate('productId');
 
         if (!allocation) {
             throw new Error('PRODUCT_NOT_ALLOCATED: This product has not been allocated to you by the manufacturer.');
@@ -181,24 +150,22 @@ class DealerService {
         }
 
         // 3. Apply Phase 6 Subscription Benefits (Wholesale Discount)
-        let finalPrice = Number(allocation.dealerBasePrice || allocation.product.basePrice);
-        const activeSub = dealer.subscriptions[0];
-        if (activeSub && activeSub.plan?.wholesaleDiscount > 0) {
-            const discount = Number(activeSub.plan.wholesaleDiscount);
+        let finalPrice = Number(allocation.dealerBasePrice || allocation.productId.basePrice);
+        const activeSub = await DealerSubscription.findOne({ dealerId, status: 'ACTIVE' }).populate('planId');
+
+        if (activeSub?.planId?.wholesaleDiscount > 0) {
+            const discount = Number(activeSub.planId.wholesaleDiscount);
             finalPrice = finalPrice * (1 - discount / 100);
         }
 
-        // 4. Update the existing allocation record with physical stock and retail price
-        return await prisma.inventory.update({
-            where: { id: allocation.id },
-            data: {
-                stock: { increment: requestedQty },
-                price: Number(initialPrice) || finalPrice, // Initial retail price
-                originalPrice: finalPrice, // Wholesale price paid by dealer (after discount)
-                isListed: true,
-                listedAt: new Date()
-            }
-        });
+        // 4. Update the existing allocation record
+        return await Inventory.findByIdAndUpdate(allocation._id, {
+            $inc: { stock: requestedQty },
+            price: Number(initialPrice) || finalPrice,
+            originalPrice: finalPrice,
+            isListed: true,
+            listedAt: new Date()
+        }, { new: true });
     }
 
 
@@ -206,16 +173,14 @@ class DealerService {
      * Get Dealer Sales Report.
      */
     async getSalesReport(dealerId) {
-        const orders = await prisma.order.findMany({
-            where: { dealerId, status: 'SETTLED' },
-            include: { items: true }
-        });
+        const { Order } = await import('../models/index.js');
+        const orders = await Order.find({ dealerId, status: 'SETTLED' }).lean();
 
         const totalRevenue = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
-        const totalTax = orders.reduce((sum, o) => sum + Number(o.taxAmount), 0);
+        const totalTax = orders.reduce((sum, o) => sum + Number(o.taxAmount || 0), 0);
         const marginEarned = orders.reduce((sum, o) => {
             const retail = Number(o.totalAmount);
-            const base = retail - Number(o.commissionAmount) - Number(o.taxAmount); // Simplified
+            const base = retail - Number(o.commissionAmount || 0) - Number(o.taxAmount || 0);
             return sum + (retail - base);
         }, 0);
 
@@ -231,17 +196,15 @@ class DealerService {
      * Get full Dealer Profile.
      */
     async getProfile(dealerId) {
-        return await prisma.dealer.findUnique({
-            where: { id: dealerId },
-            include: { user: { select: { email: true, status: true, mfaEnabled: true } } }
-        });
+        return await Dealer.findById(dealerId)
+            .populate('userId', 'email status mfaEnabled');
     }
 
     /**
      * Update Dealer Profile Sections.
      */
     async updateProfile(dealerId, section, data) {
-        const dealer = await prisma.dealer.findUnique({ where: { id: dealerId } });
+        const dealer = await Dealer.findById(dealerId);
         if (!dealer) throw new Error('DEALER_NOT_FOUND');
 
         return await userService.updateFullProfile(dealer.userId, 'DEALER', section, data);
@@ -251,33 +214,33 @@ class DealerService {
      * Discovery: Fetch manufacturers and their top products.
      */
     async getManufacturersForDiscovery() {
-        return await prisma.manufacturer.findMany({
-            where: {
-                user: { status: { not: 'SUSPENDED' } }
-            },
-            include: {
-                user: { select: { email: true, status: true } },
-                products: {
-                    where: { status: 'APPROVED' },
-                    select: {
-                        id: true,
-                        name: true,
-                        basePrice: true,
-                        images: true,
-                        category: true,
-                        moq: true
-                    },
-                    take: 6,
-                    orderBy: { createdAt: 'desc' }
-                },
-                _count: {
-                    select: {
-                        products: { where: { status: 'APPROVED' } }
-                    }
-                }
-            },
-            orderBy: { companyName: 'asc' }
-        });
+        const manufacturers = await Manufacturer.find({})
+            .populate('userId', 'email status')
+            .sort({ companyName: 1 })
+            .lean();
+
+        // Manual filter for suspended and attachment of products (Take 6)
+        const activeManufacturers = await Promise.all(manufacturers
+            .filter(m => m.userId?.status !== 'SUSPENDED')
+            .map(async (m) => {
+                const products = await Product.find({ manufacturerId: m._id, status: 'APPROVED' })
+                    .select('name basePrice images category moq')
+                    .sort({ createdAt: -1 })
+                    .limit(6)
+                    .lean();
+
+                const count = await Product.countDocuments({ manufacturerId: m._id, status: 'APPROVED' });
+
+                return {
+                    ...m,
+                    id: m._id,
+                    products,
+                    _count: { products: count }
+                };
+            })
+        );
+
+        return activeManufacturers;
     }
 
     /**
@@ -286,88 +249,70 @@ class DealerService {
     async requestAccess(dealerId, manufacturerId, metadata = {}) {
         const { message, expectedQuantity, region, priceExpectation } = metadata;
 
-        // Check for existing request
-        // Check for existing request (Status Agnostic)
-        const existing = await prisma.dealerRequest.findFirst({
-            where: {
-                dealerId,
-                manufacturerId
-            }
-        });
+        const existing = await DealerRequest.findOne({ dealerId, manufacturerId });
 
         if (existing) {
             if (existing.status === 'PENDING') throw new Error('Request already sent. Please wait for approval.');
             if (existing.status === 'APPROVED') throw new Error('You are already an approved dealer for this manufacturer.');
 
-            // If REJECTED or other, allow re-application by updating
-            return await prisma.dealerRequest.update({
-                where: { id: existing.id },
-                data: {
-                    status: 'PENDING',
-                    message: message || existing.message,
-                    metadata: {
-                        expectedQuantity,
-                        region,
-                        priceExpectation
-                    },
-                    createdAt: new Date() // Treat as new request
-                }
-            });
+            return await DealerRequest.findByIdAndUpdate(existing._id, {
+                status: 'PENDING',
+                message: message || existing.message,
+                metadata: {
+                    expectedQuantity,
+                    region,
+                    priceExpectation
+                },
+                createdAt: new Date()
+            }, { new: true });
         }
 
-        return await prisma.$transaction(async (tx) => {
-            const request = await tx.dealerRequest.create({
-                data: {
-                    dealerId,
-                    manufacturerId,
-                    message: message || '',
-                    status: 'PENDING',
-                    metadata: {
-                        expectedQuantity,
-                        region,
-                        priceExpectation
-                    }
-                },
-                include: {
-                    manufacturer: { select: { companyName: true, user: true } }
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const request = await DealerRequest.create([{
+                dealerId,
+                manufacturerId,
+                message: message || '',
+                status: 'PENDING',
+                metadata: {
+                    expectedQuantity,
+                    region,
+                    priceExpectation
                 }
-            });
+            }], { session });
 
             // Create notification for manufacturer
-            if (request.manufacturer.user) {
-                const dealer = await tx.dealer.findUnique({ where: { id: dealerId } });
-                await tx.notification.create({
-                    data: {
-                        userId: request.manufacturer.user.id,
-                        type: 'DEALER_REQUEST',
-                        title: 'New Dealer Partnership Request',
-                        message: `${dealer.businessName} has requested access to your products.`,
-                        link: '/manufacturer/dealers/requests'
-                    }
-                });
+            const manufacturer = await Manufacturer.findById(manufacturerId).populate('userId');
+            if (manufacturer?.userId) {
+                const dealer = await Dealer.findById(dealerId);
+                await Notification.create([{
+                    userId: manufacturer.userId._id,
+                    type: 'DEALER_REQUEST',
+                    title: 'New Dealer Partnership Request',
+                    message: `${dealer.businessName} has requested access to your products.`,
+                    link: '/manufacturer/dealers/requests'
+                }], { session });
             }
 
-            return request;
-        });
+            await session.commitTransaction();
+            return request[0];
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
      * Get Dealer's own requests.
      */
     async getMyAccessRequests(dealerId) {
-        return await prisma.dealerRequest.findMany({
-            where: { dealerId },
-            include: {
-                manufacturer: {
-                    select: {
-                        companyName: true,
-                        factoryAddress: true,
-                        logo: true
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        return await DealerRequest.find({ dealerId })
+            .populate('manufacturerId', 'companyName factoryAddress logo')
+            .sort({ createdAt: -1 })
+            .lean();
     }
 }
 

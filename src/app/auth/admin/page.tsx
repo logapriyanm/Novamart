@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaShieldAlt, FaLock, FaKey, FaArrowRight, FaClock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 import { useAuth } from '@/client/hooks/useAuth';
-import { useSnackbar } from '@/client/context/SnackbarContext';
+
 
 export default function AdminLoginPage() {
     const router = useRouter();

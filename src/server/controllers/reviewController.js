@@ -1,34 +1,31 @@
-
 import reviewService from '../services/review.js';
-import prisma from '../lib/prisma.js';
+import { Order, Inventory, Customer } from '../models/index.js';
 
 export const submitProductReview = async (req, res) => {
     try {
         const { orderItemId, productId, rating, comment, images } = req.body;
-        const customerId = req.user.customer.id;
+        const userId = req.user._id;
 
-        // 1. Gating: Ensure order item exists and order is DELIVERED
-        const orderItem = await prisma.orderItem.findUnique({
-            where: { id: orderItemId },
-            include: { order: true }
+        const customer = await Customer.findOne({ userId });
+        if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
+
+        const order = await Order.findOne({
+            customerId: customer._id,
+            'items._id': orderItemId
         });
 
-        if (!orderItem) {
-            return res.status(404).json({ success: false, error: 'Order item not found' });
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Order item not found or unauthorized' });
         }
 
-        if (orderItem.order.customerId !== customerId) {
-            return res.status(403).json({ success: false, error: 'Unauthorized: You do not own this order' });
-        }
-
-        if (orderItem.order.status !== 'DELIVERED') {
+        if (order.status !== 'DELIVERED') {
             return res.status(400).json({ success: false, error: 'Cannot review products before delivery' });
         }
 
         const review = await reviewService.submitProductReview({
             orderItemId,
             productId,
-            customerId,
+            customerId: customer._id,
             rating,
             comment,
             images
@@ -43,18 +40,17 @@ export const submitProductReview = async (req, res) => {
 export const submitSellerReview = async (req, res) => {
     try {
         const { orderId, dealerId, rating, delivery, packaging, communication, comment } = req.body;
-        const customerId = req.user.customer.id;
+        const userId = req.user._id;
 
-        // 1. Gating: Ensure order exists and is DELIVERED
-        const order = await prisma.order.findUnique({
-            where: { id: orderId }
-        });
+        const customer = await Customer.findOne({ userId });
+        if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
 
+        const order = await Order.findById(orderId);
         if (!order) {
             return res.status(404).json({ success: false, error: 'Order not found' });
         }
 
-        if (order.customerId !== customerId) {
+        if (order.customerId.toString() !== customer._id.toString()) {
             return res.status(403).json({ success: false, error: 'Unauthorized: You do not own this order' });
         }
 
@@ -65,7 +61,7 @@ export const submitSellerReview = async (req, res) => {
         const review = await reviewService.submitSellerReview({
             orderId,
             dealerId,
-            customerId,
+            customerId: customer._id,
             rating,
             delivery,
             packaging,
@@ -81,8 +77,11 @@ export const submitSellerReview = async (req, res) => {
 
 export const getMyReviews = async (req, res) => {
     try {
-        const customerId = req.user.customer.id;
-        const reviews = await reviewService.getCustomerReviews(customerId);
+        const userId = req.user._id;
+        const customer = await Customer.findOne({ userId });
+        if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
+
+        const reviews = await reviewService.getCustomerReviews(customer._id);
         res.status(200).json({ success: true, data: reviews });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });

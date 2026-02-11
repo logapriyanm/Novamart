@@ -3,7 +3,7 @@
  * Logic for customer-specific actions like ratings and discovery.
  */
 
-import prisma from '../lib/prisma.js';
+import { Product, Customer, Order, Review } from '../models/index.js';
 import userService from './userService.js';
 
 class CustomerService {
@@ -11,66 +11,38 @@ class CustomerService {
      * Browse Products with Regional Availability.
      */
     async browseProducts({ region, category, search }) {
-        return await prisma.product.findMany({
-            where: {
-                isApproved: true,
-                category: category || undefined,
-                name: search ? { contains: search, mode: 'insensitive' } : undefined,
-                inventory: {
-                    some: {
-                        region: region || undefined,
-                        stock: { gt: 0 }
-                    }
-                }
-            },
-            include: {
-                inventory: {
-                    where: { region: region || undefined, stock: { gt: 0 } },
-                    include: { dealer: { select: { businessName: true, id: true } } }
-                }
-            }
-        });
-    }
+        const query = {
+            isApproved: true
+        };
 
-    /**
-     * Rate a Product or Dealer.
-     */
-    async submitRating(customerId, { productId, dealerId, rating, comment }) {
-        return await prisma.rating.create({
-            data: {
-                customerId,
-                dealerId: dealerId || undefined,
-                rating,
-                comment
-            }
-        });
+        if (category) query.category = category;
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
+
+        const products = await Product.find(query)
+            .populate({
+                path: 'inventory',
+                match: region ? { region, stock: { $gt: 0 } } : { stock: { $gt: 0 } },
+                populate: { path: 'dealerId', select: 'businessName' }
+            });
+
+        // Filter out products with no matching inventory
+        return products.filter(p => p.inventory && p.inventory.length > 0);
     }
 
     /**
      * Get Customer Profile.
      */
     async getProfile(customerId) {
-        return await prisma.customer.findUnique({
-            where: { id: customerId },
-            include: {
-                user: {
-                    select: {
-                        email: true,
-                        phone: true,
-                        avatar: true,
-                        status: true,
-                        createdAt: true
-                    }
-                }
-            }
-        });
+        return await Customer.findById(customerId).populate('userId', 'email phone avatar status createdAt');
     }
 
     /**
      * Update Customer Profile.
      */
     async updateProfile(customerId, data) {
-        const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+        const customer = await Customer.findById(customerId);
         if (!customer) throw new Error('CUSTOMER_NOT_FOUND');
 
         return await userService.updateFullProfile(customer.userId, 'CUSTOMER', 'account', data);
@@ -80,17 +52,14 @@ class CustomerService {
      * Get Customer Order History with Status & Escrow Info.
      */
     async getOrderHistory(customerId) {
-        return await prisma.order.findMany({
-            where: { customerId },
-            include: {
-                items: { include: { linkedProduct: true } },
-                escrow: true,
-                timeline: true
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        return await Order.find({ customerId })
+            .populate({
+                path: 'items.inventoryId',
+                populate: { path: 'productId' }
+            })
+            .populate('escrow')
+            .sort({ createdAt: -1 });
     }
 }
 
 export default new CustomerService();
-

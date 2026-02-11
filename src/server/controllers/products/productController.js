@@ -1,13 +1,11 @@
 import productService from '../../services/productService.js';
-import prisma from '../../lib/prisma.js'; // Keep for profile check shim if needed or remove if moved
+import { Manufacturer, Product } from '../../models/index.js';
 import logger from '../../lib/logger.js';
 
 export const createProduct = async (req, res) => {
     try {
         // 1. Get Manufacturer Profile
-        const manufacturer = await prisma.manufacturer.findUnique({
-            where: { userId: req.user.id }
-        });
+        const manufacturer = await Manufacturer.findOne({ userId: req.user.id });
 
         if (!manufacturer) {
             return res.status(403).json({ error: 'Manufacturer profile not found.' });
@@ -23,8 +21,13 @@ export const createProduct = async (req, res) => {
             });
         }
 
-        const product = await productService.createProduct(manufacturer.id, req.body);
-        res.status(201).json({ success: true, message: 'Product created successfully', data: product });
+        // Auto-approve if manufacturer is verified
+        const shouldAutoApprove = manufacturer.isVerified === true;
+
+        const product = await productService.createProduct(manufacturer._id, req.body, shouldAutoApprove);
+        const successMessage = shouldAutoApprove ? 'Product published successfully' : 'Product submitted for review';
+
+        res.status(201).json({ success: true, message: successMessage, data: product });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
     }
@@ -32,13 +35,10 @@ export const createProduct = async (req, res) => {
 
 export const getMyProducts = async (req, res) => {
     try {
-        const manufacturer = await prisma.manufacturer.findUnique({ where: { userId: req.user.id } });
+        const manufacturer = await Manufacturer.findOne({ userId: req.user.id });
         if (!manufacturer) return res.status(403).json({ error: 'Manufacturer profile not found' });
 
-        const products = await prisma.product.findMany({
-            where: { manufacturerId: manufacturer.id },
-            orderBy: { updatedAt: 'desc' }
-        });
+        const products = await Product.find({ manufacturerId: manufacturer._id }).sort({ updatedAt: -1 });
         res.json({ success: true, data: products });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Failed to fetch products' });
@@ -48,7 +48,7 @@ export const getMyProducts = async (req, res) => {
 export const getAllProducts = async (req, res) => {
     try {
         const userRole = req.user?.role;
-        const dealerId = req.user?.dealer?.id;
+        const dealerId = req.user?.dealer?._id || req.user?.dealer?.id;
 
         const result = await productService.getAllProducts(req.query, userRole, dealerId);
         res.json({ success: true, data: result });
@@ -59,10 +59,11 @@ export const getAllProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
     try {
-        const product = await productService.getProductById(req.params.id, req.user?.id);
+        const product = await productService.getProductById(req.params.id, req.user?._id || req.user?.id);
         if (!product) return res.status(404).json({ success: false, error: 'Product not found' });
         res.json({ success: true, data: product });
     } catch (error) {
+        console.error('Get Product By ID Error:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch product' });
     }
 };
@@ -80,8 +81,12 @@ export const updateProductStatus = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
     try {
-        const manufacturerId = req.user.manufacturer?.id;
-        const product = await productService.updateProduct(req.params.id, manufacturerId, req.body);
+        const manufacturer = await Manufacturer.findOne({ userId: req.user.id });
+        if (!manufacturer) return res.status(403).json({ error: 'Manufacturer profile not found' });
+
+        const shouldAutoApprove = manufacturer.isVerified === true;
+
+        const product = await productService.updateProduct(req.params.id, manufacturer._id, req.body, shouldAutoApprove);
         res.json({ success: true, message: 'Product updated', data: product });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
@@ -90,8 +95,10 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
     try {
-        const manufacturerId = req.user.manufacturer?.id;
-        await productService.deleteProduct(req.params.id, manufacturerId);
+        const manufacturer = await Manufacturer.findOne({ userId: req.user.id });
+        if (!manufacturer) return res.status(403).json({ error: 'Manufacturer profile not found' });
+
+        await productService.deleteProduct(req.params.id, manufacturer._id);
         res.json({ success: true, message: 'Product deleted successfully' });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
@@ -100,8 +107,10 @@ export const deleteProduct = async (req, res) => {
 
 export const bulkImportProducts = async (req, res) => {
     try {
-        const manufacturerId = req.user.manufacturer?.id;
-        const created = await productService.bulkImport(manufacturerId, req.body.products);
+        const manufacturer = await Manufacturer.findOne({ userId: req.user.id });
+        if (!manufacturer) return res.status(403).json({ error: 'Manufacturer profile not found' });
+
+        const created = await productService.bulkImport(manufacturer._id, req.body.products);
         res.json({ success: true, message: `Successfully imported ${created.count} products`, count: created.count });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
@@ -110,8 +119,8 @@ export const bulkImportProducts = async (req, res) => {
 
 export const getDiscoveryFilters = async (req, res) => {
     try {
-        const { category, subCategory } = req.query;
-        const data = await productService.getDiscoveryFilters(category, subCategory);
+        const { category } = req.query;
+        const data = await productService.getDiscoveryFilters(category);
         res.json({ success: true, data });
     } catch (error) {
         logger.error('Fetch discovery filters failed:', error);
@@ -121,8 +130,8 @@ export const getDiscoveryFilters = async (req, res) => {
 
 export const getCategories = async (req, res) => {
     try {
-        const products = await prisma.product.findMany({ where: { status: 'APPROVED' }, distinct: ['category'], select: { category: true } });
-        res.json({ success: true, data: products.map(p => p.category) });
+        const categories = await Product.distinct('category', { status: 'APPROVED' });
+        res.json({ success: true, data: categories });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Failed to fetch categories' });
     }

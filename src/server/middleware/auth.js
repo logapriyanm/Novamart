@@ -1,13 +1,8 @@
-/**
- * Authentication Middleware
- * Validates JWT and attaches user to the request.
- */
-
 import jwt from 'jsonwebtoken';
-import prisma from '../lib/prisma.js';
+import { User, Session } from '../models/index.js';
 import logger from '../lib/logger.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
+const getJwtSecret = () => process.env.JWT_SECRET || 'supersecret';
 
 const authenticate = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -19,19 +14,17 @@ const authenticate = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, getJwtSecret());
+        // console.log('DEBUG: Decoded token:', decoded);
 
         // 1. Verify User exists and is not suspended
-        const user = await prisma.user.findUnique({
-            where: { id: decoded.id },
-            include: {
-                customer: true,
-                dealer: true,
-                manufacturer: true
-            }
-        });
+        const user = await User.findById(decoded.id)
+            .populate('customer')
+            .populate('dealer')
+            .populate('manufacturer');
 
         if (!user) {
+            console.log('DEBUG: User not found for ID:', decoded.id);
             return res.status(401).json({ error: 'USER_NOT_FOUND' });
         }
 
@@ -40,9 +33,13 @@ const authenticate = async (req, res, next) => {
         }
 
         // 2. Strict Session Verification (Database)
-        const session = await prisma.session.findUnique({
-            where: { token: token }
-        });
+        const session = await Session.findOne({ token });
+
+        if (!session) {
+            logger.info('DEBUG: Session not found in DB for token starting with: %s', token.substring(0, 10));
+        } else if (session.expiresAt < new Date()) {
+            logger.info('DEBUG: Session expired. Expires at: %s, Current time: %s', session.expiresAt, new Date());
+        }
 
         if (!session || session.expiresAt < new Date()) {
             return res.status(401).json({ error: 'SESSION_EXPIRED', message: 'Your session has ended. Please login again.' });
@@ -52,7 +49,8 @@ const authenticate = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        return res.status(401).json({ error: 'INVALID_TOKEN' });
+        logger.error('❌ Auth Middleware Error:', { message: error.message, stack: error.stack });
+        return res.status(401).json({ error: 'INVALID_TOKEN', message: error.message });
     }
 };
 
@@ -70,11 +68,11 @@ export const authenticateOptional = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = await prisma.user.findUnique({
-            where: { id: decoded.id },
-            include: { customer: true, dealer: true, manufacturer: true }
-        });
+        const decoded = jwt.verify(token, getJwtSecret());
+        const user = await User.findById(decoded.id)
+            .populate('customer')
+            .populate('dealer')
+            .populate('manufacturer');
 
         if (user && user.status !== 'SUSPENDED') {
             req.user = user;
@@ -89,6 +87,7 @@ export const authenticateUser = authenticate;
 
 export const authorizeRoles = (...roles) => {
     return (req, res, next) => {
+        logger.info('DEBUG: Role Check - User Role: %s, Allowed Roles: %s', req.user?.role, roles);
         if (!req.user || !roles.includes(req.user.role)) {
             return res.status(403).json({ error: 'FORBIDDEN', message: 'Access denied' });
         }

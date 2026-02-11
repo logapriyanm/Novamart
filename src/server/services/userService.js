@@ -3,21 +3,29 @@
  * Centralized identity management for all roles (Customer, Dealer, Manufacturer, Admin).
  */
 
-import prisma from '../lib/prisma.js';
+import { User, Customer, Dealer, Manufacturer } from '../models/index.js';
+import mongoose from 'mongoose';
 
 class UserService {
     /**
      * Get User by ID with associated role data
      */
     async getUserWithProfile(userId) {
-        return await prisma.user.findUnique({
-            where: { id: userId },
-            include: {
-                customer: true,
-                dealer: true,
-                manufacturer: true
-            }
-        });
+        const user = await User.findById(userId);
+        if (!user) return null;
+
+        const [customer, dealer, manufacturer] = await Promise.all([
+            Customer.findOne({ userId }),
+            Dealer.findOne({ userId }),
+            Manufacturer.findOne({ userId })
+        ]);
+
+        return {
+            ...user.toObject(),
+            customer,
+            dealer,
+            manufacturer
+        };
     }
 
     /**
@@ -27,15 +35,12 @@ class UserService {
     async updateAccount(userId, data) {
         const { email, phone, avatar, mfaEnabled } = data;
 
-        return await prisma.user.update({
-            where: { id: userId },
-            data: {
-                email,
-                phone,
-                avatar,
-                mfaEnabled
-            }
-        });
+        return await User.findByIdAndUpdate(userId, {
+            email,
+            phone,
+            avatar,
+            mfaEnabled
+        }, { new: true });
     }
 
     /**
@@ -43,27 +48,27 @@ class UserService {
      * Detects role and updates both User table and role-specific metadata.
      */
     async updateFullProfile(userId, role, section, data) {
-        return await prisma.$transaction(async (tx) => {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
             let updatedProfile;
 
             // 1. Update Core User Data if 'account' section or if email/phone provided
             if (section === 'account' || data.email || data.phone || data.avatar) {
-                await tx.user.update({
-                    where: { id: userId },
-                    data: {
-                        email: data.email,
-                        phone: data.phone,
-                        avatar: data.avatar
-                    }
-                });
+                await User.findByIdAndUpdate(userId, {
+                    email: data.email,
+                    phone: data.phone,
+                    avatar: data.avatar
+                }, { session, new: true });
             }
 
             // 2. Update Role-Specific Data
             if (role === 'CUSTOMER') {
-                updatedProfile = await tx.customer.update({
-                    where: { userId },
-                    data: { name: data.name }
-                });
+                updatedProfile = await Customer.findOneAndUpdate(
+                    { userId },
+                    { name: data.name },
+                    { session, new: true }
+                );
             } else if (role === 'DEALER') {
                 const updateData = {};
                 if (section === 'business') {
@@ -79,13 +84,14 @@ class UserService {
                     updateData.pincode = data.pincode;
                 } else if (section === 'bank') {
                     updateData.bankDetails = data.bankDetails;
-                    updateData.payoutBlocked = true; // Rule: Changing bank pauses payouts
+                    updateData.payoutBlocked = true;
                 }
 
-                updatedProfile = await tx.dealer.update({
-                    where: { userId },
-                    data: updateData
-                });
+                updatedProfile = await Dealer.findOneAndUpdate(
+                    { userId },
+                    updateData,
+                    { session, new: true }
+                );
             } else if (role === 'MANUFACTURER') {
                 const updateData = {};
                 if (section === 'company') {
@@ -100,27 +106,33 @@ class UserService {
                     updateData.bankDetails = data.bankDetails;
                 }
 
-                updatedProfile = await tx.manufacturer.update({
-                    where: { userId },
-                    data: updateData
-                });
+                updatedProfile = await Manufacturer.findOneAndUpdate(
+                    { userId },
+                    updateData,
+                    { session, new: true }
+                );
             }
 
+            const updatedUser = await User.findById(userId).session(session);
+            await session.commitTransaction();
+
             return {
-                user: await tx.user.findUnique({ where: { id: userId } }),
+                user: updatedUser,
                 profile: updatedProfile
             };
-        });
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
      * Update FCM Token for Push Notifications
      */
     async updateFCMToken(userId, fcmToken) {
-        return await prisma.user.update({
-            where: { id: userId },
-            data: { fcmToken }
-        });
+        return await User.findByIdAndUpdate(userId, { fcmToken }, { new: true });
     }
 }
 

@@ -304,24 +304,30 @@ export const sendEmail = async (to, template) => {
     }
 };
 
+// Import Mongoose models
+import { Order, Customer } from '../models/index.js';
+
 // Specific email functions
 export const sendOrderConfirmation = async (order) => {
     try {
         // Fetch customer details if not included
-        const orderWithDetails = await prisma.order.findUnique({
-            where: { id: order.id },
-            include: {
-                customer: { include: { user: true } },
-                items: true
-            }
-        });
+        const orderWithDetails = await Order.findById(order._id || order.id)
+            .populate({
+                path: 'customerId',
+                populate: { path: 'userId' }
+            })
+            .populate('items.productId');
 
         if (!orderWithDetails) {
             throw new Error('Order not found');
         }
 
-        const customerEmail = orderWithDetails.customer.user.email;
-        const template = emailTemplates.orderConfirmation(orderWithDetails, orderWithDetails.customer);
+        const customerEmail = orderWithDetails.customerId?.userId?.email;
+        if (!customerEmail) {
+            throw new Error('Customer email not found');
+        }
+
+        const template = emailTemplates.orderConfirmation(orderWithDetails, orderWithDetails.customerId);
 
         return await sendEmail(customerEmail, template);
     } catch (error) {
@@ -333,19 +339,22 @@ export const sendOrderConfirmation = async (order) => {
 export const sendPaymentConfirmation = async (payment, order) => {
     try {
         // Fetch full order with customer
-        const orderWithDetails = await prisma.order.findUnique({
-            where: { id: order.id },
-            include: {
-                customer: { include: { user: true } }
-            }
-        });
+        const orderWithDetails = await Order.findById(order._id || order.id)
+            .populate({
+                path: 'customerId',
+                populate: { path: 'userId' }
+            });
 
         if (!orderWithDetails) {
             throw new Error('Order not found');
         }
 
-        const customerEmail = orderWithDetails.customer.user.email;
-        const template = emailTemplates.paymentConfirmation(payment, order, orderWithDetails.customer);
+        const customerEmail = orderWithDetails.customerId?.userId?.email;
+        if (!customerEmail) {
+            throw new Error('Customer email not found');
+        }
+
+        const template = emailTemplates.paymentConfirmation(payment, order, orderWithDetails.customerId);
 
         return await sendEmail(customerEmail, template);
     } catch (error) {
@@ -353,9 +362,6 @@ export const sendPaymentConfirmation = async (payment, order) => {
         return { success: false, error: error.message };
     }
 };
-
-// Import prisma for database queries
-import prisma from '../lib/prisma.js';
 
 export default {
     sendEmail,

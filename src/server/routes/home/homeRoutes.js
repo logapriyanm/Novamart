@@ -1,6 +1,6 @@
 import express from 'express';
 import { getPersonalizedHome, getGuestHome, trackUserEvent } from '../../controllers/homeController.js';
-import { authenticateUser } from '../../middleware/auth.js';
+import authenticate from '../../middleware/auth.js';
 
 const router = express.Router();
 
@@ -8,9 +8,9 @@ const router = express.Router();
 router.get('/guest', getGuestHome);
 
 // Get personalized home data (requires auth for personalization)
-router.get('/personalized', authenticateUser, getPersonalizedHome);
+router.get('/personalized', authenticate, getPersonalizedHome);
 
 // Track user interaction (view, click)
-router.post('/track', authenticateUser, trackUserEvent);
+router.post('/track', authenticate, trackUserEvent);
 
 export default router;

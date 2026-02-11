@@ -3,104 +3,62 @@
  * Records user interactions for personalization.
  */
 
-import prisma from '../lib/prisma.js';
+import { Tracking } from '../models/index.js';
 
-class TrackingService {
+class BehaviorService {
     /**
-     * Record a user event.
-     * @param {string} userId - ID of the user
-     * @param {string} type - VIEW_PRODUCT, SEARCH, VIEW_CATEGORY, ADD_TO_CART
-     * @param {string} targetId - Product ID or Category Name
-     * @param {object} metadata - Additional info (e.g. search query)
+     * Record a user event (View, Click, Search, AddToCart)
      */
     async trackEvent(userId, type, targetId, metadata = {}) {
         try {
-            return await prisma.userBehavior.create({
-                data: {
-                    userId,
-                    type,
-                    targetId,
-                    metadata
-                }
+            return await Tracking.create({
+                userId,
+                eventType: type, // Schema uses eventType
+                targetId,
+                metadata,
+                timestamp: new Date()
             });
         } catch (error) {
-            console.error('Failed to track event:', error);
-            // Non-blocking error
-            return null;
+            console.error('Tracking Error:', error);
         }
     }
 
     /**
-     * Get recent product views.
+     * Get recent product views for a user
      */
-    async getRecentViews(userId, limit = 5) {
-        const views = await prisma.userBehavior.findMany({
-            where: {
-                userId,
-                type: 'VIEW_PRODUCT'
-            },
-            orderBy: { createdAt: 'desc' },
-            take: limit * 2 // Fetch more to deduplicate
-        });
+    async getRecentViews(userId, limit = 10) {
+        const views = await Tracking.find({
+            userId,
+            eventType: 'PAGE_VIEW' // Mapping VIEW to PAGE_VIEW if that's the intention
+        })
+            .sort({ timestamp: -1 })
+            .limit(limit);
 
-        // Deduplicate locally
-        const uniqueIds = new Set();
-        const uniqueViews = [];
-
-        for (const view of views) {
-            if (!uniqueIds.has(view.targetId)) {
-                uniqueIds.add(view.targetId);
-                uniqueViews.push(view);
-                if (uniqueViews.length >= limit) break;
-            }
-        }
-
-        return uniqueViews;
+        return views;
     }
 
     /**
-     * Calculate top categories based on recent behavior.
+     * Analytics: Identify trending categories based on recent searches/views
      */
-    async getTopCategories(userId) {
-        // Fetch last 50 relevant actions
-        const actions = await prisma.userBehavior.findMany({
-            where: {
-                userId,
-                type: { in: ['VIEW_CATEGORY', 'VIEW_PRODUCT'] }
-            },
-            orderBy: { createdAt: 'desc' },
-            take: 50
+    async getTrendingCategories() {
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+        const actions = await Tracking.find({
+            timestamp: { $gte: sevenDaysAgo },
+            'metadata.category': { $exists: true }
         });
 
-        const scores = {};
+        const categoryCounts = {};
+        actions.forEach(a => {
+            const cat = a.metadata.category;
+            categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+        });
 
-        for (const action of actions) {
-            let category = null;
-            let weight = 0;
-
-            if (action.type === 'VIEW_CATEGORY') {
-                category = action.targetId;
-                weight = 2;
-            } else if (action.type === 'VIEW_PRODUCT') {
-                // Ideally we'd fetch product category, but for speed we might rely on metadata
-                // or fetch product details (expensive loop).
-                // Optimization: Assume metadata contains category if possible, or skip.
-                if (action.metadata?.category) {
-                    category = action.metadata.category;
-                    weight = 1;
-                }
-            }
-
-            if (category) {
-                scores[category] = (scores[category] || 0) + weight;
-            }
-        }
-
-        return Object.entries(scores)
-            .sort((a, b) => b[1] - a[1])
+        return Object.entries(categoryCounts)
+            .sort(([, a], [, b]) => b - a)
             .map(([category]) => category)
-            .slice(0, 3);
+            .slice(0, 5);
     }
 }
 
-export default new TrackingService();
+export default new BehaviorService();

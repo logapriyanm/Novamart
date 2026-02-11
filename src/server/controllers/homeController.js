@@ -4,18 +4,20 @@
  */
 
 import recommendationService from '../services/recommendation.js';
-import behaviorService from '../services/behaviorService.js';
-import prisma from '../lib/prisma.js';
 import logger from '../lib/logger.js';
+import behaviorService from '../services/behaviorService.js';
+import { Product } from '../models/index.js';
 
 /**
  * Get Personalized Home Data
  */
 export const getPersonalizedHome = async (req, res) => {
-    // req.user is populated by authMiddleware
-    const userId = req.user?.id;
+    const userId = req.user?._id || req.user?.id;
     if (!userId) {
-        return res.status(401).json({ success: false, error: 'UNAUTHORIZED' });
+        return res.status(401).json({
+            success: false,
+            error: 'UNAUTHORIZED'
+        });
     }
 
     try {
@@ -38,33 +40,12 @@ export const getPersonalizedHome = async (req, res) => {
  */
 export const getGuestHome = async (req, res) => {
     try {
-        // Return featured/trending products for guest users
-        const featuredProducts = await prisma.product.findMany({
-            where: {
-                status: 'APPROVED'
-            },
-            include: {
-                manufacturer: {
-                    select: {
-                        companyName: true,
-                        id: true
-                    }
-                },
-                inventory: {
-                    select: {
-                        price: true,
-                        stock: true,
-                        dealerId: true
-                    },
-                    take: 1
-                }
-            },
-            take: 8,
-            orderBy: {
-                createdAt: 'desc'
-            }
-        });
+        const featuredProducts = await Product.find({ isApproved: true })
+            .populate('manufacturerId', 'companyName')
+            .limit(8)
+            .sort({ createdAt: -1 });
 
+        // Map to match expected frontend structure if necessary, or update service
         res.json({
             success: true,
             data: {
@@ -82,7 +63,7 @@ export const getGuestHome = async (req, res) => {
  * Track user event (frontend beacon)
  */
 export const trackUserEvent = async (req, res) => {
-    const userId = req.user?.id;
+    const userId = req.user?._id;
     const { type, targetId, metadata } = req.body;
 
     if (!userId || !type) {
@@ -90,10 +71,10 @@ export const trackUserEvent = async (req, res) => {
     }
 
     try {
-        // Fire and forget (don't wait for await if high volume, but here we await for safety)
         await behaviorService.trackEvent(userId, type, targetId, metadata);
         res.json({ success: true, message: 'Event recorded' });
     } catch (error) {
+        console.error('Track Event Error:', error);
         res.status(500).json({ success: false, error: 'TRACKING_FAILED' });
     }
 };

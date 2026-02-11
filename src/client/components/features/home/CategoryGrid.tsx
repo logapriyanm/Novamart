@@ -73,7 +73,6 @@ export default function CategoryGrid() {
         fetchCategories();
     }, []);
 
-    if (!user) return null;
 
     if (isLoading) {
         return (
@@ -117,8 +116,69 @@ export default function CategoryGrid() {
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-20">
-                    <p className="text-slate-400 font-bold">No categories available yet.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                    {/* Placeholder / Demo Mode for Empty State */}
+                    {[
+                        {
+                            title: 'Smart Cooling',
+                            slug: 'air-conditioners',
+                            icon: FaSnowflake,
+                            items: [
+                                { name: 'Inverter AC', image: 'https://images.unsplash.com/photo-1614631350868-e50eb9321487?auto=format&fit=crop&q=80&w=300' },
+                                { name: 'Portable Cooler', image: 'https://images.unsplash.com/photo-1707269666072-a72049e54d3b?auto=format&fit=crop&q=80&w=300' }
+                            ]
+                        },
+                        {
+                            title: 'Kitchen Tech',
+                            slug: 'kitchen-appliances',
+                            icon: FaBlender,
+                            items: [
+                                { name: 'Smart Fridge', image: 'https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?auto=format&fit=crop&q=80&w=300' },
+                                { name: 'Dishwasher', image: 'https://images.unsplash.com/photo-1581622558663-b2e33377dfb2?auto=format&fit=crop&q=80&w=300' }
+                            ]
+                        },
+                        {
+                            title: 'Fabric Care',
+                            slug: 'washing-machines',
+                            icon: FaTshirt,
+                            items: [
+                                { name: 'Front Load', image: 'https://images.unsplash.com/photo-1626806775807-44563324ef71?auto=format&fit=crop&q=80&w=300' },
+                                { name: 'Steam Iron', image: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?auto=format&fit=crop&q=80&w=300' }
+                            ]
+                        },
+                        {
+                            title: 'Home Comfort',
+                            slug: 'home-comfort',
+                            icon: FaWind,
+                            items: [
+                                { name: 'Air Purifier', image: 'https://images.unsplash.com/photo-1585773690161-7b1cd0accfcf?auto=format&fit=crop&q=80&w=300' },
+                                { name: 'Smart Fan', image: 'https://images.unsplash.com/photo-1618219944342-824e40a13285?auto=format&fit=crop&q=80&w=300' }
+                            ]
+                        }
+                    ].map((category, idx) => (
+                        <div key={idx} className="bg-white rounded-[10px] p-6 border border-foreground/10 hover:border-black/20 transition-all duration-300 group">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <category.icon className="w-6 h-6 text-black" />
+                                    <h3 className="text-sm font-black text-black uppercase">{category.title}</h3>
+                                </div>
+                                <span className="text-[10px] font-bold text-foreground/40 uppercase">Coming Soon</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {category.items.map((item: any, itemIdx: number) => (
+                                    <div key={itemIdx} className="flex flex-col gap-2 group/item cursor-not-allowed">
+                                        <div className="aspect-square rounded-[10px] bg-background overflow-hidden border border-foreground/5 group-hover/item:border-black/20 transition-colors">
+                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover opacity-80 group-hover/item:scale-110 transition-transform duration-500" />
+                                        </div>
+                                        <span className="text-[10px] font-bold text-foreground/40 leading-tight group-hover/item:text-black transition-colors truncate uppercase">
+                                            {item.name}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>

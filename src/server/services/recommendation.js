@@ -1,17 +1,17 @@
-import prisma from '../lib/prisma.js';
+import { Product, User, Customer, Order, Cart, Tracking, Negotiation, Inventory, DealerRequest } from '../models/index.js';
 
 class RecommendationService {
     /**
-     * Log User Behavior (exposed for other services)
+     * Log User Behavior
      */
     async logBehavior(userId, type, targetId, metadata = {}) {
         try {
-            await prisma.userBehavior.create({
-                data: {
-                    userId,
-                    type,
-                    targetId,
-                    metadata
+            await Tracking.create({
+                userId,
+                eventType: type,
+                metadata: {
+                    ...metadata,
+                    productId: targetId
                 }
             });
         } catch (error) {
@@ -21,7 +21,6 @@ class RecommendationService {
 
     async getPersonalizedHomepage(userId) {
         try {
-            // Weights configuration
             const WEIGHTS = {
                 ORDER: 5,
                 CART: 3,
@@ -32,118 +31,84 @@ class RecommendationService {
             const categoryScores = {};
 
             // 1. Fetch Data Signals
-            // First get customer to ensure we have ID for cart
-            const customer = await prisma.customer.findUnique({ where: { userId } });
+            const customer = await Customer.findOne({ userId });
 
             const [recentOrders, cart, behaviors] = await Promise.all([
                 // ORDERS: Last 10 orders
-                prisma.order.findMany({
-                    where: { customer: { userId } },
-                    orderBy: { createdAt: 'desc' },
-                    take: 10,
-                    include: { items: { include: { linkedProduct: true } } }
-                }),
-                // CART: Current cart items (only if customer exists)
-                customer ? prisma.cart.findUnique({
-                    where: { customerId: customer.id },
-                    include: { items: { include: { linkedProduct: true } } }
-                }) : Promise.resolve(null),
-                // BEHAVIORS: Last 50 actions (View/Search)
-                prisma.userBehavior.findMany({
-                    where: { userId, type: { in: ['VIEW', 'SEARCH'] } },
-                    orderBy: { createdAt: 'desc' },
-                    take: 50
-                })
+                Order.find({ customerId: customer?._id })
+                    .sort({ createdAt: -1 })
+                    .limit(10)
+                    .populate('items.productId'),
+                // CART: Current cart items
+                customer ? Cart.findOne({ customerId: customer._id }).populate('items.productId') : Promise.resolve(null),
+                // BEHAVIORS: Last 50 actions
+                Tracking.find({ userId, eventType: { $in: ['PAGE_VIEW', 'SEARCH'] } })
+                    .sort({ createdAt: -1 })
+                    .limit(50)
             ]);
 
             // 2. Compute Scores
-            // Process Orders (+5)
             recentOrders.forEach(order => {
                 order.items.forEach(item => {
-                    const cat = item.linkedProduct?.category;
+                    const cat = item.productId?.category;
                     if (cat) categoryScores[cat] = (categoryScores[cat] || 0) + WEIGHTS.ORDER;
                 });
             });
 
-            // Process Cart (+3)
             cart?.items?.forEach(item => {
-                const cat = item.linkedProduct?.category;
+                const cat = item.productId?.category;
                 if (cat) categoryScores[cat] = (categoryScores[cat] || 0) + WEIGHTS.CART;
             });
 
-            // Process Behaviors (+1)
             for (const b of behaviors) {
-                if (b.type === 'VIEW' && b.metadata?.category) {
+                if (b.eventType === 'PAGE_VIEW' && b.metadata?.category) {
                     const cat = b.metadata.category;
                     categoryScores[cat] = (categoryScores[cat] || 0) + WEIGHTS.VIEW;
-                } else if (b.type === 'SEARCH' && b.metadata?.query) {
-                    // Simple heuristic: if query matches a known category (simplified)
-                    // In real app, would need search index matching. For now, skipping direct string match.
                 }
             }
 
             // 3. Determine Top Categories
             const topCategories = Object.entries(categoryScores)
-                .sort(([, scoreA], [, scoreB]) => scoreB - scoreA) // Descending score
+                .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
                 .map(([cat]) => cat)
-                .slice(0, 3); // Top 3 interest areas
+                .slice(0, 3);
 
             // 4. Fetch Recommendations
             let recommendations = [];
             if (topCategories.length > 0) {
-                recommendations = await prisma.product.findMany({
-                    where: {
-                        category: { in: topCategories },
-                        status: 'APPROVED'
-                    },
-                    include: {
-                        manufacturer: { select: { companyName: true, id: true } },
-                        inventory: { select: { price: true, stock: true }, take: 1 }
-                    },
-                    take: 8,
-                    orderBy: { reviewCount: 'desc' } // Within interest, show popular
-                });
+                recommendations = await Product.find({
+                    category: { $in: topCategories },
+                    isApproved: true
+                })
+                    .populate('manufacturerId', 'companyName')
+                    .limit(8)
+                    .sort({ reviewCount: -1 });
             }
 
-            // 5. Backfill with Popular/Trending if personalized list is short
+            // 5. Backfill
             if (recommendations.length < 8) {
-                const popular = await prisma.product.findMany({
-                    where: {
-                        status: 'APPROVED',
-                        id: { notIn: recommendations.map(r => r.id) }
-                    },
-                    include: {
-                        manufacturer: { select: { companyName: true, id: true } },
-                        inventory: { select: { price: true, stock: true }, take: 1 }
-                    },
-                    take: 8 - recommendations.length,
-                    orderBy: { reviewCount: 'desc' }
-                });
+                const popular = await Product.find({
+                    isApproved: true,
+                    _id: { $nin: recommendations.map(r => r._id) }
+                })
+                    .populate('manufacturerId', 'companyName')
+                    .limit(8 - recommendations.length)
+                    .sort({ reviewCount: -1 });
                 recommendations = [...recommendations, ...popular];
             }
 
-            // 6. Fetch Section Data (New Arrivals, Trending) - Keep slightly random/fresh
-            const newArrivals = await prisma.product.findMany({
-                where: { status: 'APPROVED' },
-                include: {
-                    manufacturer: { select: { companyName: true, id: true } },
-                    inventory: { select: { price: true, stock: true }, take: 1 }
-                },
-                orderBy: { createdAt: 'desc' },
-                take: 8
-            });
+            // 6. Section Data
+            const newArrivals = await Product.find({ isApproved: true })
+                .populate('manufacturerId', 'companyName')
+                .limit(8)
+                .sort({ createdAt: -1 });
 
-            const trending = await prisma.product.findMany({
-                where: { status: 'APPROVED' },
-                include: {
-                    manufacturer: { select: { companyName: true, id: true } },
-                    inventory: { select: { price: true, stock: true }, take: 1 }
-                },
-                orderBy: [{ averageRating: 'desc' }, { reviewCount: 'desc' }],
-                take: 8
-            });
+            const trending = await Product.find({ isApproved: true })
+                .populate('manufacturerId', 'companyName')
+                .limit(8)
+                .sort({ averageRating: -1, reviewCount: -1 });
 
-            // 7. Hero Item (Top Recommendation)
+            // 7. Hero Item
             let hero = null;
             if (recommendations.length > 0) {
                 hero = {
@@ -152,16 +117,12 @@ class RecommendationService {
                 };
             }
 
-            // 8. Determine Special Day / Occasion (Anniversary or Member Special)
-            const user = await prisma.user.findUnique({
-                where: { id: userId },
-                include: { dealer: true, manufacturer: true }
-            });
+            // 8. Special Day & B2B Metrics
+            const user = await User.findById(userId);
             let specialDay = null;
             let b2bMetrics = null;
 
             if (user) {
-                // Personalization for B2C/Generic
                 const joinDate = new Date(user.createdAt);
                 const now = new Date();
                 const isAnniversaryMonth = joinDate.getMonth() === now.getMonth();
@@ -173,49 +134,47 @@ class RecommendationService {
                     specialDay = { type: 'WELCOME', discount: 10 };
                 }
 
-                // Personalization for B2B (New in Flow 10)
-                if (user.role === 'DEALER' && user.dealer) {
-                    const [openNegs, newAllocations] = await Promise.all([
-                        prisma.negotiation.count({ where: { dealerId: user.dealer.id, status: 'OPEN' } }),
-                        prisma.inventory.count({ where: { dealerId: user.dealer.id, isAllocated: true, stock: 0 } }) // Allocated but not "sourced" yet
-                    ]);
-                    b2bMetrics = {
-                        role: 'DEALER',
-                        actions: [
-                            { label: 'Active Negotiations', count: openNegs, link: '/dealer/negotiation', icon: 'Negotiate' },
-                            { label: 'New Allocations', count: newAllocations, link: '/dealer/inventory', icon: 'Package' }
-                        ]
-                    };
-                } else if (user.role === 'MANUFACTURER' && user.manufacturer) {
-                    const [pendingRequests, activeNegs] = await Promise.all([
-                        prisma.dealerRequest.count({ where: { manufacturerId: user.manufacturer.id, status: 'PENDING' } }),
-                        prisma.negotiation.count({ where: { manufacturerId: user.manufacturer.id, status: 'OPEN' } })
-                    ]);
-                    b2bMetrics = {
-                        role: 'MANUFACTURER',
-                        actions: [
-                            { label: 'Dealer Requests', count: pendingRequests, link: '/manufacturer/dealers/requests', icon: 'UserPlus' },
-                            { label: 'Active Negotiations', count: activeNegs, link: '/manufacturer/products', icon: 'Negotiate' }
-                        ]
-                    };
+                if (user.role === 'DEALER') {
+                    const dealer = await Dealer.findOne({ userId });
+                    if (dealer) {
+                        const [openNegs, newAllocations] = await Promise.all([
+                            Negotiation.countDocuments({ dealerId: dealer._id, status: 'OPEN' }),
+                            Inventory.countDocuments({ dealerId: dealer._id, isAllocated: true, stock: 0 })
+                        ]);
+                        b2bMetrics = {
+                            role: 'DEALER',
+                            actions: [
+                                { label: 'Active Negotiations', count: openNegs, link: '/dealer/negotiation', icon: 'Negotiate' },
+                                { label: 'New Allocations', count: newAllocations, link: '/dealer/inventory', icon: 'Package' }
+                            ]
+                        };
+                    }
+                } else if (user.role === 'MANUFACTURER') {
+                    const manufacturer = await Manufacturer.findOne({ userId });
+                    if (manufacturer) {
+                        const [pendingRequests, activeNegs] = await Promise.all([
+                            DealerRequest.countDocuments({ manufacturerId: manufacturer._id, status: 'PENDING' }),
+                            Negotiation.countDocuments({ manufacturerId: manufacturer._id, status: 'OPEN' })
+                        ]);
+                        b2bMetrics = {
+                            role: 'MANUFACTURER',
+                            actions: [
+                                { label: 'Dealer Requests', count: pendingRequests, link: '/manufacturer/dealers/requests', icon: 'UserPlus' },
+                                { label: 'Active Negotiations', count: activeNegs, link: '/manufacturer/products', icon: 'Negotiate' }
+                            ]
+                        };
+                    }
                 }
             }
 
-            // 9. Continue Viewing (History)
-            const continueViewing = behaviors
-                .filter(b => b.type === 'VIEW' && b.targetId)
+            // 9. Continue Viewing
+            const continueViewingIds = behaviors
+                .filter(b => b.eventType === 'PAGE_VIEW' && b.metadata?.productId)
                 .slice(0, 5)
-                .map(async b =>
-                    await prisma.product.findUnique({
-                        where: { id: b.targetId },
-                        include: {
-                            manufacturer: { select: { companyName: true } },
-                            inventory: { take: 1 }
-                        }
-                    })
-                );
+                .map(b => b.metadata.productId);
 
-            const resolvedHistory = (await Promise.all(continueViewing)).filter(p => p !== null);
+            const resolvedHistory = await Product.find({ _id: { $in: continueViewingIds } })
+                .populate('manufacturerId', 'companyName');
 
             return {
                 hero,

@@ -36,6 +36,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Hydrate session on mount
     useEffect(() => {
+        // Register global auth error handler
+        apiClient.setAuthErrorCallback(() => {
+            console.error('Terminal authentication error. Logging out.');
+            setUser(null);
+            router.push('/auth/login?expired=true');
+        });
+
         checkAuth();
     }, []);
 

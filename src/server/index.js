@@ -1,13 +1,10 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
+import './env.js'; // MUST BE FIRST
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import prisma from './lib/prisma.js';
 import logger from './lib/logger.js';
 import { authRateLimiter } from './middleware/rateLimiter.js';
 
@@ -36,6 +33,9 @@ import negotiationRoutes from './routes/negotiation/negotiationRoutes.js';
 import userRoutes from './routes/users/index.js';
 import mediaRoutes from './routes/media/mediaRoutes.js';
 import poolingRoutes from './routes/pooling/poolingRoutes.js';
+import collaborationRoutes from './routes/collaboration/collaborationRoutes.js';
+import customManufacturingRoutes from './routes/customManufacturing/customManufacturingRoutes.js';
+import customEscrowRoutes from './routes/customEscrow/customEscrowRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -49,13 +49,20 @@ const io = new Server(httpServer, {
 // Inject IO into NotificationService
 notificationService.setIO(io);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5002;
 
 // Middleware
 app.set('trust proxy', 1); // Trust first proxy for rate limiting (fixes IPv6 issues)
 app.use(cors());
 app.use(express.json());
-app.use('/api/', authRateLimiter); // Apply standard rate limit to all API routes
+app.use((req, res, next) => {
+    logger.info('INCOMING_REQUEST: %s %s', req.method, req.url);
+    next();
+});
+
+app.use('/api/auth', authRoutes);
+
+// app.use('/api/', authRateLimiter); // Temporarily commented out
 
 // Socket.IO Logic
 io.use(async (socket, next) => {
@@ -64,10 +71,10 @@ io.use(async (socket, next) => {
         if (!token) return next(new Error('Authentication error: No token provided'));
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecret');
-        const user = await prisma.user.findUnique({
-            where: { id: decoded.id },
-            include: { customer: true, dealer: true }
-        });
+        const user = await User.findById(decoded.id)
+            .populate('customer')
+            .populate('dealer')
+            .populate('manufacturer');
 
         if (!user) return next(new Error('Authentication error: User not found'));
 
@@ -103,21 +110,22 @@ io.on('connection', (socket) => {
 
     socket.on('chat:message', async (data) => {
         try {
-            const { chatId, message } = data;
+            const { chatId, message, messageType = 'TEXT' } = data;
             const senderId = socket.user.id;
             const senderRole = socket.user.role;
 
             // 1. Verify participation and chat status
             const chat = await Chat.findById(chatId);
-            if (!chat || chat.status !== 'OPEN') return;
+            if (!chat || (chat.status !== 'OPEN' && messageType !== 'SYSTEM')) return;
 
             const isParticipant = chat.participants.some(p => p.userId === senderId);
-            if (!isParticipant) return;
+            if (!isParticipant && senderRole !== 'ADMIN') return;
 
             // 2. Persist to MongoDB
             const newMessage = new Message({
                 chatId,
                 message,
+                messageType,
                 senderId,
                 senderRole
             });
@@ -125,7 +133,11 @@ io.on('connection', (socket) => {
 
             // 3. Update Chat's last message
             await Chat.findByIdAndUpdate(chatId, {
-                lastMessage: message,
+                lastMessage: {
+                    text: message,
+                    senderId,
+                    createdAt: new Date()
+                },
                 updatedAt: new Date()
             });
 
@@ -146,7 +158,6 @@ io.on('connection', (socket) => {
 
 // API Routes
 
-app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/manufacturer', manufacturerRoutes);
 app.use('/api/dealer', dealerRoutes);
@@ -169,12 +180,16 @@ app.use('/api/negotiation', negotiationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/pooling', poolingRoutes);
+app.use('/api/collaboration', collaborationRoutes);
+app.use('/api/custom-manufacturing', customManufacturingRoutes);
+app.use('/api/custom-escrow', customEscrowRoutes);
 
-app.get('/api/health', (req, res) => {
+// Health check route
+app.get('/', (req, res) => {
     res.json({
         status: 'OK',
-        message: 'NovaMart API v1.0.1 (Flow 10 active)',
-        db: 'PostgreSQL Connected (Prisma)'
+        message: 'NovaMart API v1.0.1 (AUDIT_ACTIVE)',
+        db: 'MongoDB (Mongoose)'
     });
 });
 
@@ -206,6 +221,10 @@ process.on('unhandledRejection', (reason, promise) => {
     logger.error('🔥 Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
+process.on('exit', (code) => {
+    logger.info(`💀 Process exiting with code: ${code}`);
+});
+
 const startServer = async () => {
     try {
         if (process.env.MONGODB_URI) {
@@ -221,11 +240,17 @@ const startServer = async () => {
             logger.warn('⚠️ MONGODB_URI not found in environment variables. Skipped connection.');
         }
 
+        httpServer.on('error', (err) => {
+            logger.error('❌ Server Error:', err);
+            process.exit(1);
+        });
+
         httpServer.listen(PORT, () => {
             logger.info(`🚀 Server running on http://localhost:${PORT}`);
         });
     } catch (error) {
         logger.error('❌ Server startup failed:', error);
+        process.exit(1);
     }
 };
 

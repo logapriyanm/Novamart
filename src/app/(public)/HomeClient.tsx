@@ -31,15 +31,21 @@ interface PersonalizedData {
 }
 
 export default function HomeClient() {
-    const { user } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const [personalizedData, setPersonalizedData] = React.useState<PersonalizedData | null>(null);
 
     React.useEffect(() => {
+        // Clear personalized data if user logs out
+        if (!user || !isAuthenticated) {
+            setPersonalizedData(null);
+            return;
+        }
+
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
 
-                if (token && user) {
+                if (token) {
                     // Fetch personalized data for logged-in users
                     try {
                         const res = await apiClient.get<any>('/home/personalized');
@@ -58,7 +64,7 @@ export default function HomeClient() {
             }
         };
         fetchData();
-    }, [user]);
+    }, [user, isAuthenticated]);
 
     return (
         <div className="min-h-screen bg-[#F1F5F9]/50 pt-40 pb-20">
@@ -69,10 +75,13 @@ export default function HomeClient() {
                     <BrandSpotlight />
 
                     <TrendingBar />
+                    <CustomerOffers />
                     <BestsellerSlider />
 
+                    {/* Guest Banner Removed as per request */}
 
-                    {user && (
+
+                    {isAuthenticated && user && (
                         <>
                             {personalizedData?.specialDay && (
                                 <OccasionBanner
@@ -112,11 +121,10 @@ export default function HomeClient() {
                     )}
 
                     <TrustStrip />
-                    <CustomerOffers />
                     <CategoryGrid />
 
                     {/* Guest-only Trust Components */}
-                    {!user && (
+                    {!isAuthenticated && (
                         <>
                             <WhyNovaMart />
                             <ManufacturersGrid />

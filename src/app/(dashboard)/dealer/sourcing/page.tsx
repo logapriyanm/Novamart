@@ -293,6 +293,16 @@ function NegotiationForm({ productId, basePrice, moq, onSuccess }: { productId: 
             onSuccess();
         } catch (error: any) {
             console.error('Negotiation failed:', error);
+            if (error.details?.negotiationId) {
+                toast.error('Negotiation already active', {
+                    action: {
+                        label: 'View',
+                        onClick: () => window.location.href = `/dealer/negotiations/${error.details.negotiationId}`
+                    }
+                });
+            } else {
+                toast.error(error.message || 'Failed to start negotiation');
+            }
         } finally {
             setIsSubmitting(false);
         }

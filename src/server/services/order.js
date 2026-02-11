@@ -3,108 +3,102 @@
  * Manages order lifecycle and inventory locking.
  */
 
-import prisma from '../lib/prisma.js';
+import { Order, Inventory, Negotiation, TaxRule, MarginRule, Notification, AuditLog } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import { isValidTransition } from '../lib/stateMachine.js';
+import mongoose from 'mongoose';
 
 class OrderService {
     /**
      * Create an order and lock inventory.
      */
     async createOrder(customerId, dealerId, items, shippingAddress) {
-        return await prisma.$transaction(async (tx) => {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
             let totalAmount = 0;
 
             // 1. Calculate base total and validate regional inventory
             for (const item of items) {
-                const where = {
+                const query = {
                     dealerId,
-                    stock: { gte: item.quantity }
+                    stock: { $gte: item.quantity }
                 };
 
                 if (item.inventoryId) {
-                    where.id = item.inventoryId;
+                    query._id = item.inventoryId;
                 } else if (item.productId) {
-                    where.productId = item.productId;
+                    query.productId = item.productId;
                 } else {
                     throw new Error('Each item must have a productId or inventoryId.');
                 }
 
-                const inventory = await tx.inventory.findFirst({
-                    where,
-                    include: { product: true }
-                });
+                const inventory = await Inventory.findOne(query).session(session);
 
                 if (!inventory) throw new Error(`Insufficient stock for item at this dealer.`);
 
-                // Check if negotiation exists for this item
+                // Check if negotiation exists
                 if (item.negotiationId) {
-                    const negotiation = await tx.negotiation.findUnique({
-                        where: { id: item.negotiationId }
-                    });
+                    const negotiation = await Negotiation.findById(item.negotiationId).session(session);
 
                     if (!negotiation) throw new Error('Invalid negotiation ID');
                     if (negotiation.status !== 'ACCEPTED') throw new Error('Negotiation must be ACCEPTED to place order');
-                    if (negotiation.productId !== inventory.productId) throw new Error('Negotiation product mismatch');
+                    if (negotiation.productId.toString() !== inventory.productId.toString()) throw new Error('Negotiation product mismatch');
 
-                    // Use negotiated price
                     item.price = negotiation.currentOffer;
                 } else {
                     item.price = inventory.price;
                 }
 
-                await tx.inventory.update({
-                    where: { id: inventory.id },
-                    data: { stock: { decrement: item.quantity }, locked: { increment: item.quantity } }
-                });
+                await Inventory.findByIdAndUpdate(inventory._id, {
+                    $inc: { stock: -item.quantity, locked: item.quantity }
+                }, { session });
 
                 totalAmount += Number(item.price) * item.quantity;
             }
 
             // 2. Dynamic Rules (GST & Commission)
-            const taxRule = await tx.taxRule.findFirst({ where: { isActive: true } }) || { taxSlab: 18 };
-            const marginRule = await tx.marginRule.findFirst({ where: { isActive: true } }) || { maxCap: 5 };
+            const taxRule = await TaxRule.findOne({ isActive: true }).session(session) || { taxSlab: 18 };
+            const marginRule = await MarginRule.findOne({ isActive: true }).session(session) || { maxCap: 5 };
 
             const taxAmount = (totalAmount * Number(taxRule.taxSlab)) / 100;
             const commissionAmount = (totalAmount * Number(marginRule.maxCap)) / 100;
 
             // 3. Create Order
-            const order = await tx.order.create({
-                data: {
-                    customerId,
-                    dealerId,
-                    totalAmount,
-                    taxAmount,
-                    commissionAmount,
-                    shippingAddress,
-                    status: 'CREATED',
-                    items: {
-                        create: items.map(i => ({
-                            productId: i.productId,
-                            quantity: i.quantity,
-                            price: i.price,
-                            inventoryId: i.inventoryId // Saving inventory link
-                        }))
-                    }
-                },
-                include: { items: true }
-            });
+            const [order] = await Order.create([{
+                customerId,
+                dealerId,
+                totalAmount,
+                taxAmount,
+                commissionAmount,
+                shippingAddress,
+                status: 'CREATED',
+                items: items.map(i => ({
+                    productId: i.productId,
+                    quantity: i.quantity,
+                    price: i.price,
+                    inventoryId: i.inventoryId
+                })),
+                timeline: [{
+                    fromState: 'CREATED',
+                    toState: 'CREATED',
+                    reason: 'Order initialized'
+                }]
+            }], { session });
 
-            await tx.orderTimeline.create({
-                data: { orderId: order.id, fromState: 'CREATED', toState: 'CREATED', reason: 'Order initialized' }
-            });
+            await session.commitTransaction();
 
-            // 4. Asynchronous Audit Logging (MongoDB)
-            // We use a separate catch to ensure order success isn't blocked by log failure
-            import('./audit.js').then(service => {
-                service.default.logAction('ORDER_CREATED', 'ORDER', order.id, {
-                    userId: customerId,
-                    newData: order,
-                    reason: 'User placed a new order'
-                });
+            // 4. Asynchronous Audit Logging (Background)
+            // We use standard create (no session) post-commit for audit
+            AuditLog.create({
+                action: 'ORDER_CREATED',
+                entityType: 'ORDER',
+                entityId: order._id,
+                userId: customerId,
+                metadata: { order, reason: 'User placed a new order' }
             }).catch(err => console.error('Background Audit Log Failed:', err));
 
-            // 5. Emit System Event for Notifications
+            // 5. Emit System Event
             systemEvents.emit(EVENTS.ORDER.PLACED, {
                 order,
                 customerId,
@@ -112,191 +106,196 @@ class OrderService {
             });
 
             return order;
-        });
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
      * Confirm payment and initialize escrow.
      */
     async confirmPayment(orderId) {
-        return await prisma.$transaction(async (tx) => {
-            const order = await tx.order.findUnique({ where: { id: orderId } });
-            if (!order) throw new Error('Order not found');
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const orderBuf = await Order.findById(orderId).session(session);
+            if (!orderBuf) throw new Error('Order not found');
 
-            const updatedOrder = await tx.order.update({
-                where: { id: orderId },
-                data: { status: 'PAID' }
-            });
+            const order = await Order.findByIdAndUpdate(orderId, {
+                status: 'PAID',
+                $push: {
+                    timeline: {
+                        fromState: orderBuf.status,
+                        toState: 'PAID',
+                        reason: 'Payment confirmed. Funds held in escrow.'
+                    }
+                }
+            }, { session, new: true });
 
-            // Initialize Escrow
-            await tx.escrow.create({
-                data: { orderId, amount: order.totalAmount, status: 'HOLD' }
-            });
+            const { Escrow } = await import('../models/index.js');
+            await Escrow.create([{
+                orderId,
+                amount: order.totalAmount,
+                status: 'HOLD'
+            }], { session });
 
-            await tx.orderTimeline.create({
-                data: { orderId, fromState: 'CREATED', toState: 'PAID', reason: 'Payment confirmed. Funds held in escrow.' }
-            });
+            await session.commitTransaction();
 
-            // 4. Asynchronous Audit Logging (MongoDB)
-            import('./audit.js').then(service => {
-                service.default.logAction('PAYMENT_CONFIRMED', 'ORDER', orderId, {
-                    userId: order.customerId,
-                    newData: { status: 'PAID', escrow: 'INITIALIZED' },
-                    reason: 'Payment successful'
-                });
+            AuditLog.create({
+                action: 'PAYMENT_CONFIRMED',
+                entityType: 'ORDER',
+                entityId: orderId,
+                userId: order.customerId,
+                metadata: { status: 'PAID', escrow: 'INITIALIZED', reason: 'Payment successful' }
             }).catch(err => console.error('Background Audit Log Failed:', err));
 
-            // Emit System Event
             systemEvents.emit(EVENTS.ORDER.PAID, {
                 orderId,
                 userId: order.customerId
             });
 
-            return updatedOrder;
-        });
+            return order;
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
      * Confirm order by Dealer.
      */
     async confirmOrder(orderId) {
-        return await prisma.$transaction(async (tx) => {
-            const order = await tx.order.update({
-                where: { id: orderId },
-                data: { status: 'CONFIRMED' }
-            });
+        const orderBuf = await Order.findById(orderId);
+        if (!orderBuf) throw new Error('Order not found');
 
-            await tx.orderTimeline.create({
-                data: { orderId, fromState: 'PAID', toState: 'CONFIRMED', reason: 'Dealer confirmed stock availability.' }
-            });
-
-            return order;
-        });
+        return await Order.findByIdAndUpdate(orderId, {
+            status: 'CONFIRMED',
+            $push: {
+                timeline: {
+                    fromState: orderBuf.status,
+                    toState: 'CONFIRMED',
+                    reason: 'Dealer confirmed stock availability.'
+                }
+            }
+        }, { new: true });
     }
 
     /**
      * Mark order as shipped.
      */
     async shipOrder(orderId, trackingNumber, carrier = 'NovaExpress') {
-        return await prisma.$transaction(async (tx) => {
-            const order = await tx.order.update({
-                where: { id: orderId },
-                data: {
-                    status: 'SHIPPED',
-                    shipmentTracking: {
-                        upsert: {
-                            create: {
-                                trackingNumber,
-                                carrier,
-                                status: 'SHIPPED',
-                                estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // T+3 days
-                            },
-                            update: {
-                                trackingNumber,
-                                carrier,
-                                status: 'SHIPPED'
-                            }
-                        }
-                    }
-                }
-            });
+        const orderBuf = await Order.findById(orderId);
+        if (!orderBuf) throw new Error('Order not found');
 
-            await tx.orderTimeline.create({
-                data: {
-                    orderId,
-                    fromState: 'CONFIRMED',
+        const order = await Order.findByIdAndUpdate(orderId, {
+            status: 'SHIPPED',
+            shipmentTracking: {
+                trackingNumber,
+                carrier,
+                status: 'SHIPPED',
+                estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+            },
+            $push: {
+                timeline: {
+                    fromState: orderBuf.status,
                     toState: 'SHIPPED',
                     reason: `Order shipped via ${carrier}. Tracking: ${trackingNumber}`
                 }
-            });
+            }
+        }, { new: true });
 
-            // Emit System Event
-            systemEvents.emit(EVENTS.ORDER.SHIPPED, {
-                orderId,
-                userId: order.customerId,
-                trackingNumber
-            });
-
-            return order;
+        systemEvents.emit(EVENTS.ORDER.SHIPPED, {
+            orderId,
+            userId: order.customerId,
+            trackingNumber
         });
+
+        return order;
     }
 
     /**
      * Mark order as delivered. Trigger for T+N settlement window.
      */
     async deliverOrder(orderId) {
-        return await prisma.$transaction(async (tx) => {
-            const order = await tx.order.update({
-                where: { id: orderId },
-                data: { status: 'DELIVERED' }
-            });
+        const orderBuf = await Order.findById(orderId);
+        if (!orderBuf) throw new Error('Order not found');
 
-            await tx.shipmentTracking.update({
-                where: { orderId },
-                data: { status: 'DELIVERED', actualDelivery: new Date() }
-            });
-
-            await tx.orderTimeline.create({
-                data: {
-                    orderId,
-                    fromState: 'SHIPPED',
+        const order = await Order.findByIdAndUpdate(orderId, {
+            status: 'DELIVERED',
+            'shipmentTracking.status': 'DELIVERED',
+            'shipmentTracking.actualDelivery': new Date(),
+            $push: {
+                timeline: {
+                    fromState: orderBuf.status,
                     toState: 'DELIVERED',
                     reason: 'Logistics provider confirmed delivery.'
                 }
-            });
+            }
+        }, { new: true });
 
-            // Emit System Event
-            systemEvents.emit(EVENTS.ORDER.DELIVERED, {
-                orderId,
-                userId: order.customerId
-            });
-
-            return order;
+        systemEvents.emit(EVENTS.ORDER.DELIVERED, {
+            orderId,
+            userId: order.customerId
         });
+
+        return order;
     }
 
     /**
      * Cancel an order and restore inventory.
      */
     async cancelOrder(orderId, reason) {
-        return await prisma.$transaction(async (tx) => {
-            const order = await tx.order.findUnique({
-                where: { id: orderId },
-                include: { items: true }
-            });
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const order = await Order.findById(orderId).session(session);
 
-            if (!order || order.status === 'SETTLED' || order.status === 'CANCELLED') {
+            if (!order || ['SETTLED', 'CANCELLED'].includes(order.status)) {
                 throw new Error('Order cannot be cancelled in its current state.');
             }
 
             // 1. Restore Inventory
             for (const item of order.items) {
-                const inventoryWhere = item.inventoryId
-                    ? { id: item.inventoryId }
-                    : { productId: item.productId, dealerId: order.dealerId };
-
-                await tx.inventory.updateMany({
-                    where: inventoryWhere,
-                    data: {
-                        stock: { increment: item.quantity },
-                        locked: { decrement: item.quantity }
-                    }
-                });
+                await Inventory.findByIdAndUpdate(item.inventoryId, {
+                    $inc: { stock: item.quantity, locked: -item.quantity }
+                }, { session });
             }
 
-            // 2. Update Status
-            const cancelledOrder = await tx.order.update({
-                where: { id: orderId },
-                data: { status: 'CANCELLED' }
-            });
+            // 2. Handle Escrow Refund
+            const { Escrow } = await import('../models/index.js');
+            const escrow = await Escrow.findOne({ orderId }).session(session);
+            if (escrow && escrow.status === 'HOLD') {
+                await Escrow.findByIdAndUpdate(escrow._id, {
+                    status: 'REFUNDED',
+                    refundedAt: new Date()
+                }, { session });
+            }
 
-            // 3. Log Action
-            await tx.orderTimeline.create({
-                data: { orderId, fromState: order.status, toState: 'CANCELLED', reason }
-            });
+            // 3. Update Status
+            const cancelledOrder = await Order.findByIdAndUpdate(orderId, {
+                status: 'CANCELLED',
+                $push: {
+                    timeline: {
+                        fromState: order.status,
+                        toState: 'CANCELLED',
+                        reason
+                    }
+                }
+            }, { session, new: true });
 
+            await session.commitTransaction();
             return cancelledOrder;
-        });
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
@@ -304,66 +303,54 @@ class OrderService {
      */
     async getOrders(role, userId, filters = {}) {
         const { status, dealerId } = filters;
-        const where = {};
+        const query = {};
 
         if (role === 'DEALER') {
-            const dealer = await prisma.dealer.findUnique({ where: { userId } });
+            const { Dealer } = await import('../models/index.js');
+            const dealer = await Dealer.findOne({ userId });
             if (!dealer) throw new Error('DEALER_PROFILE_NOT_FOUND');
-            where.dealerId = dealer.id;
+            query.dealerId = dealer._id;
         } else if (role === 'CUSTOMER') {
-            const customer = await prisma.customer.findUnique({ where: { userId } });
+            const { Customer } = await import('../models/index.js');
+            const customer = await Customer.findOne({ userId });
             if (!customer) throw new Error('CUSTOMER_PROFILE_NOT_FOUND');
-            where.customerId = customer.id;
+            query.customerId = customer._id;
         } else if (role === 'ADMIN' && dealerId) {
-            where.dealerId = dealerId;
+            query.dealerId = dealerId;
         }
 
         if (status && status !== 'All') {
-            where.status = status.toUpperCase();
+            query.status = status.toUpperCase();
         }
 
-        return await prisma.order.findMany({
-            where,
-            include: {
-                customer: {
-                    select: {
-                        name: true,
-                        user: { select: { email: true } }
-                    }
-                },
-                items: { include: { linkedProduct: { select: { name: true, images: true } } } },
-                dealer: { select: { businessName: true } }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        return await Order.find(query)
+            .populate('customerId', 'name')
+            .populate('items.productId', 'name images')
+            .populate('dealerId', 'businessName')
+            .sort({ createdAt: -1 })
+            .lean();
     }
 
     /**
      * Get Order by ID with security and full relations.
      */
     async getOrderById(orderId, userId, role) {
-        const order = await prisma.order.findUnique({
-            where: { id: orderId },
-            include: {
-                items: { include: { linkedProduct: true } },
-                customer: { include: { user: true } },
-                dealer: { include: { user: true } },
-                timeline: { orderBy: { createdAt: 'desc' } },
-                escrow: true,
-                shipmentTracking: true
-            }
-        });
+        const order = await Order.findById(orderId)
+            .populate({ path: 'items.productId', select: 'name images manufacturerId' })
+            .populate('customerId')
+            .populate('dealerId')
+            .populate('escrow')
+            .lean();
 
         if (!order) throw new Error('ORDER_NOT_FOUND');
 
         // Security Checks
-        if (role === 'CUSTOMER' && order.customer.userId !== userId) throw new Error('UNAUTHORIZED_ACCESS');
-        if (role === 'DEALER' && order.dealer.userId !== userId) throw new Error('UNAUTHORIZED_ACCESS');
+        if (role === 'CUSTOMER' && order.customerId.userId.toString() !== userId.toString()) throw new Error('UNAUTHORIZED_ACCESS');
+        if (role === 'DEALER' && order.dealerId.userId.toString() !== userId.toString()) throw new Error('UNAUTHORIZED_ACCESS');
         if (role === 'MANUFACTURER') {
-            const mfg = await prisma.manufacturer.findUnique({ where: { userId } });
-            const hasProduct = await prisma.orderItem.findFirst({
-                where: { orderId, linkedProduct: { manufacturerId: mfg.id } }
-            });
+            const { Manufacturer } = await import('../models/index.js');
+            const mfg = await Manufacturer.findOne({ userId });
+            const hasProduct = order.items.some(item => item.productId.manufacturerId.toString() === mfg._id.toString());
             if (!hasProduct) throw new Error('UNAUTHORIZED_ACCESS');
         }
 
@@ -374,11 +361,10 @@ class OrderService {
      * Unified Status Update with State Machine and Rules.
      */
     async updateStatus(orderId, status, { reason, metadata } = {}) {
-        return await prisma.$transaction(async (tx) => {
-            const current = await tx.order.findUnique({
-                where: { id: orderId },
-                include: { items: true, escrow: true }
-            });
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const current = await Order.findById(orderId).session(session);
 
             if (!current) throw new Error('ORDER_NOT_FOUND');
             if (!isValidTransition(current.status, status)) {
@@ -387,49 +373,48 @@ class OrderService {
 
             // Side Effects
             if (status === 'DELIVERED') {
-                // Unlock inventory
                 for (const item of current.items) {
-                    if (item.inventoryId) {
-                        await tx.inventory.update({
-                            where: { id: item.inventoryId },
-                            data: { locked: { decrement: item.quantity } }
-                        });
-                    }
+                    await Inventory.findByIdAndUpdate(item.inventoryId, {
+                        $inc: { locked: -item.quantity }
+                    }, { session });
                 }
             } else if (status === 'CANCELLED') {
-                // Revert stock
                 for (const item of current.items) {
-                    if (item.inventoryId) {
-                        await tx.inventory.update({
-                            where: { id: item.inventoryId },
-                            data: { stock: { increment: item.quantity }, locked: { decrement: item.quantity } }
-                        });
-                    }
+                    await Inventory.findByIdAndUpdate(item.inventoryId, {
+                        $inc: { stock: item.quantity, locked: -item.quantity }
+                    }, { session });
                 }
                 // Handle Escrow Refund
-                if (current.escrow && current.escrow.status === 'HOLD') {
-                    await tx.escrow.update({
-                        where: { id: current.escrow.id },
-                        data: { status: 'REFUNDED', refundedAt: new Date() }
-                    });
+                const { Escrow } = await import('../models/index.js');
+                const escrow = await Escrow.findOne({ orderId }).session(session);
+                if (escrow && escrow.status === 'HOLD') {
+                    await Escrow.findByIdAndUpdate(escrow._id, {
+                        status: 'REFUNDED',
+                        refundedAt: new Date()
+                    }, { session });
                 }
             }
 
-            return await tx.order.update({
-                where: { id: orderId },
-                data: {
-                    status,
+            const updatedOrder = await Order.findByIdAndUpdate(orderId, {
+                status,
+                $push: {
                     timeline: {
-                        create: {
-                            fromState: current.status,
-                            toState: status,
-                            reason: reason || 'Status updated by system',
-                            metadata: metadata || {}
-                        }
+                        fromState: current.status,
+                        toState: status,
+                        reason: reason || 'Status updated by system',
+                        metadata: metadata || {}
                     }
                 }
-            });
-        });
+            }, { session, new: true });
+
+            await session.commitTransaction();
+            return updatedOrder;
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
@@ -438,26 +423,24 @@ class OrderService {
      */
     async auditStock() {
         const stockDiscrepancies = [];
-
-        const inventories = await prisma.inventory.findMany({ include: { product: true } });
+        const inventories = await Inventory.find({}).populate('productId').lean();
 
         for (const inv of inventories) {
-            const activeOrders = await prisma.orderItem.findMany({
-                where: {
-                    productId: inv.productId,
-                    order: {
-                        dealerId: inv.dealerId,
-                        status: { in: ['CREATED', 'PAID', 'CONFIRMED', 'SHIPPED'] }
-                    }
-                }
-            });
+            const activeOrders = await Order.find({
+                dealerId: inv.dealerId,
+                status: { $in: ['CREATED', 'PAID', 'CONFIRMED', 'SHIPPED'] },
+                'items.productId': inv.productId._id
+            }).lean();
 
-            const expectedLocked = activeOrders.reduce((sum, item) => sum + item.quantity, 0);
+            const expectedLocked = activeOrders.reduce((sum, order) => {
+                const item = order.items.find(i => i.productId.toString() === inv.productId._id.toString());
+                return sum + (item?.quantity || 0);
+            }, 0);
 
             if (inv.locked !== expectedLocked) {
                 stockDiscrepancies.push({
-                    inventoryId: inv.id,
-                    product: inv.product.name,
+                    inventoryId: inv._id,
+                    product: inv.productId.name,
                     dealerId: inv.dealerId,
                     currentLocked: inv.locked,
                     expectedLocked,

@@ -15,3 +15,7 @@ export const getSystemHealth = async (req, res) => {
         });
     }
 };
+
+export default {
+    getSystemHealth
+};

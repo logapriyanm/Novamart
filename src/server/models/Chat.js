@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const ChatSchema = new mongoose.Schema({
     type: {
         type: String,
-        enum: ['PRE_PURCHASE', 'ORDER', 'B2B', 'ESCALATION'],
+        enum: ['PRE_PURCHASE', 'ORDER', 'NEGOTIATION', 'ESCALATION'],
         required: true
     },
     contextId: {

@@ -3,9 +3,10 @@
  * Logic for raising disputes and evidence collection.
  */
 
-import prisma from '../lib/prisma.js';
+import { Dispute, Order, Escrow, Evidence, AuditLog } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
-import EscrowService from './escrow.js';
+import escrowService from './escrow.js';
+import mongoose from 'mongoose';
 
 class DisputeService {
     /**
@@ -13,59 +14,61 @@ class DisputeService {
      * Supports multi-party triggers: CUSTOMER_TO_DEALER, DEALER_TO_MANUFACTURER, ADMIN_INTERNAL.
      */
     async raiseDispute(orderId, raisedByUserId, { reason, triggerType = 'CUSTOMER_TO_DEALER' }) {
-        return await prisma.$transaction(async (tx) => {
-            const dispute = await tx.dispute.create({
-                data: {
-                    orderId,
-                    raisedByUserId,
-                    reason,
-                    status: 'OPEN',
-                    metadata: { triggerType }
-                }
-            });
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const [dispute] = await Dispute.create([{
+                orderId,
+                raisedByUserId,
+                reason,
+                status: 'OPEN',
+                metadata: { triggerType }
+            }], { session });
 
-            await tx.order.update({
-                where: { id: orderId },
-                data: { status: 'DISPUTED' }
-            });
+            await Order.findByIdAndUpdate(orderId, { status: 'DISPUTED' }, { session });
 
-            // Freeze Escrow Immediately for any dispute
-            await EscrowService.freezeFunds(orderId);
+            // Freeze Escrow Immediately
+            await escrowService.freezeFunds(orderId);
 
-            await import('./audit.js').then(service => {
-                service.default.logAction('DISPUTE_RAISED', 'DISPUTE', dispute.id, {
-                    userId: raisedByUserId,
-                    reason: `[${triggerType}] ${reason}`
-                });
+            await session.commitTransaction();
+
+            AuditLog.create({
+                action: 'DISPUTE_RAISED',
+                entityType: 'DISPUTE',
+                entityId: dispute._id,
+                userId: raisedByUserId,
+                metadata: { reason: `[${triggerType}] ${reason}` }
             }).catch(err => console.error('Background Audit Log Failed:', err));
 
-            // Emit System Event
             systemEvents.emit('DISPUTE.RAISED', {
-                disputeId: dispute.id,
+                disputeId: dispute._id,
                 orderId,
                 raisedByUserId,
                 reason: `[${triggerType}] ${reason}`
             });
 
             return dispute;
-        });
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 
     /**
      * Add evidence to a dispute with rich metadata.
      */
     async addEvidence(disputeId, userId, { fileUrl, type, gpsCoordinates, timestamp }) {
-        return await prisma.evidence.create({
-            data: {
-                disputeId,
-                fileUrl,
-                type,
-                uploadedBy: userId,
-                metadata: {
-                    gps: gpsCoordinates,
-                    deviceTimestamp: timestamp,
-                    uploadAt: new Date()
-                }
+        return await Evidence.create({
+            disputeId,
+            fileUrl,
+            type,
+            uploadedBy: userId,
+            metadata: {
+                gps: gpsCoordinates,
+                deviceTimestamp: timestamp,
+                uploadAt: new Date()
             }
         });
     }
@@ -74,15 +77,15 @@ class DisputeService {
      * Evaluate dispute based on automated rules.
      */
     async evaluateRules(disputeId) {
-        const dispute = await prisma.dispute.findUnique({
-            where: { id: disputeId },
-            include: { evidence: true, order: { include: { escrow: true } } }
-        });
+        const dispute = await Dispute.findById(disputeId)
+            .populate('orderId');
+
+        const evidence = await Evidence.find({ disputeId });
 
         if (!dispute) throw new Error('Dispute not found');
 
         // 1. Evidence Types
-        const evidenceTypes = dispute.evidence.map(e => e.type);
+        const evidenceTypes = evidence.map(e => e.type);
         const hasUnboxingVideo = evidenceTypes.includes('UNBOXING_VIDEO');
         const hasPOD = evidenceTypes.includes('POD');
         const hasInvoice = evidenceTypes.includes('INVOICE');
@@ -90,7 +93,6 @@ class DisputeService {
         // 2. SLA & Deadlines (72h Policy)
         const hoursSinceCreation = (Date.now() - new Date(dispute.createdAt).getTime()) / (1000 * 60 * 60);
 
-        // SLA Breach: Seller failed to provide evidence within 72h
         if (hoursSinceCreation > 72 && !hasPOD && !hasInvoice) {
             return {
                 resolution: 'AUTO_REFUND_CUSTOMER',
@@ -106,7 +108,7 @@ class DisputeService {
             };
         }
 
-        // 4. Logic: Wrong Item (Unboxing Video Proof)
+        // 4. Logic: Wrong Item
         if (dispute.reason.includes('WRONG_ITEM') && hasUnboxingVideo) {
             return {
                 resolution: 'REFUND_PENDING_RETURN',
@@ -115,12 +117,11 @@ class DisputeService {
         }
 
         // 5. Expired Return Window Check
-        const orderDeliveryDate = await prisma.orderLog.findFirst({
-            where: { orderId: dispute.orderId, toState: 'DELIVERED' }
-        });
+        const order = dispute.orderId;
+        const deliveryLog = order.timeline.find(t => t.toState === 'DELIVERED');
 
-        if (orderDeliveryDate) {
-            const daysSinceDelivery = (Date.now() - new Date(orderDeliveryDate.timestamp).getTime()) / (1000 * 60 * 60 * 24);
+        if (deliveryLog) {
+            const daysSinceDelivery = (Date.now() - new Date(deliveryLog.createdAt).getTime()) / (1000 * 60 * 60 * 24);
             if (daysSinceDelivery > 14) {
                 return {
                     resolution: 'REJECT_DISPUTE',
@@ -136,29 +137,28 @@ class DisputeService {
      * Final Resolution Execution (Triggers Escrow)
      */
     async resolveDispute(disputeId, resolution, reviewerId) {
-        return await prisma.$transaction(async (tx) => {
-            const dispute = await tx.dispute.findUnique({ where: { id: disputeId } });
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const dispute = await Dispute.findById(disputeId).session(session);
 
-            // 1. Update Dispute Status
-            await tx.dispute.update({
-                where: { id: disputeId },
-                data: { status: 'RESOLVED', resolutionMetadata: { resolution, reviewerId } }
-            });
+            await Dispute.findByIdAndUpdate(disputeId, {
+                status: 'RESOLVED',
+                resolutionMetadata: { resolution, reviewerId }
+            }, { session });
 
-            // 2. Trigger Escrow action
             if (resolution === 'REFUND') {
-                await EscrowService.processRefund(dispute.orderId, null, false); // Full refund
+                await escrowService.processRefund(dispute.orderId, null, false);
             } else if (resolution === 'RELEASE') {
-                await EscrowService.releaseFunds(dispute.orderId);
+                await escrowService.releaseFunds(dispute.orderId);
             }
 
-            // 3. Update Order Status
-            await tx.order.update({
-                where: { id: dispute.orderId },
-                data: { status: resolution === 'REFUND' ? 'CANCELLED' : 'DELIVERED' }
-            });
+            await Order.findByIdAndUpdate(dispute.orderId, {
+                status: resolution === 'REFUND' ? 'CANCELLED' : 'DELIVERED'
+            }, { session });
 
-            // Emit System Event
+            await session.commitTransaction();
+
             systemEvents.emit('DISPUTE.RESOLVED', {
                 disputeId,
                 orderId: dispute.orderId,
@@ -167,9 +167,13 @@ class DisputeService {
             });
 
             return { disputeId, resolution, status: 'SUCCESS' };
-        });
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 }
 
 export default new DisputeService();
-

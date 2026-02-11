@@ -6,7 +6,6 @@
 import manufacturerService from '../services/manufacturer.js';
 import stockAllocationService from '../services/stockAllocationService.js';
 import auditService from '../services/audit.js';
-import prisma from '../lib/prisma.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 
 /**
@@ -14,7 +13,7 @@ import systemEvents, { EVENTS } from '../lib/systemEvents.js';
  */
 export const handleDealerNetwork = async (req, res) => {
     const { dealerId, status } = req.body;
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
@@ -27,23 +26,21 @@ export const handleDealerNetwork = async (req, res) => {
         });
 
         // Notify dealer of decision
-        const dealer = await prisma.dealer.findUnique({
-            where: { id: dealerId },
-            include: { user: true }
-        });
+        const { Dealer, Notification } = await import('../models/index.js');
+        const dealer = await Dealer.findById(dealerId).populate('userId');
 
-        if (dealer?.user) {
-            await prisma.notification.create({
-                data: {
-                    userId: dealer.user.id,
-                    type: status === 'APPROVED' ? 'REQUEST_APPROVED' : 'REQUEST_REJECTED',
-                    title: `Partnership Request ${status}`,
-                    message: status === 'APPROVED'
-                        ? 'Congratulations! Your partnership request has been approved. You can now start sourcing products.'
-                        : 'Your partnership request was not approved at this time. You can reach out to the manufacturer for more details.',
-                    link: status === 'APPROVED' ? '/dealer/inventory' : '/dealer/marketplace'
-                }
-            });
+        if (dealer?.userId) {
+            const notifyPayload = {
+                userId: dealer.userId._id,
+                type: 'PARTNERSHIP',
+                title: `Partnership Request ${status}`,
+                message: status === 'APPROVED'
+                    ? 'Congratulations! Your partnership request has been approved. You can now start sourcing products.'
+                    : 'Your partnership request was not approved at this time. You can reach out to the manufacturer for more details.',
+                link: status === 'APPROVED' ? '/dealer/inventory' : '/dealer/marketplace'
+            };
+            console.log('DEBUG: Notification.create payload:', JSON.stringify(notifyPayload, null, 2));
+            await Notification.create(notifyPayload);
         }
 
         res.json({ success: true, message: `Dealer request ${status}`, data: result });
@@ -56,13 +53,12 @@ export const handleDealerNetwork = async (req, res) => {
  * Get Dealer Requests
  */
 export const getDealerRequests = async (req, res) => {
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     const { status } = req.query;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
         const requests = await manufacturerService.getDealerRequests(mfgId, status || 'PENDING');
-        console.log(`[Manufacturer] Fetched ${requests.length} requests for ${mfgId} with status ${status || 'PENDING'}`);
         res.json({ success: true, data: requests });
     } catch (error) {
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_REQUESTS' });
@@ -74,7 +70,7 @@ export const getDealerRequests = async (req, res) => {
  */
 export const allocateInventory = async (req, res) => {
     const { productId, dealerId, region, quantity, dealerBasePrice, dealerMoq, maxMargin } = req.body;
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
@@ -97,7 +93,7 @@ export const allocateInventory = async (req, res) => {
  * Get all active allocations for manufacturer
  */
 export const getAllocations = async (req, res) => {
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
@@ -114,7 +110,7 @@ export const getAllocations = async (req, res) => {
 export const updateAllocation = async (req, res) => {
     const { allocationId } = req.params;
     const updateData = req.body;
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
@@ -129,8 +125,7 @@ export const updateAllocation = async (req, res) => {
  * Revoke stock allocation
  */
 export const revokeAllocation = async (req, res) => {
-    const { allocationId } = req.params;
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
@@ -145,13 +140,14 @@ export const revokeAllocation = async (req, res) => {
  * Get Sales & Credit Insights
  */
 export const getManufacturerStats = async (req, res) => {
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
     try {
+        const { Product } = await import('../models/index.js');
         const [sales, credit, productsCount, requests] = await Promise.all([
             manufacturerService.getSalesAnalytics(mfgId),
             manufacturerService.getCreditStatus(mfgId),
-            prisma.product.count({ where: { manufacturerId: mfgId } }),
+            Product.countDocuments({ manufacturerId: mfgId }),
             manufacturerService.getDealerRequests(mfgId, 'PENDING')
         ]);
 
@@ -174,14 +170,16 @@ export const getManufacturerStats = async (req, res) => {
  * List Managed Dealers
  */
 export const getMyDealers = async (req, res) => {
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
     try {
-        const manufacturer = await prisma.manufacturer.findUnique({
-            where: { id: mfgId },
-            include: { dealersApproved: { include: { user: { select: { email: true, status: true } } } } }
-        });
-        res.json({ success: true, data: manufacturer.dealersApproved });
+        const { Manufacturer } = await import('../models/index.js');
+        const manufacturer = await Manufacturer.findById(mfgId)
+            .populate({
+                path: 'approvedBy',
+                populate: { path: 'userId', select: 'email status' }
+            });
+        res.json({ success: true, data: manufacturer.approvedBy });
     } catch (error) {
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_DEALERS' });
     }
@@ -192,7 +190,7 @@ export const getProfile = async (req, res) => {
     if (!manufacturer) {
         return res.status(404).json({ success: false, error: 'MANUFACTURER_PROFILE_NOT_FOUND' });
     }
-    const mfgId = manufacturer.id;
+    const mfgId = manufacturer._id || manufacturer.id;
     try {
         const profile = await manufacturerService.getProfile(mfgId);
         res.json({
@@ -237,27 +235,23 @@ export const updateProfile = async (req, res) => {
 };
 
 export const getOrders = async (req, res) => {
-    const mfgId = req.user.manufacturer?.id;
+    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
     try {
-        const orders = await prisma.order.findMany({
-            where: {
-                items: {
-                    some: {
-                        product: { manufacturerId: mfgId }
-                    }
-                }
-            },
-            include: {
-                items: {
-                    include: { product: true }
-                },
-                dealer: { select: { businessName: true } },
-                customer: { select: { name: true } }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
-        res.json({ success: true, data: orders });
+        const { Order } = await import('../models/index.js');
+        const orders = await Order.find({
+            'items.product': { $exists: true } // Sub-query logic in products/manufacturerId handled in populate/lean
+        })
+            .populate('items.product')
+            .populate('dealerId', 'businessName')
+            .populate('customerId', 'name')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Filter orders by manufacturer ID manually or via better query
+        const filteredOrders = orders.filter(o => o.items.some(i => i.product?.manufacturerId?.toString() === mfgId.toString()));
+
+        res.json({ success: true, data: filteredOrders });
     } catch (error) {
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_ORDERS' });
     }
@@ -268,46 +262,36 @@ export const getOrders = async (req, res) => {
  */
 export const getAllManufacturers = async (req, res) => {
     try {
-        const manufacturers = await prisma.manufacturer.findMany({
-            where: {
-                user: {
-                    status: { not: 'SUSPENDED' }
-                }
-            },
-            include: {
-                user: {
-                    select: {
-                        email: true,
-                        status: true
-                    }
-                },
-                products: {
-                    where: { status: 'APPROVED' },
-                    select: {
-                        id: true,
-                        name: true,
-                        basePrice: true,
-                        images: true,
-                        category: true,
-                        moq: true
-                    },
-                    take: 6, // Preview products
-                    orderBy: { createdAt: 'desc' }
-                },
-                _count: {
-                    select: {
-                        products: {
-                            where: { status: 'APPROVED' }
-                        }
-                    }
-                }
-            },
-            orderBy: { companyName: 'asc' }
-        });
+        const { Manufacturer, Product } = await import('../models/index.js');
+        const manufacturers = await Manufacturer.find({})
+            .populate('userId', 'email status')
+            .sort({ companyName: 1 })
+            .lean();
+
+        // Manual filter for suspended and attachment of products (Take 6)
+        const activeManufacturers = await Promise.all(manufacturers
+            .filter(m => m.userId?.status !== 'SUSPENDED')
+            .map(async (m) => {
+                const products = await Product.find({ manufacturerId: m._id, status: 'APPROVED' })
+                    .select('name basePrice images category moq')
+                    .sort({ createdAt: -1 })
+                    .limit(6)
+                    .lean();
+
+                const count = await Product.countDocuments({ manufacturerId: m._id, status: 'APPROVED' });
+
+                return {
+                    ...m,
+                    id: m._id,
+                    products,
+                    _count: { products: count }
+                };
+            })
+        );
 
         res.json({
             success: true,
-            data: manufacturers
+            data: activeManufacturers
         });
     } catch (error) {
         console.error('Error fetching manufacturers:', error);
