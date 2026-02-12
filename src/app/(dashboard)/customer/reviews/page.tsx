@@ -63,7 +63,7 @@ export default function MyReviewsPage() {
     if (isLoading) return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10367D]"></div></div>;
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-10 px-6">
+        <div className="min-h-screen pb-20 pt-10 px-6">
             <div className="max-w-5xl mx-auto space-y-8">
 
                 {/* Header */}

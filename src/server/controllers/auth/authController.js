@@ -127,7 +127,8 @@ export const register = async (req, res) => {
                     id: user._id,
                     email: user.email,
                     role: user.role,
-                    status: user.status
+                    status: user.status,
+                    avatar: user.avatar
                 }
             }
         });
@@ -193,7 +194,8 @@ export const login = async (req, res) => {
                     id: user._id,
                     email: user.email,
                     role: user.role,
-                    status: user.status
+                    status: user.status,
+                    avatar: user.avatar
                 }
             }
         });
@@ -248,7 +250,8 @@ export const loginWithPhone = async (req, res) => {
                     id: user._id,
                     email: user.email,
                     role: user.role,
-                    status: user.status
+                    status: user.status,
+                    avatar: user.avatar
                 }
             }
         });
@@ -324,7 +327,8 @@ export const googleLogin = async (req, res) => {
                     id: user.id,
                     email: user.email,
                     role: user.role,
-                    status: user.status
+                    status: user.status,
+                    avatar: user.avatar
                 }
             }
         });
@@ -347,7 +351,8 @@ export const getCurrentUser = async (req, res) => {
                 name: user.customer?.name || user.dealer?.businessName || user.manufacturer?.companyName || user.email.split('@')[0],
                 email: user.email,
                 role: user.role,
-                status: user.status
+                status: user.status,
+                avatar: user.avatar
             }
         });
     } catch (error) {
@@ -411,16 +416,24 @@ export const logout = async (req, res) => {
 
         if (token) {
             await Session.deleteMany({ token });
-        }
-
-        if (req.user) {
-            await User.findByIdAndUpdate(req.user._id, { refreshToken: null });
+            // Ideally we should decode the token to get userId and invalidate refreshToken too,
+            // but without verification we can't trust the token.
+            // If we want to be thorough, we can try-catch jwt.decode
+            try {
+                const decoded = jwt.decode(token);
+                if (decoded?.id) {
+                    await User.findByIdAndUpdate(decoded.id, { refreshToken: null });
+                }
+            } catch (e) {
+                // Ignore decoding errors during logout
+            }
         }
 
         res.json({ success: true, message: 'LOGOUT_SUCCESSFUL' });
     } catch (error) {
         logger.error('❌ Logout Error:', error);
-        res.status(500).json({ success: false, error: 'LOGOUT_FAILED' });
+        // Even if server error, client should consider it logged out
+        res.status(200).json({ success: true, message: 'LOGOUT_COMPLETED_WITH_ERRORS' });
     }
 };
 

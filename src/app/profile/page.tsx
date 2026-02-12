@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Loader from '@/client/components/ui/Loader';
 
 export default function ProfileRedirect() {
     const router = useRouter();
@@ -11,8 +12,8 @@ export default function ProfileRedirect() {
     }, [router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 font-black text-[#10367D] uppercase tracking-[0.3em] animate-pulse">
-            Syncing Profile Data...
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <Loader size="xl" variant="primary" />
         </div>
     );
 }

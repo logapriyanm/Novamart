@@ -11,6 +11,7 @@ import {
     FaChevronRight
 } from 'react-icons/fa';
 import Link from 'next/link';
+import Loader from '@/client/components/ui/Loader';
 import { apiClient } from '@/lib/api/client';
 import MediaUpload from '@/client/components/ui/MediaUpload';
 import OptimizedImage from '@/client/components/ui/OptimizedImage';
@@ -118,7 +119,7 @@ export default function CustomerReviewPortal() {
     if (isLoading) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10367D]"></div>
+                <Loader size="lg" variant="primary" />
             </div>
         );
     }

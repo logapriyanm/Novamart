@@ -14,6 +14,7 @@ import {
 import Link from 'next/link';
 import { manufacturerService } from '@/lib/api/services/manufacturer.service';
 import { toast } from 'sonner';
+import Loader from '@/client/components/ui/Loader';
 
 export default function ManufacturerInventory() {
     const [products, setProducts] = useState<any[]>([]);
@@ -91,11 +92,13 @@ export default function ManufacturerInventory() {
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
-                                Array(3).fill(0).map((_, i) => (
-                                    <tr key={i} className="animate-pulse">
-                                        <td colSpan={5} className="px-10 py-8 bg-slate-50/10 h-24"></td>
-                                    </tr>
-                                ))
+                                <tr>
+                                    <td colSpan={5} className="py-20 text-center">
+                                        <div className="flex justify-center">
+                                            <Loader size="lg" variant="primary" />
+                                        </div>
+                                    </td>
+                                </tr>
                             ) : products.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-10 py-20 text-center text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">

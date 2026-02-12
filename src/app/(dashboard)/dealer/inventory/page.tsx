@@ -7,6 +7,7 @@ import {
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
+import Loader from '@/client/components/ui/Loader';
 
 export default function DealerInventoryPage() {
     const [inventory, setInventory] = useState<any[]>([]);
@@ -112,11 +113,13 @@ export default function DealerInventoryPage() {
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
-                                Array.from({ length: 5 }).map((_, i) => (
-                                    <tr key={i} className="animate-pulse">
-                                        <td colSpan={5} className="p-8"><div className="h-8 bg-slate-50 rounded-lg w-full"></div></td>
-                                    </tr>
-                                ))
+                                <tr>
+                                    <td colSpan={5} className="py-20 text-center">
+                                        <div className="flex justify-center">
+                                            <Loader size="lg" variant="primary" />
+                                        </div>
+                                    </td>
+                                </tr>
                             ) : inventory.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="p-20 text-center flex flex-col items-center gap-4">

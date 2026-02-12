@@ -16,6 +16,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 import { adminService } from '@/lib/api/services/admin.service';
 import EmptyState from '@/client/components/ui/EmptyState';
+import Loader from '@/client/components/ui/Loader';
 
 const mockActivityData = [
     { time: '00:00', users: 120 },
@@ -56,13 +57,7 @@ export default function AdminDashboard() {
     if (isLoading) {
         return (
             <div className="min-h-[600px] flex items-center justify-center">
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="text-slate-800"
-                >
-                    <HiOutlineRefresh className="w-8 h-8 opacity-50" />
-                </motion.div>
+                <Loader size="xl" variant="primary" />
             </div>
         );
     }

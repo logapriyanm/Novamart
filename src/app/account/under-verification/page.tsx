@@ -3,6 +3,7 @@
 import React from 'react';
 import { FaClock as Clock, FaEnvelope as Mail, FaCheckCircle as CheckCircle, FaHome as Home } from 'react-icons/fa';
 import Link from 'next/link';
+import Loader from '@/client/components/ui/Loader';
 
 export default function VerificationPendingPage() {
     return (
@@ -27,7 +28,7 @@ export default function VerificationPendingPage() {
                             {step.done ? (
                                 <CheckCircle className="w-5 h-5 text-emerald-500" />
                             ) : (
-                                <div className="w-5 h-5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+                                <Loader size="sm" variant="primary" />
                             )}
                             <span className={`text-sm font-bold ${step.done ? 'text-[#1E293B]/40 strike' : 'text-[#1E293B]'}`}>
                                 {step.label}

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight, FaLock } from 'react-icons/fa';
 
-const bestsellers = [
+const defaultBestsellers = [
     {
         id: 1,
         title: "Smart Inverter Refrigerator",
@@ -47,7 +47,12 @@ const bestsellers = [
     }
 ];
 
-export default function BestsellerSlider() {
+interface BestsellerSliderProps {
+    products?: typeof defaultBestsellers;
+}
+
+export default function BestsellerSlider({ products }: BestsellerSliderProps) {
+    const bestsellers = (products && products.length > 0) ? products : defaultBestsellers;
     // Center index starts at 2 (the 3rd item)
     const [currentIndex, setCurrentIndex] = useState(2);
 

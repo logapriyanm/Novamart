@@ -28,7 +28,7 @@ import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 
 function ProfileContent() {
-    const { user, logout, isAuthenticated } = useAuth();
+    const { user, logout, isAuthenticated, checkAuth } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const initialTab = searchParams.get('tab') || 'profile';
@@ -77,8 +77,8 @@ function ProfileContent() {
             const urls = await mediaService.uploadImages([file]);
             if (urls && urls.length > 0) {
                 await apiClient.put('/customer/profile', { section: 'account', data: { avatar: urls[0] } });
+                await checkAuth();
                 toast.success('Profile image updated');
-                window.location.reload();
             }
         } catch (error) {
             toast.error('Failed to upload image');

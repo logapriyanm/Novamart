@@ -19,6 +19,7 @@ import {
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
 import UserVerificationModal from '@/client/components/features/admin/UserVerificationModal';
+import Loader from '@/client/components/ui/Loader';
 import { toast } from 'sonner';
 
 export default function UserManagementPortal() {
@@ -65,9 +66,9 @@ export default function UserManagementPortal() {
     const confirmVerification = async (isVerified: boolean) => {
         try {
             if (entityType === 'MANUFACTURER') {
-                await adminService.verifyManufacturer(selectedEntity.id, isVerified);
+                await adminService.verifyManufacturer(selectedEntity._id || selectedEntity.id, isVerified);
             } else {
-                await adminService.verifyDealer(selectedEntity.id, isVerified);
+                await adminService.verifyDealer(selectedEntity._id || selectedEntity.id, isVerified);
             }
             toast.success(`${entityType} ${isVerified ? 'Verified' : 'Rejected'} Successfully`);
             fetchAllData(); // Refresh list
@@ -155,9 +156,15 @@ export default function UserManagementPortal() {
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {loading ? (
-                                <tr><td colSpan={4} className="p-10 text-center text-xs font-bold uppercase text-slate-400">Loading Directory...</td></tr>
+                                <tr>
+                                    <td colSpan={4} className="p-10 text-center">
+                                        <div className="flex justify-center">
+                                            <Loader size="md" variant="primary" />
+                                        </div>
+                                    </td>
+                                </tr>
                             ) : displayedList.map((user) => (
-                                <tr key={user.id} className="hover:bg-slate-50 group transition-colors">
+                                <tr key={user._id || user.id} className="hover:bg-slate-50 group transition-colors">
                                     <td className="px-10 py-6">
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-[10px] bg-black flex items-center justify-center text-white text-xs font-black group-hover:scale-110 transition-transform">

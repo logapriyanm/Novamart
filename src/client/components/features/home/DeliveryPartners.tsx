@@ -12,20 +12,22 @@ import {
     FaBoxOpen
 } from 'react-icons/fa';
 
-const PARTNERS = [
-    { name: 'BlueDart', icon: FaTruckMoving, color: '#0056b3' },
-    { name: 'DHL Express', icon: FaDhl, color: '#d40511' },
-    { name: 'FedEx', icon: FaFedex, color: '#4d148c' },
-    { name: 'Delhivery', icon: FaShippingFast, color: '#ff3e6c' },
-    { name: 'DTDC', icon: FaBoxOpen, color: '#00529b' },
-    { name: 'Ecom Express', icon: FaTruckMoving, color: '#1a237e' },
-    { name: 'Shadowfax', icon: FaShippingFast, color: '#00af87' },
-    { name: 'XpressBees', icon: FaBoxOpen, color: '#e65100' },
-    { name: 'Amazon Shipping', icon: FaAmazon, color: '#FF9900' },
-    { name: 'UPS', icon: FaUps, color: '#351c15' },
-];
+const iconMap: Record<string, any> = {
+    'FaDhl': FaDhl,
+    'FaUps': FaUps,
+    'FaFedex': FaFedex,
+    'FaAmazon': FaAmazon,
+    'FaShippingFast': FaShippingFast,
+    'FaTruckMoving': FaTruckMoving,
+    'FaBoxOpen': FaBoxOpen
+};
 
-export default function DeliveryPartners() {
+interface DeliveryPartnersProps {
+    partners?: { name: string; icon: string; color: string }[];
+}
+
+export default function DeliveryPartners({ partners = [] }: DeliveryPartnersProps) {
+    if (partners.length === 0) return null;
     return (
         <div className="w-full   border-slate-100 py-12 overflow-hidden relative">
             <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
@@ -48,14 +50,17 @@ export default function DeliveryPartners() {
                     }}
                 >
                     {/* Render specific number of duplicates to ensure width allows for smooth scrolling without gaps */}
-                    {[...PARTNERS, ...PARTNERS, ...PARTNERS, ...PARTNERS].map((partner, idx) => (
-                        <div key={idx} className="flex flex-col items-center gap-3 shrink-0 opacity-40 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0 cursor-default group">
-                            <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                                <partner.icon className="w-8 h-8" style={{ color: partner.color }} />
+                    {[...partners, ...partners, ...partners, ...partners].map((partner, idx) => {
+                        const Icon = iconMap[partner.icon] || FaTruckMoving;
+                        return (
+                            <div key={idx} className="flex flex-col items-center gap-3 shrink-0 opacity-40 hover:opacity-100 transition-opacity duration-300 grayscale hover:grayscale-0 cursor-default group">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                                    <Icon className="w-8 h-8" style={{ color: partner.color }} />
+                                </div>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{partner.name}</span>
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{partner.name}</span>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </motion.div>
             </div>
         </div>

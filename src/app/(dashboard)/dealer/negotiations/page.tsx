@@ -4,11 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     FaComments, FaIndustry, FaBoxOpen, FaClock,
-    FaCheckCircle, FaTimes, FaSpinner, FaArrowRight
+    FaCheckCircle, FaTimes, FaArrowRight
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
+import Loader from '@/client/components/ui/Loader';
 
 export default function DealerNegotiations() {
     // const { showSnackbar } = useSnackbar();
@@ -71,7 +72,7 @@ export default function DealerNegotiations() {
             {/* Negotiations List */}
             {loading ? (
                 <div className="flex items-center justify-center py-20">
-                    <FaSpinner className="w-8 h-8 text-[#0F6CBD] animate-spin" />
+                    <Loader size="lg" variant="primary" />
                 </div>
             ) : filteredNegotiations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[10px] border border-dashed border-slate-200">

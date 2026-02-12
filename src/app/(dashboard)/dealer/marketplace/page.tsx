@@ -10,6 +10,7 @@ import { apiClient } from '@/lib/api/client';
 import { useAuth } from '@/client/context/AuthContext';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import Loader from '@/client/components/ui/Loader';
 
 export default function DealerMarketplace() {
     const { user } = useAuth();
@@ -69,100 +70,95 @@ export default function DealerMarketplace() {
     });
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl font-black tracking-tight text-[#1E293B]">
-                        Manufacturer <span className="text-[#0F6CBD]">Directory</span>
-                    </h1>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">
-                        Browse verified manufacturers and request access to start partnerships
-                    </p>
-                </div>
-                <Link href="/dealer/sourcing">
-                    <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-[10px] font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
-                        <FaBoxOpen />
-                        Go to Sourcing Terminal
-                    </button>
-                </Link>
-            </div>
-
-            {/* Search & Filters */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-[10px] shadow-sm border border-slate-100">
-                <div className="flex-1 relative w-full">
-                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Search manufacturers by name or location..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F6CBD]/20 focus:border-[#0F6CBD] transition-all font-medium text-sm"
-                    />
-                </div>
-            </div>
-
-            {/* Categories */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {CATEGORIES.map((cat) => (
-                    <button
-                        key={cat}
-                        onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
-                        className={`p-6 rounded-[10px] border shadow-sm hover:shadow-md transition-all cursor-pointer group text-left ${selectedCategory === cat
-                            ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-500/20'
-                            : 'bg-white border-slate-100'
-                            }`}
-                    >
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${selectedCategory === cat ? 'bg-[#0F6CBD] text-white' : 'bg-blue-50 text-[#0F6CBD]'
-                            }`}>
-                            <FaBoxOpen />
-                        </div>
-                        <h3 className={`font-black ${selectedCategory === cat ? 'text-[#0F6CBD]' : 'text-slate-700'}`}>
-                            {cat}
-                        </h3>
-                    </button>
-                ))}
-            </div>
-
-            {/* Manufacturers Grid */}
-            <div>
-                <h2 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2">
-                    <FaIndustry className="text-[#0F6CBD]" />
-                    {loading ? 'Loading Manufacturers...' : `${filteredManufacturers.length} Manufacturers Found`}
-                </h2>
-
-                {loading ? (
-                    <div className="py-20 flex flex-col items-center justify-center">
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            className="text-[#0F6CBD] text-4xl mb-4"
-                        >
-                            <FaIndustry />
-                        </motion.div>
-                        <p className="text-slate-400 font-bold text-sm">Loading manufacturer directory...</p>
-                    </div>
-                ) : filteredManufacturers.length === 0 ? (
-                    <div className="py-12 flex flex-col items-center justify-center bg-white rounded-[10px] border border-dashed border-slate-200 text-center">
-                        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                            <FaIndustry className="w-6 h-6 text-slate-300" />
-                        </div>
-                        <h3 className="text-lg font-black text-slate-700">No Manufacturers Found</h3>
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2 max-w-md mx-auto">
-                            Try adjusting your search or filters
+        <>
+            <div className="space-y-8 animate-fade-in pb-12">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div className="flex flex-col gap-2">
+                        <h1 className="text-3xl font-black tracking-tight text-[#1E293B]">
+                            Manufacturer <span className="text-[#0F6CBD]">Directory</span>
+                        </h1>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">
+                            Browse verified manufacturers and request access to start partnerships
                         </p>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {filteredManufacturers.map((manufacturer) => (
-                            <ManufacturerCard
-                                key={manufacturer.id}
-                                manufacturer={manufacturer}
-                                onRequestAccess={handleRequestAccess}
-                            />
-                        ))}
+                    <Link href="/dealer/sourcing">
+                        <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-[10px] font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                            <FaBoxOpen />
+                            Go to Sourcing Terminal
+                        </button>
+                    </Link>
+                </div>
+
+                {/* Search & Filters */}
+                <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-[10px] shadow-sm border border-slate-100">
+                    <div className="flex-1 relative w-full">
+                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                            type="text"
+                            placeholder="Search manufacturers by name or location..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 rounded-[10px] border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F6CBD]/20 focus:border-[#0F6CBD] transition-all font-medium text-sm"
+                        />
                     </div>
-                )}
+                </div>
+
+                {/* Categories */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {CATEGORIES.map((cat) => (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(selectedCategory === cat ? null : cat)}
+                            className={`p-6 rounded-[10px] border shadow-sm hover:shadow-md transition-all cursor-pointer group text-left ${selectedCategory === cat
+                                ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-500/20'
+                                : 'bg-white border-slate-100'
+                                }`}
+                        >
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${selectedCategory === cat ? 'bg-[#0F6CBD] text-white' : 'bg-blue-50 text-[#0F6CBD]'
+                                }`}>
+                                <FaBoxOpen />
+                            </div>
+                            <h3 className={`font-black ${selectedCategory === cat ? 'text-[#0F6CBD]' : 'text-slate-700'}`}>
+                                {cat}
+                            </h3>
+                        </button>
+                    ))}
+                </div>
+
+                {/* Manufacturers Grid */}
+                <div>
+                    <h2 className="text-lg font-black text-[#1E293B] mb-6 flex items-center gap-2">
+                        <FaIndustry className="text-[#0F6CBD]" />
+                        {loading ? 'Loading Manufacturers...' : `${filteredManufacturers.length} Manufacturers Found`}
+                    </h2>
+
+                    {loading ? (
+                        <div className="py-20 flex items-center justify-center">
+                            <Loader size="xl" variant="primary" />
+                        </div>
+                    ) : filteredManufacturers.length === 0 ? (
+                        <div className="py-12 flex flex-col items-center justify-center bg-white rounded-[10px] border border-dashed border-slate-200 text-center">
+                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                                <FaIndustry className="w-6 h-6 text-slate-300" />
+                            </div>
+                            <h3 className="text-lg font-black text-slate-700">No Manufacturers Found</h3>
+                            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2 max-w-md mx-auto">
+                                Try adjusting your search or filters
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {filteredManufacturers.map((manufacturer) => (
+                                <ManufacturerCard
+                                    key={manufacturer.id}
+                                    manufacturer={manufacturer}
+                                    onRequestAccess={handleRequestAccess}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Request Access Modal */}
@@ -177,7 +173,7 @@ export default function DealerMarketplace() {
                     />
                 )}
             </AnimatePresence>
-        </div>
+        </>
     );
 }
 

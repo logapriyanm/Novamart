@@ -6,11 +6,11 @@ import {
     FaEnvelope as Mail,
     FaArrowRight as ArrowRight,
     FaArrowLeft as ArrowLeft,
-    FaCheckCircle as CheckCircle,
-    FaSpinner as Loader2
+    FaCheckCircle as CheckCircle
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { authService } from '@/lib/api/services/auth.service';
+import Loader from '@/client/components/ui/Loader';
 // import { useSnackbar } from '@/client/context/SnackbarContext';
 import { toast } from 'sonner';
 
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
                                     disabled={isLoading}
                                     className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-[10px]"
                                 >
-                                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Recovery Link'}
+                                    {isLoading ? <Loader size="sm" variant="white" /> : 'Send Recovery Link'}
                                     {!isLoading && <ArrowRight className="w-5 h-5" />}
                                 </button>
                             </form>

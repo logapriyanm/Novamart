@@ -15,6 +15,11 @@ import OccasionBanner from '@/client/components/features/home/OccasionBanner';
 import RecommendedProducts from '@/client/components/features/home/RecommendedProducts';
 import BestsellerSlider from '@/client/components/features/home/BestsellerSlider';
 import B2BShortcuts from '@/client/components/features/home/B2BShortcuts';
+import AIFeaturedProducts from '@/client/components/features/home/AIFeaturedProducts';
+import ComboOfferProducts from '@/client/components/features/home/ComboOfferProducts';
+import PersonalizedHero from '@/client/components/features/home/PersonalizedHero';
+import PromotionStrip from '@/client/components/features/home/PromotionStrip';
+import ContinueViewing from '@/client/components/features/home/ContinueViewing';
 
 const COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
     HeroSection,
@@ -30,7 +35,12 @@ const COMPONENT_MAP: Record<string, React.ComponentType<any>> = {
     OccasionBanner,
     RecommendedProducts,
     BestsellerSlider,
-    B2BShortcuts
+    B2BShortcuts,
+    AIFeaturedProducts,
+    ComboOfferProducts,
+    PersonalizedHero,
+    PromotionStrip,
+    ContinueViewing
 };
 
 interface SectionRendererProps {
@@ -55,17 +65,16 @@ export default function SectionRenderer({ section, user, personalizedData }: Sec
     // Pass custom props based on component needs
     const props: any = { ...section.content };
 
-    if (section.componentName === 'OccasionBanner' && personalizedData?.specialDay) {
+    if (section.componentName === 'OccasionBanner') {
+        if (!personalizedData?.specialDay) return null;
         props.type = personalizedData.specialDay.type;
         props.discount = Number(personalizedData.specialDay.discount);
         props.userName = user?.name || 'User';
-        // Only render if data exists
-        if (!personalizedData.specialDay) return null;
     }
 
-    if (section.componentName === 'B2BShortcuts' && personalizedData?.b2bMetrics) {
+    if (section.componentName === 'B2BShortcuts') {
+        if (!personalizedData?.b2bMetrics) return null;
         props.metrics = personalizedData.b2bMetrics;
-        if (!personalizedData.b2bMetrics) return null;
     }
 
     if (section.componentName === 'RecommendedProducts') {
@@ -83,6 +92,30 @@ export default function SectionRenderer({ section, user, personalizedData }: Sec
         }
     }
 
+    if (section.componentName === 'AIFeaturedProducts') {
+        if (!personalizedData?.recommended || personalizedData.recommended.length === 0) return null;
+        props.products = personalizedData.recommended;
+    }
+
+    if (section.componentName === 'ComboOfferProducts') {
+        if (!personalizedData?.combos || personalizedData.combos.length === 0) return null;
+        props.products = personalizedData.combos;
+    }
+
+    if (section.componentName === 'PersonalizedHero') {
+        if (!personalizedData?.hero) return null;
+        props.data = personalizedData.hero;
+    }
+
+    if (section.componentName === 'PromotionStrip') {
+        props.message = section.content?.message || 'Exclusive Deals Live Now!';
+    }
+
+    if (section.componentName === 'ContinueViewing') {
+        if (!personalizedData?.continueViewing || personalizedData.continueViewing.length === 0) return null;
+        props.data = personalizedData.continueViewing;
+    }
+
     return (
         <section className="scroll-mt-32">
             {section.title && section.title !== 'Hero Section' && (
@@ -97,7 +130,7 @@ export default function SectionRenderer({ section, user, personalizedData }: Sec
                     )}
                 </div>
             )}
-            <div className="rounded-[10px] overflow-hidden">
+            <div>
                 <Component {...props} />
             </div>
         </section>

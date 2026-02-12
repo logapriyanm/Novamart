@@ -20,6 +20,7 @@ import {
     FaStore
 } from 'react-icons/fa';
 import { WhiteCard, TrackingBadge, StatusBadge, Stepper } from '@/client/components/features/dashboard/DashboardUI';
+import Loader from '@/client/components/ui/Loader';
 
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
@@ -121,7 +122,11 @@ export default function MyOrders() {
         }
     };
 
-    if (loading) return <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Orders...</div>;
+    if (loading) return (
+        <div className="flex items-center justify-center py-20">
+            <Loader size="lg" variant="primary" />
+        </div>
+    );
 
     return (
         <div className="space-y-10 pb-20 animate-fade-in">

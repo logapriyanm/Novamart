@@ -12,19 +12,11 @@ import {
     FaBox,
     FaBars as Menu,
     FaTimes as X,
-    FaShieldAlt as ShieldCheck,
-    FaGlobe as Globe,
-    FaFileInvoice,
-    FaIdCard,
     FaIndustry,
-    FaThLarge,
-    FaChevronLeft,
-    FaChevronRight,
     FaSignOutAlt,
     FaClipboardList,
     FaHeadset,
     FaStar,
-    FaComments,
     FaHeart,
     FaShieldAlt
 } from 'react-icons/fa';
@@ -161,6 +153,20 @@ export default function Navbar() {
                             <Link href="/admin" className="btn-primary">
                                 <FaShieldAlt className="w-4 h-4" />
                                 <span>Admin </span>
+                            </Link>
+                        )}
+
+                        {user?.role === 'MANUFACTURER' && (
+                            <Link href="/manufacturer" className="btn-primary">
+                                <FaIndustry className="w-4 h-4" />
+                                <span>Manufacturer</span>
+                            </Link>
+                        )}
+
+                        {user?.role === 'DEALER' && (
+                            <Link href="/dealer" className="btn-primary">
+                                <FaStore className="w-4 h-4" />
+                                <span>Dealer</span>
                             </Link>
                         )}
 
@@ -390,6 +396,27 @@ export default function Navbar() {
                                         <FaBox className="w-5 h-5 text-foreground/20" />
                                         Products
                                     </Link>
+
+                                    {user?.role === 'ADMIN' && (
+                                        <Link href="/admin" className="flex items-center gap-3 text-sm font-bold text-primary group" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <FaShieldAlt className="w-5 h-5 text-primary/40 group-hover:text-primary" />
+                                            Admin Dashboard
+                                        </Link>
+                                    )}
+
+                                    {user?.role === 'MANUFACTURER' && (
+                                        <Link href="/manufacturer" className="flex items-center gap-3 text-sm font-bold text-primary group" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <FaIndustry className="w-5 h-5 text-primary/40 group-hover:text-primary" />
+                                            Manufacturer Dashboard
+                                        </Link>
+                                    )}
+
+                                    {user?.role === 'DEALER' && (
+                                        <Link href="/dealer" className="flex items-center gap-3 text-sm font-bold text-primary group" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <FaStore className="w-5 h-5 text-primary/40 group-hover:text-primary" />
+                                            Dealer Dashboard
+                                        </Link>
+                                    )}
 
                                     <Link href="/contact" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
                                         <FaHeadset className="w-5 h-5 text-foreground/20" />

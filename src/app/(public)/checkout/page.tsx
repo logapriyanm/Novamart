@@ -19,6 +19,7 @@ import {
     HiOutlineX
 } from 'react-icons/hi';
 import Link from 'next/link';
+import Loader from '@/client/components/ui/Loader';
 import { useRouter } from 'next/navigation';
 
 import { useCart } from '@/client/context/CartContext';
@@ -46,7 +47,7 @@ export default function CheckoutPage() {
     if (authLoading || !isAuthenticated) {
         return (
             <div className="min-h-screen pt-32 flex justify-center bg-background">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+                <Loader size="lg" variant="primary" />
             </div>
         );
     }

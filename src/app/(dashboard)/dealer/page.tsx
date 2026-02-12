@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/client/hooks/useAuth';
+import Loader from '@/client/components/ui/Loader';
 
 const mockSalesData = [
     { name: 'Mon', sales: 12000 },
@@ -35,13 +36,9 @@ export default function DealerDashboard() {
     if (isLoading) {
         return (
             <div className="min-h-[600px] flex items-center justify-center">
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="text-slate-800"
-                >
-                    <HiOutlineRefresh className="w-8 h-8 opacity-50" />
-                </motion.div>
+                <div className="min-h-[600px] flex items-center justify-center">
+                    <Loader size="xl" variant="primary" />
+                </div>
             </div>
         );
     }

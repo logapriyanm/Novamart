@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { Metadata, ResolvingMetadata } from 'next';
 import ProductsClient from './ProductsClient';
+import Loader from '@/client/components/ui/Loader';
 
 interface Props {
     searchParams: { [key: string]: string | string[] | undefined };
@@ -62,7 +63,7 @@ export default async function ProductsPage({ searchParams }: Props) {
             />
             <Suspense fallback={
                 <div className="min-h-screen pt-40 flex items-center justify-center">
-                    <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin" />
+                    <Loader size="lg" variant="primary" />
                 </div>
             }>
                 <ProductsClient />

@@ -8,117 +8,16 @@ import Image from 'next/image';
 
 import { useAuth } from '../../../context/AuthContext';
 
-const GUEST_SLIDES = [
-    {
-        id: 1,
-        tag: 'Energy Efficient Refrigerators',
-        title: "Buy Smart",
-        highlight: "Refrigerators",
-        description:
-            "Shop the best refrigerators online with advanced cooling technology, large storage capacity, and energy‑efficient performance. Perfect for modern homes.",
-        discount: "Up to 35% OFF",
-        subText: "Double Door & Smart Inverter Models",
-        ctaText: "Buy Refrigerators Online",
-        ctaLink: "/products?category=refrigerators",
-        secondaryCta: "Refrigerator Buying Guide",
-        image: "/assets/BestSeller.png"
-    },
-    {
-        id: 2,
-        tag: 'Best Washing Machines',
-        title: "Smart",
-        highlight: "Laundry Care",
-        description:
-            "Discover top‑rated washing machines with powerful cleaning, low water usage, and smart fabric care. Compare prices and features before you buy.",
-        discount: "Flat 25% OFF",
-        subText: "Front Load & Fully Automatic",
-        ctaText: "Buy Washing Machines",
-        ctaLink: "/products?category=washing-machines",
-        secondaryCta: "Compare Washing Machines",
-        image: "/assets/BestSeller2.png"
-    },
-    {
-        id: 3,
-        tag: '5‑Star Air Conditioners',
-        title: "Powerful",
-        highlight: "Cooling",
-        description:
-            "Buy energy‑efficient air conditioners with fast cooling, silent operation, and inverter technology. Save electricity while staying comfortable.",
-        discount: "Free Installation",
-        subText: "5‑Star Inverter ACs",
-        ctaText: "Shop Air Conditioners",
-        ctaLink: "/products?category=air-conditioners",
-        secondaryCta: "AC Power & Energy Calculator",
-        image: "/assets/hero/carousel_ac.jpg"
-    },
-    {
-        id: 4,
-        tag: 'Smart Kitchen Appliances',
-        title: "Modern",
-        highlight: "Kitchen",
-        description:
-            "Upgrade your kitchen with smart ovens, microwaves, and cooking appliances. Enjoy precise temperature control and faster cooking results.",
-        discount: "Bundle Offers Available",
-        subText: "Oven & Microwave Combos",
-        ctaText: "Shop Kitchen Appliances",
-        ctaLink: "/products?category=kitchen-appliances",
-        secondaryCta: "Kitchen Appliance Recipes",
-        image: "/assets/hero/carousel_kitchen.jpg"
-    }
-];
-
-const LOGGED_IN_SLIDES = [
-    {
-        id: 1,
-        tag: 'Welcome Back',
-        title: "Exclusive",
-        highlight: "Deals For You",
-        description: "Explore personalized recommendations and huge savings on the products you love. Don't miss our daily member-only deals.",
-        discount: "Up to 50% OFF",
-        subText: "Member Exclusive Deals",
-        ctaText: "View My Deals",
-        ctaLink: "/products?deals=exclusive",
-        secondaryCta: "My Orders",
-        image: "/assets/hero/main.png"
-    },
-    {
-        id: 2,
-        tag: 'Business Solutions',
-        title: "Wholesale",
-        highlight: "Bulk Orders",
-        description: "Streamline your business procurement with our dedicated B2B portal. Get volume discounts and priority shipping.",
-        discount: "Volume Discounts",
-        subText: "On Orders Over ₹50k",
-        ctaText: "Shop Wholesale",
-        ctaLink: "/products?mode=wholesale",
-        secondaryCta: "Request A Quote",
-        image: "/assets/hero/wholesale.png"
-    },
-    {
-        id: 3,
-        tag: 'New Arrivals',
-        title: "Latest",
-        highlight: "Technology",
-        description: "Stay ahead with the newest tech in home appliances. From smart refrigerators to AI-powered washing machines.",
-        discount: "Early Access",
-        subText: "For Premium Members",
-        ctaText: "Shop New Arrivals",
-        ctaLink: "/products?sort=newest",
-        secondaryCta: "View Catalog",
-        image: "/assets/hero/AI-featured.png"
-    }
-];
-
 interface HeroSectionProps {
     slides?: any[];
 }
 
-export default function HeroSection({ slides: cmsSlides }: HeroSectionProps) {
+export default function HeroSection({ slides = [] }: HeroSectionProps) {
     const { isAuthenticated } = useAuth();
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const defaultSlides = isAuthenticated ? LOGGED_IN_SLIDES : GUEST_SLIDES;
-    const slides = cmsSlides && cmsSlides.length > 0 ? cmsSlides : defaultSlides;
+    // Filter out any default slides logic - strictly use CMS data
+    // If empty, the caller or DynamicHome handles blank state
 
     // Reset index when auth state or slides change to avoid out of bounds
     useEffect(() => {
@@ -141,11 +40,14 @@ export default function HeroSection({ slides: cmsSlides }: HeroSectionProps) {
 
     const currentSlide = slides[currentIndex];
 
+    // Early return if no slides provided to reach this point
+    if (!currentSlide || slides.length === 0) {
+        return null;
+    }
+
     return (
         <section className="w-full pt-8 pb-12">
             <div className="max-w-7xl mx-auto px-4 lg:px-6">
-
-
                 {/* Main Carousel Card */}
                 <div className="relative w-full aspect-[16/16] md:aspect-[16/8] lg:aspect-[21/9] rounded-[32px] overflow-hidden group ">
                     <AnimatePresence mode='wait'>
@@ -287,5 +189,4 @@ export default function HeroSection({ slides: cmsSlides }: HeroSectionProps) {
             </div>
         </section>
     );
-
 }

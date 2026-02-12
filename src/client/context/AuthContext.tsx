@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Redirect based on role and status
         if (role === 'ADMIN') {
-            router.push('/admin/dashboard');
+            router.push('/admin');
         } else if (status === 'PENDING') {
             router.push('/auth/pending-verification');
         } else {

@@ -13,54 +13,29 @@ import {
     FaArrowRight
 } from 'react-icons/fa';
 
-const offers = [
-    {
-        id: 'welcome',
-        icon: FaGift,
-        title: 'New Member Welcome',
-        subtitle: 'Exclusive Starter Pack',
-        details: [
-            'Flat ₹500 OFF on your first order',
-            'Zero Delivery Fees (Capped at ₹100)',
-            'Combo Coupon: 20% OFF on next purchase'
-        ],
-        purpose: ['Instant Value', 'Seamless Onboarding'],
-        color: 'bg-indigo-600',
-        lightColor: 'bg-indigo-50'
-    },
-    {
-        id: 'festival',
-        icon: FaCalendarAlt,
-        title: 'Mega Festive Bonanza',
-        subtitle: 'Limited Season Deals',
-        details: [
-            'Up to 45% Cluster Discount on Brands',
-            'Exclusive Buy 1 Get 1 on Accessories',
-            'Flash Sale: New Deals every 4 Hours',
-            'No Cost EMI for all Premium Models'
-        ],
-        purpose: ['High Velocity', 'Maximum Savings'],
-        color: 'bg-rose-500',
-        lightColor: 'bg-rose-50',
-        badge: 'LIVE NOW'
-    },
-    {
-        id: 'coupons',
-        icon: FaTicketAlt,
-        title: 'Smart Voucher Codes',
-        subtitle: 'Stacked Savings',
-        details: [
-            'NOVA10: Flat 10% for App Users',
-            'FREESHIP: Free delivery above ₹2999',
-            'EXCHANGE: Get 15% extra on Trade-ins'
-        ],
-        purpose: ['Loyalty Rewards', 'Flexible Savings'],
-        color: 'bg-amber-500',
-        lightColor: 'bg-amber-50'
-    },
-];
+const iconMap: Record<string, any> = {
+    'FaGift': FaGift,
+    'FaStar': FaStar,
+    'FaCalendarAlt': FaCalendarAlt,
+    'FaLayerGroup': FaLayerGroup,
+    'FaTicketAlt': FaTicketAlt,
+    'FaTruck': FaTruck,
+    'FaBolt': FaBolt
+};
 
-export default function CustomerOffers() {
+interface CustomerOffersProps {
+    offers?: any[];
+    ctaTitle?: string;
+    ctaSubtitle?: string;
+}
+
+export default function CustomerOffers({
+    offers = [],
+    ctaTitle = "Ready to unlock exclusive benefits?",
+    ctaSubtitle = "Join thousands of satisfied shoppers on NovaMart and experience a smarter way to shop with premium savings."
+}: CustomerOffersProps) {
+    if (offers.length === 0) return null;
+
     return (
         <section className="py-10 relative overflow-hidden">
             {/* Background elements */}
@@ -70,15 +45,6 @@ export default function CustomerOffers() {
             <div className="max-w-[1300px] mx-auto px-4 lg:px-8 relative">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                     <div className="max-w-3xl">
-                        {/* <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 mb-6"
-                        >
-                            <FaGift className="w-4 h-4" />
-                            <span className="text-xs font-black uppercase tracking-widest">Rewards Program</span>
-                        </motion.div> */}
                         <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -86,7 +52,7 @@ export default function CustomerOffers() {
                             transition={{ delay: 0.1 }}
                             className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
                         >
-                            🎁 Customer Offers in 
+                            🎁 Customer Offers in
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600"> NovaMart</span>
                         </motion.h2>
                         <motion.p
@@ -103,61 +69,64 @@ export default function CustomerOffers() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {offers.map((offer, idx) => (
-                        <motion.div
-                            key={offer.id}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: idx * 0.1 }}
-                            className="group relative bg-white rounded-[10px] p-10 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-200/40 border border-slate-100 transition-all duration-500"
-                        >
-                            {offer.badge && (
-                                <div className="absolute top-8 right-8 px-4 py-1.5 rounded-full bg-rose-100 text-rose-600 text-[10px] font-black uppercase tracking-widest animate-pulse">
-                                    {offer.badge}
-                                </div>
-                            )}
+                    {offers.map((offer, idx) => {
+                        const Icon = iconMap[offer.icon] || FaGift;
+                        return (
+                            <motion.div
+                                key={offer.id || idx}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="group relative bg-white rounded-[10px] p-10 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-200/40 border border-slate-100 transition-all duration-500"
+                            >
+                                {offer.badge && (
+                                    <div className="absolute top-8 right-8 px-4 py-1.5 rounded-full bg-rose-100 text-rose-600 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                        {offer.badge}
+                                    </div>
+                                )}
 
-                            <div className={`w-16 h-16 rounded-2xl ${offer.lightColor} flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500`}>
-                                <offer.icon className={`w-8 h-8 ${offer.color.replace('bg-', 'text-')}`} />
-                            </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <h3 className="text-xl font-black text-slate-900 tracking-tight leading-snug group-hover:text-indigo-600 transition-colors">
-                                        {offer.title}
-                                    </h3>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                                        {offer.subtitle}
-                                    </p>
+                                <div className={`w-16 h-16 rounded-2xl ${offer.lightColor || 'bg-indigo-50'} flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500`}>
+                                    <Icon className={`w-8 h-8 ${(offer.color || 'bg-indigo-600').replace('bg-', 'text-')}`} />
                                 </div>
 
-                                <ul className="space-y-3 py-4">
-                                    {offer.details.map((detail, i) => (
-                                        <li key={i} className="flex items-start gap-3 text-sm font-bold text-slate-600">
-                                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
-                                            {detail}
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className="space-y-4">
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-900 tracking-tight leading-snug group-hover:text-indigo-600 transition-colors">
+                                            {offer.title}
+                                        </h3>
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                            {offer.subtitle}
+                                        </p>
+                                    </div>
 
-                                <div className="pt-6 border-t border-slate-50">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Core Purpose</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {offer.purpose.map((p, i) => (
-                                            <span key={i} className="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-black text-slate-600 uppercase border border-slate-100">
-                                                ✔ {p}
-                                            </span>
+                                    <ul className="space-y-3 py-4">
+                                        {(offer.details || []).map((detail: string, i: number) => (
+                                            <li key={i} className="flex items-start gap-3 text-sm font-bold text-slate-600">
+                                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
+                                                {detail}
+                                            </li>
                                         ))}
+                                    </ul>
+
+                                    <div className="pt-6 border-t border-slate-50">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Core Purpose</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {(offer.purpose || []).map((p: string, i: number) => (
+                                                <span key={i} className="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-black text-slate-600 uppercase border border-slate-100">
+                                                    ✔ {p}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="absolute bottom-8 right-10 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
-                                <FaArrowRight className="text-indigo-600" />
-                            </div>
-                        </motion.div>
-                    ))}
+                                <div className="absolute bottom-8 right-10 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+                                    <FaArrowRight className="text-indigo-600" />
+                                </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
 
                 {/* Bottom Call to Action or Banner */}
@@ -171,10 +140,10 @@ export default function CustomerOffers() {
 
                     <div className="relative z-10 space-y-4">
                         <h4 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-tight">
-                            Ready to unlock exclusive benefits?
+                            {ctaTitle}
                         </h4>
                         <p className="text-slate-400 font-bold max-w-xl">
-                            Join thousands of satisfied shoppers on NovaMart and experience a smarter way to shop with premium savings.
+                            {ctaSubtitle}
                         </p>
                     </div>
 

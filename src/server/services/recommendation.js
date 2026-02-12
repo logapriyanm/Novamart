@@ -1,4 +1,4 @@
-import { Product, User, Customer, Order, Cart, Tracking, Negotiation, Inventory, DealerRequest } from '../models/index.js';
+import { Product, User, Customer, Order, Cart, Tracking, Negotiation, Inventory, DealerRequest, Manufacturer, Dealer } from '../models/index.js';
 
 class RecommendationService {
     /**
@@ -176,6 +176,12 @@ class RecommendationService {
             const resolvedHistory = await Product.find({ _id: { $in: continueViewingIds } })
                 .populate('manufacturerId', 'companyName');
 
+            // 10. Combos (Placeholder for now)
+            const combos = await Product.find({ isApproved: true })
+                .populate('manufacturerId', 'companyName')
+                .limit(4)
+                .sort({ reviewCount: 1 }); // Just pick different ones
+
             return {
                 hero,
                 specialDay,
@@ -183,7 +189,8 @@ class RecommendationService {
                 recommended: recommendations,
                 newArrivals,
                 trending,
-                continueViewing: resolvedHistory
+                continueViewing: resolvedHistory,
+                combos
             };
 
         } catch (error) {

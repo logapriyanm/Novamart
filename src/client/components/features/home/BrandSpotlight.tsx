@@ -4,28 +4,13 @@ import React from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import Link from 'next/link';
 
-const SETUPS = [
-    {
-        name: 'Hall',
-        description: 'Elite Hall Setup',
-        image: '/assets/Premium/Hall-setup.jpg',
-        link: '/products?cat=hall-setup'
-    },
-    {
-        name: 'Kitchen',
-        description: 'Modern Kitchen Setup',
-        image: '/assets/Premium/Kitchen-setup.jpg',
-        link: '/products?cat=kitchen-setup'
-    },
-    {
-        name: 'Bedroom',
-        description: 'Luxury Bedroom Setup',
-        image: '/assets/Premium/Bedroom-setup.jpg',
-        link: '/products?cat=bedroom-setup'
-    },
-];
+interface BrandSpotlightProps {
+    setups?: { name: string; description: string; image: string; link: string }[];
+}
 
-export default function BrandSpotlight() {
+export default function BrandSpotlight({ setups = [] }: BrandSpotlightProps) {
+    if (setups.length === 0) return null;
+
     return (
         <div className="py-3">
             <div className="flex flex-col gap-2 mb-10 text-center">
@@ -34,7 +19,7 @@ export default function BrandSpotlight() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px] lg:h-[400px]">
-                {SETUPS.map((setup, idx) => (
+                {setups.map((setup, idx) => (
                     <Link
                         href={setup.link}
                         key={idx}

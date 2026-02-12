@@ -8,6 +8,7 @@ import { FaStore, FaMapMarkerAlt, FaCalendarAlt, FaStar, FaBox, FaShieldAlt, FaC
 import Link from 'next/link';
 import { useAuth } from '@/client/hooks/useAuth';
 import { chatService } from '@/lib/api/services/chat.service';
+import Loader from '@/client/components/ui/Loader';
 
 interface SellerClientProps {
     id: string;
@@ -59,7 +60,7 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
     }, [id, initialData]);
 
     if (isLoading) {
-        return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0F6CBD]"></div></div>;
+        return <div className="min-h-screen pt-32 flex justify-center"><Loader size="xl" /></div>;
     }
 
     if (!seller) {
@@ -67,7 +68,7 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pt-28 pb-20">
+        <div className="min-h-screen  pt-28 pb-20">
             <div className="container-responsive">
                 {/* Header Card (Ultra Premium) */}
                 <div className="bg-white rounded-[2rem] shadow-2xl shadow-blue-500/5 border border-slate-100 p-8 md:p-12 mb-12 relative overflow-hidden group">
@@ -122,7 +123,12 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
                                 className="bg-black text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-[#0F6CBD] transition-all shadow-xl shadow-black/10 active:scale-95 disabled:opacity-50"
                             >
                                 <FaComments size={18} />
-                                {isMessageLoading ? 'Connecting...' : 'Message Seller'}
+                                {isMessageLoading ? (
+                                    <>
+                                        <Loader size="sm" variant="white" />
+                                        <span>Connecting...</span>
+                                    </>
+                                ) : 'Message Seller'}
                             </button>
                         </div>
                     </div>

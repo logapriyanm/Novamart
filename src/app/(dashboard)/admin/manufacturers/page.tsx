@@ -22,6 +22,7 @@ import {
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
 import { toast } from 'sonner';
+import Loader from '@/client/components/ui/Loader';
 
 export default function ManufacturerApprovalPanel() {
     const [manufacturers, setManufacturers] = useState<any[]>([]);
@@ -52,8 +53,8 @@ export default function ManufacturerApprovalPanel() {
         setIsVerifying(true);
         try {
             await adminService.verifyManufacturer(manufacturerId, verify);
-            setManufacturers(prev => prev.map(m => m.id === manufacturerId ? { ...m, isVerified: verify } : m));
-            if (selectedRequest?.id === manufacturerId) {
+            setManufacturers(prev => prev.map(m => (m._id === manufacturerId || m.id === manufacturerId) ? { ...m, isVerified: verify } : m));
+            if ((selectedRequest?._id === manufacturerId || selectedRequest?.id === manufacturerId)) {
                 setSelectedRequest({ ...selectedRequest, isVerified: verify });
             }
             toast.success(`Manufacturer ${verify ? 'Verified' : 'Verification Revoked'}`);
@@ -88,8 +89,8 @@ export default function ManufacturerApprovalPanel() {
     };
 
     const filteredManufacturers = manufacturers.filter(m => {
-        const matchesSearch = m.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            m.gstNumber.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = m.companyName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            m.gstNumber?.toLowerCase().includes(searchQuery.toLowerCase());
 
         if (filterTab === 'ALL') return matchesSearch;
         if (filterTab === 'VERIFIED') return matchesSearch && m.isVerified;
@@ -99,7 +100,7 @@ export default function ManufacturerApprovalPanel() {
     });
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-20 overflow-x-hidden">
+        <div className="min-h-screen  pb-20 overflow-x-hidden">
             {/* Top Navigation Row */}
             <div className="max-w-[1600px] mx-auto px-6 py-6">
                 <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-[#10367D] transition-colors group">
@@ -182,9 +183,8 @@ export default function ManufacturerApprovalPanel() {
                     {/* Registry Content */}
                     <div className="space-y-4">
                         {isLoading ? (
-                            <div className="bg-white p-20 rounded-[10px] text-center border border-slate-100 shadow-sm">
-                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
-                                <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">Ingesting Entity Data...</p>
+                            <div className="bg-white p-20 rounded-[10px] text-center border border-slate-100 shadow-sm flex justify-center">
+                                <Loader size="lg" variant="primary" />
                             </div>
                         ) : filteredManufacturers.length === 0 ? (
                             <div className="bg-white p-20 rounded-[3rem] text-center border border-slate-100 shadow-sm">
@@ -196,9 +196,9 @@ export default function ManufacturerApprovalPanel() {
                                 {filteredManufacturers.map((mfg) => (
                                     <motion.div
                                         layout
-                                        key={mfg.id}
+                                        key={mfg._id || mfg.id}
                                         onClick={() => setSelectedRequest(mfg)}
-                                        className={`group relative bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer ${selectedRequest?.id === mfg.id ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''}`}
+                                        className={`group relative bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer ${(selectedRequest?._id === mfg._id || selectedRequest?.id === mfg.id) ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''}`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-6">
@@ -249,11 +249,11 @@ export default function ManufacturerApprovalPanel() {
                     <AnimatePresence mode="wait">
                         {selectedRequest ? (
                             <motion.div
-                                key={selectedRequest.id}
+                                key={selectedRequest._id || selectedRequest.id}
                                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                className="bg-[#1E293B] rounded-[3rem] p-8 text-white shadow-2xl sticky top-8 overflow-hidden group"
+                                className="bg-[#171717] rounded-[10px] p-8 text-white shadow-2xl sticky top-8 overflow-hidden group"
                             >
                                 {/* Decorative Gradient */}
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[100px] pointer-events-none" />
@@ -261,11 +261,11 @@ export default function ManufacturerApprovalPanel() {
                                 <div className="flex items-center justify-between mb-10 relative">
                                     <div>
                                         <h3 className="text-2xl font-black tracking-tight italic">Governance <span className="text-blue-400">Audit</span></h3>
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mt-1">Industrial Entity Protocol</p>
+                                        <p className="text-[12px] font-black  tracking-[0.2em] text-slate-500 mt-1">Industrial Entity Protocol</p>
                                     </div>
                                     <div className="text-right">
                                         <div className="px-3 py-1 bg-white/5 rounded-[10px] border border-white/10">
-                                            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">ID: {selectedRequest.id?.slice(0, 8)}</span>
+                                            <span className="text-[8px] font-black  tracking-widest text-slate-400">ID: {(selectedRequest._id || selectedRequest.id || '').slice(0, 8)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -279,17 +279,17 @@ export default function ManufacturerApprovalPanel() {
                                         </div>
                                         <div className="p-6 bg-white/5 rounded-[10px] border border-white/10 backdrop-blur-md space-y-6">
                                             <div>
-                                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Factory Installation</p>
+                                                <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Factory Installation</p>
                                                 <p className="text-sm font-bold leading-relaxed pr-8">{selectedRequest.factoryAddress}</p>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Reg. Hash</p>
-                                                    <p className="text-[10px] font-black text-blue-400 tracking-tighter">{selectedRequest.registrationNo}</p>
+                                                    <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Reg. Hash</p>
+                                                    <p className="text-[10px] font-black text-blue-400 tracking-widest">{selectedRequest.registrationNo}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Tax Token</p>
-                                                    <p className="text-[10px] font-black text-white">{selectedRequest.gstNumber}</p>
+                                                    <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Tax Token</p>
+                                                    <p className="text-[10px] font-black text-white tracking-widest">{selectedRequest.gstNumber}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -327,11 +327,11 @@ export default function ManufacturerApprovalPanel() {
                                     </div>
 
                                     {/* Action Command Center */}
-                                    <div className="pt-8 space-y-4">
+                                    <div className="pt-2 space-y-4">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {selectedRequest.isVerified ? (
                                                 <button
-                                                    onClick={() => handleAction(selectedRequest.id, false)}
+                                                    onClick={() => handleAction(selectedRequest._id || selectedRequest.id, false)}
                                                     disabled={isVerifying}
                                                     className="group/btn relative py-5 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
                                                 >
@@ -339,9 +339,9 @@ export default function ManufacturerApprovalPanel() {
                                                 </button>
                                             ) : (
                                                 <button
-                                                    onClick={() => handleAction(selectedRequest.id, true)}
+                                                    onClick={() => handleAction(selectedRequest._id || selectedRequest.id, true)}
                                                     disabled={isVerifying}
-                                                    className="group/btn relative py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
+                                                    className="group/btn relative py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
                                                 >
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shine" />
                                                     <div className="flex items-center justify-center gap-3">
@@ -363,7 +363,7 @@ export default function ManufacturerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleUserStatus(selectedRequest.userId, 'SUSPENDED')}
                                                     disabled={isVerifying}
-                                                    className="py-5 bg-white/5 hover:bg-white/[0.08] text-white/60 border border-white/10 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:text-white active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                                                    className="py-0 bg-white/5 hover:bg-white/[0.08] text-white/60 border border-white/10 rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:text-white active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                                                 >
                                                     <FaTimesCircle className="w-4 h-4" />
                                                     Kill Switch
@@ -371,7 +371,7 @@ export default function ManufacturerApprovalPanel() {
                                             )}
                                         </div>
 
-                                        <p className="text-[9px] font-bold text-slate-500 text-center italic uppercase leading-relaxed px-10">
+                                        <p className="text-[11px] font-bold text-slate-500 text-center   leading-relaxed px-10">
                                             Authorized entities receive immediate <span className="text-white">API access</span>. The kill switch freezes all open payouts.
                                         </p>
                                     </div>
@@ -400,7 +400,7 @@ export default function ManufacturerApprovalPanel() {
                         className="fixed inset-0 z-[100] bg-white/40 backdrop-blur-sm flex items-center justify-center"
                     >
                         <div className="p-8 bg-white rounded-[10px] shadow-2xl border border-slate-100 flex flex-col items-center gap-4">
-                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full" />
+                            <Loader size="md" variant="primary" />
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Syncing Governance state...</p>
                         </div>
                     </motion.div>

@@ -49,10 +49,14 @@ export default function UserDropdown() {
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div
+            className="relative"
+            ref={dropdownRef}
+            onMouseEnter={() => setIsOpen(true)}
+            onMouseLeave={() => setIsOpen(false)}
+        >
             <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-3 pl-4 border-l border-foreground/5 group hover:opacity-80 transition-all focus:outline-none"
+                className="flex items-center gap-3 pl-4 border-l border-foreground/5 group hover:opacity-80 transition-all focus:outline-none py-2"
             >
                 <div className="text-right hidden sm:block">
                     <p className="text-sm font-black text-foreground leading-none flex items-center justify-end gap-1.5 slice">
@@ -63,7 +67,7 @@ export default function UserDropdown() {
                         {user.role} Access
                     </p>
                 </div>
-                <div className="relative w-10 h-10 rounded-xl bg-background flex items-center justify-center overflow-hidden border border-foreground/5 shadow-sm group-hover:border-primary/20 transition-all">
+                <div className="relative w-10 h-10  rounded-full  flex items-center justify-center overflow-hidden border  ">
                     {user.avatar ? (
                         <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                     ) : (
@@ -81,53 +85,55 @@ export default function UserDropdown() {
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute right-0 mt-3 w-56 bg-surface border border-foreground/5 rounded-[10px] shadow-2xl z-[100] overflow-hidden"
+                        className="absolute right-0 mt-0 pt-3 w-56 z-[100]"
                     >
-                        <div className="p-4 border-b border-foreground/5 bg-background/50">
-                            <p className="text-xs font-black text-foreground uppercase tracking-widest leading-none mb-1">Signed in as</p>
-                            <p className="text-sm font-bold text-foreground truncate">{user.email}</p>
-                        </div>
+                        <div className="bg-surface border border-foreground/5 rounded-[10px] shadow-2xl overflow-hidden">
+                            <div className="p-4 border-b border-foreground/5 bg-background/50">
+                                <p className="text-xs font-black text-foreground uppercase tracking-widest leading-none mb-1">Signed in as</p>
+                                <p className="text-sm font-bold text-foreground truncate">{user.email}</p>
+                            </div>
 
-                        <div className="p-2">
-                            <Link
-                                href={getProfilePath()}
-                                onClick={() => setIsOpen(false)}
-                                className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-foreground/60 hover:text-black hover:bg-foreground/5 rounded-[8px] transition-all group"
-                            >
-                                <FaUser className="w-4 h-4 transition-colors group-hover:text-primary" />
-                                <span>My Profile</span>
-                            </Link>
-                            <Link
-                                href={getSettingsPath()}
-                                onClick={() => setIsOpen(false)}
-                                className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-foreground/60 hover:text-black hover:bg-foreground/5 rounded-[8px] transition-all group"
-                            >
-                                <FaCog className="w-4 h-4 transition-colors group-hover:text-primary" />
-                                <span>Settings</span>
-                            </Link>
-                            {user.role === 'ADMIN' && (
+                            <div className="p-2">
                                 <Link
-                                    href="/admin/security"
+                                    href={getProfilePath()}
                                     onClick={() => setIsOpen(false)}
                                     className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-foreground/60 hover:text-black hover:bg-foreground/5 rounded-[8px] transition-all group"
                                 >
-                                    <FaShieldAlt className="w-4 h-4 transition-colors group-hover:text-primary" />
-                                    <span>Security</span>
+                                    <FaUser className="w-4 h-4 transition-colors group-hover:text-primary" />
+                                    <span>My Profile</span>
                                 </Link>
-                            )}
-                        </div>
+                                <Link
+                                    href={getSettingsPath()}
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-foreground/60 hover:text-black hover:bg-foreground/5 rounded-[8px] transition-all group"
+                                >
+                                    <FaCog className="w-4 h-4 transition-colors group-hover:text-primary" />
+                                    <span>Settings</span>
+                                </Link>
+                                {user.role === 'ADMIN' && (
+                                    <Link
+                                        href="/admin/security"
+                                        onClick={() => setIsOpen(false)}
+                                        className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-foreground/60 hover:text-black hover:bg-foreground/5 rounded-[8px] transition-all group"
+                                    >
+                                        <FaShieldAlt className="w-4 h-4 transition-colors group-hover:text-primary" />
+                                        <span>Security</span>
+                                    </Link>
+                                )}
+                            </div>
 
-                        <div className="p-2 border-t border-foreground/5 bg-background/20">
-                            <button
-                                onClick={() => {
-                                    logout();
-                                    setIsOpen(false);
-                                }}
-                                className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-rose-500 hover:bg-rose-500/5 rounded-[8px] transition-all"
-                            >
-                                <FaSignOutAlt className="w-4 h-4" />
-                                <span>Log Out</span>
-                            </button>
+                            <div className="p-2 border-t border-foreground/5 bg-background/20">
+                                <button
+                                    onClick={() => {
+                                        logout();
+                                        setIsOpen(false);
+                                    }}
+                                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-bold text-rose-500 hover:bg-rose-500/5 rounded-[8px] transition-all"
+                                >
+                                    <FaSignOutAlt className="w-4 h-4" />
+                                    <span>Log Out</span>
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 )}

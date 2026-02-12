@@ -89,7 +89,7 @@ export default function RootLayout({
                             <CartProvider>
                                 <SidebarProvider>
                                     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
-                                        <div className="min-h-screen relative bg-background overflow-hidden">
+                                        <div className="min-h-screen relative bg-background overflow-x-hidden">
                                             <script
                                                 type="application/ld+json"
                                                 dangerouslySetInnerHTML={{
