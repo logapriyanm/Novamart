@@ -26,7 +26,7 @@ export default function LoginPage() {
 
                 <div className="relative z-10 w-full max-w-lg text-white">
                     <div className="flex items-center gap-3 mb-16">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-white rounded-full border flex items-center justify-center">
                             <img src="/assets/Novamart.png" alt="NovaMart" className="w-8 h-8 object-contain" />
                         </div>
                         <span className="text-xl font-bold tracking-tight">NOVAMART</span>
@@ -41,9 +41,9 @@ export default function LoginPage() {
                     </p>
 
                     <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
-                        <span>© 2026 NovaMart International</span>
-                        <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                        <span>Secure Portal v4.2</span>
+                      
+                        
+                        
                     </div>
                 </div>
             </div>
