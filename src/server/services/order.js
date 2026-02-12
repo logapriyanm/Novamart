@@ -10,9 +10,18 @@ import mongoose from 'mongoose';
 
 class OrderService {
     /**
+     * Find order by idempotency key (for duplicate request prevention)
+     */
+    async findOrderByIdempotencyKey(idempotencyKey, userId) {
+        if (!idempotencyKey) return null;
+        const order = await Order.findOne({ idempotencyKey, customerId: userId }).lean();
+        return order;
+    }
+
+    /**
      * Create an order and lock inventory.
      */
-    async createOrder(customerId, dealerId, items, shippingAddress) {
+    async createOrder(customerId, dealerId, items, shippingAddress, idempotencyKey = null) {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
@@ -73,6 +82,7 @@ class OrderService {
                 commissionAmount,
                 shippingAddress,
                 status: 'CREATED',
+                idempotencyKey: idempotencyKey || null,
                 items: items.map(i => ({
                     productId: i.productId,
                     quantity: i.quantity,

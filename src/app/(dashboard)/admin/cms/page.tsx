@@ -686,11 +686,9 @@ export default function AdminCMSPage() {
         }
 
         try {
-            const res = await apiClient.put<any>(`/cms/admin/${id}`, { isActive: !currentState });
-            if (res.success) {
-                setSections(sections.map(s => s._id === id ? { ...s, isActive: !currentState } : s));
-                toast.success(`Section ${!currentState ? 'enabled' : 'disabled'} successfully`);
-            }
+            await apiClient.put<any>(`/cms/admin/${id}`, { isActive: !currentState });
+            setSections(sections.map(s => s._id === id ? { ...s, isActive: !currentState } : s));
+            toast.success(`Section ${!currentState ? 'enabled' : 'disabled'} successfully`);
         } catch (error) {
             toast.error('Failed to update section status');
         }
@@ -713,10 +711,9 @@ export default function AdminCMSPage() {
         try {
             setIsSaving(true);
             const sectionOrders = sections.map(s => ({ id: s._id, order: s.order }));
-            const res = await apiClient.post<any>('/cms/admin/reorder', { sectionOrders });
-            if (res.success) {
-                toast.success('New order saved effectively');
-            }
+
+            await apiClient.post<any>('/cms/admin/reorder', { sectionOrders });
+            toast.success('New order saved effectively');
         } catch (error) {
             toast.error('Failed to save order');
         } finally {
@@ -730,12 +727,10 @@ export default function AdminCMSPage() {
 
         try {
             setIsSaving(true);
-            const res = await apiClient.put<any>(`/cms/admin/${editingSection._id}`, editingSection);
-            if (res.success) {
-                setSections(sections.map(s => s._id === editingSection._id ? editingSection : s));
-                setEditingSection(null);
-                toast.success('Section updated successfully');
-            }
+            const updatedSection = await apiClient.put<any>(`/cms/admin/${editingSection._id}`, editingSection);
+            setSections(sections.map(s => s._id === editingSection._id ? updatedSection : s));
+            setEditingSection(null);
+            toast.success('Section updated successfully');
         } catch (error) {
             toast.error('Failed to save changes');
         } finally {

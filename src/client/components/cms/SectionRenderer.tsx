@@ -121,7 +121,7 @@ export default function SectionRenderer({ section, user, personalizedData }: Sec
             {section.title && section.title !== 'Hero Section' && (
                 <div className="mb-6">
                     <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tighter uppercase italic">
-                        {section.title}
+                        {/* {section.title} */}
                     </h2>
                     {section.subtitle && (
                         <p className="text-sm text-foreground/60 font-bold uppercase tracking-widest mt-1">

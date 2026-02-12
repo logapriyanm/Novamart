@@ -9,7 +9,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
     return (
-        <div className="flex min-h-screen bg-background">
+        <div className="flex h-screen bg-background overflow-hidden">
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
@@ -17,7 +17,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 isCollapsed={isDesktopCollapsed}
             />
 
-            <div className="flex-1 flex flex-col min-w-0 no-scrollbar transition-all duration-300">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 <DashboardHeader
                     role="ADMIN"
                     onMenuClick={() => setIsSidebarOpen(true)}
@@ -29,7 +29,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                     }
                 />
 
-                <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10">
+                <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10 overflow-y-auto no-scrollbar">
                     {children}
                 </main>
             </div>

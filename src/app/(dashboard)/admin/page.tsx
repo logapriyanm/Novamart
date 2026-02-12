@@ -150,7 +150,7 @@ export default function AdminDashboard() {
                         <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Security Audit</h3>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar max-h-[400px]">
+                    <div className="flex-1 space-y-4">
                         {activities.length === 0 ? (
                             <EmptyState
                                 icon={FaShieldAlt}

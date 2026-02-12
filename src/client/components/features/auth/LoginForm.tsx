@@ -93,7 +93,20 @@ export default function LoginForm() {
 
             // Redirect logic is now handled in AuthContext
         } catch (error: any) {
-            if (error.details && typeof error.details === 'object') {
+            // Check if it's a network error
+            const errorMessage = error?.message || '';
+            const isNetworkError = errorMessage.includes('Network error') || 
+                                  errorMessage.includes('Failed to fetch') ||
+                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                                  errorMessage.includes('connection refused') ||
+                                  error?.isNetworkError ||
+                                  error?.status === 0 ||
+                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
+            
+            if (isNetworkError) {
+                // Show user-friendly network error message
+                setErrors({ general: 'Unable to connect to server. Please ensure the backend is running.' });
+            } else if (error.details && typeof error.details === 'object') {
                 const backendErrors: any = {};
                 Object.entries(error.details).forEach(([field, code]) => {
                     backendErrors[field] = typeof code === 'string' ? code.replace(/_/g, ' ') : 'Invalid';
@@ -347,17 +360,18 @@ export default function LoginForm() {
                     <div className="flex-1 h-px bg-gray-200" />
                 </div>
 
-                <div className="flex justify-center mb-6">
-                    <GoogleLogin
-                        onSuccess={handleGoogleSuccess}
-                        onError={() => toast.error('Google authentication failed')}
-                        useOneTap
-                        theme="outline"
-                        shape="rectangular"
-                        size="large"
-                        width="100%"
-                        text="continue_with"
-                    />
+                <div className="flex justify-center mb-6 w-full">
+                    <div className="w-full max-w-md">
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => toast.error('Google authentication failed')}
+                            useOneTap
+                            theme="outline"
+                            shape="rectangular"
+                            size="large"
+                            text="continue_with"
+                        />
+                    </div>
                 </div>
 
                 <div className="flex items-center justify-center gap-2 text-sm">

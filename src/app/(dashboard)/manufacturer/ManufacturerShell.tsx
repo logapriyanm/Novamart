@@ -9,7 +9,7 @@ export default function ManufacturerShell({ children }: { children: React.ReactN
     const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
     return (
-        <div className="flex min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
+        <div className="flex h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-hidden">
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
@@ -17,7 +17,7 @@ export default function ManufacturerShell({ children }: { children: React.ReactN
                 isCollapsed={isDesktopCollapsed}
             />
 
-            <div className="flex-1 flex flex-col min-w-0 relative z-10 w-full no-scrollbar transition-all duration-300">
+            <div className="flex-1 flex flex-col min-w-0 relative z-10 w-full overflow-hidden">
                 <DashboardHeader
                     role="MANUFACTURER"
                     onMenuClick={() => setIsSidebarOpen(true)}
@@ -26,7 +26,7 @@ export default function ManufacturerShell({ children }: { children: React.ReactN
                     badgeText="Production Center"
                 />
 
-                <main className="flex-1 p-4 sm:p-6 lg:p-10 bg-slate-50/20">
+                <main className="flex-1 p-4 sm:p-6 lg:p-10 bg-slate-50/20 overflow-y-auto no-scrollbar">
                     {children}
                 </main>
             </div>

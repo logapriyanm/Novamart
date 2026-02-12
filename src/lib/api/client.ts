@@ -102,7 +102,18 @@ class ApiClient {
         };
 
         try {
-            const response = await fetch(url, config);
+            let response: Response;
+            try {
+                response = await fetch(url, config);
+            } catch (fetchError: any) {
+                // Handle network errors (connection refused, CORS, etc.)
+                const networkError = new Error('Network error: Backend server may be down');
+                (networkError as any).status = 0;
+                (networkError as any).isNetworkError = true;
+                (networkError as any).originalError = fetchError;
+                // Don't log network errors - they're expected when backend is down
+                throw networkError;
+            }
 
             // Handle 401 Unauthorized (potentially expired token)
             // Skip refresh for auth endpoints to prevent loops on invalid credentials
@@ -111,7 +122,21 @@ class ApiClient {
                 return await this.handleTokenRefresh<T>(endpoint, method, body, options);
             }
 
-            const data: ApiResponse<T> = await response.json();
+            // Parse JSON only if response is ok or has content
+            let data: ApiResponse<T>;
+            try {
+                const text = await response.text();
+                data = text ? JSON.parse(text) : { success: false, error: 'Empty response' };
+            } catch (parseError) {
+                // If JSON parsing fails, it might be a network error or invalid response
+                if (!response.ok) {
+                    const networkError = new Error(`Network error: ${response.status} ${response.statusText}`);
+                    (networkError as any).status = response.status;
+                    (networkError as any).isNetworkError = true;
+                    throw networkError;
+                }
+                throw parseError;
+            }
 
             if (!response.ok || data.success === false) {
                 const error = new Error(data.error || `Request failed with status ${response.status}`);
@@ -123,10 +148,24 @@ class ApiClient {
 
             return data.data as T;
         } catch (error: any) {
+            // Handle network errors gracefully (don't log connection refused errors)
+            if (error.message?.includes('Failed to fetch') || error.message?.includes('Network error') || error.isNetworkError) {
+                // Don't throw for network errors on auth check - just return null/empty
+                if (endpoint === '/auth/me') {
+                    return null as T;
+                }
+                // For other endpoints, throw but don't log
+                throw error;
+            }
+
             if (error.status === 401 && this.refreshToken && endpoint !== '/auth/refresh') {
                 return await this.handleTokenRefresh<T>(endpoint, method, body, options);
             }
-            console.error(`API Error [${method} ${endpoint}]:`, error);
+            
+            // Only log non-network errors in development
+            if (process.env.NODE_ENV === 'development' && !error.isNetworkError) {
+                console.error(`API Error [${method} ${endpoint}]:`, error);
+            }
             throw error;
         }
     }

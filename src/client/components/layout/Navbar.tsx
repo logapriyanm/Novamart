@@ -374,11 +374,11 @@ export default function Navbar() {
                             className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-[110] md:hidden"
                         />
                         <motion.div
-                            initial={{ x: '-100%' }}
+                            initial={{ x: '100%' }}
                             animate={{ x: 0 }}
-                            exit={{ x: '-100%' }}
+                            exit={{ x: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed top-0 left-0 bottom-0 w-80 max-w-[90vw] bg-background z-[120] md:hidden shadow-2xl overflow-y-auto border-r border-foreground/5"
+                            className="fixed top-0 right-0 bottom-0 w-80 max-w-[90vw] bg-background z-[120] md:hidden shadow-2xl overflow-y-auto border-l border-foreground/5"
                         >
                             <div className="p-6">
                                 <div className="flex items-center justify-between mb-8">

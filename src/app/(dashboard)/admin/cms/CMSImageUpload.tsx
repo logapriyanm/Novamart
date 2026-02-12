@@ -79,7 +79,13 @@ export default function CMSImageUpload({
                         return (
                             <button
                                 type="button"
-                                onClick={() => open()}
+                                onClick={() => {
+                                    if (open && typeof open === 'function') {
+                                        open();
+                                    } else {
+                                        console.error('Cloudinary widget not initialized');
+                                    }
+                                }}
                                 className="w-full h-32 border border-dashed border-foreground/20 rounded-[12px] flex flex-col items-center justify-center gap-2 hover:bg-foreground/5 hover:border-primary/40 transition-all text-foreground/40 hover:text-primary group"
                             >
                                 <div className="p-2 bg-surface rounded-full group-hover:scale-110 transition-transform">

@@ -56,19 +56,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const userData = await authService.getCurrentUser();
             setUser(userData);
-        } catch (error) {
-            console.error('Session hydration failed:', error);
+        } catch (error: any) {
+            // Silently handle network errors (backend may not be running)
+            const isNetworkError = error?.message?.includes('Failed to fetch') || 
+                                  error?.message?.includes('Network error') || 
+                                  error?.isNetworkError;
+            
+            if (!isNetworkError && process.env.NODE_ENV === 'development') {
+                console.error('Session hydration failed:', error);
+            }
+            
             // If checking user fails (e.g. token expired), token refresh happens in apiClient.ts
             // But if it still fails, clear tokens.
-            if (apiClient.getToken() === null) {
+            if (apiClient.getToken() === null || isNetworkError) {
                 setUser(null);
             } else {
                 // Retry once if tokens were refreshed during the failure
                 try {
                     const retryUserData = await authService.getCurrentUser();
                     setUser(retryUserData);
-                } catch (retryError) {
-                    apiClient.setTokens(null, null);
+                } catch (retryError: any) {
+                    const isRetryNetworkError = retryError?.message?.includes('Failed to fetch') || 
+                                               retryError?.message?.includes('Network error') ||
+                                               retryError?.isNetworkError;
+                    if (!isRetryNetworkError) {
+                        apiClient.setTokens(null, null);
+                    }
                     setUser(null);
                 }
             }
@@ -113,8 +126,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             handleAuthSuccess(response);
             toast.success('Login successful');
         } catch (error: any) {
-            console.error('Login failed:', error);
-            toast.error(error.message || 'Invalid email or password');
+            // Check if it's a network error (backend down)
+            const errorMessage = error?.message || '';
+            const isNetworkError = errorMessage.includes('Network error') || 
+                                  errorMessage.includes('Failed to fetch') ||
+                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                                  errorMessage.includes('connection refused') ||
+                                  error?.isNetworkError ||
+                                  error?.status === 0 ||
+                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
+            
+            if (isNetworkError) {
+                // User-friendly message for network errors
+                toast.error('Unable to connect to server. Please check if the backend is running.');
+                // Don't log network errors to console - they're expected when backend is down
+            } else {
+                // Log actual authentication errors in development
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Login failed:', error);
+                }
+                toast.error(error.message || 'Invalid email or password');
+            }
             throw error;
         } finally {
             setIsLoading(false);
@@ -128,8 +160,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             handleAuthSuccess(response);
             toast.success('Login successful via Google');
         } catch (error: any) {
-            console.error('Google Login failed:', error);
-            toast.error(error.message || 'Google Login Failed');
+            const errorMessage = error?.message || '';
+            const isNetworkError = errorMessage.includes('Network error') || 
+                                  errorMessage.includes('Failed to fetch') ||
+                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                                  errorMessage.includes('connection refused') ||
+                                  error?.isNetworkError ||
+                                  error?.status === 0 ||
+                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
+            
+            if (isNetworkError) {
+                toast.error('Unable to connect to server. Please check if the backend is running.');
+            } else {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Google Login failed:', error);
+                }
+                toast.error(error.message || 'Google Login Failed');
+            }
             throw error;
         } finally {
             setIsLoading(false);
@@ -142,8 +189,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const response = await authService.loginWithPhone(phone, otp);
             handleAuthSuccess(response);
         } catch (error: any) {
-            console.error('Phone Login failed:', error);
-            toast.error(error.message || 'Phone login failed');
+            const errorMessage = error?.message || '';
+            const isNetworkError = errorMessage.includes('Network error') || 
+                                  errorMessage.includes('Failed to fetch') ||
+                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                                  errorMessage.includes('connection refused') ||
+                                  error?.isNetworkError ||
+                                  error?.status === 0 ||
+                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
+            
+            if (isNetworkError) {
+                toast.error('Unable to connect to server. Please check if the backend is running.');
+            } else {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Phone Login failed:', error);
+                }
+                toast.error(error.message || 'Phone login failed');
+            }
             throw error;
         } finally {
             setIsLoading(false);
@@ -156,8 +218,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             await authService.sendOtp(phone);
             toast.success('OTP sent successfully');
         } catch (error: any) {
-            console.error('Send OTP failed:', error);
-            toast.error(error.message || 'Failed to send OTP');
+            const errorMessage = error?.message || '';
+            const isNetworkError = errorMessage.includes('Network error') || 
+                                  errorMessage.includes('Failed to fetch') ||
+                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                                  errorMessage.includes('connection refused') ||
+                                  error?.isNetworkError ||
+                                  error?.status === 0 ||
+                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
+            
+            if (isNetworkError) {
+                toast.error('Unable to connect to server. Please check if the backend is running.');
+            } else {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Send OTP failed:', error);
+                }
+                toast.error(error.message || 'Failed to send OTP');
+            }
             throw error;
         } finally {
             setIsLoading(false);
@@ -177,8 +254,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 router.push('/auth/login?registered=pending');
             }
         } catch (error: any) {
-            console.error('Registration failed:', error);
-            toast.error(error.message || 'Something went wrong. Please try again.');
+            const errorMessage = error?.message || '';
+            const isNetworkError = errorMessage.includes('Network error') || 
+                                  errorMessage.includes('Failed to fetch') ||
+                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                                  errorMessage.includes('connection refused') ||
+                                  error?.isNetworkError ||
+                                  error?.status === 0 ||
+                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
+            
+            if (isNetworkError) {
+                toast.error('Unable to connect to server. Please check if the backend is running.');
+            } else {
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('Registration failed:', error);
+                }
+                toast.error(error.message || 'Something went wrong. Please try again.');
+            }
             throw error;
         } finally {
             setIsLoading(false);

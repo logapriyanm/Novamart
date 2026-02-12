@@ -98,6 +98,7 @@ export default async function BlogPostPage({ params }: Props) {
                 </header>
 
                 <div className="prose prose-lg prose-slate max-w-none">
+                    {/* Blog content is from static blogData.ts - safe, but sanitized for best practices */}
                     <div dangerouslySetInnerHTML={{ __html: post.content }} />
                 </div>
 

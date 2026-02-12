@@ -52,9 +52,12 @@ interface BestsellerSliderProps {
 }
 
 export default function BestsellerSlider({ products }: BestsellerSliderProps) {
-    const bestsellers = (products && products.length > 0) ? products : defaultBestsellers;
-    // Center index starts at 2 (the 3rd item)
-    const [currentIndex, setCurrentIndex] = useState(2);
+    const bestsellers = products || [];
+
+    if (bestsellers.length === 0) return null;
+
+    // Center index starts at floor(length / 2)
+    const [currentIndex, setCurrentIndex] = useState(Math.floor(bestsellers.length / 2));
 
     const handleNext = () => {
         setCurrentIndex((prev) => (prev + 1) % bestsellers.length);

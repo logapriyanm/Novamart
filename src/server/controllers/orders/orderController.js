@@ -6,24 +6,50 @@ import { Customer } from '../../models/index.js';
 
 export const createOrder = async (req, res) => {
     try {
-        const { dealerId, items, shippingAddress } = req.body;
+        const { dealerId, items, shippingAddress, idempotencyKey } = req.body;
         const userId = req.user._id;
 
-        // Ensure we have the customer profile _id
+        // Idempotency check: if idempotencyKey provided and order exists, return existing order
+        if (idempotencyKey) {
+            const existingOrder = await orderService.findOrderByIdempotencyKey(idempotencyKey, userId);
+            if (existingOrder) {
+                logger.info('Idempotent order creation: returning existing order', { idempotencyKey, orderId: existingOrder._id });
+                return res.status(200).json({ success: true, data: existingOrder, idempotent: true });
+            }
+        }
+
+        // Get customerId for idempotency check
         let customerId;
         if (req.user.role === 'CUSTOMER') {
             const customer = await Customer.findOne({ userId });
             if (!customer) throw new Error('Customer profile required');
             customerId = customer._id;
+            
+            // Re-check idempotency with customerId
+            if (idempotencyKey) {
+                const existingOrder = await orderService.findOrderByIdempotencyKey(idempotencyKey, customerId);
+                if (existingOrder) {
+                    logger.info('Idempotent order creation: returning existing order', { idempotencyKey, orderId: existingOrder._id });
+                    return res.status(200).json({ success: true, data: existingOrder, idempotent: true });
+                }
+            }
         }
 
+        // Ensure we have the customer profile _id (if not already set above)
         if (!customerId) {
-            return res.status(403).json({ success: false, error: 'Customer profile required for orders.' });
+            if (req.user.role === 'CUSTOMER') {
+                const customer = await Customer.findOne({ userId });
+                if (!customer) throw new Error('Customer profile required');
+                customerId = customer._id;
+            } else {
+                return res.status(403).json({ success: false, error: 'Customer profile required for orders.' });
+            }
         }
 
-        const order = await orderService.createOrder(customerId, dealerId, items, shippingAddress);
+        const order = await orderService.createOrder(customerId, dealerId, items, shippingAddress, idempotencyKey);
         res.status(201).json({ success: true, data: order });
     } catch (error) {
+        logger.error('Order creation failed:', error);
         res.status(400).json({ success: false, error: error.message });
     }
 };

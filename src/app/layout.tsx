@@ -13,7 +13,11 @@ import { TrackingProvider } from '@/client/context/TrackingContext';
 import FCMHandler from '@/client/components/utils/FCMHandler';
 import InstructionButton from '@/client/components/layout/InstructionButton';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+    subsets: ['latin'],
+    display: 'swap', // Prevent font preload warning
+    preload: true
+});
 
 export const metadata: Metadata = {
     metadataBase: new URL('https://novamart.com'),

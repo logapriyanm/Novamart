@@ -37,7 +37,8 @@ const OrderSchema = new mongoose.Schema({
         status: String,
         estimatedDelivery: Date,
         actualDelivery: Date
-    }
+    },
+    idempotencyKey: { type: String, index: true, sparse: true } // For preventing duplicate orders
 }, { timestamps: true });
 
 export default mongoose.models.Order || mongoose.model('Order', OrderSchema);

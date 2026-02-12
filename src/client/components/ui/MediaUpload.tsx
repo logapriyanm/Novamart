@@ -55,7 +55,13 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                 return (
                     <button
                         type="button"
-                        onClick={() => open()}
+                        onClick={() => {
+                            if (open && typeof open === 'function') {
+                                open();
+                            } else {
+                                console.error('Cloudinary widget not initialized');
+                            }
+                        }}
                         className="w-full h-40 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center gap-3 hover:border-[#10367D]/20 hover:bg-[#10367D]/5 transition-all group"
                     >
                         <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-[#10367D] group-hover:bg-white group-hover:scale-110 transition-all">

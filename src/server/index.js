@@ -87,16 +87,8 @@ app.use(helmet());                         // HTTP security headers (X-Frame-Opt
 app.use(cors(corsOptions));                // Restricted CORS
 app.use(express.json({ limit: '10mb' })); // Body parser with size limit
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Standard URL-encoded parser
-app.use((req, res, next) => {
-    try {
-        mongoSanitize()(req, res, next);
-    } catch (error) {
-        // Silently skip if sanitization fails (e.g. read-only properties) but log it
-        logger.warn('MongoSanitize skipped:', error.message);
-        next();
-    }
-}); // Prevent NoSQL injection ($gt, $ne, etc.)
-app.use(xss());                            // Sanitize user input against XSS
+app.use(mongoSanitize()); // Prevent NoSQL injection ($gt, $ne, etc.)
+app.use(xss()); // Sanitize user input against XSS
 app.use((req, res, next) => {
     logger.info('INCOMING_REQUEST: %s %s', req.method, req.url);
     next();

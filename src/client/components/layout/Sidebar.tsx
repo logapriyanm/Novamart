@@ -160,10 +160,10 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
             <motion.aside
                 initial={false}
                 animate={{
-                    x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1025 ? -300 : 0),
-                    width: isCollapsed ? 80 : 288 // 5rem (80px) vs 18rem (288px)
+                    x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1025 ? 300 : 0),
+                    width: isCollapsed ? '5rem' : '20%' // 30% when expanded, 5rem when collapsed
                 }}
-                className={`fixed inset-y-0 left-0 bg-surface border-r border-border z-50 flex flex-col transition-all no-scrollbar`}
+                className={`fixed inset-y-0 right-0 bg-surface border-l border-border z-50 flex flex-col transition-all no-scrollbar lg:relative lg:border-r lg:border-l-0 lg:left-0`}
             >
                 {/* Logo Section */}
                 <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center p-4' : 'gap-3'}`}>
@@ -186,7 +186,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 )}
 
                 {/* Primary Navigation */}
-                <nav className="flex-1 px-4 py-2 space-y-1 overflow-x-hidden overflow-y-auto no-scrollbar">
+                <nav className="flex-1 px-4 py-2 space-y-1 overflow-hidden">
                     {/* Customer Profile Section (Refined) */}
                     {role === 'CUSTOMER' && !isCollapsed && (
                         <div className="mb-6 p-4 bg-muted/20 rounded-[10px] border border-border/50">
