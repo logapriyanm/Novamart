@@ -146,7 +146,7 @@ export default function Navbar() {
                   <div className="relative w-5 h-5 group-hover:scale-110 transition-transform">
                     <img
                       src="/assets/search-hover-spin.svg"
-                      alt=""
+                      alt="Search"
                       className="w-full h-full object-contain brightness-0 invert"
                     />
                   </div>

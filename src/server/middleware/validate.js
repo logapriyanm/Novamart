@@ -65,12 +65,24 @@ export const validateProduct = (req, res, next) => {
     const nameVal = name?.trim();
     if (!nameVal || nameVal.length < 3) errors.name = 'NAME_TOO_SHORT';
 
+    const isDraft = req.body.status === 'DRAFT';
+
     const priceNum = parseFloat(basePrice);
     if (isNaN(priceNum) || priceNum <= 0) {
-        errors.basePrice = 'INVALID_PRICE';
+        if (isDraft) {
+            req.body.basePrice = 0; // Default to 0 for drafts to satisfy Mongoose
+        } else {
+            errors.basePrice = 'INVALID_PRICE'; 
+        }
     }
 
-    if (!category || category === '') errors.category = 'CATEGORY_REQUIRED';
+    if (!category || category === '') {
+        // Optional: allow missing category for drafts? Mongoose requires it.
+        // If we want to allow drafts without category, we'd need to relax Mongoose schema too.
+        // For now, let's keep category required or return error.
+        // But user reported price error.
+        errors.category = 'CATEGORY_REQUIRED';
+    }
 
     if (moq) {
         const moqNum = parseInt(moq);
@@ -80,7 +92,7 @@ export const validateProduct = (req, res, next) => {
     }
 
     if (Object.keys(errors).length > 0) {
-        logger.warn('Product validation failed', { name, errors, manufacturerId: req.user?.id });
+        logger.warn('Product validation failed', { name, errors, manufacturerId: req.user?.id, body: req.body });
         return res.status(400).json({ error: 'VALIDATION_FAILED', details: errors });
     }
 

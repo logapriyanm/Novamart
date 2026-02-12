@@ -2,6 +2,9 @@ import './env.js'; // MUST BE FIRST
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
 import mongoose from 'mongoose';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -42,10 +45,34 @@ import sellerRoutes from './routes/sellers/sellerRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
+
+// === CORS Configuration ===
+const ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    process.env.FRONTEND_URL,
+    process.env.NEXT_PUBLIC_FRONTEND_URL,
+].filter(Boolean);
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (ALLOWED_ORIGINS.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Audit-Reason'],
+};
+
 const io = new Server(httpServer, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+        origin: ALLOWED_ORIGINS,
+        methods: ['GET', 'POST'],
+        credentials: true,
     }
 });
 
@@ -54,10 +81,22 @@ notificationService.setIO(io);
 
 const PORT = process.env.PORT || 5002;
 
-// Middleware
+// === Security Middleware ===
 app.set('trust proxy', 1); // Trust first proxy for rate limiting (fixes IPv6 issues)
-app.use(cors());
-app.use(express.json());
+app.use(helmet());                         // HTTP security headers (X-Frame-Options, HSTS, etc.)
+app.use(cors(corsOptions));                // Restricted CORS
+app.use(express.json({ limit: '10mb' })); // Body parser with size limit
+app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Standard URL-encoded parser
+app.use((req, res, next) => {
+    try {
+        mongoSanitize()(req, res, next);
+    } catch (error) {
+        // Silently skip if sanitization fails (e.g. read-only properties) but log it
+        logger.warn('MongoSanitize skipped:', error.message);
+        next();
+    }
+}); // Prevent NoSQL injection ($gt, $ne, etc.)
+app.use(xss());                            // Sanitize user input against XSS
 app.use((req, res, next) => {
     logger.info('INCOMING_REQUEST: %s %s', req.method, req.url);
     next();
@@ -71,7 +110,7 @@ io.use(async (socket, next) => {
         const token = socket.handshake.auth.token;
         if (!token) return next(new Error('Authentication error: No token provided'));
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecret');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded.id)
             .populate('customer')
             .populate('dealer')
@@ -232,6 +271,18 @@ process.on('exit', (code) => {
 
 const startServer = async () => {
     try {
+        // === Startup Security Checks ===
+        if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+            logger.error('🔴 FATAL: JWT_SECRET is missing or too short (min 32 chars). Server cannot start securely.');
+            process.exit(1);
+        }
+
+        if (process.env.NODE_ENV === 'production') {
+            if (!process.env.RAZORPAY_KEY_ID) {
+                logger.warn('⚠️ RAZORPAY_KEY_ID not set. Payments will run in mock mode.');
+            }
+        }
+
         if (process.env.MONGODB_URI) {
             try {
                 await mongoose.connect(process.env.MONGODB_URI, {
@@ -260,3 +311,4 @@ const startServer = async () => {
 };
 
 startServer();
+

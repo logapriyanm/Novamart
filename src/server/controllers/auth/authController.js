@@ -19,8 +19,18 @@ import emailService from '../../services/emailService.js';
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const getJwtSecret = () => process.env.JWT_SECRET || 'supersecret';
-const getRefreshSecret = () => process.env.REFRESH_SECRET || 'superrefreshsecret';
+const getJwtSecret = () => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('FATAL: JWT_SECRET environment variable is not set.');
+    }
+    return process.env.JWT_SECRET;
+};
+const getRefreshSecret = () => {
+    if (!process.env.REFRESH_SECRET && !process.env.JWT_SECRET) {
+        throw new Error('FATAL: REFRESH_SECRET or JWT_SECRET environment variable is not set.');
+    }
+    return process.env.REFRESH_SECRET || (process.env.JWT_SECRET + '_refresh');
+};
 
 /**
  * Helper to generate access and refresh tokens

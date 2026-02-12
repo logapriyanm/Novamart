@@ -2,7 +2,12 @@ import jwt from 'jsonwebtoken';
 import { User, Session } from '../models/index.js';
 import logger from '../lib/logger.js';
 
-const getJwtSecret = () => process.env.JWT_SECRET || 'supersecret';
+const getJwtSecret = () => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('FATAL: JWT_SECRET environment variable is not set. Server cannot start securely.');
+    }
+    return process.env.JWT_SECRET;
+};
 
 const authenticate = async (req, res, next) => {
     const authHeader = req.headers.authorization;
