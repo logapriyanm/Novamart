@@ -3,7 +3,7 @@ import rateLimit from 'express-rate-limit';
 // Strict rate limiter for OTP endpoints (prevent brute force)
 export const otpRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 500, // 5 requests per window
+    limit: 5, // 5 requests per 15-minute window
     message: {
         success: false,
         error: 'Too many OTP requests. Please try again later.',
@@ -20,7 +20,7 @@ export const otpRateLimiter = rateLimit({
 // Standard rate limiter for auth endpoints
 export const authRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 10000, // 100 requests per window
+    limit: 100, // 100 requests per 15-minute window
     message: {
         success: false,
         error: 'Too many requests. Please try again later.'
@@ -33,7 +33,7 @@ export const authRateLimiter = rateLimit({
 // Strict login rate limiter (prevent credential stuffing)
 export const loginRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 1000, // 10 login attempts per window
+    limit: 10, // 10 login attempts per 15-minute window
     message: {
         success: false,
         error: 'Too many login attempts. Please try again later.',
@@ -46,3 +46,4 @@ export const loginRateLimiter = rateLimit({
     },
     validate: { xForwardedForHeader: false, trustProxy: false }
 });
+
