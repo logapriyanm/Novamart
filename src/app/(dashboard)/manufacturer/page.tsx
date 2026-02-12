@@ -13,6 +13,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 import EmptyState from '@/client/components/ui/EmptyState';
 import Loader from '@/client/components/ui/Loader';
+import DashboardSkeleton from '@/client/components/ui/DashboardSkeleton';
 
 const mockChartData = [
     { name: 'Jan', value: 4000 },
@@ -51,13 +52,7 @@ export default function ManufacturerDashboard() {
     const isVerified = profile?.isVerified;
 
     if (isLoading) {
-        return (
-            <div className="min-h-[600px] flex items-center justify-center">
-                <div className="min-h-[600px] flex items-center justify-center">
-                    <Loader size="xl" variant="primary" />
-                </div>
-            </div>
-        );
+        return <DashboardSkeleton />;
     }
 
     return (

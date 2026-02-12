@@ -8,3 +8,7 @@ build
 *.tsbuildinfo
 .cache
 coverage
+
+# Saved/exported HTML pages (browser exports)
+*.html
+!public/**/*.html

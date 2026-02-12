@@ -92,14 +92,7 @@ export default function Navbar() {
                 <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-8">
                     {/* Brand & Mobile Toggle */}
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden p-2 hover:bg-foreground/5 rounded-[10px] touch-target"
-                            aria-label="Toggle mobile menu"
-                            aria-expanded={isMobileMenuOpen}
-                        >
-                            <Menu className="w-6 h-6 text-foreground/60" />
-                        </button>
+
                         <Link href="/" className="flex items-center gap-2 group">
                             <div className="relative w-10 h-10 sm:w-12 sm:h-12 p-1.5 sm:p-2 rounded-full border-2 border-black overflow-hidden flex items-center justify-center bg-white shadow-sm group-hover:shadow-md transition-all shrink-0">
                                 <img src="/assets/Novamart.png" alt="NovaMart" className="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
@@ -172,14 +165,16 @@ export default function Navbar() {
 
                         <div className="h-8 w-px bg-foreground/10 hidden md:block" />
 
-                        <Link href="/contact" className="flex flex-col items-center group gap-1">
+                        {/* Support - Hidden on mobile */}
+                        <Link href="/contact" className="hidden md:flex flex-col items-center group gap-1">
                             <FaHeadset className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
                             <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Support</span>
                         </Link>
 
                         {isAuthenticated && <NotificationBell />}
 
-                        <Link href="/cart" className="flex flex-col items-center group gap-1 relative">
+                        {/* Cart - Hidden on mobile */}
+                        <Link href="/cart" className="hidden md:flex flex-col items-center group gap-1 relative">
                             <div className="relative">
                                 <HiOutlineShoppingCart className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
                                 <span className="absolute -top-2 -right-2 bg-black text-background text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
@@ -188,9 +183,9 @@ export default function Navbar() {
                             </div>
                             <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Cart</span>
                         </Link>
-                        {/* Profile Section */}
+                        {/* Profile Section - Hidden on mobile */}
                         <div
-                            className="relative py-2"
+                            className="relative py-2 hidden md:block"
                             ref={dropdownRef}
                             onMouseEnter={() => setIsProfileDropdownOpen(true)}
                             onMouseLeave={() => setIsProfileDropdownOpen(false)}
@@ -292,6 +287,14 @@ export default function Navbar() {
                                 )}
                             </AnimatePresence>
                         </div>
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="md:hidden p-2 hover:bg-foreground/5 rounded-[10px] touch-target text-black ml-2"
+                            aria-label="Toggle mobile menu"
+                            aria-expanded={isMobileMenuOpen}
+                        >
+                            <Menu className="w-6 h-6 text-foreground/60" />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -392,6 +395,25 @@ export default function Navbar() {
                                 </div>
 
                                 <div className="space-y-6">
+                                    {/* Support Link - Visible in mobile menu */}
+                                    <Link href="/contact" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                        <FaHeadset className="w-5 h-5 text-foreground/20" />
+                                        Support
+                                    </Link>
+
+                                    {/* Cart Link - Visible in mobile menu */}
+                                    <Link href="/cart" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                        <div className="relative">
+                                            <HiOutlineShoppingCart className="w-5 h-5 text-foreground/20" />
+                                            {cart.length > 0 && (
+                                                <span className="absolute -top-1 -right-1 bg-black text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">
+                                                    {cart.length}
+                                                </span>
+                                            )}
+                                        </div>
+                                        Cart {cart.length > 0 && `(${cart.length})`}
+                                    </Link>
+
                                     <Link href="/products" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
                                         <FaBox className="w-5 h-5 text-foreground/20" />
                                         Products
@@ -418,10 +440,7 @@ export default function Navbar() {
                                         </Link>
                                     )}
 
-                                    <Link href="/contact" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
-                                        <FaHeadset className="w-5 h-5 text-foreground/20" />
-                                        Contact Support
-                                    </Link>
+
 
                                     {/* Mobile Categories - NEW RESPONSIVE FIX */}
                                     <div className="pt-6 border-t border-foreground/5">
@@ -449,6 +468,10 @@ export default function Navbar() {
                                                         <HiOutlineUser className="w-5 h-5 text-foreground/20" />
                                                         Profile Dashboard
                                                     </Link>
+                                                    <Link href="/wishlist" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                                        <FaHeart className="w-5 h-5 text-foreground/20" />
+                                                        Wishlist
+                                                    </Link>
                                                     <Link href="/profile?tab=orders" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
                                                         <FaClipboardList className="w-5 h-5 text-foreground/20" />
                                                         Orders
@@ -464,10 +487,15 @@ export default function Navbar() {
                                             </div>
                                         </>
                                     ) : (
-                                        <Link href="/auth/login" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
-                                            <HiOutlineUserCircle className="w-5 h-5 text-foreground/20" />
-                                            Sign In
-                                        </Link>
+                                        <>
+                                            <div className="pt-6 border-t border-foreground/5">
+                                                <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest mb-4">Account</p>
+                                                <Link href="/auth/login" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                                    <HiOutlineUserCircle className="w-5 h-5 text-foreground/20" />
+                                                    Sign In
+                                                </Link>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
 

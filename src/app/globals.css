@@ -68,6 +68,18 @@
   .touch-target {
     @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
+
+  /* Global Scrollbar Hide */
+  /* ::-webkit-scrollbar {
+    display: none;
+  } */
+
+  * {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
 }
 
 @layer components {

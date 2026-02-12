@@ -111,7 +111,7 @@ class NotificationService {
                 logger.info('---------------------------');
                 results.whatsapp = { success: true };
             } else {
-                console.warn(`[NotificationService] WhatsApp blocked for type: ${type}`);
+                // console.warn(`[NotificationService] WhatsApp blocked for type: ${type}`);
             }
         }
 

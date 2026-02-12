@@ -20,6 +20,9 @@ import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
 import UserVerificationModal from '@/client/components/features/admin/UserVerificationModal';
 import Loader from '@/client/components/ui/Loader';
+import TableSkeleton from '@/client/components/ui/TableSkeleton';
+import Tooltip from '@/client/components/ui/Tooltip';
+import UserCard from '@/client/components/features/admin/UserCard';
 import { toast } from 'sonner';
 
 export default function UserManagementPortal() {
@@ -132,85 +135,119 @@ export default function UserManagementPortal() {
                 ))}
             </div>
 
-            {/* User Directory Table */}
-            <div className="bg-white rounded-[10px] border border-foreground/10 shadow-sm overflow-hidden">
-                <div className="p-8 border-b border-foreground/10 bg-background/50 flex items-center justify-between">
-                    <h2 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-3">
-                        <FaUsers className="text-black" />
-                        Active Identity Ledger
-                    </h2>
-                    <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">
-                        {displayedList.length} Entities Found
-                    </p>
-                </div>
+            {loading ? (
+                <TableSkeleton />
+            ) : (
+                <>
+                    {/* Mobile Card View */}
+                    <div className="grid grid-cols-1 gap-4 md:hidden">
+                        {displayedList.map((user) => (
+                            <UserCard
+                                key={user._id || user.id}
+                                user={user}
+                                selectedRole={selectedRole}
+                                onVerify={handleVerifyClick}
+                            />
+                        ))}
+                        {displayedList.length === 0 && (
+                            <div className="p-8 text-center bg-white rounded-[10px] border border-slate-100 shadow-sm">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No users found</p>
+                            </div>
+                        )}
+                    </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="border-b border-foreground/10">
-                                <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest">User Entity</th>
-                                <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Privilege Level</th>
-                                <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest text-center">Protocol Status</th>
-                                <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={4} className="p-10 text-center">
-                                        <div className="flex justify-center">
-                                            <Loader size="md" variant="primary" />
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : displayedList.map((user) => (
-                                <tr key={user._id || user.id} className="hover:bg-slate-50 group transition-colors">
-                                    <td className="px-10 py-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-[10px] bg-black flex items-center justify-center text-white text-xs font-black group-hover:scale-110 transition-transform">
-                                                {(user.name || user.email || 'U').substring(0, 2).toUpperCase()}
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-black text-black leading-none">{user.name || 'Unknown User'}</p>
-                                                <p className="text-[10px] font-bold text-foreground/40 mt-1.5">{user.email || 'No Email'}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-6">
-                                        <div className="flex items-center gap-2">
-                                            {user.role === 'ADMIN' ? <FaUserShield className="text-black w-3 h-3" /> :
-                                                user.role === 'DEALER' ? <FaStore className="text-black w-3 h-3" /> :
-                                                    user.role === 'MANUFACTURER' ? <FaIndustry className="text-black w-3 h-3" /> :
-                                                        <FaUserTie className="text-black w-3 h-3" />}
-                                            <span className="text-[10px] font-bold text-black uppercase tracking-widest">{user.role}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-6 text-center">
-                                        <span className={`inline-flex items-center px-4 py-1.5 rounded-[10px] text-[9px] font-bold uppercase tracking-wider ${(user.status === 'Active' || user.isVerified) ? 'bg-emerald-100 text-emerald-700' :
-                                            (user.status === 'Banned' || user.isVerified === false) ? 'bg-rose-100 text-rose-700' :
-                                                'bg-amber-100 text-amber-700'
-                                            }`}>
-                                            {user.status || (user.isVerified ? 'Active' : 'Pending')}
-                                        </span>
-                                    </td>
-                                    <td className="px-10 py-6 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            {(selectedRole === 'MANUFACTURER' || selectedRole === 'DEALER') && !user.isVerified && (
-                                                <button
-                                                    onClick={() => handleVerifyClick(user, selectedRole as any)}
-                                                    className="btn-primary"
-                                                >
-                                                    Verify
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block bg-white rounded-[10px] border border-foreground/10 shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-foreground/10 bg-background/50 flex items-center justify-between">
+                            <h2 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-3">
+                                <FaUsers className="text-black" />
+                                Active Identity Ledger
+                            </h2>
+                            <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">
+                                {displayedList.length} Entities Found
+                            </p>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="border-b border-foreground/10">
+                                        <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest">User Entity</th>
+                                        <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Privilege Level</th>
+                                        <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest text-center">Protocol Status</th>
+                                        <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {displayedList.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={4} className="p-10 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                                No entities found in this registry.
+                                            </td>
+                                        </tr>
+                                    ) : displayedList.map((user) => (
+                                        <tr key={user._id || user.id} className="hover:bg-slate-50 group transition-colors">
+                                            <td className="px-10 py-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-[10px] bg-black flex items-center justify-center text-white text-xs font-black group-hover:scale-110 transition-transform">
+                                                        {(user.name || user.email || 'U').substring(0, 2).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-black text-black leading-none">{user.name || 'Unknown User'}</p>
+                                                        <p className="text-[10px] font-bold text-foreground/40 mt-1.5">{user.email || 'No Email'}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-6">
+                                                <div className="flex items-center gap-2">
+                                                    {user.role === 'ADMIN' ? (
+                                                        <Tooltip content="Administrator - Full Access">
+                                                            <FaUserShield className="text-black w-3 h-3 cursor-help" />
+                                                        </Tooltip>
+                                                    ) : user.role === 'DEALER' ? (
+                                                        <Tooltip content="Authorized Dealer">
+                                                            <FaStore className="text-black w-3 h-3 cursor-help" />
+                                                        </Tooltip>
+                                                    ) : user.role === 'MANUFACTURER' ? (
+                                                        <Tooltip content="Verified Manufacturer">
+                                                            <FaIndustry className="text-black w-3 h-3 cursor-help" />
+                                                        </Tooltip>
+                                                    ) : (
+                                                        <Tooltip content="Standard Customer">
+                                                            <FaUserTie className="text-black w-3 h-3 cursor-help" />
+                                                        </Tooltip>
+                                                    )}
+                                                    <span className="text-[10px] font-bold text-black uppercase tracking-widest">{user.role}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-6 text-center">
+                                                <span className={`inline-flex items-center px-4 py-1.5 rounded-[10px] text-[9px] font-bold uppercase tracking-wider ${(user.status === 'Active' || user.isVerified) ? 'bg-emerald-100 text-emerald-700' :
+                                                    (user.status === 'Banned' || user.isVerified === false) ? 'bg-rose-100 text-rose-700' :
+                                                        'bg-amber-100 text-amber-700'
+                                                    }`}>
+                                                    {user.status || (user.isVerified ? 'Active' : 'Pending')}
+                                                </span>
+                                            </td>
+                                            <td className="px-10 py-6 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {(selectedRole === 'MANUFACTURER' || selectedRole === 'DEALER') && !user.isVerified && (
+                                                        <button
+                                                            onClick={() => handleVerifyClick(user, selectedRole as any)}
+                                                            className="btn-primary"
+                                                        >
+                                                            Verify
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
+            )}
 
             <UserVerificationModal
                 isOpen={verifyModalOpen}

@@ -1,5 +1,6 @@
 import './env.js'; // MUST BE FIRST
 import express from 'express';
+import { validateEnv } from './config/env.js';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -220,7 +221,23 @@ app.use('/api/custom-escrow', customEscrowRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/sellers', sellerRoutes);
 
+// Log all routes
+function printRoutes(stack, prefix = '') {
+    stack.forEach((r) => {
+        if (r.route && r.route.path) {
+            // console.log(`Route: ${prefix}${r.route.path}`);
+        } else if (r.name === 'router' && r.handle.stack) {
+            printRoutes(r.handle.stack, prefix + r.regexp.source.replace('\\/?(?=\\/|$)', '').replace('^\\', '').replace('\\/', '/'));
+        }
+    });
+}
+// console.log('--- Registered Routes ---');
+printRoutes(app._router.stack);
+// console.log('-------------------------');
+
 // Health check route
+app.get('/test-route', (req, res) => res.json({ success: true, message: 'Server is updating!' }));
+
 app.get('/', (req, res) => {
     res.json({
         status: 'OK',

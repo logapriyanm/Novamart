@@ -13,9 +13,9 @@ async function resetPassword() {
         const hashedPassword = await bcrypt.hash('Admin@123', 10);
         const result = await User.updateOne({ email: 'admin@test.com' }, { password: hashedPassword });
         if (result.matchedCount > 0) {
-            console.log('✅ Password reset successful for admin@test.com');
+            // console.log('✅ Password reset successful for admin@test.com');
         } else {
-            console.log('❌ User admin@test.com not found');
+            // console.log('❌ User admin@test.com not found');
         }
         await mongoose.disconnect();
     } catch (err) {

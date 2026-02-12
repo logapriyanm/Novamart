@@ -10,8 +10,8 @@ async function checkAdmin() {
         await mongoose.connect(MONGO_URI);
         const User = mongoose.model('User', new mongoose.Schema({ email: String, role: String, status: String }));
         const admins = await User.find({ role: 'ADMIN' });
-        console.log('--- Registered Admins ---');
-        admins.forEach(a => console.log(`Email: ${a.email}, Role: ${a.role}, Status: ${a.status}`));
+        // console.log('--- Registered Admins ---');
+        admins.forEach(a => // console.log(`Email: ${a.email}, Role: ${a.role}, Status: ${a.status}`));
         await mongoose.disconnect();
     } catch (err) {
         console.error('Error:', err);

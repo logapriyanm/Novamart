@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/client/hooks/useAuth';
 import Loader from '@/client/components/ui/Loader';
+import DashboardSkeleton from '@/client/components/ui/DashboardSkeleton';
 
 const mockSalesData = [
     { name: 'Mon', sales: 12000 },
@@ -34,13 +35,7 @@ export default function DealerDashboard() {
     }, []);
 
     if (isLoading) {
-        return (
-            <div className="min-h-[600px] flex items-center justify-center">
-                <div className="min-h-[600px] flex items-center justify-center">
-                    <Loader size="xl" variant="primary" />
-                </div>
-            </div>
-        );
+        return <DashboardSkeleton />;
     }
 
     return (

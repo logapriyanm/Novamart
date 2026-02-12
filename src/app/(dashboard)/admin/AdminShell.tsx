@@ -9,7 +9,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
 
     return (
-        <div className="flex h-screen bg-background overflow-hidden">
+        <div className="flex h-screen supports-[height:100dvh]:h-[100dvh] bg-background overflow-hidden">
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}

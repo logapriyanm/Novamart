@@ -4,6 +4,7 @@ import React from 'react';
 import { FaSearch as Search, FaBars as Menu, FaShieldAlt as ShieldCheck } from 'react-icons/fa';
 import UserDropdown from './UserDropdown';
 import NotificationBell from './NotificationBell';
+import DashboardBreadcrumb from './DashboardBreadcrumb';
 
 interface DashboardHeaderProps {
     role: 'ADMIN' | 'MANUFACTURER' | 'DEALER';
@@ -39,12 +40,10 @@ export default function DashboardHeader({
                     </div>
                 </div>
 
-                {/* Dashboard Title (e.g., for Dealer/Admin) */}
-                {title && (
-                    <div className="hidden sm:block mr-8">
-                        {title}
-                    </div>
-                )}
+                {/* Breadcrumb Navigation */}
+                <div className="hidden sm:block mr-4">
+                    <DashboardBreadcrumb />
+                </div>
 
                 {/* Search Bar */}
                 <div className="relative w-full max-w-sm hidden md:block group">

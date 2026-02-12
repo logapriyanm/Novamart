@@ -13,11 +13,13 @@ import {
     FaRegClock,
     FaEye,
     FaShippingFast,
-    FaBan
+    FaBan,
+    FaFilter
 } from 'react-icons/fa';
 import Link from 'next/link';
 
 import { adminService } from '@/lib/api/services/admin.service';
+import OrderFilterDrawer from '@/client/components/features/admin/OrderFilterDrawer';
 import { toast } from 'sonner';
 
 export default function OrderOversightPanel() {
@@ -25,6 +27,13 @@ export default function OrderOversightPanel() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     // const { showSnackbar } = useSnackbar();
+
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [filters, setFilters] = useState({
+        status: [] as string[],
+        dateRange: 'ALL',
+        minValue: ''
+    });
 
     useEffect(() => {
         fetchOrders();
@@ -64,13 +73,40 @@ export default function OrderOversightPanel() {
     ];
 
     const filteredOrders = orders.filter(o => {
+        // Text Search
         const idMatch = o?._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             o?.id?.toLowerCase().includes(searchTerm.toLowerCase());
         const customerMatch = o?.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase());
         const dealerMatch = o?.dealer?.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             o?.manufacturer?.businessName?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        return idMatch || customerMatch || dealerMatch;
+        const searchCondition = idMatch || customerMatch || dealerMatch;
+
+        // Status Filter
+        const statusMatch = filters.status.length === 0 || filters.status.includes(o.status);
+
+        // Min Value Filter
+        const valueMatch = !filters.minValue || Number(o.totalAmount) >= Number(filters.minValue);
+
+        // Date Range (Simplified)
+        let dateMatch = true;
+        if (filters.dateRange !== 'ALL') {
+            const orderDate = new Date(o.createdAt);
+            const today = new Date();
+            if (filters.dateRange === 'TODAY') {
+                dateMatch = orderDate.toDateString() === today.toDateString();
+            } else if (filters.dateRange === 'WEEK') {
+                const weekAgo = new Date();
+                weekAgo.setDate(today.getDate() - 7);
+                dateMatch = orderDate >= weekAgo;
+            } else if (filters.dateRange === 'MONTH') {
+                const monthAgo = new Date();
+                monthAgo.setMonth(today.getMonth() - 1);
+                dateMatch = orderDate >= monthAgo;
+            }
+        }
+
+        return searchCondition && statusMatch && valueMatch && dateMatch;
     });
 
     if (loading) return (
@@ -99,7 +135,7 @@ export default function OrderOversightPanel() {
             </div>
 
             {/* Global Order Health */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat) => (
                     <div key={stat.label} className="bg-white rounded-[10px] p-6 border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                         <div>
@@ -131,9 +167,23 @@ export default function OrderOversightPanel() {
                                 className="w-full bg-white border border-slate-200 rounded-[10px] py-2 pl-9 pr-4 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
                             />
                         </div>
-                        <button className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[10px] hover:bg-slate-800 transition-all shadow-sm">Filter</button>
+                        <button
+                            onClick={() => setIsFilterOpen(true)}
+                            className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[10px] hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
+                        >
+                            <FaFilter className="w-3 h-3" />
+                            Filter {(filters.status.length > 0 || filters.dateRange !== 'ALL' || filters.minValue) && <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>}
+                        </button>
                     </div>
                 </div>
+
+                <OrderFilterDrawer
+                    isOpen={isFilterOpen}
+                    onClose={() => setIsFilterOpen(false)}
+                    filters={filters}
+                    onApply={setFilters}
+                    onReset={() => setFilters({ status: [], dateRange: 'ALL', minValue: '' })}
+                />
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
@@ -183,23 +233,23 @@ export default function OrderOversightPanel() {
                                             {order.status === 'PAID' && (
                                                 <button
                                                     onClick={() => handleUpdateStatus(order._id || order.id, 'SHIP')}
-                                                    className="w-8 h-8 rounded-[10px] bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                                                    className="w-10 h-10 rounded-[10px] bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                                                     title="Mark Shipped"
                                                 >
-                                                    <FaShippingFast className="w-3.5 h-3.5" />
+                                                    <FaShippingFast className="w-4 h-4" />
                                                 </button>
                                             )}
                                             {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
                                                 <button
                                                     onClick={() => handleUpdateStatus(order._id || order.id, 'CANCEL')}
-                                                    className="w-8 h-8 rounded-[10px] bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                                                    className="w-10 h-10 rounded-[10px] bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                                                     title="Cancel Order"
                                                 >
-                                                    <FaBan className="w-3.5 h-3.5" />
+                                                    <FaBan className="w-4 h-4" />
                                                 </button>
                                             )}
-                                            <button className="w-8 h-8 rounded-[10px] bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-sm">
-                                                <FaEye className="w-3.5 h-3.5" />
+                                            <button className="w-10 h-10 rounded-[10px] bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all shadow-sm">
+                                                <FaEye className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>

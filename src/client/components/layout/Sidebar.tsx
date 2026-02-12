@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,6 @@ import {
     FaTruck as LogisticsIcon,
     FaCog as SettingsIcon,
     FaHeadset as SupportIcon,
-    FaSignOutAlt as LogoutIcon,
     FaRocket as LogoIcon,
     FaHeart as WishlistIcon,
     FaCreditCard as PaymentsIcon,
@@ -33,23 +32,126 @@ import {
     FaHandshake,
     FaDesktop,
     FaSearch,
-    FaArrowRight as ArrowRight
+    FaArrowRight as ArrowRight,
+    FaChevronDown,
+    FaChevronRight,
+    FaClipboardList,
+    FaExclamationTriangle,
+    FaFileAlt,
+    FaGlobe,
+    FaEnvelope,
+    FaUserShield,
+    FaPlusCircle,
+    FaLayerGroup,
+    FaProjectDiagram,
+    FaWarehouse,
+    FaStream,
+    FaTasks,
+    FaChartLine,
+    FaUserCog,
+    FaObjectGroup,
+    FaStore,
+    FaCartPlus,
+    FaCubes,
+    FaExchangeAlt,
+    FaFilter,
+    FaFileExport,
+    FaBriefcase,
+    FaUserTie,
+    FaComments,
+    FaClipboardCheck,
+    FaNetworkWired,
+    FaTimes,
+    FaBars,
+    FaEye,
+    FaAward,
+    FaBalanceScale,
+    FaMoneyCheckAlt,
+    FaSlidersH,
+    FaArrowsAltH,
 } from 'react-icons/fa';
 
-const adminMenuItems = [
-    { name: 'Dashboard', icon: DashboardIcon, path: '/admin' },
-    { name: 'Verification', icon: FaShieldAlt, path: '/admin/verification' },
-    { name: 'Users', icon: FaUsers, path: '/admin/users' },
-    { name: 'Manufacturers', icon: FaIndustry, path: '/admin/manufacturers' },
-    { name: 'Dealers', icon: DealersIcon, path: '/admin/dealers' },
-    { name: 'Product Management', icon: ProductsIcon, path: '/admin/products' },
-    { name: 'Orders', icon: LogisticsIcon, path: '/admin/orders' },
-    { name: 'Finance', icon: WalletIcon, path: '/admin/finance' },
-    { name: 'Disputes', icon: DisputesIcon, path: '/admin/disputes' },
-    { name: 'Home CMS', icon: FaSearch, path: '/admin/cms' },
+// --- Types ---
+interface MenuItem {
+    name: string;
+    icon: React.ComponentType<{ className?: string }>;
+    path: string;
+}
+
+interface MenuGroup {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    items: MenuItem[];
+}
+
+// =============================================================================
+// ADMIN MENU (23 pages → 6 groups)
+// =============================================================================
+const adminMenuGroups: MenuGroup[] = [
+    {
+        label: 'Overview',
+        icon: DashboardIcon,
+        items: [
+            { name: 'Dashboard', icon: DashboardIcon, path: '/admin' },
+            { name: 'Analytics', icon: FaChartBar, path: '/admin/analytics' },
+            { name: 'Product Analytics', icon: FaChartLine, path: '/admin/analytics/products' },
+        ],
+    },
+    {
+        label: 'User & Role Management',
+        icon: FaUsers,
+        items: [
+            { name: 'All Users', icon: FaUsers, path: '/admin/users' },
+            { name: 'Manufacturers', icon: FaIndustry, path: '/admin/manufacturers' },
+            { name: 'Dealers', icon: DealersIcon, path: '/admin/dealers' },
+            { name: 'Verification', icon: FaShieldAlt, path: '/admin/verification' },
+            { name: 'Badges', icon: FaAward, path: '/admin/badges' },
+        ],
+    },
+    {
+        label: 'Commerce Control',
+        icon: FaStore,
+        items: [
+            { name: 'Products', icon: ProductsIcon, path: '/admin/products' },
+            { name: 'Orders', icon: LogisticsIcon, path: '/admin/orders' },
+            { name: 'Escrow', icon: FaMoneyCheckAlt, path: '/admin/escrow' },
+            { name: 'Disputes', icon: DisputesIcon, path: '/admin/disputes' },
+            { name: 'Escalations', icon: FaExclamationTriangle, path: '/admin/escalations' },
+            { name: 'Finance', icon: WalletIcon, path: '/admin/finance' },
+            { name: 'Reviews', icon: ReviewsIcon, path: '/admin/reviews' },
+        ],
+    },
+    {
+        label: 'Governance & Security',
+        icon: FaUserShield,
+        items: [
+            { name: 'Audit Log', icon: FaClipboardList, path: '/admin/audit' },
+            { name: 'Rules', icon: FaBalanceScale, path: '/admin/rules' },
+            { name: 'Fraud Detection', icon: FaExclamationTriangle, path: '/admin/fraud' },
+            { name: 'Messages', icon: FaEnvelope, path: '/admin/messages' },
+        ],
+    },
+    {
+        label: 'CMS & Content',
+        icon: FaGlobe,
+        items: [
+            { name: 'Home CMS', icon: FaDesktop, path: '/admin/cms' },
+        ],
+    },
+    {
+        label: 'System',
+        icon: SettingsIcon,
+        items: [
+            { name: 'Settings', icon: SettingsIcon, path: '/admin/settings' },
+            { name: 'Profile', icon: FaUserCog, path: '/admin/profile' },
+        ],
+    },
 ];
 
-const customerMenuItems = [
+// =============================================================================
+// CUSTOMER MENU (kept flat — already complete at 5 items)
+// =============================================================================
+const customerMenuItems: MenuItem[] = [
     { name: 'Dashboard', icon: DashboardIcon, path: '/customer' },
     { name: 'My Orders', icon: LogisticsIcon, path: '/customer/orders' },
     { name: 'Wishlist', icon: WishlistIcon, path: '/customer/wishlist' },
@@ -57,33 +159,114 @@ const customerMenuItems = [
     { name: 'My Reviews', icon: ReviewsIcon, path: '/customer/reviews' },
 ];
 
-const dealerMenuItems = [
-    { name: 'Dashboard', icon: DashboardIcon, path: '/dealer' },
-    { name: 'Marketplace', icon: FaBox, path: '/dealer/marketplace' },
-    { name: 'Orders', icon: LogisticsIcon, path: '/dealer/orders' },
-    { name: 'Negotiations', icon: FaHandshake, path: '/dealer/negotiations' },
-    { name: 'Subscription', icon: FaCrown, path: '/dealer/subscription' },
-    { name: 'Finance', icon: WalletIcon, path: '/dealer/finance' },
+// =============================================================================
+// DEALER MENU (24 pages → 5 groups)
+// =============================================================================
+const dealerMenuGroups: MenuGroup[] = [
+    {
+        label: 'Dashboard',
+        icon: DashboardIcon,
+        items: [
+            { name: 'Dashboard', icon: DashboardIcon, path: '/dealer' },
+        ],
+    },
+    {
+        label: 'Manufacturer Marketplace',
+        icon: FaStore,
+        items: [
+            { name: 'Browse Marketplace', icon: FaSearch, path: '/dealer/marketplace' },
+            { name: 'Pending Requests', icon: FaTasks, path: '/dealer/pending' },
+            { name: 'Negotiations', icon: FaHandshake, path: '/dealer/negotiations' },
+            { name: 'Collaboration', icon: FaProjectDiagram, path: '/dealer/collaboration' },
+        ],
+    },
+    {
+        label: 'My Inventory & Sales',
+        icon: FaBox,
+        items: [
+            { name: 'Products', icon: ProductsIcon, path: '/dealer/products' },
+            { name: 'Allocations', icon: FaLayerGroup, path: '/dealer/allocations' },
+            { name: 'Inventory', icon: FaWarehouse, path: '/dealer/inventory' },
+            { name: 'Custom Requests', icon: FaClipboardCheck, path: '/dealer/custom-requests' },
+            { name: 'Sourcing', icon: FaNetworkWired, path: '/dealer/sourcing' },
+            { name: 'Pooling', icon: FaCubes, path: '/dealer/pooling' },
+            { name: 'Orders', icon: LogisticsIcon, path: '/dealer/orders' },
+        ],
+    },
+    {
+        label: 'Reports & Analytics',
+        icon: FaChartBar,
+        items: [
+            { name: 'Analytics', icon: FaChartLine, path: '/dealer/analytics' },
+            { name: 'Subscription', icon: FaCrown, path: '/dealer/subscription' },
+        ],
+    },
+    {
+        label: 'Account',
+        icon: FaUserCog,
+        items: [
+            { name: 'Profile', icon: FaUserTie, path: '/dealer/profile' },
+            { name: 'Messages', icon: FaEnvelope, path: '/dealer/messages' },
+            { name: 'Settings', icon: SettingsIcon, path: '/dealer/settings' },
+            { name: 'Support', icon: SupportIcon, path: '/dealer/support' },
+        ],
+    },
 ];
 
-const manufacturerMenuItems = [
-    { name: 'Dashboard', icon: DashboardIcon, path: '/manufacturer' },
-    { name: 'Products', icon: ProductsIcon, path: '/manufacturer/products' },
-    { name: 'Dealer Requests', icon: FaUserCheck, path: '/manufacturer/dealers/requests' },
-    { name: 'Negotiations', icon: FaHandshake, path: '/manufacturer/negotiations' },
-    { name: 'Approved Dealers', icon: DealersIcon, path: '/manufacturer/dealers' },
-    { name: 'Orders Overview', icon: LogisticsIcon, path: '/manufacturer/orders' },
-    { name: 'Pricing Rules', icon: FaTag, path: '/manufacturer/pricing' },
-    { name: 'Inventory Insights', icon: FaBox, path: '/manufacturer/inventory' },
-    { name: 'Analytics', icon: FaChartBar, path: '/manufacturer/analytics' },
-    { name: 'Profile & Compliance', icon: FaShieldAlt, path: '/manufacturer/profile' },
-    { name: 'Notifications', icon: FaBell, path: '/manufacturer/notifications' },
+// =============================================================================
+// MANUFACTURER MENU (21 pages → 5 groups)
+// =============================================================================
+const manufacturerMenuGroups: MenuGroup[] = [
+    {
+        label: 'Dashboard',
+        icon: DashboardIcon,
+        items: [
+            { name: 'Dashboard', icon: DashboardIcon, path: '/manufacturer' },
+        ],
+    },
+    {
+        label: 'Product & Inventory',
+        icon: ProductsIcon,
+        items: [
+            { name: 'Products', icon: ProductsIcon, path: '/manufacturer/products' },
+            { name: 'Inventory', icon: FaWarehouse, path: '/manufacturer/inventory' },
+            { name: 'Allocations', icon: FaLayerGroup, path: '/manufacturer/allocations' },
+            { name: 'Custom Orders', icon: FaClipboardCheck, path: '/manufacturer/custom-orders' },
+            { name: 'Pricing Rules', icon: FaTag, path: '/manufacturer/pricing' },
+        ],
+    },
+    {
+        label: 'Dealer Network',
+        icon: FaNetworkWired,
+        items: [
+            { name: 'Dealer Requests', icon: FaUserCheck, path: '/manufacturer/dealers/requests' },
+            { name: 'Approved Dealers', icon: DealersIcon, path: '/manufacturer/dealers' },
+            { name: 'Negotiations', icon: FaHandshake, path: '/manufacturer/negotiations' },
+        ],
+    },
+    {
+        label: 'Orders & Revenue',
+        icon: LogisticsIcon,
+        items: [
+            { name: 'Orders', icon: LogisticsIcon, path: '/manufacturer/orders' },
+            { name: 'Analytics', icon: FaChartBar, path: '/manufacturer/analytics' },
+        ],
+    },
+    {
+        label: 'Account',
+        icon: FaUserCog,
+        items: [
+            { name: 'Profile & Compliance', icon: FaShieldAlt, path: '/manufacturer/profile' },
+            { name: 'Notifications', icon: FaBell, path: '/manufacturer/notifications' },
+            { name: 'Messages', icon: FaEnvelope, path: '/manufacturer/messages' },
+            { name: 'Settings', icon: SettingsIcon, path: '/manufacturer/settings' },
+        ],
+    },
 ];
 
-const bottomMenuItems = [
-    { name: 'Settings', icon: SettingsIcon, path: '/settings' },
-    { name: 'Support', icon: SupportIcon, path: '/support' },
-];
+// =============================================================================
+// SIDEBAR COMPONENT
+// =============================================================================
 
 interface SidebarProps {
     isOpen: boolean;
@@ -95,49 +278,111 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed = false }: SidebarProps) {
     const pathname = usePathname();
     const { user, logout } = useAuth();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
-    // Update menu items based on Role. 
-    const menuItems = role === 'ADMIN' ? adminMenuItems :
-        role === 'DEALER' ? dealerMenuItems :
-            role === 'MANUFACTURER' ? manufacturerMenuItems :
-                customerMenuItems;
+    // Persist collapsed state per role
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem(`sidebar_collapsed_${role}`);
+            if (stored) setCollapsedGroups(JSON.parse(stored));
+        } catch { }
+    }, [role]);
 
-    const NavItem = ({ item }: { item: any }) => {
-        const isDashboard = ['/admin', '/dealer', '/manufacturer', '/customer'].includes(item.path);
+    const saveCollapsedState = (next: Record<string, boolean>) => {
+        setCollapsedGroups(next);
+        try { localStorage.setItem(`sidebar_collapsed_${role}`, JSON.stringify(next)); } catch { }
+    };
 
-        // Specific match logic: An item is active if it's an exact match, 
-        // OR if it's a prefix and NO other menu item is a more specific (longer) prefix.
+    const toggleGroup = (label: string) => {
+        const next = { ...collapsedGroups, [label]: !collapsedGroups[label] };
+        saveCollapsedState(next);
+    };
+
+    // Determine which config to use
+    const isGrouped = role !== 'CUSTOMER';
+    const menuGroups = role === 'ADMIN' ? adminMenuGroups
+        : role === 'DEALER' ? dealerMenuGroups
+            : role === 'MANUFACTURER' ? manufacturerMenuGroups
+                : [];
+
+    // Flatten all items for search and active detection
+    const allItems = useMemo(() => {
+        if (!isGrouped) return customerMenuItems;
+        return menuGroups.flatMap(g => g.items);
+    }, [isGrouped, role]);
+
+    // Search filter
+    const filteredGroups = useMemo(() => {
+        if (!isGrouped) return [];
+        if (!searchQuery.trim()) return menuGroups;
+        const q = searchQuery.toLowerCase();
+        return menuGroups
+            .map(g => ({
+                ...g,
+                items: g.items.filter(item => item.name.toLowerCase().includes(q)),
+            }))
+            .filter(g => g.items.length > 0);
+    }, [searchQuery, isGrouped, role]);
+
+    const filteredFlatItems = useMemo(() => {
+        if (isGrouped) return [];
+        if (!searchQuery.trim()) return customerMenuItems;
+        const q = searchQuery.toLowerCase();
+        return customerMenuItems.filter(item => item.name.toLowerCase().includes(q));
+    }, [searchQuery, isGrouped]);
+
+    // --- NavItem ---
+    const NavItem = ({ item }: { item: MenuItem }) => {
+        const dashboardPaths = ['/admin', '/dealer', '/manufacturer', '/customer'];
+        const isDashboard = dashboardPaths.includes(item.path);
+
         const isActive = pathname === item.path || (
             !isDashboard &&
             pathname?.startsWith(`${item.path}/`) &&
-            !menuItems.some(other =>
+            !allItems.some(other =>
                 other.path !== item.path &&
                 pathname.startsWith(other.path) &&
                 other.path.length > item.path.length
             )
         );
 
-        // Use role-specific settings if it's the settings item
-        let finalPath = item.path;
-        if (item.name === 'Settings') {
-            finalPath = `/${role.toLowerCase()}/settings`;
-        } else if (item.name === 'Support') {
-            finalPath = `/${role.toLowerCase()}/support`;
-        }
-
         return (
             <Link
-                href={finalPath}
+                href={item.path}
                 onClick={onClose}
                 title={isCollapsed ? item.name : ''}
-                className={`flex items-center gap-3 px-4 py-3 rounded-[10px] transition-all group ${isActive
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-[10px] transition-all group text-[13px] ${isActive
                     ? 'bg-black text-white'
                     : 'text-foreground/50 hover:bg-muted hover:text-foreground'
                     } ${isCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : ''}`}
             >
-                <item.icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-foreground/40 group-hover:text-foreground/60'}`} />
+                <item.icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-foreground/40 group-hover:text-foreground/60'}`} />
                 {!isCollapsed && <span className="text-sm font-bold tracking-tight whitespace-nowrap">{item.name}</span>}
             </Link>
+        );
+    };
+
+    // --- GroupHeader ---
+    const GroupHeader = ({ group }: { group: MenuGroup }) => {
+        const isOpen = !collapsedGroups[group.label];
+        if (isCollapsed) return null;
+
+        return (
+            <button
+                onClick={() => toggleGroup(group.label)}
+                className="w-full flex items-center justify-between px-4 py-2 mt-3 first:mt-0 cursor-pointer group"
+            >
+                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.15em] group-hover:text-foreground/70 transition-colors">
+                    {group.label}
+                </span>
+                <motion.span
+                    animate={{ rotate: isOpen ? 0 : -90 }}
+                    transition={{ duration: 0.15 }}
+                >
+                    <FaChevronDown className="w-2.5 h-2.5 text-muted-foreground/40 group-hover:text-foreground/50 transition-colors" />
+                </motion.span>
+            </button>
         );
     };
 
@@ -156,12 +401,12 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 )}
             </AnimatePresence>
 
-            {/* Sidebar Sidebar */}
+            {/* Sidebar */}
             <motion.aside
                 initial={false}
                 animate={{
                     x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1025 ? 300 : 0),
-                    width: isCollapsed ? '5rem' : '20%' // 30% when expanded, 5rem when collapsed
+                    width: isCollapsed ? '5rem' : '20%'
                 }}
                 className={`fixed inset-y-0 right-0 bg-surface border-l border-border z-50 flex flex-col transition-all no-scrollbar lg:relative lg:border-r lg:border-l-0 lg:left-0`}
             >
@@ -178,16 +423,40 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     )}
                 </div>
 
-                {/* Workspace Label */}
-                {!isCollapsed && role === 'DEALER' && (
-                    <div className="px-6 py-2">
+                {/* Sidebar Search */}
+                {!isCollapsed && (
+                    <div className="px-4 pb-2">
+                        <div className="relative">
+                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-foreground/30" />
+                            <input
+                                type="text"
+                                placeholder="Search menu…"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                className="w-full bg-muted/40 border border-border/50 rounded-[10px] py-2 pl-8 pr-8 text-[12px] font-medium focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 transition-all placeholder:text-foreground/30"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60"
+                                >
+                                    <FaTimes className="w-3 h-3" />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Workspace Label (Dealer only) */}
+                {!isCollapsed && role === 'DEALER' && !searchQuery && (
+                    <div className="px-6 py-1">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Workspace</p>
                     </div>
                 )}
 
                 {/* Primary Navigation */}
-                <nav className="flex-1 px-4 py-2 space-y-1 overflow-hidden">
-                    {/* Customer Profile Section (Refined) */}
+                <nav className="flex-1 px-3 py-1 overflow-y-auto no-scrollbar">
+                    {/* Customer Profile Section (unchanged) */}
                     {role === 'CUSTOMER' && !isCollapsed && (
                         <div className="mb-6 p-4 bg-muted/20 rounded-[10px] border border-border/50">
                             <div className="flex items-center gap-4 p-2">
@@ -220,14 +489,48 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                         </div>
                     )}
 
-                    <div className="space-y-1">
-                        {menuItems.map((item) => (
-                            <NavItem key={item.path} item={item} />
-                        ))}
-                    </div>
+                    {/* Grouped Navigation (Admin / Dealer / Manufacturer) */}
+                    {isGrouped && (
+                        <div className="space-y-0.5">
+                            {filteredGroups.map((group) => {
+                                const isGroupOpen = !collapsedGroups[group.label];
+                                return (
+                                    <div key={group.label}>
+                                        <GroupHeader group={group} />
+                                        <AnimatePresence initial={false}>
+                                            {(isGroupOpen || isCollapsed || searchQuery) && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="space-y-0.5 pb-1">
+                                                        {group.items.map((item) => (
+                                                            <NavItem key={item.path} item={item} />
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Flat Navigation (Customer) */}
+                    {!isGrouped && (
+                        <div className="space-y-1">
+                            {filteredFlatItems.map((item) => (
+                                <NavItem key={item.path} item={item} />
+                            ))}
+                        </div>
+                    )}
                 </nav>
 
-                {/* Bottom Navigation / Storage Widget */}
+                {/* Bottom Section */}
                 <div className="p-4 space-y-1 bg-surface border-t border-border/10">
                     {role === 'DEALER' && !isCollapsed && (
                         <div className="mb-4 p-4 bg-primary/5 rounded-[10px] border border-primary/10">
@@ -243,10 +546,6 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                             </Link>
                         </div>
                     )}
-
-                    {bottomMenuItems.map((item) => (
-                        <NavItem key={item.name} item={item} />
-                    ))}
                 </div>
             </motion.aside>
         </>

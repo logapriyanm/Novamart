@@ -2,19 +2,30 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FaHeart, FaBookmark, FaPlus, FaFilter, FaLaptopHouse, FaUtensils, FaTools, FaThLarge } from 'react-icons/fa';
 import WishlistCard from '@/client/components/features/wishlist/WishlistCard';
 import WishlistSidebar from '@/client/components/features/wishlist/WishlistSidebar';
 import { wishlistService } from '@/lib/api/services/wishlist.service';
 import RecentlySaved from '@/client/components/features/wishlist/RecentlySaved';
 import { toast } from 'sonner';
+import { useAuth } from '@/client/context/AuthContext';
+import Loader from '@/client/components/ui/Loader';
 
 export default function WishlistPage() {
+    const { user, isLoading: authLoading } = useAuth();
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<'wishlist' | 'saved'>('wishlist');
     const [items, setItems] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchWishlist = async () => {
+        // Only fetch if user is authenticated
+        if (!user) {
+            setIsLoading(false);
+            return;
+        }
+
         setIsLoading(true);
         try {
             const data = await wishlistService.getWishlist();
@@ -36,8 +47,11 @@ export default function WishlistPage() {
     };
 
     useEffect(() => {
-        fetchWishlist();
-    }, []);
+        // Wait for auth to load before attempting to fetch wishlist
+        if (!authLoading) {
+            fetchWishlist();
+        }
+    }, [user, authLoading]);
 
     const handleRemove = async (productId: string) => {
         try {
@@ -51,6 +65,48 @@ export default function WishlistPage() {
     };
 
     const displayItems = activeTab === 'wishlist' ? items : []; // Only show wishlist items for now
+
+    // Show loading state while checking auth
+    if (authLoading) {
+        return (
+            <div className="min-h-screen pt-40 flex items-center justify-center">
+                <Loader size="lg" variant="primary" />
+            </div>
+        );
+    }
+
+    // Show login prompt if not authenticated
+    if (!user) {
+        return (
+            <div className="min-h-screen pt-32 pb-20">
+                <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+                    <div className="py-20 text-center">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <FaHeart className="text-slate-300 text-3xl" />
+                        </div>
+                        <h2 className="text-2xl font-black text-black mb-3">Sign in to view your wishlist</h2>
+                        <p className="text-slate-500 mb-8 max-w-md mx-auto">
+                            Save your favorite products and access them anytime by logging into your account.
+                        </p>
+                        <div className="flex items-center justify-center gap-4">
+                            <Link
+                                href="/auth/login"
+                                className="px-8 py-3 bg-black text-white rounded-[10px] text-sm font-bold hover:bg-black/90 transition-colors"
+                            >
+                                Sign In
+                            </Link>
+                            <Link
+                                href="/auth/register"
+                                className="px-8 py-3 bg-white text-black border-2 border-black rounded-[10px] text-sm font-bold hover:bg-slate-50 transition-colors"
+                            >
+                                Create Account
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen  pt-32 pb-20">

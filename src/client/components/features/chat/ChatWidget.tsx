@@ -119,14 +119,14 @@ export default function ChatWidget({ productId, dealerId, dealerName, contextTyp
     };
 
     return (
-        <div className="fixed bottom-8 right-8 z-[100]">
+        <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-[100]">
             <AnimatePresence>
                 {isOpen ? (
                     <motion.div
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="w-[380px] h-[550px] bg-white rounded-[10px] shadow-2xl border border-slate-100 flex flex-col overflow-hidden"
+                        className="w-[90vw] sm:w-[380px] h-[550px] max-h-[80vh] bg-white rounded-[10px] shadow-2xl border border-slate-100 flex flex-col overflow-hidden"
                     >
                         {/* Header */}
                         <div className="p-6 bg-[#10367D] text-white flex items-center justify-between">

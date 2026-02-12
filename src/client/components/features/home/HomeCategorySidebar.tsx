@@ -60,22 +60,22 @@ export default function HomeCategorySidebar() {
 
                     {/* Close Button - Outside Sidebar */}
                     <motion.button
-                        initial={{ opacity: 0, x: -20 }}
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
+                        exit={{ opacity: 0, x: 20 }}
                         onClick={closeCategorySidebar}
-                        className="fixed left-[380px] top-4 z-[1001] text-white hover:text-gray-300 transition-colors"
+                        className="fixed right-[380px] top-4 z-[1001] text-white hover:text-gray-300 transition-colors"
                     >
                         <FaTimes className="w-8 h-8" />
                     </motion.button>
 
                     {/* Sidebar Drawer */}
                     <motion.aside
-                        initial={{ x: '-100%' }}
+                        initial={{ x: '100%' }}
                         animate={{ x: 0 }}
-                        exit={{ x: '-100%' }}
+                        exit={{ x: '100%' }}
                         transition={{ type: 'tween', duration: 0.3 }}
-                        className="fixed left-0 top-0 bottom-0 w-[85vw] max-w-[365px] bg-white z-[1001] shadow-2xl flex flex-col overflow-hidden"
+                        className="fixed right-0 top-0 bottom-0 w-[85vw] max-w-[365px] bg-white z-[1001] shadow-2xl flex flex-col overflow-hidden"
                     >
                         {/* Header - Amazon Style */}
                         {isAuthenticated ? (

@@ -3,18 +3,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-<<<<<<< HEAD
-    FaPaperPlane, FaCheckCircle, FaTimes, FaIndustry,
-    FaStore, FaBoxOpen, FaCoins, FaArrowLeft,
-    FaCommentAlt, FaInfoCircle, FaHistory, FaHandshake,
-    FaCalendarAlt, FaShieldAlt
-} from 'react-icons/fa';
-import { apiClient } from '@/lib/api/client';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import io from 'socket.io-client';
-import Loader from '@/client/components/ui/Loader';
-=======
   FaPaperPlane,
   FaCheckCircle,
   FaTimes,
@@ -30,12 +18,12 @@ import Loader from '@/client/components/ui/Loader';
   FaHandshake,
   FaCalendarAlt,
   FaShieldAlt,
-} from "react-icons/fa";
-import { apiClient } from "@/lib/api/client";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import io from "socket.io-client";
->>>>>>> b768283 (product)
+} from 'react-icons/fa';
+import { apiClient } from '@/lib/api/client';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import io from 'socket.io-client';
+import Loader from '@/client/components/ui/Loader';
 
 const socket = io(
   typeof window !== "undefined"
@@ -160,15 +148,13 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
   const sendMessage = async (offerDetails?: any) => {
     if (!message.trim() && !offerDetails) return;
 
-<<<<<<< HEAD
     if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader size="lg" variant="primary" /></div>;
     if (!negotiation) return <div className="text-center py-20 bg-white rounded-[10px]"><p className="text-slate-400 font-bold">Negotiation not found or access denied.</p></div>;
-=======
+
     setSending(true);
     try {
       const payload: any = { message: message.trim() };
       if (offerDetails) payload.offerDetails = offerDetails;
->>>>>>> b768283 (product)
 
       await apiClient.put(`/negotiation/${negotiationId}`, payload);
 
@@ -239,7 +225,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] max-w-[1600px] mx-auto overflow-hidden animate-fade-in text-[#1E293B]">
       {/* 3-Panel Grid - Responsive Fix: Stack and order on mobile */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-px bg-slate-100 overflow-hidden rounded-[10px] border border-slate-200 shadow-xl">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-px bg-slate-100 overflow-y-auto lg:overflow-hidden rounded-[10px] border border-slate-200 shadow-xl">
         {/* LEFT: DEAL CONTEXT (Col 1-3) - Responsive Fix: Order 2 on mobile */}
         <aside className="order-2 lg:order-1 lg:col-span-3 bg-white flex flex-col overflow-y-auto max-h-[300px] lg:max-h-full border-t lg:border-t-0 border-slate-100">
           <div className="p-6 border-b border-slate-50">
@@ -787,67 +773,7 @@ function OfferModal({
             </button>
           </div>
         </div>
-<<<<<<< HEAD
-    );
-}
-
-function OfferModal({ onClose, onSubmit, initialPrice, initialQty, sending }: any) {
-    const [price, setPrice] = useState(initialPrice);
-    const [quantity, setQuantity] = useState(initialQty);
-    const [timeline, setTimeline] = useState('7-14 Days');
-    const [note, setNote] = useState('');
-
-    return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" />
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white w-full max-w-lg rounded-[10px] shadow-2xl overflow-hidden">
-                <div className="p-8 bg-black text-white">
-                    <h3 className="text-xl font-black tracking-tight">Formal Business Offer</h3>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">Structured Negotiation Proposal</p>
-                </div>
-                <div className="p-8 space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Proposed Unit Price (₹)</label>
-                            <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-[10px] focus:outline-none focus:border-primary font-black text-sm" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Quantity</label>
-                            <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-[10px] focus:outline-none focus:border-primary font-black text-sm" />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Expected Delivery Timeline</label>
-                        <select value={timeline} onChange={e => setTimeline(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-[10px] focus:outline-none focus:border-primary font-bold text-sm">
-                            <option>3-5 Business Days</option>
-                            <option>7-14 Days</option>
-                            <option>1 Month</option>
-                            <option>Custom Timeline</option>
-                        </select>
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Optional Note</label>
-                        <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Attach a message to this formal offer..." className="w-full h-24 px-4 py-3 bg-slate-50 border border-slate-100 rounded-[10px] focus:outline-none focus:border-primary font-medium text-sm transition-all" />
-                    </div>
-
-                    <div className="flex gap-4 pt-2">
-                        <button onClick={onClose} className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">Cancel</button>
-                        <button
-                            disabled={sending}
-                            onClick={() => onSubmit({ price, quantity, timeline, note })}
-                            className="flex-[2] py-4 bg-primary text-white rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
-                        >
-                            {sending ? <Loader size="sm" variant="white" /> : <FaPaperPlane />}
-                            Submit Formal Offer
-                        </button>
-                    </div>
-                </div>
-            </motion.div>
-        </div>
-    );
-=======
       </motion.div>
     </div>
   );
->>>>>>> b768283 (product)
 }

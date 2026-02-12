@@ -11,7 +11,7 @@ async function loginAsAdmin() {
             password: 'Admin@123'
         });
         adminToken = res.data.data.token;
-        console.log('✅ Admin Login Successful');
+        // console.log('✅ Admin Login Successful');
     } catch (error) {
         console.error('❌ Admin Login Failed:', error.response?.data || error.message);
         process.exit(1);
@@ -24,7 +24,7 @@ async function testCMSFlow() {
 
     // 1. Get all sections
     let res = await axios.get(`${BASE_URL}/cms/admin/all`, { headers });
-    console.log(`✅ Fetched ${res.data.data.length} sections`);
+    // console.log(`✅ Fetched ${res.data.data.length} sections`);
 
     // 2. Create a test section
     const testSection = {
@@ -38,18 +38,18 @@ async function testCMSFlow() {
     };
     res = await axios.post(`${BASE_URL}/cms/admin`, testSection, { headers });
     const sectionId = res.data.data._id;
-    console.log(`✅ Created test section with ID: ${sectionId}`);
+    // console.log(`✅ Created test section with ID: ${sectionId}`);
 
     // 3. Update visibility
     res = await axios.put(`${BASE_URL}/cms/admin/${sectionId}`, { isActive: false }, { headers });
-    console.log(`✅ Updated visibility (isActive: false)`);
+    // console.log(`✅ Updated visibility (isActive: false)`);
 
     // 4. Update content/SEO
     res = await axios.put(`${BASE_URL}/cms/admin/${sectionId}`, {
         title: 'Updated Title',
         seo: { metaTitle: 'SEO Title Test', metaDescription: 'SEO Desc Test' }
     }, { headers });
-    console.log(`✅ Updated Title and SEO Metadata`);
+    // console.log(`✅ Updated Title and SEO Metadata`);
 
     // 5. Verify guest view reflects changes
     res = await axios.get(`${BASE_URL}/cms/home/guest`);
@@ -57,14 +57,14 @@ async function testCMSFlow() {
     if (found) {
         console.error('❌ Test section still visible in guest view even though isActive=false');
     } else {
-        console.log('✅ Test section hidden from guest view as expected');
+        // console.log('✅ Test section hidden from guest view as expected');
     }
 
     // 6. Delete test section (cleanup)
     // Note: If delete is not implemented, just disable it permanently or use a unique key
-    console.log('ℹ️ CMS Delete not implemented in route mapping, leaving disabled.');
+    // console.log('ℹ️ CMS Delete not implemented in route mapping, leaving disabled.');
 
-    console.log('\n--- CMS E2E API Verification Complete ---');
+    // console.log('\n--- CMS E2E API Verification Complete ---');
 }
 
 testCMSFlow();

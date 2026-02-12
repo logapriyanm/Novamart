@@ -7,9 +7,10 @@ interface BreadcrumbProps {
         label: string;
         href?: string;
     }[];
+    className?: string; // Optional styling override
 }
 
-export default function Breadcrumb({ items }: BreadcrumbProps) {
+export default function Breadcrumb({ items, className }: BreadcrumbProps) {
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -35,7 +36,7 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
-            <nav className="flex items-center gap-2 text-xs font-bold text-foreground/40 mb-6 overflow-x-auto no-scrollbar py-2" aria-label="Breadcrumb">
+            <nav className={`flex items-center gap-2 text-xs font-bold text-foreground/40 overflow-x-auto no-scrollbar py-2 ${className || 'mb-6'}`} aria-label="Breadcrumb">
                 <Link href="/" className="flex items-center gap-1.5 hover:text-primary transition-colors">
                     <FaHome className="w-3 h-3" />
                     <span>Home</span>
