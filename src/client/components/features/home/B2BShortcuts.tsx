@@ -36,7 +36,7 @@ import { useAuth } from '@/client/hooks/useAuth';
 
 export default function B2BShortcuts({ metrics }: B2BShortcutsProps) {
     const { user } = useAuth();
-    if (!user) return null;
+    if (!user || !metrics) return null;
 
     const isManufacturer = metrics.role === 'MANUFACTURER';
 

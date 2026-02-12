@@ -31,6 +31,7 @@ import { useCart } from '@/client/context/CartContext';
 import { toast } from 'sonner';
 import { productService } from '@/lib/api/services/product.service';
 import Link from 'next/link';
+import Loader from '@/client/components/ui/Loader';
 
 interface ProductClientProps {
     id: string;
@@ -109,7 +110,7 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
     if (isLoading) {
         return (
             <div className="min-h-screen pt-32 flex justify-center bg-[#F9FAFB]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <Loader size="lg" variant="primary" />
             </div>
         );
     }

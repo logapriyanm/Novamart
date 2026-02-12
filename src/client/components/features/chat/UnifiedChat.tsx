@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaSearch, FaFilter, FaCommentDots, FaPaperPlane,
     FaUserCircle, FaBox, FaShieldAlt, FaRegClock,
-    FaCheckCircle, FaInfoCircle, FaLock, FaTimes, FaSpinner
+    FaCheckCircle, FaInfoCircle, FaLock, FaTimes
 } from 'react-icons/fa';
+import Loader from '@/client/components/ui/Loader';
 import { io } from 'socket.io-client';
 import { apiClient } from '@/lib/api/client';
 import { chatService } from '@/lib/api/services/chat.service';
@@ -141,7 +142,7 @@ export default function UnifiedChat({ currentUserRole, currentUserId }: UnifiedC
                 <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-50">
                     {loading ? (
                         <div className="flex items-center justify-center py-20">
-                            <FaSpinner className="w-6 h-6 text-[#10367D] animate-spin" />
+                            <Loader size="md" variant="primary" />
                         </div>
                     ) : filteredChats.length === 0 ? (
                         <div className="text-center py-20 px-6">

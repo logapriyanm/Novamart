@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../../lib/api/client';
 import { toast } from 'sonner';
+import { useAuth } from './useAuth';
 
 export function useRealProfile<T>(role: 'dealer' | 'manufacturer') {
     const [profile, setProfile] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    // const { showSnackbar } = useSnackbar();
+    const { checkAuth } = useAuth();
 
     const fetchProfile = async () => {
         setIsLoading(true);
@@ -31,6 +32,12 @@ export function useRealProfile<T>(role: 'dealer' | 'manufacturer') {
         try {
             const result = await apiClient.put<T>(`/${role}/profile`, { section, data });
             setProfile(result);
+
+            // Sync with global auth state if account/avatar updated
+            if (section === 'account' || section === 'PROFILE' || data.avatar || data.name) {
+                await checkAuth();
+            }
+
             toast.success('Profile updated');
             return result;
         } catch (err: any) {

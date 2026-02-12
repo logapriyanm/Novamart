@@ -1,4 +1,4 @@
-'use client';
+import Loader from '@/client/components/ui/Loader';
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -41,10 +41,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#EBEBEB]">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-[#10367D] border-t-transparent rounded-full animate-spin"></div>
-                    <p className="text-[#10367D] font-bold text-sm uppercase tracking-widest animate-pulse">Verifying Access</p>
-                </div>
+                <Loader size="xl" />
             </div>
         );
     }

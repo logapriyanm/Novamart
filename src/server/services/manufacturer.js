@@ -33,8 +33,10 @@ class ManufacturerService {
                 // Mark dealer as verified globally if this is the main authority
                 const dealer = await Dealer.findByIdAndUpdate(dealerId, { isVerified: true }, { session });
 
-                // Ensure the User is ACTIVE
-                await User.findByIdAndUpdate(dealer.userId, { status: 'ACTIVE' }, { session });
+                if (dealer && dealer.userId) {
+                    // Ensure the User is ACTIVE
+                    await User.findByIdAndUpdate(dealer.userId, { status: 'ACTIVE' }, { session });
+                }
             } else {
                 await Manufacturer.findByIdAndUpdate(mfgId, {
                     $pull: { approvedBy: dealerId }

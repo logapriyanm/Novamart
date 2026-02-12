@@ -8,101 +8,11 @@ import {
     FaStar as Star
 } from 'react-icons/fa';
 
-const testimonials = [
-    {
-        id: 1,
-        variant: "service-card",
-        title: "Good Services!",
-        text: "Sodales ut etiam sit amet nisl. Semper feugiat nibh sed pulvinar proin gravida facilisi.",
-        author: "James Brown",
-        role: "COO, Dunig Co.",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
-        rating: 5,
-        cols: "md:col-span-1",
-        rows: "md:row-span-1"
-    },
-    {
-        id: 2,
-        variant: "pure-quote",
-        title: "I really appreciate!!",
-        text: "Congue mauris rhoncus depene an vel elit Morbi non arcu risus quis varius Tincidunt.",
-        author: "Victoria Wotton",
-        role: "Fermentum Odio Co.",
-        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
-        rating: 5,
-        cols: "md:col-span-1",
-        rows: "md:row-span-1"
-    },
-    {
-        id: 3,
-        variant: "photo-split",
-        title: "Direct yet Friendly",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
-        author: "Menry Vane",
-        role: "CEO",
-        image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
-        cols: "md:col-span-1",
-        rows: "md:row-span-1"
-    },
-    {
-        id: 4,
-        variant: "photo-split",
-        title: "Direct yet Friendly",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
-        author: "Menry Vane",
-        role: "CEO",
-        image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
-        cols: "md:col-span-1",
-        rows: "md:row-span-1"
-    },
-    {
-        id: 5,
-        variant: "wide-likes",
-        title: "Tremendous Job Team",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida.",
-        author: "Marthe Wallin",
-        role: "Product Lead",
-        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
-        likes: 65,
-        cols: "md:col-span-2",
-        rows: "md:row-span-1"
-    },
-    {
-        id: 6,
-        variant: "typography-hero",
-        text: "When an unknown printer took A galley of type and scrambled it to make a type specimen Book.",
-        author: "Charli Hapan",
-        role: "Dribbble",
-        image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop",
-        cols: "md:col-span-2",
-        rows: "md:row-span-2"
-    },
-    {
-        id: 7,
-        variant: "simple-card",
-        title: "Victoria Wotton",
-        text: "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text.",
-        author: "Victoria Wotton",
-        role: "Fermentum Odio Co.",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
-        rating: 5,
-        cols: "md:col-span-1",
-        rows: "md:row-span-1"
-    },
-    {
-        id: 8,
-        variant: "centered-avatar",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et.",
-        author: "Isabella L.",
-        role: "Designer",
-        image: "https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?q=80&w=200&auto=format&fit=crop",
-        rating: 5,
-        cols: "md:col-span-1",
-        rows: "md:row-span-1"
-    }
-];
+interface TestimonialsProps {
+    testimonials?: any[];
+}
 
-export default function Testimonials() {
+export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
     return (
         <div className="max-w-7xl mx-auto px-4 xs:px-6 mt-20 sm:mt-32 mb-20 sm:mb-32">
             <div className="text-center mb-12 sm:mb-16">

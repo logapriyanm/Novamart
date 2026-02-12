@@ -53,7 +53,7 @@ export default function WishlistPage() {
     const displayItems = activeTab === 'wishlist' ? items : []; // Only show wishlist items for now
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pt-32 pb-20">
+        <div className="min-h-screen  pt-32 pb-20">
             <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
 
                 {/* Header */}

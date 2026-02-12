@@ -47,7 +47,6 @@ const adminMenuItems = [
     { name: 'Finance', icon: WalletIcon, path: '/admin/finance' },
     { name: 'Disputes', icon: DisputesIcon, path: '/admin/disputes' },
     { name: 'Home CMS', icon: FaSearch, path: '/admin/cms' },
-    { name: 'Settings', icon: SettingsIcon, path: '/admin/settings' },
 ];
 
 const customerMenuItems = [
@@ -65,7 +64,6 @@ const dealerMenuItems = [
     { name: 'Negotiations', icon: FaHandshake, path: '/dealer/negotiations' },
     { name: 'Subscription', icon: FaCrown, path: '/dealer/subscription' },
     { name: 'Finance', icon: WalletIcon, path: '/dealer/finance' },
-    { name: 'Settings', icon: SettingsIcon, path: '/dealer/settings' },
 ];
 
 const manufacturerMenuItems = [
@@ -80,16 +78,11 @@ const manufacturerMenuItems = [
     { name: 'Analytics', icon: FaChartBar, path: '/manufacturer/analytics' },
     { name: 'Profile & Compliance', icon: FaShieldAlt, path: '/manufacturer/profile' },
     { name: 'Notifications', icon: FaBell, path: '/manufacturer/notifications' },
-    { name: 'Support', icon: SupportIcon, path: '/manufacturer/support' },
 ];
 
 const bottomMenuItems = [
-    // { name: 'Settings', icon: SettingsIcon, path: '/settings' }, // Image 1 doesn't show Settings in main list, maybe bottom?
-    // Image 1 shows "Workspace" label above main items.
-    // Keeping standard footer items for now but customized per role if needed.
-    { name: 'Settings', icon: SettingsIcon, path: '/settings' }, // Generic settings path, might need role prefix
+    { name: 'Settings', icon: SettingsIcon, path: '/settings' },
     { name: 'Support', icon: SupportIcon, path: '/support' },
-    { name: 'Logout', icon: LogoutIcon, path: '/auth/logout' },
 ];
 
 interface SidebarProps {
@@ -111,30 +104,30 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
 
     const NavItem = ({ item }: { item: any }) => {
         const isDashboard = ['/admin', '/dealer', '/manufacturer', '/customer'].includes(item.path);
-        const isActive = isDashboard
-            ? pathname === item.path
-            : pathname === item.path || pathname?.startsWith(`${item.path}/`);
-        const isLogout = item.name === 'Logout';
 
-        if (isLogout) {
-            return (
-                <button
-                    onClick={() => {
-                        logout();
-                        onClose();
-                    }}
-                    title={isCollapsed ? item.name : ''}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-[10px] transition-all group text-foreground/50 hover:bg-rose-500/5 hover:text-rose-500 ${isCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : 'w-full'}`}
-                >
-                    <item.icon className={`w-5 h-5 flex-shrink-0 text-foreground/40 group-hover:text-rose-500`} />
-                    {!isCollapsed && <span className="text-sm font-bold tracking-tight whitespace-nowrap">{item.name}</span>}
-                </button>
-            );
+        // Specific match logic: An item is active if it's an exact match, 
+        // OR if it's a prefix and NO other menu item is a more specific (longer) prefix.
+        const isActive = pathname === item.path || (
+            !isDashboard &&
+            pathname?.startsWith(`${item.path}/`) &&
+            !menuItems.some(other =>
+                other.path !== item.path &&
+                pathname.startsWith(other.path) &&
+                other.path.length > item.path.length
+            )
+        );
+
+        // Use role-specific settings if it's the settings item
+        let finalPath = item.path;
+        if (item.name === 'Settings') {
+            finalPath = `/${role.toLowerCase()}/settings`;
+        } else if (item.name === 'Support') {
+            finalPath = `/${role.toLowerCase()}/support`;
         }
 
         return (
             <Link
-                href={item.path}
+                href={finalPath}
                 onClick={onClose}
                 title={isCollapsed ? item.name : ''}
                 className={`flex items-center gap-3 px-4 py-3 rounded-[10px] transition-all group ${isActive
@@ -170,7 +163,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1025 ? -300 : 0),
                     width: isCollapsed ? 80 : 288 // 5rem (80px) vs 18rem (288px)
                 }}
-                className={`fixed inset-y-0 left-0 bg-surface border-r border-border z-50 flex flex-col transition-all md:sticky overflow-hidden h-screen`}
+                className={`fixed inset-y-0 left-0 bg-surface border-r border-border z-50 flex flex-col transition-all no-scrollbar`}
             >
                 {/* Logo Section */}
                 <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center p-4' : 'gap-3'}`}>
@@ -193,7 +186,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 )}
 
                 {/* Primary Navigation */}
-                <nav className="flex-1 px-4 py-2 space-y-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
+                <nav className="flex-1 px-4 py-2 space-y-1 overflow-x-hidden overflow-y-auto no-scrollbar">
                     {/* Customer Profile Section (Refined) */}
                     {role === 'CUSTOMER' && !isCollapsed && (
                         <div className="mb-6 p-4 bg-muted/20 rounded-[10px] border border-border/50">
@@ -238,11 +231,11 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 <div className="p-4 space-y-1 bg-surface border-t border-border/10">
                     {role === 'DEALER' && !isCollapsed && (
                         <div className="mb-4 p-4 bg-primary/5 rounded-[10px] border border-primary/10">
-                            <div className="flex justify-between items-center mb-2">
+                            <div className="justify-between items-center mb-2 hidden sm:flex">
                                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Market Reputation</span>
                                 <span className="text-[10px] font-bold text-primary">Top 10%</span>
                             </div>
-                            <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden mb-3">
+                            <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden mb-3 hidden sm:block">
                                 <div className="h-full bg-primary w-[90%] rounded-full opacity-80"></div>
                             </div>
                             <Link href="/dealer/subscription" className="block text-center w-full py-2 bg-white border border-primary/10 text-primary text-[10px] font-bold rounded-[10px] hover:bg-primary hover:text-white transition-all shadow-sm">
@@ -252,7 +245,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     )}
 
                     {bottomMenuItems.map((item) => (
-                        <NavItem key={item.path} item={item} />
+                        <NavItem key={item.name} item={item} />
                     ))}
                 </div>
             </motion.aside>

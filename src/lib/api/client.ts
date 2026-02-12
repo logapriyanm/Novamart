@@ -105,7 +105,9 @@ class ApiClient {
             const response = await fetch(url, config);
 
             // Handle 401 Unauthorized (potentially expired token)
-            if (response.status === 401 && this.refreshToken && endpoint !== '/auth/refresh') {
+            // Skip refresh for auth endpoints to prevent loops on invalid credentials
+            const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/refresh'].includes(endpoint);
+            if (response.status === 401 && this.refreshToken && !isAuthEndpoint) {
                 return await this.handleTokenRefresh<T>(endpoint, method, body, options);
             }
 

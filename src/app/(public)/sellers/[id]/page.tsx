@@ -15,6 +15,7 @@ import {
     FaChevronRight
 } from 'react-icons/fa';
 import Link from 'next/link';
+import Loader from '@/client/components/ui/Loader';
 import { toast } from 'sonner';
 
 export default function SellerProfilePage() {
@@ -47,7 +48,7 @@ export default function SellerProfilePage() {
     if (isLoading) {
         return (
             <div className="min-h-screen pt-40 flex justify-center bg-[#F9FAFB]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <Loader size="lg" variant="primary" />
             </div>
         );
     }

@@ -16,6 +16,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
+import Loader from '@/client/components/ui/Loader';
 import { toast } from 'sonner';
 
 export default function AdminProductManagement() {
@@ -92,7 +93,9 @@ export default function AdminProductManagement() {
                         </div>
                         <div className="divide-y divide-slate-50 min-h-[400px]">
                             {isLoading ? (
-                                <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold py-20 uppercase tracking-widest">Loading...</div>
+                                <div className="flex items-center justify-center h-full py-20">
+                                    <Loader size="md" variant="primary" />
+                                </div>
                             ) : products.length === 0 ? (
                                 <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold py-20 uppercase tracking-widest">No Products</div>
                             ) : (

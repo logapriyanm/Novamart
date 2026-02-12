@@ -6,10 +6,10 @@ import {
     FaLock as Lock,
     FaArrowRight as ArrowRight,
     FaCheckCircle as CheckCircle,
-    FaSpinner as Loader2,
     FaEye,
     FaEyeSlash
 } from 'react-icons/fa';
+import Loader from '@/client/components/ui/Loader';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authService } from '@/lib/api/services/auth.service';
 // import { useSnackbar } from '@/client/context/SnackbarContext';
@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
                             disabled={isLoading || !token}
                             className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-[10px]"
                         >
-                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Update Password'}
+                            {isLoading ? <Loader size="sm" variant="white" /> : 'Update Password'}
                             {!isLoading && <ArrowRight className="w-5 h-5" />}
                         </button>
                     </form>

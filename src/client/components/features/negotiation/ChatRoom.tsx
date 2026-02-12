@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaPaperPlane, FaCheckCircle, FaTimes, FaIndustry,
-    FaStore, FaBoxOpen, FaCoins, FaSpinner, FaArrowLeft,
+    FaStore, FaBoxOpen, FaCoins, FaArrowLeft,
     FaCommentAlt, FaInfoCircle, FaHistory, FaHandshake,
     FaCalendarAlt, FaShieldAlt
 } from 'react-icons/fa';
@@ -12,6 +12,7 @@ import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import io from 'socket.io-client';
+import Loader from '@/client/components/ui/Loader';
 
 const socket = io(typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') : 'http://localhost:5000', {
     auth: {
@@ -169,7 +170,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
         }
     };
 
-    if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><FaSpinner className="w-8 h-8 text-primary animate-spin" /></div>;
+    if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader size="lg" variant="primary" /></div>;
     if (!negotiation) return <div className="text-center py-20 bg-white rounded-[10px]"><p className="text-slate-400 font-bold">Negotiation not found or access denied.</p></div>;
 
     const isDealer = userRole === 'DEALER';
@@ -528,7 +529,7 @@ function OfferModal({ onClose, onSubmit, initialPrice, initialQty, sending }: an
                             onClick={() => onSubmit({ price, quantity, timeline, note })}
                             className="flex-[2] py-4 bg-primary text-white rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                         >
-                            {sending ? <FaSpinner className="animate-spin" /> : <FaPaperPlane />}
+                            {sending ? <Loader size="sm" variant="white" /> : <FaPaperPlane />}
                             Submit Formal Offer
                         </button>
                     </div>

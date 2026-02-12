@@ -12,7 +12,7 @@ import { manufacturerService } from '@/lib/api/services/manufacturer.service';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import EmptyState from '@/client/components/ui/EmptyState';
-import DashboardNotificationBell from '@/client/components/layout/DashboardNotificationBell';
+import Loader from '@/client/components/ui/Loader';
 
 const mockChartData = [
     { name: 'Jan', value: 4000 },
@@ -53,13 +53,9 @@ export default function ManufacturerDashboard() {
     if (isLoading) {
         return (
             <div className="min-h-[600px] flex items-center justify-center">
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="text-slate-800"
-                >
-                    <HiOutlineRefresh className="w-8 h-8 opacity-50" />
-                </motion.div>
+                <div className="min-h-[600px] flex items-center justify-center">
+                    <Loader size="xl" variant="primary" />
+                </div>
             </div>
         );
     }
@@ -73,7 +69,6 @@ export default function ManufacturerDashboard() {
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Global Operations & Manufacturer Analytics</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <DashboardNotificationBell />
                     <Link href="/manufacturer/products/add" className="px-6 py-2.5 bg-black text-white text-[11px] font-black uppercase tracking-widest rounded-[10px] hover:bg-slate-800 transition-all shadow-sm">
                         + New SKU
                     </Link>

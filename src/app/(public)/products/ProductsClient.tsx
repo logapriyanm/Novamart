@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import CustomerProductCard from '@/client/components/ui/CustomerProductCard';
 import CustomerProductListRow from '@/client/components/ui/CustomerProductListRow';
+import ProductSkeleton from '@/client/components/ui/ProductSkeleton';
 import { ProductFilterSidebar, FilterState } from '@/client/components/features/products/ProductFilterSidebar';
 import { productService } from '@/lib/api/services/product.service';
 import {
@@ -173,7 +174,7 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
     if (filters.subCategory) activeFilters.push({ key: 'subCategory', label: filters.subCategory, value: null });
 
     return (
-        <div className="min-h-screen pb-20 bg-[#F8FAFC]">
+        <div className="min-h-screen pb-20 ">
             {/* 1️⃣ TOP BAR DESIGN (ABOVE PRODUCTS) */}
             <header className="sticky top-20 z-40 bg-white border-b border-slate-200 py-4 shadow-sm">
                 <div className="max-w-[1440px] mx-auto px-4 xs:px-6">
@@ -299,7 +300,7 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                             : "space-y-6"
                         }>
                             {Array.from({ length: 8 }).map((_, i) => (
-                                <div key={i} className="bg-white rounded-[10px] border border-slate-100 animate-pulse h-96"></div>
+                                <ProductSkeleton key={i} />
                             ))}
                         </div>
                     ) : products.length > 0 ? (

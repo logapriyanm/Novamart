@@ -5,6 +5,7 @@ import { useAuth } from '@/client/hooks/useAuth';
 import { apiClient } from '@/lib/api/client';
 import SectionRenderer from './SectionRenderer';
 import { motion, AnimatePresence } from 'framer-motion';
+import Loader from '@/client/components/ui/Loader';
 
 export default function DynamicHome() {
     const { user, isAuthenticated } = useAuth();
@@ -59,7 +60,7 @@ export default function DynamicHome() {
     if (isLoading && sections.length === 0) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <Loader size="xl" />
             </div>
         );
     }
@@ -74,7 +75,7 @@ export default function DynamicHome() {
     }
 
     return (
-        <main className="space-y-16 overflow-x-hidden">
+        <main className="space-y-16">
             <AnimatePresence>
                 {sections.map((section, index) => {
                     const processedSection = {

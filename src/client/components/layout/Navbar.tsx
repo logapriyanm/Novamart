@@ -7,27 +7,19 @@ import Lottie from "lottie-react";
 import slider1 from "@/../public/assets/slider-1.json";
 import slider2 from "@/../public/assets/slider-2.json";
 import {
-  FaSearch as Search,
-  FaStore,
-  FaBox,
-  FaBars as Menu,
-  FaTimes as X,
-  FaShieldAlt as ShieldCheck,
-  FaGlobe as Globe,
-  FaFileInvoice,
-  FaIdCard,
-  FaIndustry,
-  FaThLarge,
-  FaChevronLeft,
-  FaChevronRight,
-  FaSignOutAlt,
-  FaClipboardList,
-  FaHeadset,
-  FaStar,
-  FaComments,
-  FaHeart,
-  FaShieldAlt,
-} from "react-icons/fa";
+    FaSearch as Search,
+    FaStore,
+    FaBox,
+    FaBars as Menu,
+    FaTimes as X,
+    FaIndustry,
+    FaSignOutAlt,
+    FaClipboardList,
+    FaHeadset,
+    FaStar,
+    FaHeart,
+    FaShieldAlt
+} from 'react-icons/fa';
 import {
   HiOutlineShoppingCart,
   HiOutlineUserCircle,
@@ -293,15 +285,36 @@ export default function Navbar() {
                             My Wishlist
                           </span>
                         </Link>
-                        <Link
-                          href="/customer/reviews"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group"
-                        >
-                          <FaStar className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
-                          <span className="text-xs font-bold uppercase tracking-widest">
-                            My Reviews
-                          </span>
+
+
+
+
+                        {user?.role === 'ADMIN' && (
+                            <Link href="/admin" className="btn-primary">
+                                <FaShieldAlt className="w-4 h-4" />
+                                <span>Admin </span>
+                            </Link>
+                        )}
+
+                        {user?.role === 'MANUFACTURER' && (
+                            <Link href="/manufacturer" className="btn-primary">
+                                <FaIndustry className="w-4 h-4" />
+                                <span>Manufacturer</span>
+                            </Link>
+                        )}
+
+                        {user?.role === 'DEALER' && (
+                            <Link href="/dealer" className="btn-primary">
+                                <FaStore className="w-4 h-4" />
+                                <span>Dealer</span>
+                            </Link>
+                        )}
+
+                        <div className="h-8 w-px bg-foreground/10 hidden md:block" />
+
+                        <Link href="/contact" className="flex flex-col items-center group gap-1">
+                            <FaHeadset className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
+                            <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Support</span>
                         </Link>
                         <Link
                           href="/profile?tab=orders"
@@ -521,27 +534,116 @@ export default function Navbar() {
                             href={profilePath}
                             className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary"
                             onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <HiOutlineUser className="w-5 h-5 text-foreground/20" />
-                            Profile Dashboard
-                          </Link>
-                          <Link
-                            href="/profile?tab=orders"
-                            className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <FaClipboardList className="w-5 h-5 text-foreground/20" />
-                            Orders
-                          </Link>
-                          <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 text-sm font-bold text-rose-500 w-full text-left"
-                          >
-                            <FaSignOutAlt className="w-5 h-5" />
-                            Sign Out
-                          </button>
-                        </div>
-                      </div>
+                            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-[110] md:hidden"
+                        />
+                        <motion.div
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed top-0 left-0 bottom-0 w-80 max-w-[90vw] bg-background z-[120] md:hidden shadow-2xl overflow-y-auto border-r border-foreground/5"
+                        >
+                            <div className="p-6">
+                                <div className="flex items-center justify-between mb-8">
+                                    <span className="text-xl font-black text-primary">Menu</span>
+                                    <div className="flex items-center gap-2">
+                                        {isAuthenticated && <NotificationBell />}
+                                        <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-surface rounded-[10px] border border-foreground/5">
+                                            <X className="w-5 h-5 text-foreground" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <Link href="/products" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                        <FaBox className="w-5 h-5 text-foreground/20" />
+                                        Products
+                                    </Link>
+
+                                    {user?.role === 'ADMIN' && (
+                                        <Link href="/admin" className="flex items-center gap-3 text-sm font-bold text-primary group" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <FaShieldAlt className="w-5 h-5 text-primary/40 group-hover:text-primary" />
+                                            Admin Dashboard
+                                        </Link>
+                                    )}
+
+                                    {user?.role === 'MANUFACTURER' && (
+                                        <Link href="/manufacturer" className="flex items-center gap-3 text-sm font-bold text-primary group" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <FaIndustry className="w-5 h-5 text-primary/40 group-hover:text-primary" />
+                                            Manufacturer Dashboard
+                                        </Link>
+                                    )}
+
+                                    {user?.role === 'DEALER' && (
+                                        <Link href="/dealer" className="flex items-center gap-3 text-sm font-bold text-primary group" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <FaStore className="w-5 h-5 text-primary/40 group-hover:text-primary" />
+                                            Dealer Dashboard
+                                        </Link>
+                                    )}
+
+                                    <Link href="/contact" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                        <FaHeadset className="w-5 h-5 text-foreground/20" />
+                                        Contact Support
+                                    </Link>
+
+                                    {/* Mobile Categories - NEW RESPONSIVE FIX */}
+                                    <div className="pt-6 border-t border-foreground/5">
+                                        <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest mb-4">Product Categories</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {mainCategories.map((cat, i) => (
+                                                <Link
+                                                    key={i}
+                                                    href={cat.href}
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                    className="px-3 py-2 bg-surface border border-foreground/5 rounded-[10px] text-[10px] font-bold text-foreground/60 hover:text-primary hover:border-primary/20 transition-all text-center"
+                                                >
+                                                    {cat.name}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {isAuthenticated ? (
+                                        <>
+                                            <div className="pt-6 border-t border-foreground/5">
+                                                <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest mb-4">My Account</p>
+                                                <div className="space-y-4">
+                                                    <Link href={profilePath} className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                                        <HiOutlineUser className="w-5 h-5 text-foreground/20" />
+                                                        Profile Dashboard
+                                                    </Link>
+                                                    <Link href="/profile?tab=orders" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                                        <FaClipboardList className="w-5 h-5 text-foreground/20" />
+                                                        Orders
+                                                    </Link>
+                                                    <button
+                                                        onClick={handleLogout}
+                                                        className="flex items-center gap-3 text-sm font-bold text-rose-500 w-full text-left"
+                                                    >
+                                                        <FaSignOutAlt className="w-5 h-5" />
+                                                        Sign Out
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <Link href="/auth/login" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <HiOutlineUserCircle className="w-5 h-5 text-foreground/20" />
+                                            Sign In
+                                        </Link>
+                                    )}
+                                </div>
+
+                                {!isAuthenticated && (
+                                    <div className="mt-12 pt-12 border-t border-foreground/5 space-y-4">
+                                        <Link href="/auth/login" className="btn-primary" onClick={() => setIsMobileMenuOpen(false)}>
+                                            Sign In
+                                        </Link>
+
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
                     </>
                   ) : (
                     <Link

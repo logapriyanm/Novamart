@@ -63,11 +63,15 @@ export default function OrderOversightPanel() {
         { label: 'Halted/Risk', value: orders.filter(o => o.status === 'CANCELLED').length.toString(), icon: FaExclamationTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
     ];
 
-    const filteredOrders = orders.filter(o =>
-        o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        o.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        o.dealer?.businessName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredOrders = orders.filter(o => {
+        const idMatch = o?._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            o?.id?.toLowerCase().includes(searchTerm.toLowerCase());
+        const customerMatch = o?.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+        const dealerMatch = o?.dealer?.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            o?.manufacturer?.businessName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return idMatch || customerMatch || dealerMatch;
+    });
 
     if (loading) return (
         <div className="min-h-[600px] flex items-center justify-center">
@@ -149,10 +153,10 @@ export default function OrderOversightPanel() {
                                     <td colSpan={6} className="p-12 text-center text-slate-400 text-sm font-medium">No orders found matching your search.</td>
                                 </tr>
                             ) : filteredOrders.map((order) => (
-                                <tr key={order.id} className="hover:bg-slate-50 transition-colors group">
+                                <tr key={order._id || order.id} className="hover:bg-slate-50 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-slate-900">ORD-{order.id.slice(0, 8).toUpperCase()}</span>
+                                            <span className="text-sm font-bold text-slate-900">ORD-{(order._id || order.id || '').slice(0, 8).toUpperCase()}</span>
                                             <span className="text-xs text-slate-500 mt-0.5">{new Date(order.createdAt).toLocaleDateString()}</span>
                                         </div>
                                     </td>
@@ -178,7 +182,7 @@ export default function OrderOversightPanel() {
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {order.status === 'PAID' && (
                                                 <button
-                                                    onClick={() => handleUpdateStatus(order.id, 'SHIP')}
+                                                    onClick={() => handleUpdateStatus(order._id || order.id, 'SHIP')}
                                                     className="w-8 h-8 rounded-[10px] bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                                                     title="Mark Shipped"
                                                 >
@@ -187,7 +191,7 @@ export default function OrderOversightPanel() {
                                             )}
                                             {order.status !== 'CANCELLED' && order.status !== 'DELIVERED' && (
                                                 <button
-                                                    onClick={() => handleUpdateStatus(order.id, 'CANCEL')}
+                                                    onClick={() => handleUpdateStatus(order._id || order.id, 'CANCEL')}
                                                     className="w-8 h-8 rounded-[10px] bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                                                     title="Cancel Order"
                                                 >

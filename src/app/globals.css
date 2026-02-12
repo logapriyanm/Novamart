@@ -29,7 +29,7 @@
   }
 
   body {
-    @apply font-sans antialiased text-foreground bg-background;
+    @apply font-sans antialiased text-foreground bg-background overflow-x-hidden;
     font-size: 14px;
     /* Default for mobile */
   }

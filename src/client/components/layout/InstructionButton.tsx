@@ -11,43 +11,61 @@ const InstructionButton: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [showTooltip, setShowTooltip] = useState(false);
 
-    let buttonText = "How NovaMart Works";
-    if (user?.role === 'CUSTOMER') buttonText = "Customer User Manual";
-    else if (user?.role === 'DEALER') buttonText = "Dealer / Seller User Manual";
-    else if (user?.role === 'MANUFACTURER') buttonText = "Manufacturer User Manual";
-    else if (user?.role === 'ADMIN') return null;
+    // Only hide for admins or if no role is present (though guests might want a manual)
+    if (user?.role === 'ADMIN') return null;
+
+    let tooltipText = "Help Guide";
+    if (user?.role === 'CUSTOMER') tooltipText = "Customer Manual";
+    else if (user?.role === 'DEALER') tooltipText = "Dealer Manual";
+    else if (user?.role === 'MANUFACTURER') tooltipText = "Manufacturer Manual";
 
     return (
         <>
-            <div className="fixed bottom-6 right-6 z-[9997] flex flex-col items-end gap-2">
+            <div className="fixed bottom-6 right-6 z-[9997] flex flex-col items-end gap-2 pointer-events-none">
                 <AnimatePresence>
                     {showTooltip && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.9 }}
-                            className="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg shadow-xl mb-1 mr-1 whitespace-nowrap"
+                            initial={{ opacity: 0, x: 20, scale: 0.9 }}
+                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                            exit={{ opacity: 0, x: 20, scale: 0.9 }}
+                            className="pointer-events-auto bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl mb-1 mr-2 whitespace-nowrap border border-slate-700 backdrop-blur-sm"
                         >
-                            Open Help Manual
+                            {tooltipText}
                         </motion.div>
                     )}
                 </AnimatePresence>
 
                 <motion.button
-                    whileHover={{ scale: 1.02, backgroundColor: '#171717' }}
-                    whileTap={{ scale: 0.98 }}
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{
+                        scale: 1,
+                        rotate: 0,
+                        boxShadow: "0px 10px 20px rgba(0,0,0,0.2)"
+                    }}
+                    whileHover={{
+                        scale: 1.1,
+                        rotate: 15,
+                        boxShadow: "0px 15px 30px rgba(59, 130, 246, 0.4)" // Blue glow
+                    }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20 }}
                     onMouseEnter={() => setShowTooltip(true)}
                     onMouseLeave={() => setShowTooltip(false)}
                     onClick={() => setIsOpen(true)}
-                    className="h-12 px-6 bg-primary text-white rounded-[10px] shadow-lg shadow-black/20 flex items-center justify-center transition-all group relative overflow-hidden"
+                    className="pointer-events-auto w-12 h-12 md:w-14 md:h-14 bg-white text-slate-900 border border-slate-100 rounded-full flex items-center justify-center transition-colors group relative overflow-hidden"
                 >
-                    <span className="font-bold text-sm tracking-wide relative z-10 flex items-center gap-2">
-                        <HelpCircle className="w-4 h-4" />
-                        {buttonText}
+                    {/* Pulsing ring behind (if needed, currently shadow handles it) */}
+
+                    <span className="relative z-10 flex items-center justify-center">
+                        <HelpCircle className="w-5 h-5 md:w-6 md:h-6 text-blue-600 fill-blue-50" strokeWidth={2.5} />
                     </span>
 
-                    {/* Animated background pulse */}
-                    <div className="absolute inset-0 bg-white/5 scale-0 group-hover:scale-150 transition-transform duration-500 rounded-full" />
+                    {/* Subtle pulse animation inside */}
+                    <motion.div
+                        className="absolute inset-0 bg-blue-100 rounded-full opacity-0"
+                        animate={{ scale: [1, 1.5], opacity: [0.3, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                    />
                 </motion.button>
             </div>
 

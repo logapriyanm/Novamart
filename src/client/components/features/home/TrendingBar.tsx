@@ -3,27 +3,17 @@ import Link from 'next/link';
 import { FaChevronRight as ChevronRight } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
 
-const categories = [
-    { name: 'Air Conditioners', image: '/assets/trendingAppliance/Air-Conditionar.jpeg' },
-    { name: 'Mixer Grinders', image: '/assets/trendingAppliance/Mixe.jpeg' },
-    { name: 'Microwave Ovens', image: '/assets/trendingAppliance/Owen.jpeg' },
-    { name: 'Water Purifiers', image: '/assets/trendingAppliance/W-Purifier.jpeg' },
-    { name: 'Vacuum Cleaners', image: '/assets/trendingAppliance/W-cleaner.jpeg' },
-    { name: 'Washing Machines', image: '/assets/trendingAppliance/Wash-mach.png' },
-    { name: 'Refrigerators', image: '/assets/trendingAppliance/Fridge.jpg' },
-    { name: 'Induction Cooktops', image: '/assets/trendingAppliance/Induction.jpg' },
-    { name: 'Dishwashers', image: '/assets/trendingAppliance/Dishwasher.jpg' },
-    { name: 'Air Purifiers', image: '/assets/trendingAppliance/Air-Purifiers.jpg' },
-    { name: 'Water Heaters', image: '/assets/trendingAppliance/Water_heater.jpg' },
-    { name: 'Smart TVs', image: '/assets/trendingAppliance/TV.jpeg' },
-];
+interface TrendingBarProps {
+    categories?: { name: string; image: string }[];
+}
 
-export default function TrendingBar() {
+export default function TrendingBar({ categories = [] }: TrendingBarProps) {
     const { user, isLoading } = useAuth();
 
     // Hide component strictly for logged-out users
     // We wait for loading to finish to prevent content flash (optional, but good UX)
     if (isLoading) return null;
+    if (categories.length === 0) return null;
 
     return (
         <div className="max-w-7xl mx-auto px-4 xs:px-6 mt-20 xs:mt-32 md:mt-40">

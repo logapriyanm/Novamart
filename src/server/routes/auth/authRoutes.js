@@ -20,7 +20,7 @@ router.post('/google', loginRateLimiter, googleLogin);
 router.post('/refresh', refresh);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
-router.post('/logout', authenticate, logout);
+router.post('/logout', logout);
 
 export default router;
 

@@ -19,7 +19,7 @@ import { useAuth } from '@/client/hooks/useAuth';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api/client';
-import { FaSpinner as Loader2 } from 'react-icons/fa';
+import Loader from '@/client/components/ui/Loader';
 import { PolicyModal } from '@/client/components/ui/PolicyModal';
 
 type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';
@@ -328,7 +328,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                             disabled={isLoading || !formData.agreedToTerms}
                             className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wider"
                         >
-                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                            {isLoading ? <Loader size="sm" variant="white" /> : (
                                 <>
                                     {role === 'CUSTOMER' ? 'Create Account' : 'Continue'}
                                     <ArrowRight className="w-4 h-4" />

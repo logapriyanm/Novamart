@@ -38,7 +38,7 @@ export function middleware(request: NextRequest) {
         // Redirect logged-in users based on their role for a better experience
         const payload = decodeJwt(token);
         if (payload?.role) {
-            if (payload.role === 'ADMIN') return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+            if (payload.role === 'ADMIN') return NextResponse.redirect(new URL('/admin', request.url));
             if (payload.role === 'MANUFACTURER') return NextResponse.redirect(new URL('/manufacturer/dashboard', request.url));
             if (payload.role === 'DEALER') return NextResponse.redirect(new URL('/dealer/dashboard', request.url));
         }

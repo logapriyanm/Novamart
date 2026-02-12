@@ -8,7 +8,7 @@ import {
     FaPhoneAlt as Phone,
     FaArrowRight as ArrowRight,
     FaMobileAlt as Smartphone,
-    FaSpinner as Loader2,
+
     FaKey,
     FaEye,
     FaEyeSlash
@@ -19,6 +19,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
 import { useAuth } from '../../../context/AuthContext';
 import { PolicyModal } from '../../ui/PolicyModal';
+import Loader from '../../ui/Loader';
 // import { useSnackbar } from '../../../context/SnackbarContext';
 
 export default function LoginForm() {
@@ -256,7 +257,7 @@ export default function LoginForm() {
                                 disabled={isLoading || !formData.identifier || !formData.password || !agreedToTerms}
                                 className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                             >
-                                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Enter Secure Portal'}
+                                {isLoading ? <Loader size="sm" variant="white" /> : 'Enter Secure Portal'}
                                 {!isLoading && <ArrowRight className="w-4 h-4" />}
                             </button>
                         </motion.div>
@@ -303,7 +304,7 @@ export default function LoginForm() {
                                         disabled={isLoading || !agreedToTerms}
                                         className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all text-sm"
                                     >
-                                        {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Log In Securely'}
+                                        {isLoading ? <Loader size="sm" variant="white" /> : 'Log In Securely'}
                                     </button>
                                 </div>
                             ) : (
@@ -324,7 +325,7 @@ export default function LoginForm() {
                                         disabled={!formData.identifier || isLoading}
                                         className="w-full bg-primary/10 text-primary font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 hover:bg-primary/20 transition-all disabled:opacity-50 text-sm"
                                     >
-                                        {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send OTP Code'}
+                                        {isLoading ? <Loader size="sm" variant="primary" /> : 'Send OTP Code'}
                                         {!isLoading && <ArrowRight className="w-4 h-4" />}
                                     </button>
                                 </div>

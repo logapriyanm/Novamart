@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
 import { ENDPOINTS } from '@/lib/api/contract';
+import Loader from '@/client/components/ui/Loader';
 
 export default function ProductMaster() {
     const [products, setProducts] = useState<any[]>([]);
@@ -135,7 +136,9 @@ export default function ProductMaster() {
                 {/* Mobile View: Cards */}
                 <div className="md:hidden divide-y divide-slate-100">
                     {isLoading ? (
-                        <div className="px-6 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">Syncing Catalog...</div>
+                        <div className="flex items-center justify-center py-12">
+                            <Loader size="lg" variant="primary" />
+                        </div>
                     ) : products.length === 0 ? (
                         <div className="px-6 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">No Products Active</div>
                     ) : products.map((product) => (
@@ -190,7 +193,11 @@ export default function ProductMaster() {
                         <tbody className="divide-y divide-slate-50">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">Syncing Catalog...</td>
+                                    <td colSpan={4} className="px-6 py-12 text-center">
+                                        <div className="flex justify-center">
+                                            <Loader size="lg" variant="primary" />
+                                        </div>
+                                    </td>
                                 </tr>
                             ) : products.length === 0 ? (
                                 <tr>
