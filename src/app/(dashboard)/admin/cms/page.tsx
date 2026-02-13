@@ -890,7 +890,7 @@ export default function AdminCMSPage() {
 
                                                 <button
                                                     onClick={() => setEditingSection(section)}
-                                                    className="p-2.5 bg-primary text-white rounded-[12px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
+                                                    className="p-2.5 bg-primary text-black rounded-[12px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
                                                     title="Edit Content"
                                                 >
                                                     <FaEdit className="w-4 h-4" />
@@ -908,21 +908,21 @@ export default function AdminCMSPage() {
             {/* Edit Modal */}
             <AnimatePresence>
                 {editingSection && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                            className="absolute inset-0 bg-white"
                             onClick={() => setEditingSection(null)}
                         />
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
-                            className="relative bg-surface w-full max-w-3xl rounded-[32px] shadow-2xl overflow-hidden border border-foreground/10"
+                            className="relative bg-surface w-full max-w-3xl rounded-[32px] shadow-2xl overflow-hidden border border-foreground/10 flex flex-col max-h-[90vh]"
                         >
-                            <div className="p-8 border-b border-foreground/5 sticky top-0 bg-surface z-10 flex justify-between items-center">
+                            <div className="p-8 border-b border-foreground/5 bg-white shrink-0 flex justify-between items-center">
                                 <div>
                                     <h2 className="text-xl font-black text-foreground">Edit Section</h2>
                                     <p className="text-xs text-foreground/40 font-bold uppercase tracking-widest mt-1">{editingSection.sectionKey} — {editingSection.componentName}</p>
@@ -935,98 +935,100 @@ export default function AdminCMSPage() {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleEditSave} className="p-8 space-y-6 overflow-y-auto max-h-[70vh]">
-                                {/* Basic Fields */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <EditorLabel>Display Title</EditorLabel>
-                                        <input
-                                            type="text"
-                                            value={editingSection.title}
-                                            onChange={e => setEditingSection({ ...editingSection, title: e.target.value })}
-                                            className="w-full bg-background border border-foreground/10 rounded-[12px] px-4 py-3 text-sm focus:border-primary outline-none"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <EditorLabel>Subtitle (Optional)</EditorLabel>
-                                        <input
-                                            type="text"
-                                            value={editingSection.subtitle || ''}
-                                            onChange={e => setEditingSection({ ...editingSection, subtitle: e.target.value })}
-                                            className="w-full bg-background border border-foreground/10 rounded-[12px] px-4 py-3 text-sm focus:border-primary outline-none"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* Visibility Roles */}
-                                <div className="space-y-2">
-                                    <EditorLabel>Visibility Roles</EditorLabel>
-                                    <div className="flex flex-wrap gap-2">
-                                        {['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER', 'ADMIN'].map(role => (
-                                            <button
-                                                key={role}
-                                                type="button"
-                                                onClick={() => {
-                                                    const current = editingSection.visibleFor;
-                                                    const fresh = current.includes(role)
-                                                        ? current.filter(r => r !== role)
-                                                        : [...current, role];
-                                                    setEditingSection({ ...editingSection, visibleFor: fresh });
-                                                }}
-                                                className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${editingSection.visibleFor.includes(role) ? 'bg-primary text-white' : 'bg-background border border-foreground/10 text-foreground/40'}`}
-                                            >
-                                                {role}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Component-Specific Content Editor */}
-                                <div className="border-t border-foreground/5 pt-6">
-                                    <h4 className="text-sm font-black text-foreground mb-4 uppercase tracking-tighter flex items-center gap-2">
-                                        <FaEdit className="w-3 h-3" /> Section Content
-                                    </h4>
-                                    <ContentEditor
-                                        section={editingSection}
-                                        setContent={(newContent: any) => setEditingSection({ ...editingSection, content: newContent })}
-                                    />
-                                </div>
-
-                                {/* SEO */}
-                                <div className="border-t border-foreground/5 pt-6">
-                                    <h4 className="text-sm font-black text-foreground mb-4 uppercase tracking-tighter flex items-center gap-2">
-                                        <FaSearch className="w-3 h-3" /> SEO Optimization
-                                    </h4>
-                                    <div className="space-y-4">
+                            <form onSubmit={handleEditSave} className="flex flex-col flex-1 min-h-0">
+                                <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                                    {/* Basic Fields */}
+                                    <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <EditorLabel>Meta Title Override</EditorLabel>
+                                            <EditorLabel>Display Title</EditorLabel>
                                             <input
                                                 type="text"
-                                                placeholder="Keep empty to use default"
-                                                value={editingSection.seo?.metaTitle || ''}
-                                                onChange={e => setEditingSection({ ...editingSection, seo: { ...(editingSection.seo || {}), metaTitle: e.target.value } })}
+                                                value={editingSection.title}
+                                                onChange={e => setEditingSection({ ...editingSection, title: e.target.value })}
                                                 className="w-full bg-background border border-foreground/10 rounded-[12px] px-4 py-3 text-sm focus:border-primary outline-none"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <EditorLabel>Meta Description</EditorLabel>
-                                            <textarea
-                                                rows={2}
-                                                placeholder="Brief summary for search engines"
-                                                value={editingSection.seo?.metaDescription || ''}
-                                                onChange={e => setEditingSection({ ...editingSection, seo: { ...(editingSection.seo || {}), metaDescription: e.target.value } })}
-                                                className="w-full bg-background border border-foreground/10 rounded-[12px] px-4 py-3 text-sm focus:border-primary outline-none resize-none"
+                                            <EditorLabel>Subtitle (Optional)</EditorLabel>
+                                            <input
+                                                type="text"
+                                                value={editingSection.subtitle || ''}
+                                                onChange={e => setEditingSection({ ...editingSection, subtitle: e.target.value })}
+                                                className="w-full bg-background border border-foreground/10 rounded-[12px] px-4 py-3 text-sm focus:border-primary outline-none"
                                             />
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Save Button */}
-                                <div className="border-t border-foreground/5 pt-6 sticky bottom-0 bg-surface mt-auto">
+                                    {/* Visibility Roles */}
+                                    <div className="space-y-2">
+                                        <EditorLabel>Visibility Roles</EditorLabel>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER', 'ADMIN'].map(role => (
+                                                <button
+                                                    key={role}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const current = editingSection.visibleFor;
+                                                        const fresh = current.includes(role)
+                                                            ? current.filter(r => r !== role)
+                                                            : [...current, role];
+                                                        setEditingSection({ ...editingSection, visibleFor: fresh });
+                                                    }}
+                                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${editingSection.visibleFor.includes(role) ? 'bg-primary text-black' : 'bg-background border border-foreground/10 text-foreground/40'}`}
+                                                >
+                                                    {role}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Component-Specific Content Editor */}
+                                    <div className="border-t border-foreground/5 pt-6">
+                                        <h4 className="text-sm font-black text-foreground mb-4 uppercase tracking-tighter flex items-center gap-2">
+                                            <FaEdit className="w-3 h-3" /> Section Content
+                                        </h4>
+                                        <ContentEditor
+                                            section={editingSection}
+                                            setContent={(newContent: any) => setEditingSection({ ...editingSection, content: newContent })}
+                                        />
+                                    </div>
+
+                                    {/* SEO */}
+                                    <div className="border-t border-foreground/5 pt-6">
+                                        <h4 className="text-sm font-black text-foreground mb-4 uppercase tracking-tighter flex items-center gap-2">
+                                            <FaSearch className="w-3 h-3" /> SEO Optimization
+                                        </h4>
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <EditorLabel>Meta Title Override</EditorLabel>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Keep empty to use default"
+                                                    value={editingSection.seo?.metaTitle || ''}
+                                                    onChange={e => setEditingSection({ ...editingSection, seo: { ...(editingSection.seo || {}), metaTitle: e.target.value } })}
+                                                    className="w-full bg-background border border-foreground/10 rounded-[12px] px-4 py-3 text-sm focus:border-primary outline-none"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <EditorLabel>Meta Description</EditorLabel>
+                                                <textarea
+                                                    rows={2}
+                                                    placeholder="Brief summary for search engines"
+                                                    value={editingSection.seo?.metaDescription || ''}
+                                                    onChange={e => setEditingSection({ ...editingSection, seo: { ...(editingSection.seo || {}), metaDescription: e.target.value } })}
+                                                    className="w-full bg-background border border-foreground/10 rounded-[12px] px-4 py-3 text-sm focus:border-primary outline-none resize-none"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Save Button */}
+                                </div>
+                                <div className="p-4 border-t border-foreground/5 bg-black     shrink-0 z-20 relative shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
                                     <button
                                         type="submit"
                                         disabled={isSaving}
-                                        className="w-full bg-primary text-white font-black py-4 rounded-[16px] flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 shadow-xl shadow-primary/20"
+                                        className="w-full bg-primary text-white  font-black py-1 rounded-[16px] flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
                                     >
                                         {isSaving ? 'Saving Changes...' : 'Update Section Configuration'}
                                     </button>

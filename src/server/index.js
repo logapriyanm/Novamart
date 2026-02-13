@@ -312,8 +312,8 @@ const startServer = async () => {
             process.exit(1);
         });
 
-        httpServer.listen(PORT, () => {
-            logger.info(`🚀 Server running on http://localhost:${PORT}`);
+        httpServer.listen(PORT, '0.0.0.0', () => {
+            logger.info(`🚀 Server running on http://0.0.0.0:${PORT}`);
         });
     } catch (error) {
         logger.error('❌ Server startup failed:', error);

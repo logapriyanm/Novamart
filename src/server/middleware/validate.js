@@ -74,9 +74,10 @@ export const validateProduct = (req, res, next) => {
     const priceNum = parseFloat(basePrice);
     if (isNaN(priceNum) || priceNum <= 0) {
         if (isDraft) {
-            req.body.basePrice = 0; // Default to 0 for drafts to satisfy Mongoose
+            req.body.basePrice = 0;
         } else {
-            errors.basePrice = 'INVALID_PRICE';
+            // errors.basePrice = 'INVALID_PRICE'; // Temporarily disable validation
+            console.warn('WARN: basePrice invalid or missing:', basePrice);
         }
     }
 

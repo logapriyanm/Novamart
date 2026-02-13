@@ -353,7 +353,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 onClick={onClose}
                 title={isCollapsed ? item.name : ''}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-[10px] transition-all group text-sm ${isActive
-                    ? 'bg-black text-white'
+                    ? 'bg-primary text-white'
                     : 'text-foreground/50 hover:bg-muted hover:text-foreground'
                     } ${isCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : ''}`}
             >

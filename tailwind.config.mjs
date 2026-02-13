@@ -14,8 +14,8 @@ export default {
                 'lg': '1025px',  // Desktop (≥ 1025px)
             },
             colors: {
-                primary: "#171717", // The ONLY Accent Color (Buttons, Active States)
-                secondary: "#171717", // Dark Gray (Text, Secondary Actions)
+                primary: "#2772A0", // Blue Accent (Buttons, Active States)
+                secondary: "#171717", // Black (Text, Secondary Actions)
                 accent: "#2772A0",   // Alias for Primary
                 background: "#FFFFFF", // Pure White Background
                 surface: "#FAFAFA", // Very Light Gray Surface

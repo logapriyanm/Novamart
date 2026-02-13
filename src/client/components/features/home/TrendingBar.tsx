@@ -21,7 +21,7 @@ export default function TrendingBar({ categories = [] }: TrendingBarProps) {
             <div id="trending-appliances" className="bg-white rounded-[10px] p-6 xs:p-8 lg:p-12 border border-foreground/10 relative -mt-12 xs:-mt-16 md:-mt-20 z-40 ">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 md:mb-12 gap-6 sm:gap-0">
                     <div>
-                        <h2 className="text-2xl md:text-3xl font-bold text-black tracking-tight">Trending appliances <span className="text-black/40 font-medium text-lg ml-2 block sm:inline">in your location</span></h2>
+                        <h2 className="text-2xl md:text-3xl font-bold text-black italic tracking-tight">TRENDING APPLIANCES <span className="text-black/40 font-medium text-lg ml-2 block  sm:inline">in your location</span></h2>
 
                     </div>
                     <Link href="/products" className="group self-start sm:self-auto flex items-center gap-2 text-black text-sm font-semibold border-2 border-black px-6 py-4 rounded-[10px] hover:bg-black hover:text-white transition-all shadow-lg hover:shadow-black/20">

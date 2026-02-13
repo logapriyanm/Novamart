@@ -154,11 +154,7 @@ export const reorderSections = async (req, res) => {
  */
 export const seedDefaults = async (req, res) => {
     try {
-        const count = await HomePageCMS.countDocuments();
-        if (count > 0 && !req.query.force) {
-            return res.json({ success: true, message: 'CMS already seeded. Use ?force=true to overwrite.' });
-        }
-
+        // Check if we should force update (overwrite existing)
         if (req.query.force) {
             await HomePageCMS.deleteMany({});
         }
@@ -376,8 +372,20 @@ export const seedDefaults = async (req, res) => {
             }
         ];
 
-        await HomePageCMS.insertMany(defaults);
-        res.json({ success: true, message: `Seeded ${defaults.length} sections.` });
+        const bulkOps = defaults.map(section => ({
+            updateOne: {
+                filter: { sectionKey: section.sectionKey },
+                update: { $setOnInsert: section },
+                upsert: true
+            }
+        }));
+
+        const result = await HomePageCMS.bulkWrite(bulkOps);
+
+        res.json({
+            success: true,
+            message: `Seeding complete. New sections added: ${result.upsertedCount}. Existing sections verified: ${result.matchedCount}.`
+        });
 
     } catch (error) {
         logger.error('Failed to seed CMS:', error);

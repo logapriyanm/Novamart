@@ -50,10 +50,10 @@ export default function CustomerOffers({
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
+                            className="text-4xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight"
                         >
                             🎁 Customer Offers in
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600"> NovaMart</span>
+                            <span className="text-transparent text-4xl italic bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600"> NovaMart</span>
                         </motion.h2>
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
