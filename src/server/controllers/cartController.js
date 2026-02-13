@@ -39,7 +39,7 @@ export const getCart = async (req, res) => {
                 quantity: item.quantity,
                 price: item.price,
                 product: inventory?.productId,
-                dealerId: inventory?.dealerId,
+                dealerId: inventory?.sellerId,
                 inventoryId: inventory?._id,
                 stock: inventory?.stock || 0,
                 originalPrice: inventory?.originalPrice

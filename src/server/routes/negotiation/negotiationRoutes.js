@@ -5,9 +5,9 @@ import authorize from '../../middleware/rbac.js';
 
 const router = express.Router();
 
-router.post('/create', authenticateUser, authorize(['DEALER']), createNegotiation);
-router.get('/', authenticateUser, authorize(['DEALER', 'MANUFACTURER']), getNegotiations);
-router.get('/:negotiationId', authenticateUser, authorize(['DEALER', 'MANUFACTURER']), getSingleNegotiation);
-router.put('/:negotiationId', authenticateUser, authorize(['DEALER', 'MANUFACTURER']), updateNegotiation);
+router.post('/create', authenticateUser, authorize(['SELLER']), createNegotiation);
+router.get('/', authenticateUser, authorize(['SELLER', 'MANUFACTURER']), getNegotiations);
+router.get('/:negotiationId', authenticateUser, authorize(['SELLER', 'MANUFACTURER']), getSingleNegotiation);
+router.put('/:negotiationId', authenticateUser, authorize(['SELLER', 'MANUFACTURER']), updateNegotiation);
 
 export default router;

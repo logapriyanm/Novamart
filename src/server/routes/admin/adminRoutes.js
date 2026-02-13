@@ -42,9 +42,15 @@ router.get('/manufacturers',
     userManagementController.getManufacturers
 );
 
+router.get('/sellers',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    userManagementController.getSellers
+);
+
+// Dealer aliases for backward compatibility (after Dealer->Seller refactoring)
 router.get('/dealers',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
-    userManagementController.getDealers
+    userManagementController.getSellers
 );
 
 router.get('/products/pending',
@@ -125,16 +131,30 @@ router.put('/manufacturers/:manufacturerId/verify',
     userManagementController.verifyManufacturer
 );
 
-router.put('/dealers/:dealerId/verify',
+router.put('/sellers/:sellerId/verify',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
-    auditLog('VERIFY_DEALER', 'DEALER'),
-    userManagementController.verifyDealer
+    auditLog('VERIFY_SELLER', 'SELLER'),
+    userManagementController.verifySeller
 );
 
+// Dealer alias
+router.put('/dealers/:dealerId/verify',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    auditLog('VERIFY_SELLER', 'SELLER'),
+    userManagementController.verifySeller
+);
+
+router.put('/sellers/:sellerId/manufacturers',
+    authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
+    auditLog('SELLER_MANUFACTURER_LINK', 'SELLER'),
+    userManagementController.updateSellerManufacturers
+);
+
+// Dealer alias
 router.put('/dealers/:dealerId/manufacturers',
     authorize(['ADMIN'], ['SUPER_ADMIN', 'OPS_ADMIN']),
-    auditLog('DEALER_MANUFACTURER_LINK', 'DEALER'),
-    userManagementController.updateDealerManufacturers
+    auditLog('SELLER_MANUFACTURER_LINK', 'SELLER'),
+    userManagementController.updateSellerManufacturers
 );
 
 router.put('/settings',

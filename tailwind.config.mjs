@@ -14,7 +14,7 @@ export default {
                 'lg': '1025px',  // Desktop (≥ 1025px)
             },
             colors: {
-                primary: "#2772A0", // The ONLY Accent Color (Buttons, Active States)
+                primary: "#171717", // The ONLY Accent Color (Buttons, Active States)
                 secondary: "#171717", // Dark Gray (Text, Secondary Actions)
                 accent: "#2772A0",   // Alias for Primary
                 background: "#FFFFFF", // Pure White Background
@@ -30,6 +30,14 @@ export default {
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                 'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+            },
+            borderRadius: {
+                DEFAULT: '10px',
+                'sm': '6px',
+                'md': '10px',
+                'lg': '10px',
+                'xl': '12px',
+                '2xl': '20px',
             },
         },
     },

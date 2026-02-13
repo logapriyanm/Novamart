@@ -24,7 +24,7 @@ class CustomerService {
             .populate({
                 path: 'inventory',
                 match: region ? { region, stock: { $gt: 0 } } : { stock: { $gt: 0 } },
-                populate: { path: 'dealerId', select: 'businessName' }
+                populate: { path: 'sellerId', select: 'businessName' }
             });
 
         // Filter out products with no matching inventory

@@ -88,7 +88,7 @@ export default function Navbar() {
     return (
         <header className="fixed top-0 left-0 right-0 z-[100] bg-white border-b  shadow-sm transition-all duration-300 ">
             {/* Top Row: Logo, Search, User Actions */}
-            <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-2">
+            <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-1">
                 <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-8">
                     {/* Brand & Mobile Toggle */}
                     <div className="flex items-center gap-4">
@@ -97,8 +97,8 @@ export default function Navbar() {
                             <div className="relative w-10 h-10 sm:w-12 sm:h-12 p-1.5 sm:p-2 rounded-full border-2 border-black overflow-hidden flex items-center justify-center bg-white shadow-sm group-hover:shadow-md transition-all shrink-0">
                                 <img src="/assets/Novamart.png" alt="NovaMart" className="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
                             </div>
-                            <span className="text-xl sm:text-2xl font-black text-foreground tracking-tighter italic hidden xs:block sm:block">
-                                NovaMart
+                            <span className="text-xl sm:text-2xl font-bold text-foreground  italic hidden xs:block sm:block">
+                                NOVAMART
                             </span>
                         </Link>
                     </div>
@@ -163,8 +163,8 @@ export default function Navbar() {
 
                         {/* Support - Hidden on mobile */}
                         <Link href="/contact" className="hidden md:flex flex-col items-center group gap-1">
-                            <FaHeadset className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
-                            <span className="text-sm font-bold text-foreground/60 group-hover:text-black transition-colors">Support</span>
+                            <FaHeadset className="w-5 h-5 text-foreground/40 group-hover:text-black transition-colors" />
+                            <span className="text-sm font-medium text-foreground/60 group-hover:text-black transition-colors">Support</span>
                         </Link>
 
                         {isAuthenticated && <NotificationBell />}
@@ -172,12 +172,12 @@ export default function Navbar() {
                         {/* Cart - Hidden on mobile */}
                         <Link href="/cart" className="hidden md:flex flex-col items-center group gap-1 relative">
                             <div className="relative">
-                                <HiOutlineShoppingCart className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
-                                <span className="absolute -top-2 -right-2 bg-black text-background text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
+                                <HiOutlineShoppingCart className="w-5 h-5 text-foreground/40 group-hover:text-black transition-colors" />
+                                <span className="absolute -top-2 -right-2 bg-black text-white text-background text-xs font-medium w-4 h-4 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
                                     {cart.length}
                                 </span>
                             </div>
-                            <span className="text-sm font-bold text-foreground/60 group-hover:text-black transition-colors">Cart</span>
+                            <span className="text-sm font-medium text-foreground/60 group-hover:text-black transition-colors">Cart</span>
                         </Link>
                         {/* Profile Section - Hidden on mobile */}
                         <div
@@ -199,18 +199,18 @@ export default function Navbar() {
                                                 <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                                             </div>
                                         ) : (
-                                            <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black text-sm border border-primary/20 group-hover:bg-primary group-hover:text-background transition-all">
+                                            <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-primary font-medium text-sm border border-primary/20 group-hover:bg-primary group-hover:text-background transition-all">
                                                 {user?.name?.charAt(0).toUpperCase() || 'U'}
                                             </div>
                                         )}
-                                        <span className="text-xs font-black text-primary truncate max-w-[80px]">
+                                        <span className="text-xs font-medium text-primary truncate max-w-[80px]">
                                             {user?.name?.split(' ')[0] || 'User'}
                                         </span>
                                     </>
                                 ) : (
                                     <>
                                         <HiOutlineUserCircle className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
-                                        <span className="text-sm font-black text-foreground/60 group-hover:text-black transition-colors">Account</span>
+                                        <span className="text-sm font-medium text-foreground/60 group-hover:text-black transition-colors">Account</span>
                                     </>
                                 )}
                             </button>

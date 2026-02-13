@@ -8,10 +8,10 @@ const router = express.Router();
 router.get('/plans', getPlans);
 router.post('/seed', authenticateUser, authorize(['ADMIN']), seedPlans);
 
-router.post('/subscribe', authenticateUser, authorize(['DEALER']), subscribeToPlan);
-router.post('/cancel', authenticateUser, authorize(['DEALER']), cancelSubscription);
-router.get('/my-subscription', authenticateUser, authorize(['DEALER']), getMySubscription);
-router.get('/features', authenticateUser, authorize(['DEALER']), getSubscriptionFeatures);
+router.post('/subscribe', authenticateUser, authorize(['SELLER']), subscribeToPlan);
+router.post('/cancel', authenticateUser, authorize(['SELLER']), cancelSubscription);
+router.get('/my-subscription', authenticateUser, authorize(['SELLER']), getMySubscription);
+router.get('/features', authenticateUser, authorize(['SELLER']), getSubscriptionFeatures);
 
 
 export default router;

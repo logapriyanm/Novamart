@@ -68,7 +68,7 @@ export default function RoleSelectionCards({ selectedRole, onSelectRole }: RoleS
         <div className="space-y-6">
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-[#1E293B] mb-2">
-                    Choose Your <span className="text-[#10367D]">Account Type</span>
+                    Choose Your <span className="text-primary">Account Type</span>
                 </h2>
                 <p className="text-sm font-bold text-slate-500">
                     Select the role that best describes how you'll use NovaMart
@@ -82,13 +82,13 @@ export default function RoleSelectionCards({ selectedRole, onSelectRole }: RoleS
                         type="button"
                         onClick={() => onSelectRole(option.role)}
                         className={`relative text-left p-6 rounded-[20px] border-2 transition-all ${selectedRole === option.role
-                            ? 'border-[#10367D] bg-[#10367D]/5 shadow-xl'
+                            ? 'border-primary bg-primary/5 shadow-xl'
                             : 'border-slate-200 hover:border-slate-300 hover:shadow-lg'
                             }`}
                     >
                         {/* Selection Indicator */}
                         {selectedRole === option.role && (
-                            <div className="absolute top-4 right-4 w-6 h-6 bg-[#10367D] rounded-full flex items-center justify-center">
+                            <div className="absolute top-4 right-4 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                                 <FaCheck className="w-3 h-3 text-white" />
                             </div>
                         )}

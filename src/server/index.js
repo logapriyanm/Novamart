@@ -197,6 +197,7 @@ io.on('connection', (socket) => {
 app.use('/api/admin', adminRoutes);
 app.use('/api/manufacturer', manufacturerRoutes);
 app.use('/api/seller', sellerRoutes);
+app.use('/api/dealer', sellerRoutes); // Alias for backward compatibility
 app.use('/api/customer', customerRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/tracking', trackingRoutes);

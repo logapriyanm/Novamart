@@ -60,6 +60,16 @@ export const register = async (req, res) => {
 
     try {
         const roleUpper = role.toUpperCase();
+
+        // Critical Security Check: Prevent Admin Creation via Public API
+        if (roleUpper === 'ADMIN') {
+            return res.status(403).json({
+                success: false,
+                error: 'FORBIDDEN_ROLE_ASSIGNMENT',
+                message: 'Admin accounts cannot be created via public registration.'
+            });
+        }
+
         logger.info('DEBUG: roleUpper: %s', roleUpper);
         const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
 
@@ -162,7 +172,11 @@ export const register = async (req, res) => {
             keyValue: error.keyValue
         });
 
-        res.status(400).json({ success: false, error: message, details });
+        res.status(400).json({
+            success: false,
+            error: message,
+            details: process.env.NODE_ENV === 'development' ? details : undefined
+        });
     } finally {
         session.endSession();
     }

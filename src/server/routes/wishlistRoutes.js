@@ -8,7 +8,7 @@ const router = express.Router();
 
 // All wishlist routes require authentication and CUSTOMER role
 router.use(authenticate);
-router.use(authorize(['CUSTOMER', 'ADMIN', 'MANUFACTURER', 'DEALER'], [], ['ACTIVE', 'PENDING']));
+router.use(authorize(['CUSTOMER', 'ADMIN', 'MANUFACTURER', 'SELLER'], [], ['ACTIVE', 'PENDING']));
 
 router.get('/', wishlistController.getWishlist);
 router.post('/', wishlistController.toggleWishlist); // Handle add/toggle via root POST

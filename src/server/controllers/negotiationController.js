@@ -10,13 +10,13 @@ export const createNegotiation = async (req, res) => {
         const offerPrice = proposedPrice || initialOffer;
 
         const seller = await Seller.findOne({ userId });
-        if (!seller) return res.status(403).json({ success: false, error: 'Only dealers can negotiate' });
+        if (!seller) return res.status(403).json({ success: false, error: 'Only sellers can negotiate' });
 
         const product = await Product.findById(productId).populate('manufacturerId');
         if (!product) return res.status(404).json({ success: false, error: 'Product not found' });
 
         const existing = await Negotiation.findOne({
-            dealerId: seller._id,
+            sellerId: seller._id,
             productId: productId,
             status: 'OPEN'
         });
@@ -28,14 +28,14 @@ export const createNegotiation = async (req, res) => {
         });
 
         const negotiation = await Negotiation.create({
-            dealerId: seller._id,
+            sellerId: seller._id,
             manufacturerId: product.manufacturerId._id,
             productId: productId,
             quantity: parseInt(quantity),
             currentOffer: parseFloat(offerPrice),
             status: 'OPEN',
             chatLog: [{
-                sender: 'DEALER',
+                sender: 'SELLER',
                 message: `Started negotiation for ${quantity} units at ₹${offerPrice}`,
                 time: new Date()
             }]
@@ -50,8 +50,8 @@ export const createNegotiation = async (req, res) => {
         };
 
         const activeNegotiationsCount = await Negotiation.countDocuments({
-            dealerId: seller._id,
-            status: { $in: ['OPEN', 'MANUFACTURER_COUNTERED', 'DEALER_COUNTERED'] }
+            sellerId: seller._id,
+            status: { $in: ['OPEN', 'MANUFACTURER_COUNTERED', 'SELLER_COUNTERED'] }
         });
 
         if (activeNegotiationsCount > limits[tier]) {
@@ -81,7 +81,7 @@ export const createNegotiation = async (req, res) => {
                         type: 'NEGOTIATION',
                         contextId: negotiation._id.toString(),
                         participants: [
-                            { userId: userId, role: 'DEALER' },
+                            { userId: userId, role: 'SELLER' },
                             { userId: manufacturer.userId._id, role: 'MANUFACTURER' }
                         ],
                         lastMessage: {
@@ -96,7 +96,7 @@ export const createNegotiation = async (req, res) => {
                         message: `Started negotiation for ${quantity} units at ₹${offerPrice}`,
                         messageType: 'SYSTEM',
                         senderId: userId,
-                        senderRole: 'DEALER'
+                        senderRole: 'SELLER'
                     });
                 }
 
@@ -125,10 +125,10 @@ export const getNegotiations = async (req, res) => {
         const role = req.user.role;
 
         let query = {};
-        if (role === 'DEALER') {
+        if (role === 'SELLER') {
             const seller = await Seller.findOne({ userId });
             if (!seller) return res.status(404).json({ message: 'Profile not found' });
-            query = { dealerId: seller._id };
+            query = { sellerId: seller._id };
         } else if (role === 'MANUFACTURER') {
             const manufacturer = await Manufacturer.findOne({ userId });
             if (!manufacturer) return res.status(404).json({ message: 'Profile not found' });
@@ -139,7 +139,7 @@ export const getNegotiations = async (req, res) => {
 
         const negotiations = await Negotiation.find(query)
             .populate('productId', 'name images basePrice')
-            .populate('dealerId', 'businessName')
+            .populate('sellerId', 'businessName')
             .populate('manufacturerId', 'companyName')
             .sort({ updatedAt: -1 });
 
@@ -159,12 +159,12 @@ export const updateNegotiation = async (req, res) => {
         const role = req.user.role;
 
         const negotiation = await Negotiation.findById(negotiationId)
-            .populate('dealerId')
+            .populate('sellerId')
             .populate('manufacturerId');
 
         if (!negotiation) return res.status(404).json({ message: 'Negotiation not found' });
 
-        const isParticipant = (role === 'DEALER' && negotiation.dealerId.userId.toString() === userId.toString()) ||
+        const isParticipant = (role === 'SELLER' && negotiation.sellerId.userId.toString() === userId.toString()) ||
             (role === 'MANUFACTURER' && negotiation.manufacturerId.userId.toString() === userId.toString());
 
         if (!isParticipant) {
@@ -190,7 +190,7 @@ export const updateNegotiation = async (req, res) => {
             try {
                 await stockAllocationService.allocateStock(negotiation.manufacturerId._id, {
                     productId: negotiation.productId,
-                    dealerId: negotiation.dealerId._id,
+                    sellerId: negotiation.sellerId._id,
                     region: 'NATIONAL',
                     quantity: negotiation.quantity,
                     dealerBasePrice: updatedNegotiation.currentOffer,
@@ -212,8 +212,8 @@ export const updateNegotiation = async (req, res) => {
             }
         }
 
-        const recipientUserId = role === 'DEALER' ? negotiation.manufacturerId.userId : negotiation.dealerId.userId;
-        const senderName = role === 'DEALER' ? negotiation.dealerId.businessName : negotiation.manufacturerId.companyName;
+        const recipientUserId = role === 'SELLER' ? negotiation.manufacturerId.userId : negotiation.sellerId.userId;
+        const senderName = role === 'SELLER' ? negotiation.sellerId.businessName : negotiation.manufacturerId.companyName;
 
         try {
             let chat = await Chat.findOne({ type: 'NEGOTIATION', contextId: negotiationId });
@@ -223,7 +223,7 @@ export const updateNegotiation = async (req, res) => {
                     type: 'NEGOTIATION',
                     contextId: negotiationId,
                     participants: [
-                        { userId: negotiation.dealerId.userId, role: 'DEALER' },
+                        { userId: negotiation.sellerId.userId, role: 'SELLER' },
                         { userId: negotiation.manufacturerId.userId, role: 'MANUFACTURER' }
                     ]
                 });
@@ -313,7 +313,7 @@ export const updateNegotiation = async (req, res) => {
                 type: notificationType,
                 title: notificationTitle,
                 message: notificationMessage,
-                link: role === 'DEALER' ? '/manufacturer/negotiations' : '/dealer/negotiations'
+                link: role === 'SELLER' ? '/manufacturer/negotiations' : '/seller/negotiations'
             });
         } else if (message || newOffer) {
             await Notification.create({
@@ -323,7 +323,7 @@ export const updateNegotiation = async (req, res) => {
                 message: offerUpdate
                     ? `${senderName} sent a new offer: ₹${offerUpdate}`
                     : `${senderName}: ${message?.substring(0, 50)}${message?.length > 50 ? '...' : ''}`,
-                link: role === 'DEALER' ? '/dealer/negotiations' : '/manufacturer/negotiations'
+                link: role === 'SELLER' ? '/seller/negotiations' : '/manufacturer/negotiations'
             });
         }
 
@@ -341,7 +341,7 @@ export const getSingleNegotiation = async (req, res) => {
 
         const negotiation = await Negotiation.findById(negotiationId)
             .populate('productId', 'name images basePrice moq category')
-            .populate('dealerId', 'businessName city state userId')
+            .populate('sellerId', 'businessName city state userId')
             .populate('manufacturerId', 'companyName factoryAddress userId');
 
         if (!negotiation) {
@@ -349,7 +349,7 @@ export const getSingleNegotiation = async (req, res) => {
         }
 
         const userId = req.user._id.toString();
-        const isParticipant = (role === 'DEALER' && negotiation.dealerId.userId.toString() === userId) ||
+        const isParticipant = (role === 'SELLER' && negotiation.sellerId.userId.toString() === userId) ||
             (role === 'MANUFACTURER' && negotiation.manufacturerId.userId.toString() === userId);
 
         if (!isParticipant) {

@@ -141,14 +141,12 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="w-full ">
-            <div className="mb-10 text-left">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="w-full border-[1px] border-gray-200 rounded-[10px] p-6">
+            <div className="mb-4 text-left">
+                <h2 className="text-3xl font-bold italic text-gray-900 ">
                     Continue your journey with NovaMart
                 </h2>
-                <p className="text-gray-500">
-                    Access your personalized commerce dashboard.
-                </p>
+                
             </div>
 
             {/* Method Switcher */}
@@ -268,7 +266,7 @@ export default function LoginForm() {
                             <button
                                 type="submit"
                                 disabled={isLoading || !formData.identifier || !formData.password || !agreedToTerms}
-                                className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                className="w-full bg-gray-900 text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-gray-900/20 hover:bg-black hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wider"
                             >
                                 {isLoading ? <Loader size="sm" variant="white" /> : 'Enter Secure Portal'}
                                 {!isLoading && <ArrowRight className="w-4 h-4" />}
@@ -315,7 +313,7 @@ export default function LoginForm() {
                                     <button
                                         type="submit"
                                         disabled={isLoading || !agreedToTerms}
-                                        className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all text-sm"
+                                        className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all text-sm uppercase tracking-wider"
                                     >
                                         {isLoading ? <Loader size="sm" variant="white" /> : 'Log In Securely'}
                                     </button>
@@ -346,11 +344,7 @@ export default function LoginForm() {
                         </motion.div>
                     )}
                 </AnimatePresence>
-                {errors.general && (
-                    <div className="bg-rose-50 border border-rose-200 p-4 rounded-[10px] animate-shake">
-                        <p className="text-rose-600 text-[10px] font-black uppercase text-center tracking-wider">{errors.general}</p>
-                    </div>
-                )}
+               
             </form>
 
             <div className="mt-8">
@@ -361,7 +355,7 @@ export default function LoginForm() {
                 </div>
 
                 <div className="flex justify-center mb-6 ">
-                    <div className="w-full border-[1px] border-gray-200 rounded-[10px]">
+                    <div className="w-full flex items-center justify-center border-gray-200 rounded-[10px]">
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => toast.error('Google authentication failed')}
@@ -370,6 +364,7 @@ export default function LoginForm() {
                             shape="rectangular"
                             size="large"
                             text="continue_with"
+                            width="650"
                         />
                     </div>
                 </div>

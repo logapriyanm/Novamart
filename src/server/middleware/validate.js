@@ -14,6 +14,10 @@ export const validateRegistration = (req, res, next) => {
     if (!role) errors.role = 'ROLE_REQUIRED';
 
     const roleUpper = role?.toUpperCase();
+    const ALLOWED_ROLES = ['CUSTOMER', 'SELLER', 'MANUFACTURER'];
+
+    if (!ALLOWED_ROLES.includes(roleUpper)) errors.role = 'INVALID_ROLE';
+
     if (roleUpper === 'CUSTOMER' && !name) errors.name = 'NAME_REQUIRED';
     if (roleUpper === 'DEALER' && !businessName) errors.businessName = 'BUSINESS_NAME_REQUIRED';
     if (roleUpper === 'MANUFACTURER' && !companyName) errors.companyName = 'COMPANY_NAME_REQUIRED';
@@ -72,7 +76,7 @@ export const validateProduct = (req, res, next) => {
         if (isDraft) {
             req.body.basePrice = 0; // Default to 0 for drafts to satisfy Mongoose
         } else {
-            errors.basePrice = 'INVALID_PRICE'; 
+            errors.basePrice = 'INVALID_PRICE';
         }
     }
 

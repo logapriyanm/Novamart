@@ -14,7 +14,7 @@ export default function BrandSpotlight({ setups = [] }: BrandSpotlightProps) {
     return (
         <div className="py-0">
             <div className="flex flex-col gap-2 mb-10 text-center">
-                <h2 className="text-3xl font-bold text-black tracking-tight">Premium <span className="text-black/40">setups</span></h2>
+                <h2 className="text-3xl font-bold text-black tracking-tight italic">PREMIUM SETUPS</h2>
                 <p className="text-black/40 font-medium text-sm">Curated collections for your modern home</p>
             </div>
 

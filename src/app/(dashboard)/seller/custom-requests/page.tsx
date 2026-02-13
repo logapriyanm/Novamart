@@ -30,19 +30,29 @@ export default function CustomRequestsPage() {
     const router = useRouter();
 
     useEffect(() => {
-        fetchFeatures();
-        fetchRequests();
+        initPage();
     }, []);
+
+    const initPage = async () => {
+        const feat = await fetchFeatures();
+        if (feat?.allowCustomRequests) {
+            await fetchRequests();
+        } else {
+            setLoading(false);
+        }
+    };
 
     const fetchFeatures = async () => {
         try {
             const res = await apiClient.get<any>('/subscription/features');
             if (res.success) {
                 setFeatures(res.data);
+                return res.data;
             }
         } catch (error) {
             console.error('Failed to fetch features');
         }
+        return null;
     };
 
     const fetchRequests = async () => {
@@ -52,7 +62,8 @@ export default function CustomRequestsPage() {
                 setRequests(res.data);
             }
         } catch (error) {
-            toast.error('Failed to load custom requests');
+            // Only show error if we expected to have access
+            console.error('Failed to load custom requests');
         } finally {
             setLoading(false);
         }
@@ -139,8 +150,8 @@ export default function CustomRequestsPage() {
                         key={status}
                         onClick={() => setFilter(status)}
                         className={`px-6 py-3 rounded-[10px] font-black uppercase tracking-wider text-xs whitespace-nowrap transition-all ${filter === status
-                                ? 'bg-[#10367D] text-white shadow-lg'
-                                : 'bg-white text-slate-600 border border-slate-200 hover:border-[#10367D]'
+                            ? 'bg-[#10367D] text-white shadow-lg'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:border-[#10367D]'
                             }`}
                     >
                         {status.replace('_', ' ')}

@@ -18,13 +18,14 @@ const router = express.Router();
 router.use(authenticate);
 
 // Routes
+// Routes
 router.post('/', authorize(['CUSTOMER']), createOrder);
-router.get('/', authorize(['ADMIN', 'DEALER']), getOrders);
+router.get('/', authorize(['ADMIN', 'SELLER']), getOrders);
 router.get('/my', authorize(['CUSTOMER']), getMyOrders);
 router.get('/:id', getOrderById); // Ownership checked in service
 router.get('/:id/payment', getOrderById);
-router.patch('/:id/status', authorize(['ADMIN', 'DEALER']), updateOrderStatus);
+router.patch('/:id/status', authorize(['ADMIN', 'SELLER']), updateOrderStatus);
 router.post('/:id/dispute', authorize(['CUSTOMER']), raiseDispute);
-router.post('/:id/simulate-delivery', authorize(['ADMIN', 'DEALER']), simulateDelivery);
+router.post('/:id/simulate-delivery', authorize(['ADMIN', 'SELLER']), simulateDelivery);
 
 export default router;

@@ -30,18 +30,18 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                 styles: {
                     palette: {
                         window: '#FFFFFF',
-                        windowBorder: '#10367D10',
-                        tabIcon: '#10367D',
-                        menuIcons: '#10367D',
+                        windowBorder: '#2772A010',
+                        tabIcon: '#2772A0',
+                        menuIcons: '#2772A0',
                         textDark: '#1E293B',
                         textLight: '#FFFFFF',
-                        link: '#10367D',
-                        action: '#10367D',
-                        inactiveTabIcon: '#10367D40',
-                        error: '#F43F5E',
-                        inProgress: '#10367D',
+                        link: '#2772A0',
+                        action: '#2772A0',
+                        inactiveTabIcon: '#2772A040',
+                        error: '#EF4444',
+                        inProgress: '#2772A0',
                         complete: '#10B981',
-                        sourceBg: '#F8FAFC'
+                        sourceBg: '#FAFAFA'
                     }
                 }
             }}
@@ -62,9 +62,9 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
                                 console.error('Cloudinary widget not initialized');
                             }
                         }}
-                        className="w-full h-40 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center gap-3 hover:border-[#10367D]/20 hover:bg-[#10367D]/5 transition-all group"
+                        className="w-full h-40 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center gap-3 hover:border-primary/20 hover:bg-primary/5 transition-all group"
                     >
-                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-[#10367D] group-hover:bg-white group-hover:scale-110 transition-all">
+                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-primary group-hover:bg-white group-hover:scale-110 transition-all">
                             {resourceType === 'video' ? <FaVideo className="w-5 h-5" /> :
                                 resourceType === 'image' ? <FaImages className="w-5 h-5" /> :
                                     <FaCloudUploadAlt className="w-6 h-6" />}

@@ -85,7 +85,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-background text-foreground pt-12 md:pt-20 pb-10 overflow-hidden relative">
+    <footer className="bg-background text-foreground border-t border-gray-100 pt-12 md:pt-20 pb-10 overflow-hidden relative">
       {/* Ambient Background Accents */}
       {/* <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-primary to-primary" /> */}
       <div className="absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-primary/5 blur-[80px] md:blur-[120px] rounded-full -mr-32 -mt-32 md:-mr-48 md:-mt-48" />

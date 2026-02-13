@@ -71,7 +71,7 @@ export default function SellerAnalyticsDashboard() {
 
                 {/* Placeholder for Funnel/Margin since backend data is mocked/pending */}
                 <ChartCard title="Conversion Funnel (Beta)" isEmpty={true}>
-                    <div></div>
+                    <div className="hidden" />
                 </ChartCard>
             </div>
         </div>

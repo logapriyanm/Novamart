@@ -18,6 +18,7 @@ import {
     FaExclamationTriangle,
     FaRocket
 } from 'react-icons/fa';
+import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 
 export default function DealerAllocationView() {
@@ -40,9 +41,8 @@ export default function DealerAllocationView() {
     const fetchAllocations = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/dealer/allocations');
-            const data = await res.json();
-            if (data.success) setAllocations(data.data);
+            const res = await apiClient.get<any>('/seller/allocations');
+            if (res.success) setAllocations(res.data);
         } catch (error) {
             toast.error('Failed to load allocations');
         } finally {

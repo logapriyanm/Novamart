@@ -11,7 +11,8 @@ import {
     FaShieldAlt as ShieldCheck,
     FaCheckCircle as CheckCircle2,
     FaEye,
-    FaEyeSlash
+    FaEyeSlash,
+    FaCheck
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { useAuth } from '@/client/hooks/useAuth';
@@ -21,15 +22,18 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api/client';
 import Loader from '@/client/components/ui/Loader';
 import { PolicyModal } from '@/client/components/ui/PolicyModal';
+import { GoogleLogin } from '@react-oauth/google';
 
 type Role = 'MANUFACTURER' | 'SELLER' | 'CUSTOMER';
 
-export default function Register({ searchParams }: { searchParams?: { role?: string } }) {
+
+export default function Register({ searchParams, initialRole: propRole }: { searchParams?: Promise<{ role?: string }>, initialRole?: string }) {
+    const params = searchParams ? React.use(searchParams) : undefined;
     const router = useRouter();
-    const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+    const { login, loginWithGoogle, isAuthenticated, isLoading: authLoading } = useAuth();
     // const { showSnackbar } = useSnackbar();
 
-    const initialRole = searchParams?.role?.toUpperCase() as Role | undefined;
+    const initialRole = (propRole || params?.role)?.toUpperCase() as Role | undefined;
     const isValidRole = ['MANUFACTURER', 'SELLER', 'CUSTOMER'].includes(initialRole || '');
 
     React.useEffect(() => {
@@ -109,6 +113,16 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
         setStep(2);
     };
 
+    const handleGoogleSuccess = async (credentialResponse: any) => {
+        try {
+            if (credentialResponse.credential) {
+                await loginWithGoogle(credentialResponse.credential);
+            }
+        } catch (error: any) {
+            toast.error(error.message || 'Google Login Failed');
+        }
+    };
+
     const handleFinalizeRegistration = async () => {
         setIsLoading(true);
         try {
@@ -124,7 +138,7 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
                 gstNumber: formData.gstNumber,
                 factoryAddress: formData.address,
                 businessAddress: formData.address,
-                bankDetails: {} // NO_OPlaceholder
+                bankDetails: {} // Placeholder
             };
 
             const res = await apiClient.post<any>('/auth/register', payload);
@@ -184,7 +198,7 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
                 return (
                     <div className="space-y-6">
                         <div className="text-left space-y-2">
-                            <h2 className="text-2xl font-bold text-gray-900">Choose your account type</h2>
+                            <h2 className="text-2xl font-bold italic text-gray-900">Choose your account type</h2>
                             <p className="text-sm text-gray-500">Select how you want to operate within the NovaMart Ecosystem</p>
                         </div>
                         <div className="grid grid-cols-1 gap-4">
@@ -217,40 +231,44 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
                 return (
                     <div className="space-y-6">
                         <div className="text-left space-y-2">
-                            <h2 className="text-2xl font-bold text-gray-900">Basic Information</h2>
+                            <h2 className="text-2xl font-bold italic text-gray-900">Basic Information</h2>
                             <p className="text-sm text-gray-500">Enter your personal details to get started</p>
                         </div>
                         <div className="space-y-4">
-                            <div className="grid grid-cols-1 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-gray-700">Full Name</label>
-                                    <input
-                                        type="text"
-                                        placeholder="John Doe"
-                                        className={`w-full bg-white border ${errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm transition-all focus:ring-1 focus:outline-none`}
-                                        value={formData.name}
-                                        onChange={e => {
-                                            const value = e.target.value;
-                                            if (/^[a-zA-Z\s]*$/.test(value)) {
-                                                setFormData({ ...formData, name: value });
-                                            }
-                                        }}
-                                    />
-                                    {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                            <div className="space-y-4">
+                                {/* Row 1: Name and Email */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-semibold text-gray-700">Full Name</label>
+                                        <input
+                                            type="text"
+                                            placeholder="John Doe"
+                                            className={`w-full bg-white border ${errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm transition-all focus:ring-1 focus:outline-none`}
+                                            value={formData.name}
+                                            onChange={e => {
+                                                const value = e.target.value;
+                                                if (/^[a-zA-Z\s]*$/.test(value)) {
+                                                    setFormData({ ...formData, name: value });
+                                                }
+                                            }}
+                                        />
+                                        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-semibold text-gray-700">Email Address</label>
+                                        <input
+                                            type="email"
+                                            placeholder="name@company.com"
+                                            className={`w-full bg-white border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm transition-all focus:ring-1 focus:outline-none`}
+                                            value={formData.email}
+                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                        />
+                                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                                    </div>
                                 </div>
 
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-gray-700">Email Address</label>
-                                    <input
-                                        type="email"
-                                        placeholder="name@company.com"
-                                        className={`w-full bg-white border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm transition-all focus:ring-1 focus:outline-none`}
-                                        value={formData.email}
-                                        onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                    />
-                                    {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-                                </div>
-
+                                {/* Row 2: Secure Password */}
                                 <div className="space-y-1">
                                     <label className="text-xs font-semibold text-gray-700">Secure Password</label>
                                     <div className="relative">
@@ -272,6 +290,7 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
                                     {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                                 </div>
 
+                                {/* Row 3: Phone Number (+ OTP Row 4 if sent) */}
                                 <div className="space-y-1">
                                     <label className="text-xs font-semibold text-gray-700">Phone Number</label>
                                     <div className="flex flex-col gap-2">
@@ -330,7 +349,7 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
                         <button
                             onClick={nextStep}
                             disabled={isLoading || !formData.agreedToTerms}
-                            className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wider"
+                            className="w-full bg-gray-900 text-white font-bold py-3 rounded-[10px] flex items-center justify-center gap-2 hover:bg-black hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wider mt-6"
                         >
                             {isLoading ? <Loader size="sm" variant="white" /> : (
                                 <>
@@ -339,11 +358,7 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
                                 </>
                             )}
                         </button>
-                        {errors.general && (
-                            <div className="bg-red-50 border border-red-100 p-3 rounded-[10px] text-center">
-                                <p className="text-red-600 text-xs font-semibold">{errors.general}</p>
-                            </div>
-                        )}
+
                     </div>
                 );
             case 3:
@@ -365,7 +380,7 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
                 ) : (
                     <div className="space-y-6">
                         <div className="text-left space-y-2">
-                            <h2 className="text-2xl font-bold text-gray-900">Business Details</h2>
+                            <h2 className="text-2xl font-bold italic text-gray-900">Business Details</h2>
                             <p className="text-sm text-gray-500">Mandatory verification for {role?.toLowerCase()}s</p>
                         </div>
                         <div className="space-y-4">
@@ -409,7 +424,7 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
 
                         <button
                             onClick={nextStep}
-                            className="w-full bg-primary text-white font-bold py-3.5 rounded-[10px] flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all uppercase tracking-wider text-sm"
+                            className="w-full bg-gray-900 text-white font-bold py-3 rounded-[10px] flex items-center justify-center gap-2  hover:bg-black hover:scale-[1.02] transition-all uppercase tracking-wider text-sm mt-6"
                         >
                             Finalize Application
                             <ArrowRight className="w-4 h-4" />
@@ -441,121 +456,168 @@ export default function Register({ searchParams }: { searchParams?: { role?: str
     };
 
     return (
-        <div className="min-h-screen w-full flex overflow-hidden">
+        <div className="h-screen w-full flex overflow-hidden">
             {/* Left Panel - Branding */}
-            <div className="hidden lg:flex lg:w-1/2 bg-[#0a0f1c] relative items-center justify-center p-12 overflow-hidden">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#10367D] rounded-full blur-3xl"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#10367D] rounded-full blur-[120px] opacity-20"></div>
-                    <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#74b4da] rounded-full blur-3xl"></div>
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-black via-gray-900 to-black relative items-center justify-center p-12 overflow-hidden">
+                {/* Glass Effect Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-white/10 to-transparent backdrop-blur-3xl"></div>
+
+                {/* Animated Background Pattern */}
+                <div className="absolute inset-0 opacity-20">
+                    <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/5 rounded-full blur-[120px]"></div>
+                    <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
                 </div>
 
                 <div className="relative z-10 w-full max-w-lg text-white">
                     <div className="flex items-center gap-3 mb-16">
-                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center" >
+                        <div className="w-10 h-10 bg-white rounded-full border border-white/20 flex items-center justify-center shadow-lg shadow-white/20">
                             <img src="/assets/Novamart.png" alt="NovaMart" className="w-8 h-8 object-contain" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight">NOVAMART</span>
+                        <span className="text-xl font-bold italic tracking-tight text-white drop-shadow-lg">NOVAMART</span>
                     </div>
 
-                    <h1 className="text-5xl font-bold leading-tight mb-8">
+                    <h1 className="text-5xl font-bold leading-tight mb-8 text-white drop-shadow-2xl">
                         Connecting the global Supply Chain marketplace.
                     </h1>
 
-                    <p className="text-lg text-gray-400 leading-relaxed mb-12">
+                    <p className="text-lg text-gray-200 leading-relaxed mb-12 drop-shadow-lg">
                         Join over 50,000+ businesses expanding their reach through NovaMart's seamless B2B and B2C ecosystem.
                     </p>
 
                     {/* Testimonial / Social Proof */}
-                    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-12">
-                        <p className="text-gray-300 italic mb-4">"NovaMart transformed how we source materials. The verification process gives us 100% confidence in our partners."</p>
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mb-12 shadow-2xl">
+                        <p className="text-gray-100 italic mb-4 drop-shadow">"NovaMart transformed how we source materials. The verification process gives us 100% confidence in our partners."</p>
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-emerald-400"></div>
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-emerald-400 shadow-lg"></div>
                             <div className="text-sm">
-                                <div className="font-semibold text-white">Rahul Mehta</div>
-                                <div className="text-gray-500">Director, Mehta Textiles</div>
+                                <div className="font-semibold text-white drop-shadow">Rahul Mehta</div>
+                                <div className="text-gray-300 drop-shadow">Director, Mehta Textiles</div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
+                    <div className="flex items-center gap-4 text-xs text-gray-400 font-medium">
                     </div>
                 </div>
             </div>
 
             {/* Right Panel - Register Form */}
-            <div className="w-full lg:w-1/2 bg-white flex flex-col items-center justify-center p-6 xs:p-10 sm:p-12 lg:p-24 overflow-y-auto relative">
+            <div className="w-full lg:w-1/2 bg-white p-6 xs:p-10 sm:p-12 lg:p-24 relative shadow-2xl z-10 overflow-y-auto">
                 {/* Mobile Back to Home Navigation */}
-                <div className="lg:hidden absolute top-6 left-6 flex items-center gap-3">
+                <div className="lg:hidden absolute top-6 left-6 flex items-center gap-3 z-20">
                     <Link href="/" className="flex items-center gap-2 group">
                         <div className="w-8 h-8 p-1 rounded-full border border-black flex items-center justify-center bg-white shadow-sm">
-                            <img src="/assets/Novamart.png" alt="N" className="w-full h-full object-contain" />
+                            <img src="/assets/Novamart.png" alt="Novamart" className="w-full h-full object-contain" />
                         </div>
                         <span className="text-xs font-black text-foreground tracking-tighter italic">NovaMart</span>
                     </Link>
                 </div>
 
-                {/* Progress Bar */}
-                {step < 4 && (
-                    <div className="w-full max-w-md mb-8">
-                        <div className="flex justify-between text-[10px] sm:text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                            <span className={step >= 1 ? "text-primary" : ""}>Role</span>
-                            <span className={step >= 2 ? "text-primary" : ""}>Basic</span>
-                            <span className={step >= 3 ? "text-primary" : ""}>Business</span>
-                        </div>
-                        <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                            <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${(step / 3) * 100}%` }}
-                                className="h-full bg-primary"
-                                transition={{ duration: 0.3 }}
-                            />
+                <div className="min-h-full w-full flex flex-col items-center justify-center">
+                    <div className="w-full max-w-md space-y-8 mt-12 lg:mt-0">
+                        {/* Form Container Box */}
+                        <div className="w-full border-[1px] border-gray-200 rounded-[10px] p-6">
+                            {/* Progress Bar */}
+                            {step < 4 && (
+                                <div className="w-full mb-8">
+                                    <div className="relative flex items-center justify-between z-0">
+                                        {/* Background Line */}
+                                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-100 -z-10 rounded-full"></div>
+
+                                        {/* Active Line (Progress) */}
+                                        <div
+                                            className="absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-primary -z-10 rounded-full transition-all duration-300"
+                                            style={{ width: step === 1 ? '0%' : step === 2 ? '50%' : '100%' }}
+                                        ></div>
+
+                                        {/* Steps */}
+                                        {['Role', 'Basic', 'Business'].map((label, index) => {
+                                            const stepNum = index + 1;
+                                            const isActive = step >= stepNum;
+                                            const isCompleted = step > stepNum;
+
+                                            return (
+                                                <div key={label} className="flex flex-col items-center gap-2 bg-white text black px-2">
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${isActive
+                                                        ? 'bg-primary border-primary text-black shadow-lg shadow-primary/20'
+                                                        : 'bg-white border-gray-200 text-gray-400'
+                                                        }`}>
+                                                        {isCompleted ? <FaCheck className="w-3 h-3" /> : stepNum}
+                                                    </div>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'
+                                                        }`}>
+                                                        {label}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="w-full relative z-10">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={step}
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        {renderStep()}
+                                    </motion.div>
+                                </AnimatePresence>
+
+                                {step > 1 && step < 4 && (
+                                    <button
+                                        onClick={prevStep}
+                                        className="mt-6 flex items-center gap-2 text-gray-400 font-semibold hover:text-gray-900 transition-colors text-xs uppercase tracking-wide"
+                                    >
+                                        <ArrowLeft className="w-3 h-3" />
+                                        Back
+                                    </button>
+                                )}
+
+                                <div className="mt-3">
+
+
+                                    <div className="flex justify-center mb-6 ">
+                                        <div className="w-full flex items-center justify-center rounded-[10px]">
+                                            <GoogleLogin
+                                                onSuccess={handleGoogleSuccess}
+                                                onError={() => toast.error('Google authentication failed')}
+                                                useOneTap
+                                                theme="outline"
+                                                shape="rectangular"
+                                                size="large"
+                                                text="continue_with"
+                                                width="650"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-0  text-center">
+                                        <p className="text-sm text-gray-500">
+                                            Already have an account?{' '}
+                                            <Link href="/auth/login" className="text-primary font-bold hover:underline">
+                                                Login Now
+                                            </Link>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                )}
 
-                <div className="w-full max-w-md relative z-10">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={step}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            {renderStep()}
-                        </motion.div>
-                    </AnimatePresence>
-
-                    {step > 1 && step < 4 && (
-                        <button
-                            onClick={prevStep}
-                            className="mt-6 flex items-center gap-2 text-gray-400 font-semibold hover:text-gray-900 transition-colors text-xs uppercase tracking-wide"
-                        >
-                            <ArrowLeft className="w-3 h-3" />
-                            Back
-                        </button>
-                    )}
-
-                    <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                        <p className="text-sm text-gray-500">
-                            Already have an account?{' '}
-                            <Link href="/auth/login" className="text-primary font-bold hover:underline">
-                                Login Now
-                            </Link>
-                        </p>
-                    </div>
+                    {/* Terms Modal */}
+                    <PolicyModal
+                        isOpen={showTermsModal}
+                        onClose={() => setShowTermsModal(false)}
+                        policyKey={role ? `terms-${role.toLowerCase()}` as any : "terms-of-service"}
+                    />
                 </div>
             </div>
-
-            {/* Terms Modal */}
-            <PolicyModal
-                isOpen={showTermsModal}
-                onClose={() => setShowTermsModal(false)}
-                policyKey={role ? `terms-${role.toLowerCase()}` as any : "terms-of-service"}
-            />
         </div>
     );
 }
-

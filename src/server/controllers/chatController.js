@@ -6,7 +6,7 @@ const checkSubscription = async (userId, requiredTier = 'PRO') => {
     if (!seller) return false;
 
     const activeSub = await SellerSubscription.findOne({
-        dealerId: seller._id,
+        sellerId: seller._id,
         status: 'ACTIVE'
     }).populate('planId').sort({ endDate: -1 });
 
@@ -22,21 +22,21 @@ export const createChat = async (req, res) => {
         const senderId = req.user._id;
         const senderRole = req.user.role;
 
-        if (senderRole === 'CUSTOMER' && receiverRole !== 'DEALER') {
-            return res.status(403).json({ message: 'Customers can only chat with Dealers' });
+        if (senderRole === 'CUSTOMER' && receiverRole !== 'SELLER') {
+            return res.status(403).json({ message: 'Customers can only chat with Sellers' });
         }
 
-        if ((senderRole === 'DEALER' && receiverRole === 'MANUFACTURER') ||
-            (senderRole === 'MANUFACTURER' && receiverRole === 'DEALER')) {
+        if ((senderRole === 'SELLER' && receiverRole === 'MANUFACTURER') ||
+            (senderRole === 'MANUFACTURER' && receiverRole === 'SELLER')) {
 
-            const dealerId = senderRole === 'DEALER' ? req.user.dealer?._id : (await Seller.findOne({ userId: receiverId }))?._id;
+            const sellerId = senderRole === 'SELLER' ? req.user.seller?._id : (await Seller.findOne({ userId: receiverId }))?._id;
             const mfrId = senderRole === 'MANUFACTURER' ? req.user.manufacturer?._id : (await Manufacturer.findOne({ userId: receiverId }))?._id;
 
-            if (!dealerId || !mfrId) {
-                return res.status(404).json({ message: 'Dealer or Manufacturer profile not found' });
+            if (!sellerId || !mfrId) {
+                return res.status(404).json({ message: 'Seller or Manufacturer profile not found' });
             }
 
-            const seller = await Seller.findById(dealerId);
+            const seller = await Seller.findById(sellerId);
             if (type !== 'NEGOTIATION') {
                 const isApproved = seller?.approvedBy?.some(id => id.toString() === mfrId.toString());
                 if (!isApproved) {
@@ -47,7 +47,7 @@ export const createChat = async (req, res) => {
                 }
             }
 
-            if (senderRole === 'DEALER') {
+            if (senderRole === 'SELLER') {
                 const hasAccess = await checkSubscription(senderId, 'PRO');
                 if (!hasAccess) {
                     return res.status(403).json({
@@ -63,9 +63,9 @@ export const createChat = async (req, res) => {
             if (!order) return res.status(404).json({ message: 'Order not found' });
 
             const customer = await Customer.findOne({ userId: senderRole === 'CUSTOMER' ? senderId : receiverId });
-            const seller = await Seller.findOne({ userId: senderRole === 'DEALER' ? senderId : receiverId });
+            const seller = await Seller.findOne({ userId: senderRole === 'SELLER' ? senderId : receiverId });
 
-            if (order.customerId.toString() !== customer?._id.toString() || order.dealerId.toString() !== seller?._id.toString()) {
+            if (order.customerId.toString() !== customer?._id.toString() || order.sellerId.toString() !== seller?._id.toString()) {
                 return res.status(403).json({ message: 'Unauthorized: Participation in order required' });
             }
         }
@@ -74,10 +74,10 @@ export const createChat = async (req, res) => {
             const negotiation = await Negotiation.findById(contextId);
             if (!negotiation) return res.status(404).json({ message: 'Negotiation not found' });
 
-            const seller = await Seller.findOne({ userId: senderRole === 'DEALER' ? senderId : receiverId });
+            const seller = await Seller.findOne({ userId: senderRole === 'SELLER' ? senderId : receiverId });
             const mfr = await Manufacturer.findOne({ userId: senderRole === 'MANUFACTURER' ? senderId : receiverId });
 
-            if (negotiation.dealerId.toString() !== seller?._id.toString() || negotiation.manufacturerId.toString() !== mfr?._id.toString()) {
+            if (negotiation.sellerId.toString() !== seller?._id.toString() || negotiation.manufacturerId.toString() !== mfr?._id.toString()) {
                 return res.status(403).json({ message: 'Unauthorized: Participation in negotiation required' });
             }
         }

@@ -176,7 +176,7 @@ export default function OnboardingChecklist({ role }: OnboardingChecklistProps) 
                         <span className="text-xs font-black text-slate-400 uppercase tracking-wider">
                             Progress
                         </span>
-                        <span className="text-xs font-black text-[#10367D]">
+                        <span className="text-xs font-black text-primary">
                             {completedCount} of {steps.length} completed
                         </span>
                     </div>
@@ -185,7 +185,7 @@ export default function OnboardingChecklist({ role }: OnboardingChecklistProps) 
                             initial={{ width: 0 }}
                             animate={{ width: `${progress}%` }}
                             transition={{ duration: 0.5 }}
-                            className="h-full bg-gradient-to-r from-[#10367D] to-blue-500"
+                            className="h-full bg-gradient-to-r from-primary to-blue-500"
                         />
                     </div>
                 </div>
@@ -224,7 +224,7 @@ export default function OnboardingChecklist({ role }: OnboardingChecklistProps) 
                                 {!step.completed && step.action && (
                                     <a
                                         href={step.action.href}
-                                        className="inline-flex items-center gap-2 text-xs font-black text-[#10367D] hover:text-blue-700 transition-colors"
+                                        className="inline-flex items-center gap-2 text-xs font-black text-primary hover:text-blue-700 transition-colors"
                                     >
                                         {step.action.label}
                                         <FaArrowRight className="w-3 h-3" />

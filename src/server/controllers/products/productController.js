@@ -48,9 +48,9 @@ export const getMyProducts = async (req, res) => {
 export const getAllProducts = async (req, res) => {
     try {
         const userRole = req.user?.role;
-        const dealerId = req.user?.dealer?._id || req.user?.dealer?.id;
+        const sellerId = req.user?.seller?._id || req.user?.seller?.id;
 
-        const result = await productService.getAllProducts(req.query, userRole, dealerId);
+        const result = await productService.getAllProducts(req.query, userRole, sellerId);
         res.json({ success: true, data: result });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });

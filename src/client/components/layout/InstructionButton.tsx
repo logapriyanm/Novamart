@@ -45,7 +45,7 @@ const InstructionButton: React.FC = () => {
                     whileHover={{
                         scale: 1.1,
                         rotate: 15,
-                        boxShadow: "0px 15px 30px rgba(59, 130, 246, 0.4)" // Blue glow
+                        // boxShadow: "0px 15px 30px rgba(59, 130, 246, 0.4)" // Blue glow
                     }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ type: "spring", stiffness: 260, damping: 20 }}

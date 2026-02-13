@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const DisputeSchema = new mongoose.Schema({
     orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true, unique: true, index: true },
-    raisedBy: { type: String, enum: ['CUSTOMER', 'DEALER', 'MANUFACTURER'], required: true },
+    raisedBy: { type: String, enum: ['CUSTOMER', 'DEALER', 'SELLER', 'MANUFACTURER'], required: true },
     status: {
         type: String,
         enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED'],

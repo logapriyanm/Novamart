@@ -120,9 +120,9 @@ class NotificationService {
 
     // --- Specific Event Handlers ---
 
-    async handleOrderPlaced({ order, customerId, dealerId }) {
+    async handleOrderPlaced({ order, customerId, sellerId }) {
         const orderId = order?._id || order?.id;
-        logger.info('[NotificationService] handleOrderPlaced triggered', { orderId, customerId, dealerId });
+        logger.info('[NotificationService] handleOrderPlaced triggered', { orderId, customerId, sellerId });
 
         await this.sendNotification({
             userId: customerId,
@@ -134,7 +134,7 @@ class NotificationService {
         });
 
         await this.sendNotification({
-            userId: dealerId,
+            userId: sellerId,
             type: 'ORDER',
             title: 'New Incoming Order',
             message: `A new order #${orderId.toString().slice(-8)} is awaiting fulfillment.`,
@@ -175,9 +175,9 @@ class NotificationService {
         });
     }
 
-    async handleEscrowRelease({ orderId, dealerId, amount }) {
+    async handleEscrowRelease({ orderId, sellerId, amount }) {
         await this.sendNotification({
-            userId: dealerId,
+            userId: sellerId,
             type: 'PAYMENT',
             title: 'Funds Released',
             message: `₹${amount} for order #${orderId.toString().slice(-8)} has been released to your account.`,

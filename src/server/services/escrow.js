@@ -43,7 +43,7 @@ class EscrowService {
                 path: 'orderId',
                 populate: [
                     { path: 'items.productId' },
-                    { path: 'dealerId' }
+                    { path: 'sellerId' }
                 ]
             });
 
@@ -134,7 +134,7 @@ class EscrowService {
             // Emit System Event
             systemEvents.emit(EVENTS.ESCROW.RELEASE, {
                 orderId,
-                dealerId: order.dealerId._id,
+                sellerId: order.sellerId._id,
                 amount: dealerPayout
             });
 

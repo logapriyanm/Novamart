@@ -42,7 +42,7 @@ export default function CategoryLayout({ categorySlug }: CategoryLayoutProps) {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground pt-32 pb-0">
+        <div className="min-h-screen bg-background text-foreground pt-39 pb-0">
             <div className="max-w-[1920px] mx-auto px-4 lg:px-8">
                 {/* Layout Container */}
                 <div className="flex flex-col lg:flex-row gap-8">

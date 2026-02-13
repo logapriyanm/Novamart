@@ -33,8 +33,8 @@ router.get('/product/:productId', getProductReviews);
 router.get('/seller/:sellerId', getSellerReviews);
 
 // Analytics & Management (Seller)
-router.get('/analytics/seller', authenticate, authorize('SELLER'), getSellerAnalytics);
-router.post('/:reviewId/reply', authenticate, authorize('SELLER'), replyToReview);
+router.get('/analytics/seller', authenticate, authorize(['SELLER']), getSellerAnalytics);
+router.post('/:reviewId/reply', authenticate, authorize(['SELLER']), replyToReview);
 
 // Admin Moderation Routes
 router.get('/analytics/admin', authenticate, authorize(['ADMIN']), getAdminAnalytics);

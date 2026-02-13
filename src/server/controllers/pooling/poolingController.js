@@ -19,7 +19,7 @@ export const joinPool = async (req, res) => {
 
         const seller = await Seller.findOne({ userId });
         if (!seller) {
-            return res.status(403).json({ success: false, message: 'Dealer profile required' });
+            return res.status(403).json({ success: false, message: 'Seller profile required' });
         }
 
         const participant = await poolingService.joinPool(poolId, seller._id, quantity);

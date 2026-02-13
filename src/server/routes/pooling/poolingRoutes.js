@@ -5,9 +5,9 @@ import authorize from '../../middleware/rbac.js';
 
 const router = express.Router();
 
-router.post('/create', authenticate, authorize(['DEALER']), poolingController.createPool);
-router.post('/:poolId/join', authenticate, authorize(['DEALER']), poolingController.joinPool);
-router.get('/', authenticate, authorize(['DEALER']), poolingController.getPools);
-router.get('/:id', authenticate, authorize(['DEALER']), poolingController.getPoolDetails);
+router.post('/create', authenticate, authorize(['SELLER']), poolingController.createPool);
+router.post('/:poolId/join', authenticate, authorize(['SELLER']), poolingController.joinPool);
+router.get('/', authenticate, authorize(['SELLER']), poolingController.getPools);
+router.get('/:id', authenticate, authorize(['SELLER']), poolingController.getPoolDetails);
 
 export default router;

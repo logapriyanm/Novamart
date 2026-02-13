@@ -86,18 +86,18 @@ export const getManufacturers = async (req, res) => {
     }
 };
 
-export const getDealers = async (req, res) => {
+export const getSellers = async (req, res) => {
     try {
-        const dealers = await Seller.find()
+        const sellers = await Seller.find()
             .populate('userId', 'email status')
             .populate('approvedBy')
             .sort({ createdAt: -1 });
         res.json({
             success: true,
-            data: dealers
+            data: sellers
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_DEALERS' });
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_SELLERS' });
     }
 };
 
@@ -146,22 +146,23 @@ export const verifyManufacturer = async (req, res) => {
     }
 };
 
-export const verifyDealer = async (req, res) => {
-    const { dealerId } = req.params;
+export const verifySeller = async (req, res) => {
+    const { sellerId, dealerId } = req.params;
+    const id = sellerId || dealerId; // Handle both sellerId and dealerId
     const { isVerified } = req.body;
     const adminId = req.user._id;
 
     try {
-        const dealer = await Seller.findByIdAndUpdate(dealerId, { isVerified }, { new: true }).populate('userId');
+        const seller = await Seller.findByIdAndUpdate(id, { isVerified }, { new: true }).populate('userId');
 
         if (isVerified) {
-            await User.findByIdAndUpdate(dealer.userId._id, { status: 'ACTIVE' });
+            await User.findByIdAndUpdate(seller.userId._id, { status: 'ACTIVE' });
         }
 
         try {
             const badge = await Badge.findOne({ name: 'VERIFIED' });
             if (badge && isVerified) {
-                await User.findByIdAndUpdate(dealer.userId._id, {
+                await User.findByIdAndUpdate(seller.userId._id, {
                     $addToSet: { badges: { badgeId: badge._id } }
                 });
             }
@@ -169,46 +170,47 @@ export const verifyDealer = async (req, res) => {
             console.error('Badge Assignment Failed:', badgeError.message);
         }
 
-        await auditService.logAction('DEALER_VERIFICATION', 'DEALER', dealerId, {
+        await auditService.logAction('SELLER_VERIFICATION', 'SELLER', id, {
             userId: adminId,
             isVerified,
             req
         });
 
         systemEvents.emit(isVerified ? EVENTS.AUTH.VERIFIED : EVENTS.AUTH.REJECTED, {
-            userId: dealer.userId._id,
-            userName: dealer.businessName
+            userId: seller.userId._id,
+            userName: seller.businessName
         });
 
         res.json({
             success: true,
-            message: `Dealer ${isVerified ? 'Verified' : 'Unverified'}`,
-            data: dealer
+            message: `Seller ${isVerified ? 'Verified' : 'Unverified'}`,
+            data: seller
         });
     } catch (error) {
-        console.error('DEALER VERIFICATION ERROR:', error);
-        res.status(400).json({ success: false, error: 'DEALER_VERIFICATION_FAILED' });
+        console.error('SELLER VERIFICATION ERROR:', error);
+        res.status(400).json({ success: false, error: 'SELLER_VERIFICATION_FAILED' });
     }
 };
 
-export const updateDealerManufacturers = async (req, res) => {
-    const { dealerId } = req.params;
+export const updateSellerManufacturers = async (req, res) => {
+    const { sellerId, dealerId } = req.params;
+    const id = sellerId || dealerId; // Handle both sellerId and dealerId
     const { manufacturerId } = req.body;
     const adminId = req.user._id;
 
     try {
-        const currentDealer = await Seller.findById(dealerId);
-        const isLinked = currentDealer.approvedBy.includes(manufacturerId);
+        const currentSeller = await Seller.findById(id);
+        const isLinked = currentSeller.approvedBy.includes(manufacturerId);
 
         const updateAction = isLinked
             ? { $pull: { approvedBy: manufacturerId } }
             : { $addToSet: { approvedBy: manufacturerId } };
 
-        const updatedDealer = await Seller.findByIdAndUpdate(dealerId, updateAction, { new: true })
+        const updatedSeller = await Seller.findByIdAndUpdate(id, updateAction, { new: true })
             .populate('approvedBy')
             .populate('userId');
 
-        await auditService.logAction('DEALER_MANUFACTURER_LINK', 'DEALER', dealerId, {
+        await auditService.logAction('SELLER_MANUFACTURER_LINK', 'SELLER', id, {
             userId: adminId,
             manufacturerId,
             action: isLinked ? 'UNLINK' : 'LINK',
@@ -218,11 +220,11 @@ export const updateDealerManufacturers = async (req, res) => {
         res.json({
             success: true,
             message: `Manufacturer ${isLinked ? 'unlinked' : 'linked'} successfully`,
-            data: updatedDealer
+            data: updatedSeller
         });
     } catch (error) {
         console.error('Linking failed:', error);
-        res.status(400).json({ success: false, error: 'DEALER_MANUFACTURER_LINK_FAILED' });
+        res.status(400).json({ success: false, error: 'SELLER_MANUFACTURER_LINK_FAILED' });
     }
 };
 
@@ -243,9 +245,9 @@ export default {
     getUsers,
     manageUser,
     getManufacturers,
-    getDealers,
+    getSellers,
     verifyManufacturer,
-    verifyDealer,
-    updateDealerManufacturers,
+    verifySeller,
+    updateSellerManufacturers,
     assignBadge
 };

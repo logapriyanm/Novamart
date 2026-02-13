@@ -56,7 +56,7 @@ export const subscribeToPlan = async (req, res) => {
         const { planId } = req.body;
 
         const seller = await Seller.findOne({ userId });
-        if (!seller) return res.status(404).json({ message: 'Dealer profile not found' });
+        if (!seller) return res.status(404).json({ message: 'Seller profile not found' });
 
         const plan = await SubscriptionPlan.findById(planId);
         if (!plan) return res.status(404).json({ message: 'Plan not found' });
@@ -65,18 +65,18 @@ export const subscribeToPlan = async (req, res) => {
         endDate.setDate(endDate.getDate() + plan.duration);
 
         await SellerSubscription.updateMany(
-            { dealerId: seller._id, status: 'ACTIVE' },
+            { sellerId: seller._id, status: 'ACTIVE' },
             { $set: { status: 'CANCELLED' } }
         );
 
         const subscription = await SellerSubscription.create({
-            dealerId: seller._id,
+            sellerId: seller._id,
             planId: plan._id,
             endDate,
             status: 'ACTIVE'
         });
 
-        // Update dealer's cached subscription tier
+        // Update seller's cached subscription tier
         seller.currentSubscriptionTier = plan.name;
         seller.subscriptionExpiresAt = endDate;
         await seller.save();
@@ -93,10 +93,10 @@ export const getMySubscription = async (req, res) => {
         const userId = req.user._id;
         const seller = await Seller.findOne({ userId });
 
-        if (!seller) return res.status(404).json({ message: 'Dealer not found' });
+        if (!seller) return res.status(404).json({ message: 'Seller not found' });
 
         const activeSub = await SellerSubscription.findOne({
-            dealerId: seller._id,
+            sellerId: seller._id,
             status: 'ACTIVE'
         }).populate('planId').sort({ endDate: -1 });
 
@@ -110,10 +110,10 @@ export const cancelSubscription = async (req, res) => {
     try {
         const userId = req.user._id;
         const seller = await Seller.findOne({ userId });
-        if (!seller) return res.status(404).json({ message: 'Dealer not found' });
+        if (!seller) return res.status(404).json({ message: 'Seller not found' });
 
         await SellerSubscription.updateMany(
-            { dealerId: seller._id, status: 'ACTIVE' },
+            { sellerId: seller._id, status: 'ACTIVE' },
             { $set: { status: 'CANCELLED' } }
         );
 
@@ -132,11 +132,11 @@ export const getSubscriptionFeatures = async (req, res) => {
         const seller = await Seller.findOne({ userId });
 
         if (!seller) {
-            return res.status(404).json({ message: 'Dealer not found' });
+            return res.status(404).json({ message: 'Seller not found' });
         }
 
         const activeSub = await SellerSubscription.findOne({
-            dealerId: seller._id,
+            sellerId: seller._id,
             status: 'ACTIVE',
             endDate: { $gt: new Date() }
         }).populate('planId');

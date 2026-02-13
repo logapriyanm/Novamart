@@ -7,7 +7,8 @@ import { Customer } from '../../models/index.js';
 
 export const createOrder = async (req, res) => {
     try {
-        const { dealerId, items, shippingAddress, idempotencyKey } = req.body;
+        const { dealerId, sellerId, items, shippingAddress, idempotencyKey } = req.body;
+        const targetSellerId = sellerId || dealerId; // Backward compatibility
         const userId = req.user._id;
 
         // Idempotency check: if idempotencyKey provided and order exists, return existing order
@@ -47,7 +48,7 @@ export const createOrder = async (req, res) => {
             }
         }
 
-        const order = await orderService.createOrder(customerId, dealerId, items, shippingAddress, idempotencyKey);
+        const order = await orderService.createOrder(customerId, targetSellerId, items, shippingAddress, idempotencyKey);
         res.status(201).json({ success: true, data: order });
     } catch (error) {
         logger.error('Order creation failed:', error);

@@ -103,7 +103,7 @@ const adminMenuGroups: MenuGroup[] = [
         items: [
             { name: 'All Users', icon: FaUsers, path: '/admin/users' },
             { name: 'Manufacturers', icon: FaIndustry, path: '/admin/manufacturers' },
-            { name: 'Sellers', icon: SellersIcon, path: '/admin/sellers' },
+            { name: 'Sellers', icon: SellersIcon, path: '/admin/dealers' },
             { name: 'Verification', icon: FaShieldAlt, path: '/admin/verification' },
             { name: 'Badges', icon: FaAward, path: '/admin/badges' },
         ],
