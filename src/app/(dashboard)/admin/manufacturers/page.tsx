@@ -103,7 +103,7 @@ export default function ManufacturerApprovalPanel() {
         <div className="min-h-screen  pb-20 overflow-x-hidden">
             {/* Top Navigation Row */}
             <div className="max-w-[1600px] mx-auto px-6 py-6">
-                <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-[#10367D] transition-colors group">
+                <Link href="/admin" className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#10367D] transition-colors group">
                     <FaArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
                     Back to Mission Control
                 </Link>
@@ -117,7 +117,7 @@ export default function ManufacturerApprovalPanel() {
                             <FaIndustry className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Entities</p>
+                            <p className="text-sm font-bold text-slate-400">Global Entities</p>
                             <h3 className="text-2xl font-black text-slate-900 leading-tight">{stats.total}</h3>
                         </div>
                     </div>
@@ -126,7 +126,7 @@ export default function ManufacturerApprovalPanel() {
                             <FaShieldAlt className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verified Partners</p>
+                            <p className="text-sm font-bold text-slate-400">Verified Partners</p>
                             <h3 className="text-2xl font-black text-slate-900 leading-tight">{stats.verified}</h3>
                         </div>
                     </div>
@@ -135,7 +135,7 @@ export default function ManufacturerApprovalPanel() {
                             <FaClock className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pending Review</p>
+                            <p className="text-sm font-bold text-slate-400">Pending Review</p>
                             <h3 className="text-2xl font-black text-slate-900 leading-tight">{stats.pending}</h3>
                         </div>
                     </div>
@@ -144,7 +144,7 @@ export default function ManufacturerApprovalPanel() {
                             <FaExclamationCircle className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Suspended Accounts</p>
+                            <p className="text-sm font-bold text-slate-400">Suspended Accounts</p>
                             <h3 className="text-2xl font-black text-slate-900 leading-tight">{stats.suspended}</h3>
                         </div>
                     </div>
@@ -162,7 +162,7 @@ export default function ManufacturerApprovalPanel() {
                                 <button
                                     key={tab}
                                     onClick={() => setFilterTab(tab as any)}
-                                    className={`px-6 py-2 rounded-[10px] text-[10px] font-black uppercase tracking-widest transition-all ${filterTab === tab ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+                                    className={`px-6 py-2 rounded-[10px] text-sm font-bold transition-all ${filterTab === tab ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
                                 >
                                     {tab}
                                 </button>
@@ -173,7 +173,7 @@ export default function ManufacturerApprovalPanel() {
                             <input
                                 type="text"
                                 placeholder="Search by GST or Title..."
-                                className="w-full bg-slate-50 border-none rounded-[10px] py-2.5 pl-10 pr-4 text-xs font-bold focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-300"
+                                className="w-full bg-slate-50 border-none rounded-[10px] py-2.5 pl-10 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-300"
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                             />
@@ -189,7 +189,7 @@ export default function ManufacturerApprovalPanel() {
                         ) : filteredManufacturers.length === 0 ? (
                             <div className="bg-white p-20 rounded-[3rem] text-center border border-slate-100 shadow-sm">
                                 <FaBuilding className="w-12 h-12 text-slate-100 mx-auto mb-4" />
-                                <p className="text-xs font-black text-slate-300 uppercase tracking-[0.2em]">No Matches Found</p>
+                                <p className="text-sm font-bold text-slate-300 uppercase tracking-[0.2em]">No Matches Found</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
@@ -208,19 +208,19 @@ export default function ManufacturerApprovalPanel() {
                                                 <div>
                                                     <h4 className="text-lg font-black text-slate-900 leading-tight mb-1">{mfg.companyName}</h4>
                                                     <div className="flex flex-wrap items-center gap-2">
-                                                        <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-[10px] border border-blue-100">GST: {mfg.gstNumber}</span>
+                                                        <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-[10px] border border-blue-100">GST: {mfg.gstNumber}</span>
                                                         {mfg.isVerified && (
-                                                            <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 flex items-center gap-1.5">
+                                                            <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 flex items-center gap-1.5">
                                                                 <FaShieldAlt className="w-3 h-3" /> Verified
                                                             </span>
                                                         )}
                                                         {mfg.user?.status === 'SUSPENDED' && (
-                                                            <span className="text-[9px] font-black text-rose-600 uppercase tracking-widest bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 flex items-center gap-1.5">
+                                                            <span className="text-sm font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 flex items-center gap-1.5">
                                                                 <FaExclamationCircle className="w-3 h-3" /> Suspended
                                                             </span>
                                                         )}
                                                         {!mfg.isVerified && mfg.user?.status !== 'SUSPENDED' && (
-                                                            <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-1 rounded-lg border border-amber-100 flex items-center gap-1.5">
+                                                            <span className="text-sm font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg border border-amber-100 flex items-center gap-1.5">
                                                                 <FaClock className="w-3 h-3" /> Pending Audit
                                                             </span>
                                                         )}
@@ -229,8 +229,8 @@ export default function ManufacturerApprovalPanel() {
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <div className="hidden md:block text-right">
-                                                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Registration</p>
-                                                    <p className="text-[10px] font-black text-slate-600 truncate max-w-[120px]">{mfg.registrationNo}</p>
+                                                    <p className="text-sm font-bold text-slate-400 mb-0.5">Registration</p>
+                                                    <p className="text-sm font-bold text-slate-600 truncate max-w-[120px]">{mfg.registrationNo}</p>
                                                 </div>
                                                 <button className="w-10 h-10 rounded-[10px] bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
                                                     <FaArrowRight className="w-3 h-3" />
@@ -261,11 +261,11 @@ export default function ManufacturerApprovalPanel() {
                                 <div className="flex items-center justify-between mb-10 relative">
                                     <div>
                                         <h3 className="text-2xl font-black tracking-tight italic">Governance <span className="text-blue-400">Audit</span></h3>
-                                        <p className="text-[12px] font-black  tracking-[0.2em] text-slate-500 mt-1">Industrial Entity Protocol</p>
+                                        <p className="text-sm font-bold text-slate-500 mt-1">Industrial Entity Protocol</p>
                                     </div>
                                     <div className="text-right">
                                         <div className="px-3 py-1 bg-white/5 rounded-[10px] border border-white/10">
-                                            <span className="text-[8px] font-black  tracking-widest text-slate-400">ID: {(selectedRequest._id || selectedRequest.id || '').slice(0, 8)}</span>
+                                            <span className="text-sm font-bold text-slate-400">ID: {(selectedRequest._id || selectedRequest.id || '').slice(0, 8)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -275,21 +275,21 @@ export default function ManufacturerApprovalPanel() {
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 mb-2">
                                             <FaBuilding className="w-3 h-3 text-blue-400" />
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Base Operations</p>
+                                            <p className="text-sm font-bold text-slate-400">Base Operations</p>
                                         </div>
                                         <div className="p-6 bg-white/5 rounded-[10px] border border-white/10 backdrop-blur-md space-y-6">
                                             <div>
-                                                <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Factory Installation</p>
+                                                <p className="text-sm font-bold text-slate-500 mb-1.5">Factory Installation</p>
                                                 <p className="text-sm font-bold leading-relaxed pr-8">{selectedRequest.factoryAddress}</p>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Reg. Hash</p>
-                                                    <p className="text-[10px] font-black text-blue-400 tracking-widest">{selectedRequest.registrationNo}</p>
+                                                    <p className="text-sm font-bold text-slate-500 mb-1.5">Reg. Hash</p>
+                                                    <p className="text-sm font-bold text-blue-400">{selectedRequest.registrationNo}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Tax Token</p>
-                                                    <p className="text-[10px] font-black text-white tracking-widest">{selectedRequest.gstNumber}</p>
+                                                    <p className="text-sm font-bold text-slate-500 mb-1.5">Tax Token</p>
+                                                    <p className="text-sm font-bold text-white">{selectedRequest.gstNumber}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -299,7 +299,7 @@ export default function ManufacturerApprovalPanel() {
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 mb-2">
                                             <FaFileSignature className="w-3 h-3 text-emerald-400" />
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Compliance Assets</p>
+                                            <p className="text-sm font-bold text-slate-400">Compliance Assets</p>
                                         </div>
                                         <div className="grid grid-cols-1 gap-2">
                                             {selectedRequest.certifications?.length > 0 ? (
@@ -310,8 +310,8 @@ export default function ManufacturerApprovalPanel() {
                                                                 <FaFileAlt className="w-4 h-4" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-200">{doc}</p>
-                                                                <p className="text-[8px] font-bold text-slate-500 mt-0.5 uppercase tracking-tighter">Verified Static Asset</p>
+                                                                <p className="text-sm font-bold text-slate-200">{doc}</p>
+                                                                <p className="text-sm font-bold text-slate-500 mt-0.5">Verified Static Asset</p>
                                                             </div>
                                                         </div>
                                                         <FaCheckCircle className="w-3 h-3 text-emerald-500 shadow-xl shadow-emerald-500/20" />
@@ -320,7 +320,7 @@ export default function ManufacturerApprovalPanel() {
                                             ) : (
                                                 <div className="p-6 bg-white/5 rounded-[10px] border border-white/10 text-center">
                                                     <FaGlobe className="w-8 h-8 text-white/5 mx-auto mb-3" />
-                                                    <p className="text-[10px] font-bold text-slate-500 italic uppercase tracking-widest">No certifications linked</p>
+                                                    <p className="text-sm font-bold text-slate-500 italic">No certifications linked</p>
                                                 </div>
                                             )}
                                         </div>
@@ -333,7 +333,7 @@ export default function ManufacturerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleAction(selectedRequest._id || selectedRequest.id, false)}
                                                     disabled={isVerifying}
-                                                    className="group/btn relative py-5 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
+                                                    className="group/btn relative py-5 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-[10px] font-black text-sm transition-all hover:bg-rose-500/20 active:scale-95 disabled:opacity-50"
                                                 >
                                                     {isVerifying ? 'Processing...' : 'Revoke Status'}
                                                 </button>
@@ -341,7 +341,7 @@ export default function ManufacturerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleAction(selectedRequest._id || selectedRequest.id, true)}
                                                     disabled={isVerifying}
-                                                    className="group/btn relative py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
+                                                    className="group/btn relative py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-black text-sm shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
                                                 >
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shine" />
                                                     <div className="flex items-center justify-center gap-3">
@@ -355,7 +355,7 @@ export default function ManufacturerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleUserStatus(selectedRequest.userId, 'ACTIVE')}
                                                     disabled={isVerifying}
-                                                    className="py-5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:bg-emerald-500/20 active:scale-95 disabled:opacity-50"
+                                                    className="py-5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-[2rem] font-black text-sm transition-all hover:bg-emerald-500/20 active:scale-95 disabled:opacity-50"
                                                 >
                                                     Restore Account
                                                 </button>
@@ -363,7 +363,7 @@ export default function ManufacturerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleUserStatus(selectedRequest.userId, 'SUSPENDED')}
                                                     disabled={isVerifying}
-                                                    className="py-0 bg-white/5 hover:bg-white/[0.08] text-white/60 border border-white/10 rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] transition-all hover:text-white active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                                                    className="py-0 bg-white/5 hover:bg-white/[0.08] text-white/60 border border-white/10 rounded-[10px] font-black text-sm transition-all hover:text-white active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                                                 >
                                                     <FaTimesCircle className="w-4 h-4" />
                                                     Kill Switch
@@ -371,7 +371,7 @@ export default function ManufacturerApprovalPanel() {
                                             )}
                                         </div>
 
-                                        <p className="text-[11px] font-bold text-slate-500 text-center   leading-relaxed px-10">
+                                        <p className="text-sm font-bold text-slate-500 text-center   leading-relaxed px-10">
                                             Authorized entities receive immediate <span className="text-white">API access</span>. The kill switch freezes all open payouts.
                                         </p>
                                     </div>
@@ -382,8 +382,8 @@ export default function ManufacturerApprovalPanel() {
                                 <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mb-6 shadow-sm">
                                     <FaExclamationCircle className="w-10 h-10 text-slate-200" />
                                 </div>
-                                <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-900 mb-3">Target Not Scoped</h4>
-                                <p className="text-[10px] font-bold leading-relaxed max-w-[240px] text-slate-400 uppercase tracking-widest">Select an industrial entity from the active ledger to initiate the audit protocol.</p>
+                                <h4 className="text-sm font-black text-slate-900 mb-3">Target Not Scoped</h4>
+                                <p className="text-sm font-bold leading-relaxed max-w-[240px] text-slate-400">Select an industrial entity from the active ledger to initiate the audit protocol.</p>
                             </div>
                         )}
                     </AnimatePresence>
@@ -401,7 +401,7 @@ export default function ManufacturerApprovalPanel() {
                     >
                         <div className="p-8 bg-white rounded-[10px] shadow-2xl border border-slate-100 flex flex-col items-center gap-4">
                             <Loader size="md" variant="primary" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Syncing Governance state...</p>
+                            <p className="text-sm font-bold text-slate-900">Syncing Governance state...</p>
                         </div>
                     </motion.div>
                 )}

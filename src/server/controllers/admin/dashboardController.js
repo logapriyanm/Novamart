@@ -1,11 +1,11 @@
-import { Order, Escrow, Dispute, User } from '../../models/index.js';
+import { Order, Escrow, Dispute, User, Product, Manufacturer, Seller } from '../../models/index.js';
 
 /**
- * Dashboard Stats (GMV, Escrow, Disputes)
+ * Dashboard Stats (GMV, Escrow, Disputes, Users, Products)
  */
 export const getDashboardStats = async (req, res) => {
     try {
-        const [gmvResult, escrowStats, disputes, pendingUsers] = await Promise.all([
+        const [gmvResult, escrowStats, disputes, pendingUsers, pendingProducts, totalManufacturers, totalSellers, totalCustomers] = await Promise.all([
             Order.aggregate([{ $group: { _id: null, total: { $sum: '$totalAmount' } } }]),
             Escrow.aggregate([
                 {
@@ -17,7 +17,11 @@ export const getDashboardStats = async (req, res) => {
                 }
             ]),
             Dispute.countDocuments({ status: 'OPEN' }),
-            User.countDocuments({ status: 'PENDING' })
+            User.countDocuments({ status: 'PENDING' }),
+            Product.countDocuments({ status: 'PENDING' }),
+            Manufacturer.countDocuments(),
+            Seller.countDocuments(),
+            User.countDocuments({ role: 'CUSTOMER' })
         ]);
 
         res.json({
@@ -30,7 +34,12 @@ export const getDashboardStats = async (req, res) => {
                     _count: s.count
                 })),
                 activeDisputes: disputes,
-                pendingApprovals: pendingUsers
+                pendingApprovals: pendingUsers,
+                pendingUserApprovals: pendingUsers,
+                pendingProductApprovals: pendingProducts,
+                totalManufacturers,
+                totalSellers,
+                totalCustomers
             }
         });
     } catch (error) {

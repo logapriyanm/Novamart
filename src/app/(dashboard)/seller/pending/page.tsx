@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { FaRegClock, FaShieldAlt, FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
 import Link from 'next/link';
 
-export default function DealerPendingVerification() {
+export default function SellerPendingVerification() {
     return (
         <div className="min-h-screen bg-[#EBEBEB] flex items-center justify-center p-6">
             <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-2 bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100">
@@ -18,7 +18,7 @@ export default function DealerPendingVerification() {
                         </div>
                         <h1 className="text-3xl font-black tracking-tight mb-6">Marketplace <br />Safety Audit</h1>
                         <p className="text-slate-400 font-medium leading-relaxed">
-                            NovaMart maintains a high-trust ecosystem. Every dealer is manually verified to ensure tax compliance and business legitimacy.
+                            NovaMart maintains a high-trust ecosystem. Every seller is manually verified to ensure tax compliance and business legitimacy.
                         </p>
                     </div>
 

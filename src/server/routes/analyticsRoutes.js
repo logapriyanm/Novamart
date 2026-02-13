@@ -1,6 +1,7 @@
 import express from 'express';
 import {
     getAdminOverview,
+    getQualityAudit,
     getManufacturerOverview,
     getSellerOverview
 } from '../controllers/analyticsController.js';
@@ -11,6 +12,7 @@ const router = express.Router();
 
 // Admin
 router.get('/admin/overview', authenticate, authorize(['ADMIN']), getAdminOverview);
+router.get('/admin/quality-audit', authenticate, authorize(['ADMIN']), getQualityAudit);
 
 // Manufacturer
 router.get('/manufacturer/overview', authenticate, authorize(['MANUFACTURER']), getManufacturerOverview);

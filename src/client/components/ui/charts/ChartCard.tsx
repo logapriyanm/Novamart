@@ -29,7 +29,7 @@ export default function ChartCard({
     className
 }: ChartCardProps) {
     return (
-        <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full ${className || ''}`}>
+        <div className={`bg-white p-6 rounded-[10px] shadow-sm border border-slate-100 flex flex-col h-full ${className || ''}`}>
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
@@ -45,8 +45,8 @@ export default function ChartCard({
                                     key={range}
                                     onClick={() => onRangeChange(range)}
                                     className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${currentRange === range
-                                            ? 'bg-white text-slate-800 shadow-sm'
-                                            : 'text-slate-400 hover:text-slate-600'
+                                        ? 'bg-white text-slate-800 shadow-sm'
+                                        : 'text-slate-400 hover:text-slate-600'
                                         }`}
                                 >
                                     {range}

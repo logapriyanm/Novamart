@@ -87,7 +87,7 @@ export default function UserDropdown() {
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         className="absolute right-0 mt-0 pt-3 w-56 z-[100]"
                     >
-                        <div className="bg-surface border border-foreground/5 rounded-[10px] shadow-2xl overflow-hidden">
+                        <div className="bg-white border border-foreground/5 rounded-[10px] shadow-2xl overflow-hidden">
                             <div className="p-4 border-b border-foreground/5 bg-background/50">
                                 <p className="text-xs font-black text-foreground uppercase tracking-widest leading-none mb-1">Signed in as</p>
                                 <p className="text-sm font-bold text-foreground truncate">{user.email}</p>

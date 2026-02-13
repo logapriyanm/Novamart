@@ -13,6 +13,15 @@ const ManufacturerSchema = new mongoose.Schema({
     gstNumber: { type: String, required: true, unique: true },
     certifications: [String],
     isVerified: { type: Boolean, default: false },
+    verificationStatus: {
+        type: String,
+        enum: ['NONE', 'PENDING', 'VERIFIED', 'REJECTED'],
+        default: 'NONE'
+    },
+    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    verifiedAt: { type: Date },
+    verificationNotes: { type: String },
+    rejectionReason: { type: String },
     logo: { type: String },
     brandDescription: { type: String },
     marketingMaterials: [String],

@@ -308,7 +308,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                                             {!otpSent && (
                                                 <button
                                                     onClick={() => setOtpSent(true)}
-                                                    className="px-4 bg-gray-900 text-white rounded-[10px] text-xs font-bold uppercase tracking-wide hover:bg-black transition-all whitespace-nowrap"
+                                                    className="px-4 bg-gray-900 text-white rounded-[10px] text-xs font-bold tracking-wide hover:bg-black transition-all whitespace-nowrap"
                                                 >
                                                     Get OTP
                                                 </button>
@@ -349,7 +349,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                         <button
                             onClick={nextStep}
                             disabled={isLoading || !formData.agreedToTerms}
-                            className="w-full bg-gray-900 text-white font-bold py-3 rounded-[10px] flex items-center justify-center gap-2 hover:bg-black hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-wider mt-6"
+                            className="w-full bg-gray-900 text-white font-bold py-3 rounded-[10px] flex items-center justify-center gap-2 hover:bg-black hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm tracking-wider mt-6"
                         >
                             {isLoading ? <Loader size="sm" variant="white" /> : (
                                 <>
@@ -372,7 +372,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                             <p className="text-gray-500 font-medium">Your account has been activated. You can now browse products and purchase securely with escrow.</p>
                         </div>
                         <Link href="/profile" className="block w-full">
-                            <button className="w-full bg-primary text-white font-bold py-4 rounded-[10px] transition-all hover:bg-primary/90 shadow-lg shadow-primary/20 uppercase tracking-widest text-xs">
+                            <button className="w-full bg-primary text-white font-bold py-4 rounded-[10px] transition-all hover:bg-primary/90 shadow-lg shadow-primary/20 tracking-widest text-xs">
                                 Go to Profile
                             </button>
                         </Link>
@@ -403,7 +403,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                                 <input
                                     type="text"
                                     placeholder="22AAAAA0000A1Z5"
-                                    className={`w-full bg-white border ${errors.gstNumber ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm font-medium transition-all focus:ring-1 focus:outline-none uppercase`}
+                                    className={`w-full bg-white border ${errors.gstNumber ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-primary focus:ring-primary'} rounded-[10px] px-4 py-3 text-sm font-medium transition-all focus:ring-1 focus:outline-none`}
                                     value={formData.gstNumber}
                                     onChange={e => setFormData({ ...formData, gstNumber: e.target.value })}
                                 />
@@ -424,7 +424,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
 
                         <button
                             onClick={nextStep}
-                            className="w-full bg-gray-900 text-white font-bold py-3 rounded-[10px] flex items-center justify-center gap-2  hover:bg-black hover:scale-[1.02] transition-all uppercase tracking-wider text-sm mt-6"
+                            className="w-full bg-gray-900 text-white font-bold py-3 rounded-[10px] flex items-center justify-center gap-2  hover:bg-black hover:scale-[1.02] transition-all tracking-wider text-sm mt-6"
                         >
                             Finalize Application
                             <ArrowRight className="w-4 h-4" />
@@ -434,7 +434,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
             case 4:
                 return (
                     <div className="text-center space-y-6">
-                        <div className="w-24 h-24 rounded-full bg-blue-50 text-primary flex items-center justify-center mx-auto">
+                        <div className="w-24 h-24 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
                             <ShieldCheck className="w-12 h-12" />
                         </div>
                         <div className="space-y-3">
@@ -444,7 +444,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                             </p>
                         </div>
                         <Link href="/" className="block w-full">
-                            <button className="w-full bg-primary text-white font-bold py-4 rounded-[10px] transition-all hover:bg-primary/90 uppercase tracking-widest text-xs">
+                            <button className="w-full bg-primary text-white font-bold py-4 rounded-[10px] transition-all hover:bg-primary/90 tracking-widest text-xs">
                                 Back to Home
                             </button>
                         </Link>
@@ -545,7 +545,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                                                         }`}>
                                                         {isCompleted ? <FaCheck className="w-3 h-3" /> : stepNum}
                                                     </div>
-                                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'
+                                                    <span className={`text-[10px] font-bold tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'
                                                         }`}>
                                                         {label}
                                                     </span>
@@ -572,7 +572,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                                 {step > 1 && step < 4 && (
                                     <button
                                         onClick={prevStep}
-                                        className="mt-6 flex items-center gap-2 text-gray-400 font-semibold hover:text-gray-900 transition-colors text-xs uppercase tracking-wide"
+                                        className="mt-6 flex items-center gap-2 text-gray-400 font-semibold hover:text-gray-900 transition-colors text-xs tracking-wide"
                                     >
                                         <ArrowLeft className="w-3 h-3" />
                                         Back

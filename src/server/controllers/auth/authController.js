@@ -309,13 +309,8 @@ export const googleLogin = async (req, res) => {
         let user = await User.findOne({ email });
 
         if (user) {
-            if (user.role !== 'CUSTOMER') {
-                return res.status(403).json({
-                    success: false,
-                    error: 'RESTRICTED_ROLE',
-                    message: 'Please use standard secure login for your account type.'
-                });
-            }
+            // Allow login for any role if email matches
+            logger.info('DEBUG: Google Login for existing user: %s, Role: %s', email, user.role);
         } else {
             user = await User.create({
                 email,
@@ -363,7 +358,11 @@ export const googleLogin = async (req, res) => {
             }
         });
     } catch (error) {
-        logger.error('❌ Google Auth Error:', error);
+        logger.error('❌ Google Auth Error:', {
+            message: error.message,
+            stack: error.stack,
+            clientId: process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing'
+        });
         res.status(400).json({ success: false, error: 'GOOGLE_AUTH_FAILED', details: error.message });
     }
 };

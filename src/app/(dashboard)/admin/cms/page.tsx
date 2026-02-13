@@ -66,7 +66,7 @@ const TESTIMONIAL_VARIANTS = ['service-card', 'pure-quote', 'photo-split', 'wide
 
 // ─── SHARED EDITOR COMPONENTS ──────────────────────────────────────────────────
 function EditorLabel({ children }: { children: React.ReactNode }) {
-    return <label className="text-[10px] font-black uppercase tracking-wider text-foreground/40">{children}</label>;
+    return <label className="text-xs font-bold text-foreground/60">{children}</label>;
 }
 
 function EditorInput({ value, onChange, placeholder = '' }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
@@ -99,7 +99,7 @@ function AddItemBtn({ onClick, label = 'Add Item' }: { onClick: () => void; labe
         <button
             type="button"
             onClick={onClick}
-            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-primary hover:text-primary/80 transition-colors mt-2"
+            className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors mt-2"
         >
             <FaPlus className="w-2.5 h-2.5" /> {label}
         </button>
@@ -143,11 +143,11 @@ function HeroEditor({ content, setContent }: { content: any; setContent: (c: any
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Hero Slides ({slides.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Hero Slides ({slides.length})</h4>
             {slides.map((slide: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-4 border border-foreground/5 space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-foreground/30 uppercase">Slide {idx + 1}</span>
+                        <span className="text-xs font-bold text-foreground/30">Slide {idx + 1}</span>
                         <RemoveItemBtn onClick={() => removeSlide(idx)} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -199,11 +199,11 @@ function BrandSpotlightEditor({ content, setContent }: { content: any; setConten
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Brand Setups ({setups.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Brand Setups ({setups.length})</h4>
             {setups.map((setup: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-4 border border-foreground/5 space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-foreground/30 uppercase">Setup {idx + 1}</span>
+                        <span className="text-xs font-bold text-foreground/30">Setup {idx + 1}</span>
                         <RemoveItemBtn onClick={() => removeSetup(idx)} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -247,11 +247,11 @@ function TrustStripEditor({ content, setContent }: { content: any; setContent: (
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Trust Items ({items.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Trust Items ({items.length})</h4>
             {items.map((item: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-4 border border-foreground/5 space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-foreground/30 uppercase">Item {idx + 1}</span>
+                        <span className="text-xs font-bold text-foreground/30">Item {idx + 1}</span>
                         <RemoveItemBtn onClick={() => removeItem(idx)} />
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -285,7 +285,7 @@ function TrendingBarEditor({ content, setContent }: { content: any; setContent: 
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Trending Categories ({categories.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Trending Categories ({categories.length})</h4>
             {categories.map((cat: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-3 border border-foreground/5 flex items-end gap-3">
                     <div className="flex-1"><EditorLabel>Name</EditorLabel><EditorInput value={cat.name} onChange={v => updateCategory(idx, 'name', v)} /></div>
@@ -351,11 +351,11 @@ function CustomerOffersEditor({ content, setContent }: { content: any; setConten
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Offers ({offers.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Offers ({offers.length})</h4>
             {offers.map((offer: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-4 border border-foreground/5 space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-foreground/30 uppercase">Offer {idx + 1}</span>
+                        <span className="text-xs font-bold text-foreground/30">Offer {idx + 1}</span>
                         <RemoveItemBtn onClick={() => removeOffer(idx)} />
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -394,7 +394,7 @@ function CustomerOffersEditor({ content, setContent }: { content: any; setConten
             <AddItemBtn onClick={addOffer} label="Add Offer" />
 
             <div className="border-t border-foreground/5 pt-4 space-y-3">
-                <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">CTA Section</h4>
+                <h4 className="text-sm font-bold text-foreground/60">CTA Section</h4>
                 <div><EditorLabel>CTA Title</EditorLabel><EditorInput value={content?.ctaTitle || ''} onChange={v => setContent({ ...content, ctaTitle: v })} /></div>
                 <div><EditorLabel>CTA Subtitle</EditorLabel><EditorInput value={content?.ctaSubtitle || ''} onChange={v => setContent({ ...content, ctaSubtitle: v })} /></div>
             </div>
@@ -421,11 +421,11 @@ function BestsellerEditor({ content, setContent }: { content: any; setContent: (
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Bestseller Products ({products.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Bestseller Products ({products.length})</h4>
             {products.map((product: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-4 border border-foreground/5 space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-foreground/30 uppercase">Product {idx + 1}</span>
+                        <span className="text-xs font-bold text-foreground/30">Product {idx + 1}</span>
                         <RemoveItemBtn onClick={() => removeProduct(idx)} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -472,11 +472,11 @@ function WhyNovaMartEditor({ content, setContent }: { content: any; setContent: 
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Features ({features.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Features ({features.length})</h4>
             {features.map((feature: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-4 border border-foreground/5 space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-foreground/30 uppercase">Feature {idx + 1}</span>
+                        <span className="text-xs font-bold text-foreground/30">Feature {idx + 1}</span>
                         <RemoveItemBtn onClick={() => removeFeature(idx)} />
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -510,7 +510,7 @@ function ManufacturersEditor({ content, setContent }: { content: any; setContent
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Manufacturers ({manufacturers.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Manufacturers ({manufacturers.length})</h4>
             {manufacturers.map((mfr: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-3 border border-foreground/5 flex items-end gap-3">
                     <div className="flex-1"><EditorLabel>Name</EditorLabel><EditorInput value={mfr.name} onChange={v => updateMfr(idx, 'name', v)} /></div>
@@ -553,11 +553,11 @@ function TestimonialsEditor({ content, setContent }: { content: any; setContent:
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Testimonials ({testimonials.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Testimonials ({testimonials.length})</h4>
             {testimonials.map((t: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-4 border border-foreground/5 space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-foreground/30 uppercase">Testimonial {idx + 1}</span>
+                        <span className="text-xs font-bold text-foreground/30">Testimonial {idx + 1}</span>
                         <RemoveItemBtn onClick={() => removeTestimonial(idx)} />
                     </div>
                     <div className="grid grid-cols-3 gap-3">
@@ -619,7 +619,7 @@ function DeliveryPartnersEditor({ content, setContent }: { content: any; setCont
 
     return (
         <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase tracking-wider text-foreground/60">Delivery Partners ({partners.length})</h4>
+            <h4 className="text-sm font-bold text-foreground/60">Delivery Partners ({partners.length})</h4>
             {partners.map((partner: any, idx: number) => (
                 <div key={idx} className="bg-background rounded-[12px] p-3 border border-foreground/5 flex items-end gap-3">
                     <div className="flex-1"><EditorLabel>Name</EditorLabel><EditorInput value={partner.name} onChange={v => updatePartner(idx, 'name', v)} /></div>
@@ -769,7 +769,7 @@ export default function AdminCMSPage() {
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-foreground tracking-tight">Home Page CMS</h1>
+                    <h1 className="text-3xl font-black text-foreground tracking-tight UPPERCASE ITALIC">Home Page CMS</h1>
                     <p className="text-foreground/60 mt-1">Manage sections, content, visibility, and role-based layout dynamically.</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -829,11 +829,11 @@ export default function AdminCMSPage() {
                                                 <div>
                                                     <h3 className="font-black text-lg text-foreground tracking-tight leading-tight">{section.title}</h3>
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/40 bg-foreground/5 px-2 py-0.5 rounded-md">
+                                                        <span className="text-xs font-bold text-foreground/40 bg-foreground/5 px-2 py-0.5 rounded-md">
                                                             {section.componentName}
                                                         </span>
                                                         {DATA_DRIVEN_COMPONENTS.includes(section.componentName) && (
-                                                            <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                                                            <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
                                                                 <FaInfoCircle className="w-2.5 h-2.5" /> Auto
                                                             </span>
                                                         )}
@@ -843,7 +843,7 @@ export default function AdminCMSPage() {
 
                                             {/* Order Badge */}
                                             <div className="flex flex-col items-end">
-                                                <span className="text-[9px] font-black uppercase text-foreground/20">Order</span>
+                                                <span className="text-[10px] font-bold text-foreground/20">Order</span>
                                                 <span className="text-xl font-black text-foreground/10 tabular-nums leading-none">{String(section.order).padStart(2, '0')}</span>
                                             </div>
                                         </div>
@@ -852,7 +852,7 @@ export default function AdminCMSPage() {
                                         <div className="flex items-end justify-between mt-auto pt-6 border-t border-dashed border-foreground/5">
                                             <div className="flex flex-wrap gap-1.5 max-w-[60%]">
                                                 {section.visibleFor.map(role => (
-                                                    <span key={role} className="text-[9px] font-bold bg-foreground/5 text-foreground/60 px-2 py-1 rounded-md uppercase tracking-wider">
+                                                    <span key={role} className="text-[10px] font-bold bg-foreground/5 text-foreground/60 px-2 py-1 rounded-md tracking-wider">
                                                         {role === 'MANUFACTURER' ? 'MFR' : role}
                                                     </span>
                                                 ))}
@@ -925,7 +925,7 @@ export default function AdminCMSPage() {
                             <div className="p-8 border-b border-foreground/5 bg-white shrink-0 flex justify-between items-center">
                                 <div>
                                     <h2 className="text-xl font-black text-foreground">Edit Section</h2>
-                                    <p className="text-xs text-foreground/40 font-bold uppercase tracking-widest mt-1">{editingSection.sectionKey} — {editingSection.componentName}</p>
+                                    <p className="text-sm font-bold text-foreground/40 mt-1">{editingSection.sectionKey} — {editingSection.componentName}</p>
                                 </div>
                                 <button
                                     onClick={() => setEditingSection(null)}
@@ -974,7 +974,7 @@ export default function AdminCMSPage() {
                                                             : [...current, role];
                                                         setEditingSection({ ...editingSection, visibleFor: fresh });
                                                     }}
-                                                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${editingSection.visibleFor.includes(role) ? 'bg-primary text-black' : 'bg-background border border-foreground/10 text-foreground/40'}`}
+                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${editingSection.visibleFor.includes(role) ? 'bg-primary text-black' : 'bg-background border border-foreground/10 text-foreground/40'}`}
                                                 >
                                                     {role}
                                                 </button>
@@ -984,7 +984,7 @@ export default function AdminCMSPage() {
 
                                     {/* Component-Specific Content Editor */}
                                     <div className="border-t border-foreground/5 pt-6">
-                                        <h4 className="text-sm font-black text-foreground mb-4 uppercase tracking-tighter flex items-center gap-2">
+                                        <h4 className="text-sm font-black text-foreground mb-4 flex items-center gap-2">
                                             <FaEdit className="w-3 h-3" /> Section Content
                                         </h4>
                                         <ContentEditor
@@ -995,7 +995,7 @@ export default function AdminCMSPage() {
 
                                     {/* SEO */}
                                     <div className="border-t border-foreground/5 pt-6">
-                                        <h4 className="text-sm font-black text-foreground mb-4 uppercase tracking-tighter flex items-center gap-2">
+                                        <h4 className="text-sm font-black text-foreground mb-4 flex items-center gap-2">
                                             <FaSearch className="w-3 h-3" /> SEO Optimization
                                         </h4>
                                         <div className="space-y-4">
@@ -1028,7 +1028,7 @@ export default function AdminCMSPage() {
                                     <button
                                         type="submit"
                                         disabled={isSaving}
-                                        className="w-full bg-primary text-white  font-black py-1 rounded-[16px] flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
+                                        className="w-full bg-primary text-white font-black py-1 rounded-[16px] flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
                                     >
                                         {isSaving ? 'Saving Changes...' : 'Update Section Configuration'}
                                     </button>

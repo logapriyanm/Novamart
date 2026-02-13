@@ -22,11 +22,9 @@ export default function ManufacturerShell({ children }: { children: React.ReactN
                     role="MANUFACTURER"
                     onMenuClick={() => setIsSidebarOpen(true)}
                     searchPlaceholder="Search production analytics..."
-                    showBadge={true}
-                    badgeText="Production Center"
                 />
 
-                <main className="flex-1 p-4 sm:p-6 lg:p-10 bg-slate-50/20 overflow-y-auto no-scrollbar">
+                <main className="flex-1 p-4 sm:p-6 lg:p-10 bg-slate-50/20 overflow-y-auto no-scrollbar [&_h1]:uppercase [&_h1]:italic [&_h1]:tracking-tight text-sm text-[14px]">
                     {children}
                 </main>
             </div>

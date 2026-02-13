@@ -1,29 +1,45 @@
 import express from 'express';
-import { uploadDocument, getMyDocuments, verifyDocument } from '../../controllers/verificationController.js';
-import { authenticateUser } from '../../middleware/auth.js';
+import kycController from '../../controllers/verification/kycController.js';
+import authenticate from '../../middleware/auth.js';
 import authorize from '../../middleware/rbac.js';
-import multer from 'multer';
-import path from 'path';
+import auditLog from '../../middleware/audit.js';
 
 const router = express.Router();
 
-// Multer Setup for Local Uploads (for now)
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-const upload = multer({ storage });
+// Apply authentication to all routes
+router.use(authenticate);
 
-// Routes
-router.post('/upload', authenticateUser, upload.single('document'), uploadDocument);
-router.get('/my-documents', authenticateUser, getMyDocuments);
+// Manufacturer/Seller: Upload KYC documents
+router.post('/upload',
+    authorize(['MANUFACTURER', 'SELLER']),
+    auditLog('KYC_UPLOAD', 'KYC'),
+    kycController.uploadKYCDocument
+);
 
-// Admin Routes
-router.put('/:documentId/verify', authenticateUser, authorize(['ADMIN']), verifyDocument);
-router.put('/:documentId/verify/:subDocId', authenticateUser, authorize(['ADMIN']), verifyDocument);
+// Manufacturer/Seller: Get my KYC documents
+router.get('/my-documents',
+    authorize(['MANUFACTURER', 'SELLER']),
+    kycController.getMyKYCDocuments
+);
+
+// Admin: Get pending KYC documents
+router.get('/pending',
+    authorize(['ADMIN']),
+    kycController.getPendingKYCDocuments
+);
+
+// Admin: Review KYC document (approve/reject)
+router.patch('/:id/review',
+    authorize(['ADMIN']),
+    auditLog('KYC_REVIEW', 'KYC'),
+    kycController.reviewKYCDocument
+);
+
+// Admin: Revoke verification
+router.post('/revoke',
+    authorize(['ADMIN']),
+    auditLog('REVOKE_VERIFICATION', 'KYC'),
+    kycController.revokeVerification
+);
 
 export default router;

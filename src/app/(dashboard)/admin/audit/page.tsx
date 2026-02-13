@@ -62,14 +62,14 @@ export default function AuditLogsPanel() {
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#10367D] hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">Audit <span className="text-[#10367D]">Persistence</span></h1>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Immutable Administrative Action Records</p>
+                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight uppercase italic">Audit <span className="text-[#10367D]">Persistence</span></h1>
+                        <p className="text-slate-400 font-bold text-sm mt-1">Immutable Administrative Action Records</p>
                     </div>
                 </div>
             </div>
@@ -77,7 +77,7 @@ export default function AuditLogsPanel() {
             {/* Audit Log Table */}
             <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-8 lg:p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
-                    <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-widest flex items-center gap-3">
+                    <h2 className="text-sm font-black text-[#1E293B] flex items-center gap-3">
                         <FaHistory className="text-[#10367D]" />
                         System Audit Stream
                     </h2>
@@ -88,7 +88,7 @@ export default function AuditLogsPanel() {
                             placeholder="Filter by Action or Role..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-white border border-slate-100 rounded-[10px] py-2.5 pl-10 pr-4 text-xs font-medium focus:outline-none focus:border-[#10367D]/30"
+                            className="w-full bg-white border border-slate-100 rounded-[10px] py-2.5 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-[#10367D]/30"
                         />
                     </div>
                 </div>
@@ -97,11 +97,11 @@ export default function AuditLogsPanel() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-slate-50 bg-white">
-                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol ID</th>
-                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Governor Action</th>
-                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Actor Role</th>
-                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
-                                <th className="px-10 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Details</th>
+                                <th className="px-10 py-5 text-sm font-black text-slate-400">Protocol ID</th>
+                                <th className="px-10 py-5 text-sm font-black text-slate-400">Governor Action</th>
+                                <th className="px-10 py-5 text-sm font-black text-slate-400">Actor Role</th>
+                                <th className="px-10 py-5 text-sm font-black text-slate-400">Timestamp</th>
+                                <th className="px-10 py-5 text-sm font-black text-slate-400 text-right">Details</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -113,7 +113,7 @@ export default function AuditLogsPanel() {
                                 </tr>
                             ) : filteredLogs.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-10 py-20 text-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+                                    <td colSpan={5} className="px-10 py-20 text-center text-slate-400 font-bold text-sm">
                                         No audit records found
                                     </td>
                                 </tr>
@@ -122,7 +122,7 @@ export default function AuditLogsPanel() {
                                 return (
                                     <tr key={log.id} className="hover:bg-slate-50 group transition-colors">
                                         <td className="px-10 py-6">
-                                            <span className="text-xs font-black text-[#10367D] tracking-wider">{log.id?.slice(-8).toUpperCase()}</span>
+                                            <span className="text-sm font-black text-[#10367D] tracking-wider">{log.id?.slice(-8).toUpperCase()}</span>
                                         </td>
                                         <td className="px-10 py-6">
                                             <div className="flex items-center gap-4">
@@ -130,21 +130,21 @@ export default function AuditLogsPanel() {
                                                     <Icon className="w-4 h-4" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-black text-[#1E293B] leading-none uppercase">{log.action}</p>
+                                                    <p className="text-sm font-black text-[#1E293B] leading-none">{log.action}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
-                                            <span className="text-xs font-bold text-[#1E293B] uppercase">{log.actorRole}</span>
+                                            <span className="text-sm font-bold text-[#1E293B]">{log.actorRole}</span>
                                         </td>
                                         <td className="px-10 py-6">
                                             <div className="flex flex-col">
-                                                <span className="text-xs font-bold text-slate-600">{new Date(log.createdAt).toLocaleDateString()}</span>
-                                                <span className="text-[10px] font-black text-[#10367D] opacity-40">{new Date(log.createdAt).toLocaleTimeString()}</span>
+                                                <span className="text-sm font-bold text-slate-600">{new Date(log.createdAt).toLocaleDateString()}</span>
+                                                <span className="text-sm font-black text-[#10367D] opacity-40">{new Date(log.createdAt).toLocaleTimeString()}</span>
                                             </div>
                                         </td>
                                         <td className="px-10 py-6 text-right">
-                                            <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-[10px] border border-slate-100 truncate max-w-[200px] inline-block">
+                                            <span className="text-sm font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-[10px] border border-slate-100 truncate max-w-[200px] inline-block">
                                                 {JSON.stringify(log.details)}
                                             </span>
                                         </td>
@@ -156,7 +156,7 @@ export default function AuditLogsPanel() {
                 </div>
 
                 <div className="p-8 lg:p-10 border-t border-slate-50 bg-[#10367D]/5 flex items-center justify-between">
-                    <p className="text-[10px] font-black text-[#10367D] uppercase tracking-[0.2em] flex items-center gap-3">
+                    <p className="text-sm font-black text-[#10367D] flex items-center gap-3">
                         <FaCheckCircle className="animate-pulse" />
                         Log Persistence Engine Verified • SEC/FINRA Style Audit Ready
                     </p>
@@ -165,4 +165,3 @@ export default function AuditLogsPanel() {
         </div>
     );
 }
-

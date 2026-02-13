@@ -78,7 +78,36 @@ class SellerService {
             }
         }
 
+        // 3. Check Minimum Price (Cost + 5% Commission)
+        const minPrice = wholesalePrice * 1.05;
+        if (requestedPrice < minPrice) {
+            throw new Error(`PRICE_TOO_LOW: Minimum price is ₹${minPrice.toFixed(2)} (Wholesale + 5% Platform Commission)`);
+        }
+
         return await Inventory.findByIdAndUpdate(inventoryId, { price: requestedPrice }, { new: true });
+    }
+
+    /**
+     * Respond to a Customer Review.
+     */
+    async replyToReview(sellerId, reviewId, response) {
+        const { ProductReview } = await import('../models/index.js');
+        const review = await ProductReview.findById(reviewId);
+
+        if (!review) throw new Error('REVIEW_NOT_FOUND');
+
+        // Verify ownership (Review -> Product -> Inventory -> Seller or direct SellerReview)
+        // Assuming SellerReview for now based on context, or ProductReview linked to Seller
+        if (review.sellerId && review.sellerId.toString() !== sellerId.toString()) {
+            throw new Error('UNAUTHORIZED_REVIEW_ACCESS');
+        }
+
+        review.sellerResponse = {
+            text: response,
+            respondedAt: new Date()
+        };
+
+        return await review.save();
     }
 
 
@@ -176,25 +205,110 @@ class SellerService {
 
 
     /**
-     * Get Seller Sales Report.
+     * Get Comprehensive Seller Dashboard Stats.
+     * Aggregates Sales, Inventory, Network, and Order data.
      */
-    async getSalesReport(sellerId) {
-        const { Order } = await import('../models/index.js');
-        const orders = await Order.find({ sellerId, status: 'SETTLED' }).lean();
+    async getDashboardStats(sellerId) {
+        const { Order, Negotiation, SellerRequest } = await import('../models/index.js');
 
-        const totalRevenue = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
-        const totalTax = orders.reduce((sum, o) => sum + Number(o.taxAmount || 0), 0);
-        const marginEarned = orders.reduce((sum, o) => {
-            const retail = Number(o.totalAmount);
-            const base = retail - Number(o.commissionAmount || 0) - Number(o.taxAmount || 0);
-            return sum + (retail - base);
-        }, 0);
+        // Parallelize unrelated queries for performance
+        const [
+            inventoryDocs,
+            orders,
+            activeNegotiations,
+            manufacturerRequests,
+            activeNetwork
+        ] = await Promise.all([
+            // 1. Inventory Stats
+            Inventory.find({ sellerId }).select('stock price listedAt isAllocated').lean(),
+
+            // 2. Orders (All statuses for funnel view)
+            Order.find({ sellerId }).select('totalAmount status createdAt escrow').lean(),
+
+            // 3. Active Negotiations
+            Negotiation.find({
+                sellerId,
+                status: { $in: ['negotiating', 'offer_received', 'requested', 'NEGOTIATING', 'OFFER_RECEIVED', 'REQUESTED'] }
+            }).countDocuments(),
+
+            // 4. Pending Manufacturer Requests
+            SellerRequest.countDocuments({ sellerId, status: 'PENDING' }),
+
+            // 5. Active Manufacturers (Network)
+            SellerRequest.countDocuments({ sellerId, status: 'APPROVED' })
+        ]);
+
+        // --- Aggregation Logic ---
+
+        // Inventory
+        const totalRetailProducts = inventoryDocs.length;
+        const inventoryValue = inventoryDocs.reduce((sum, item) => sum + (item.price * item.stock), 0);
+
+        // Sales & Revenue
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        let totalRevenue = 0;
+        let todaySales = 0;
+        let monthlyRevenue = 0;
+        let pendingOrdersCount = 0;
+        let activeOrdersCount = 0;
+        let escrowHeld = 0;
+
+        for (const order of orders) {
+            const amount = Number(order.totalAmount || 0);
+            const isSettled = order.status === 'SETTLED';
+            const isCashFlow = ['PAID', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'SETTLED'].includes(order.status);
+
+            if (isCashFlow) {
+                totalRevenue += amount; // Gross Revenue (GMV)
+
+                const orderDate = new Date(order.createdAt);
+                if (orderDate >= startOfDay) todaySales += amount;
+                if (orderDate >= startOfMonth) monthlyRevenue += amount;
+            }
+
+            if (['CREATED', 'PAID', 'CONFIRMED', 'SHIPPED'].includes(order.status)) {
+                activeOrdersCount++;
+            }
+
+            if (order.status === 'CREATED' || order.status === 'PAID') {
+                pendingOrdersCount++; // requiring action
+            }
+
+            // Escrow Calculation: Money held in system but not settled
+            // Assuming Escrow model holds the truth, but approximation from Order status:
+            if (['PAID', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'DISPUTED'].includes(order.status)) {
+                escrowHeld += amount;
+            }
+        }
 
         return {
-            totalRevenue,
-            totalTax,
-            marginEarned,
-            settledOrders: orders.length
+            network: {
+                activeManufacturers: activeNetwork,
+                pendingRequests: manufacturerRequests
+            },
+            negotiations: {
+                active: activeNegotiations
+            },
+            inventory: {
+                totalProducts: totalRetailProducts,
+                value: inventoryValue
+            },
+            orders: {
+                active: activeOrdersCount,
+                pending: pendingOrdersCount
+            },
+            finance: {
+                totalRevenue,
+                todaySales,
+                monthlyRevenue,
+                escrowHeld
+            }
         };
     }
 

@@ -21,7 +21,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({
 }) => {
     return (
         <CldUploadWidget
-            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'novamart_unsigned'}
             options={{
                 sources: ['local', 'url', 'camera'],
                 multiple,

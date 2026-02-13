@@ -30,9 +30,10 @@ router.put('/inventory/toggle-listing', sellerController.toggleListing);
 
 
 /**
- * Performance
+ * Performance & Reputation
  */
 router.get('/analytics', sellerController.getSellerStats);
+router.post('/reviews/:reviewId/reply', sellerController.replyToReview);
 
 /**
  * Fulfillment

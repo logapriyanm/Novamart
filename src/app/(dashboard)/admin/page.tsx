@@ -7,7 +7,7 @@ import {
     FaCube,
     FaGavel,
     FaShieldAlt,
-    FaArrowRight as ArrowRight
+
 } from 'react-icons/fa';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import Link from 'next/link';
@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 
 
 import { adminService } from '@/lib/api/services/admin.service';
-import EmptyState from '@/client/components/ui/EmptyState';
+
 import Loader from '@/client/components/ui/Loader';
 import DashboardSkeleton from '@/client/components/ui/DashboardSkeleton';
 import AdminAnalyticsDashboard from '@/client/components/features/dashboard/admin/AdminAnalyticsDashboard';
@@ -33,7 +33,6 @@ const mockActivityData = [
 export default function AdminDashboard() {
     const router = useRouter();
     const [stats, setStats] = useState<any>(null);
-    const [activities, setActivities] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -43,12 +42,8 @@ export default function AdminDashboard() {
     const fetchAdminData = async () => {
         setIsLoading(true);
         try {
-            const [statsData, logsData] = await Promise.all([
-                adminService.getDashboardStats(),
-                adminService.getAuditLogs()
-            ]);
+            const statsData = await adminService.getDashboardStats();
             setStats(statsData);
-            setActivities(logsData || []);
         } catch (error) {
             console.error('Failed to fetch admin dashboard data:', error);
         } finally {
@@ -65,8 +60,8 @@ export default function AdminDashboard() {
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60 font-sans">
                 <div>
-                    <h1 className="text-2xl font-black tracking-tight text-slate-900 italic">System <span className="text-primary">Governance</span></h1>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Central Authority & Health Monitor</p>
+                    <h1 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">System <span className="text-primary">Governance</span></h1>
+                    <p className="text-sm font-bold text-slate-400 mt-2">Central Authority & Health Monitor</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <Link href="/admin/verification" className="btn-primary">
@@ -112,48 +107,9 @@ export default function AdminDashboard() {
             </div>
 
             {/* Main Content Sections */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <div className="w-full">
                 {/* Live Traffic / Usage Chart */}
-                <div className="xl:col-span-2">
-                    <AdminAnalyticsDashboard />
-                </div>
-
-                {/* Recent Audit Logs */}
-                <div className="card-enterprise p-8 bg-white flex flex-col">
-                    <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Security Audit</h3>
-                    </div>
-
-                    <div className="flex-1 space-y-4">
-                        {activities.length === 0 ? (
-                            <EmptyState
-                                icon={FaShieldAlt}
-                                title="No Recent Activity"
-                                description="The audit log is clear."
-                            />
-                        ) : (
-                            activities.slice(0, 6).map((log, index) => (
-                                <div key={log.id || index} className="flex gap-4 p-4 rounded-[10px] hover:bg-slate-50 transition-all group table-row-enterprise border border-slate-100/50">
-                                    <div className={`mt-1 w-2.5 h-2.5 rounded-full shrink-0 shadow-sm ${log.action.includes('REJECT') || log.action.includes('SUSPEND') ? 'bg-rose-500' : 'bg-emerald-500'
-                                        }`} />
-                                    <div>
-                                        <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{log.action.replace(/_/g, ' ')}</p>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{log.actorRole}</span>
-                                            <span className="text-[9px] font-medium text-slate-300">•</span>
-                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                    <Link href="/admin/audit" className="mt-8 text-center text-[10px] font-black text-primary uppercase tracking-[0.2em] hover:translate-x-1 transition-transform inline-flex items-center justify-center gap-2">
-                        View Full Audit Trail <ArrowRight className="w-3 h-3" />
-                    </Link>
-                </div>
+                <AdminAnalyticsDashboard />
             </div>
         </div>
     );
@@ -164,7 +120,7 @@ function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
         <div className="card-enterprise p-6 bg-white flex flex-col justify-between group h-full">
             <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{label}</p>
+                    <p className="text-sm font-bold text-slate-400 mb-1.5">{label}</p>
                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h3>
                 </div>
                 <div className={`w-12 h-12 ${bgColor} ${color} rounded-[10px] flex items-center justify-center transition-all group-hover:scale-110 shadow-sm`}>
@@ -172,7 +128,7 @@ function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
                 </div>
             </div>
             <div className="mt-6 flex items-center gap-2">
-                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[10px] border border-slate-100 shadow-sm`}>
+                <span className={`text-sm font-bold ${color} bg-white px-2 py-1 rounded-[10px] border border-slate-100 shadow-sm`}>
                     {trend}
                 </span>
             </div>

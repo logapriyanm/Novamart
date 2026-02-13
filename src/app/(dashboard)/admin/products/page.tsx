@@ -72,11 +72,11 @@ export default function AdminProductManagement() {
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
             {/* Header */}
             <div className="flex flex-col gap-1 border-b border-foreground/5 pb-8">
-                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest hover:translate-x-[-4px] transition-transform mb-4">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-primary hover:translate-x-[-4px] transition-transform mb-4">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Console
                 </Link>
-                <h1 className="text-2xl font-bold text-[#1E293B]">Product Management</h1>
+                <h1 className="text-2xl font-bold text-[#1E293B] uppercase italic">Product Management</h1>
                 <p className="text-sm text-slate-400 font-medium">Manage visibility and audit catalog submissions.</p>
             </div>
 
@@ -85,10 +85,10 @@ export default function AdminProductManagement() {
                 <div className="xl:col-span-7 space-y-6">
                     <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
-                            <h2 className="text-xs font-bold text-[#1E293B] uppercase tracking-widest">Master Catalog</h2>
+                            <h2 className="text-sm font-bold text-[#1E293B]">Master Catalog</h2>
                             <div className="relative">
                                 <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
-                                <input type="text" placeholder="Filter..." className="bg-white border border-slate-100 rounded-[10px] py-1.5 pl-9 pr-4 text-[10px] font-medium focus:outline-none focus:border-primary/30" />
+                                <input type="text" placeholder="Filter..." className="bg-white border border-slate-100 rounded-[10px] py-1.5 pl-9 pr-4 text-sm font-medium focus:outline-none focus:border-primary/30" />
                             </div>
                         </div>
                         <div className="divide-y divide-slate-50 min-h-[400px]">
@@ -97,7 +97,7 @@ export default function AdminProductManagement() {
                                     <Loader size="md" variant="primary" />
                                 </div>
                             ) : products.length === 0 ? (
-                                <div className="flex items-center justify-center h-full text-slate-400 text-xs font-bold py-20 uppercase tracking-widest">No Products</div>
+                                <div className="flex items-center justify-center h-full text-slate-400 text-sm font-bold py-20">No Products</div>
                             ) : (
                                 products.map((item) => (
                                     <div
@@ -111,14 +111,14 @@ export default function AdminProductManagement() {
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-bold text-[#1E293B]">{item.name}</h4>
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{item.manufacturerId?.companyName || item.manufacturer?.companyName || 'Unknown Corp'}</p>
+                                                <p className="text-sm font-bold text-slate-400 mt-0.5">{item.manufacturerId?.companyName || item.manufacturer?.companyName || 'Unknown Corp'}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">
+                                            <span className="text-sm font-bold text-slate-400 block mb-1">
                                                 {new Date(item.updatedAt).toLocaleDateString()}
                                             </span>
-                                            <span className={`text-[8px] font-bold uppercase px-3 py-1 rounded-[10px] border ${item.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                            <span className={`text-sm font-bold px-3 py-1 rounded-[10px] border ${item.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                                                 item.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                                                     item.status === 'DISABLED' ? 'bg-rose-50 text-rose-600 border-rose-100' :
                                                         'bg-slate-50 text-slate-600 border-slate-100'
@@ -146,24 +146,24 @@ export default function AdminProductManagement() {
                             >
                                 <div className="p-8 bg-black text-white">
                                     <h3 className="text-xl font-bold tracking-tight">{selectedProduct.name}</h3>
-                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Management Record • {(selectedProduct.id || selectedProduct._id)?.slice(0, 8)}</p>
+                                    <p className="text-sm font-bold text-white/40 mt-1">Management Record • {(selectedProduct.id || selectedProduct._id)?.slice(0, 8)}</p>
                                 </div>
 
                                 <div className="flex-1 p-8 space-y-8 overflow-y-auto">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-4 bg-slate-50 rounded-[10px] border border-slate-100">
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Base Price</p>
+                                            <p className="text-sm font-bold text-slate-400 mb-1">Base Price</p>
                                             <p className="text-base font-bold text-[#1E293B]">₹{selectedProduct.basePrice}</p>
                                         </div>
                                         <div className="p-4 bg-slate-50 rounded-[10px] border border-slate-100">
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Category</p>
+                                            <p className="text-sm font-bold text-slate-400 mb-1">Category</p>
                                             <p className="text-base font-bold text-[#1E293B]">{selectedProduct.category}</p>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Specification</h4>
-                                        <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-100 text-xs font-medium text-slate-600 leading-relaxed">
+                                        <h4 className="text-sm font-bold text-slate-400 mb-3">Specification</h4>
+                                        <div className="bg-slate-50 p-6 rounded-[10px] border border-slate-100 text-sm font-medium text-slate-600 leading-relaxed">
                                             {selectedProduct.description}
                                         </div>
                                     </div>
@@ -174,22 +174,22 @@ export default function AdminProductManagement() {
                                             animate={{ opacity: 1, y: 0 }}
                                             className={`p-6 rounded-[10px] text-center ${auditStatus === 'APPROVED' ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}
                                         >
-                                            <p className="text-sm font-bold uppercase tracking-widest">{auditStatus} Processed</p>
+                                            <p className="text-sm font-bold">{auditStatus} Processed</p>
                                         </motion.div>
                                     )}
 
                                     {showRejectModal && (
                                         <div className="space-y-3 bg-rose-50 p-5 rounded-[10px] border border-rose-100">
-                                            <h4 className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Rejection Reason</h4>
+                                            <h4 className="text-sm font-bold text-rose-500">Rejection Reason</h4>
                                             <textarea
-                                                className="w-full h-20 rounded-[10px] border border-rose-200 p-2 text-xs font-medium"
+                                                className="w-full h-20 rounded-[10px] border border-rose-200 p-2 text-sm font-medium"
                                                 placeholder="Compliance violation details..."
                                                 value={rejectionReason}
                                                 onChange={e => setRejectionReason(e.target.value)}
                                             />
                                             <button
                                                 onClick={() => handleStatusUpdate('REJECTED', false)}
-                                                className="w-full py-2.5 bg-rose-500 text-white rounded-[10px] text-xs font-bold uppercase tracking-widest"
+                                                className="w-full py-2.5 bg-rose-500 text-white rounded-[10px] text-sm font-bold"
                                             >
                                                 Confirm Rejection
                                             </button>
@@ -204,14 +204,14 @@ export default function AdminProductManagement() {
                                                 <button
                                                     onClick={() => handleStatusUpdate('APPROVED', true)}
                                                     disabled={!!auditStatus}
-                                                    className="flex-1 py-4 bg-emerald-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
+                                                    className="flex-1 py-4 bg-emerald-600 text-white rounded-[10px] font-bold text-sm shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
                                                 >
                                                     Unblock / Approve
                                                 </button>
                                                 <button
                                                     onClick={() => setShowRejectModal(true)}
                                                     disabled={!!auditStatus}
-                                                    className="flex-1 py-4 bg-white border border-rose-100 text-rose-500 rounded-[10px] font-bold text-[10px] uppercase tracking-widest hover:bg-rose-50 transition-all disabled:opacity-50"
+                                                    className="flex-1 py-4 bg-white border border-rose-100 text-rose-500 rounded-[10px] font-bold text-sm hover:bg-rose-50 transition-all disabled:opacity-50"
                                                 >
                                                     Block Asset
                                                 </button>
@@ -220,7 +220,7 @@ export default function AdminProductManagement() {
                                             <button
                                                 onClick={() => handleStatusUpdate('DISABLED', false)}
                                                 disabled={!!auditStatus}
-                                                className="w-full py-4 bg-rose-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
+                                                className="w-full py-4 bg-rose-600 text-white rounded-[10px] font-bold text-sm shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
                                             >
                                                 Block from Website
                                             </button>
@@ -228,19 +228,19 @@ export default function AdminProductManagement() {
                                             <button
                                                 onClick={() => handleStatusUpdate('APPROVED', true)}
                                                 disabled={!!auditStatus}
-                                                className="w-full py-4 bg-emerald-600 text-white rounded-[10px] font-bold text-[10px] uppercase tracking-widest shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
+                                                className="w-full py-4 bg-emerald-600 text-white rounded-[10px] font-bold text-sm shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50"
                                             >
                                                 Unblock / Approve
                                             </button>
                                         )}
                                     </div>
-                                    <p className="text-[8px] font-medium text-slate-400 text-center uppercase tracking-widest">Updates are reflected on the platform in real-time.</p>
+                                    <p className="text-sm font-medium text-slate-400 text-center">Updates are reflected on the platform in real-time.</p>
                                 </div>
                             </motion.div>
                         ) : (
                             <div className="h-full bg-slate-50/50 rounded-[10px] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center p-12">
                                 <FaExclamationCircle className="w-12 h-12 text-slate-200 mb-4" />
-                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Select Item to Audit</h3>
+                                <h3 className="text-sm font-bold text-slate-400">Select Item to Audit</h3>
                             </div>
                         )}
                     </AnimatePresence>
@@ -249,4 +249,3 @@ export default function AdminProductManagement() {
         </div>
     );
 }
-

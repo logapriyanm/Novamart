@@ -128,7 +128,7 @@ export default function AdminLoginPage() {
 
                                 <button
                                     disabled={isLoading}
-                                    className="w-full py-5 bg-[#10367D] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+                                    className="w-full py-5 bg-[#10367D] text-white rounded-2xl font-black text-xs tracking-[0.2em] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
                                 >
                                     {isLoading ? 'Verifying Credentials...' : (
                                         <>
@@ -165,7 +165,7 @@ export default function AdminLoginPage() {
 
                                 <button
                                     disabled={isLoading}
-                                    className="w-full py-5 bg-[#10367D] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all"
+                                    className="w-full py-5 bg-[#10367D] text-white rounded-2xl font-black text-xs tracking-[0.2em] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all"
                                 >
                                     {isLoading ? 'Finalizing Audit...' : 'Authorize Governance Access'}
                                 </button>

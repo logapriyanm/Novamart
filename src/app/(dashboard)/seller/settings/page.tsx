@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     FaArrowLeft,
@@ -18,39 +18,67 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { CldUploadWidget } from 'next-cloudinary';
-import { useProfile } from '@/client/hooks/useProfile';
 import { toast } from 'sonner';
-
-interface SellerProfile {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    avatar: string;
-}
+import { sellerService } from '@/lib/api/services/seller.service';
+import Loader from '@/client/components/ui/Loader';
 
 export default function SellerSettings() {
+    const [profile, setProfile] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    // const { showSnackbar } = useSnackbar();
 
-    // Seller Profile Persistence
-    const { profile, saveProfile, isLoaded } = useProfile<SellerProfile>('seller_profile', {
-        name: 'Apex Retail Partners',
-        email: 'support@apexretail.in',
-        phone: '+91 91234 56789',
-        address: 'G-44, Electronic Market, Phase 2, Bangalore, KA - 560001',
-        avatar: ''
-    });
+    useEffect(() => {
+        fetchProfile();
+    }, []);
 
-    const handleSave = () => {
-        setIsSaving(true);
-        setTimeout(() => {
-            setIsSaving(false);
-            toast.success('Seller Profile Updated Successfully!');
-        }, 1500);
+    const fetchProfile = async () => {
+        try {
+            const data = await sellerService.getProfile();
+            setProfile(data);
+        } catch (error: any) {
+            console.error('Profile fetch error:', error);
+            toast.error('Failed to load profile');
+            // Fallback data
+            setProfile({
+                name: 'Apex Retail Partners',
+                email: 'support@apexretail.in',
+                phone: '+91 91234 56789',
+                address: 'G-44, Electronic Market, Phase 2, Bangalore, KA - 560001',
+                avatar: '',
+                businessName: 'Apex Retail Partners',
+                city: 'Bangalore',
+                state: 'Karnataka',
+                gst: '27AAEC...1Z5'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    if (!isLoaded) return null;
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await sellerService.updateProfile(profile);
+            toast.success('Profile Updated Successfully!');
+        } catch (error: any) {
+            console.error('Profile update error:', error);
+            toast.error(error.message || 'Failed to update profile');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const updateField = (field: string, value: any) => {
+        setProfile((prev: any) => ({ ...prev, [field]: value }));
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader size="lg" variant="primary" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
@@ -58,7 +86,7 @@ export default function SellerSettings() {
             <div className="flex flex-col gap-2">
                 <Link href="/seller" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
-                    Back to Command Center
+                    Back to Dashboard
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
@@ -67,7 +95,8 @@ export default function SellerSettings() {
                     </div>
                     <button
                         onClick={handleSave}
-                        className="px-10 py-3 bg-[#10367D] text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-3"
+                        disabled={isSaving}
+                        className="px-10 py-3 bg-[#10367D] text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <FaSave className="w-3 h-3" />
                         {isSaving ? 'Syncing...' : 'Commit Changes'}
@@ -82,7 +111,7 @@ export default function SellerSettings() {
                         <div className="flex items-center gap-10">
                             <div className="relative group">
                                 <div className="w-32 h-32 rounded-[3.5rem] bg-[#10367D]/5 border-2 border-[#10367D]/10 flex items-center justify-center text-[#10367D] shadow-sm overflow-hidden">
-                                    {profile.avatar ? (
+                                    {profile?.avatar ? (
                                         <img src={profile.avatar} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
                                         <FaUserCircle className="w-16 h-16" />
@@ -91,7 +120,7 @@ export default function SellerSettings() {
                                 <div className="absolute -bottom-2 -right-2">
                                     <CldUploadWidget
                                         uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                                        onSuccess={(res: any) => saveProfile({ avatar: res.info.secure_url })}
+                                        onSuccess={(res: any) => updateField('avatar', res.info.secure_url)}
                                     >
                                         {({ open }) => (
                                             <button
@@ -105,7 +134,7 @@ export default function SellerSettings() {
                                 </div>
                             </div>
                             <div>
-                                <h2 className="text-3xl font-black tracking-tight">{profile.name}</h2>
+                                <h2 className="text-3xl font-black tracking-tight">{profile?.businessName || profile?.name}</h2>
                                 <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 italic">Verified Seller Entity • Registered 2024</p>
                                 <div className="mt-4 flex items-center gap-3">
                                     <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black uppercase tracking-widest rounded-lg">Status: Active</span>
@@ -119,8 +148,8 @@ export default function SellerSettings() {
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Business Name</label>
                                 <input
                                     type="text"
-                                    value={profile.name}
-                                    onChange={(e) => saveProfile({ name: e.target.value })}
+                                    value={profile?.businessName || profile?.name || ''}
+                                    onChange={(e) => updateField('businessName', e.target.value)}
                                     className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-sm font-medium focus:outline-none focus:border-[#10367D]/30"
                                 />
                             </div>
@@ -130,8 +159,8 @@ export default function SellerSettings() {
                                     <FaEnvelope className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
                                     <input
                                         type="email"
-                                        value={profile.email}
-                                        onChange={(e) => saveProfile({ email: e.target.value })}
+                                        value={profile?.email || ''}
+                                        onChange={(e) => updateField('email', e.target.value)}
                                         className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-sm font-medium focus:outline-none focus:border-[#10367D]/30"
                                     />
                                 </div>
@@ -142,8 +171,8 @@ export default function SellerSettings() {
                                     <FaPhone className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
                                     <input
                                         type="text"
-                                        value={profile.phone}
-                                        onChange={(e) => saveProfile({ phone: e.target.value })}
+                                        value={profile?.phone || ''}
+                                        onChange={(e) => updateField('phone', e.target.value)}
                                         className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-sm font-medium focus:outline-none focus:border-[#10367D]/30"
                                     />
                                 </div>
@@ -154,8 +183,8 @@ export default function SellerSettings() {
                                     <FaMapMarkerAlt className="absolute left-6 top-6 text-slate-300 w-3 h-3" />
                                     <textarea
                                         rows={3}
-                                        value={profile.address}
-                                        onChange={(e) => saveProfile({ address: e.target.value })}
+                                        value={profile?.address || ''}
+                                        onChange={(e) => updateField('address', e.target.value)}
                                         className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-sm font-medium focus:outline-none focus:border-[#10367D]/30"
                                     />
                                 </div>
@@ -197,7 +226,7 @@ export default function SellerSettings() {
                         </h3>
                         <div className="space-y-8">
                             {[
-                                { l: 'GST Verified', d: '27AAEC...1Z5', i: FaIdCard, c: 'text-emerald-500' },
+                                { l: 'GST Verified', d: profile?.gst || '27AAEC...1Z5', i: FaIdCard, c: 'text-emerald-500' },
                                 { l: 'Admin Shield', d: 'Level 2 Active', i: FaShieldAlt, c: 'text-[#10367D]' },
                             ].map((s, idx) => (
                                 <div key={idx} className="flex items-center gap-6">
@@ -225,4 +254,5 @@ export default function SellerSettings() {
         </div>
     );
 }
+
 

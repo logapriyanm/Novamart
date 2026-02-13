@@ -258,10 +258,16 @@ class ProductService {
                 .populate('sellerId', 'businessName')
                 .lean();
 
+            // Security: Remove Sensitive Data for Public/Customer
+            if (!['ADMIN', 'SELLER', 'MANUFACTURER'].includes(userRole)) {
+                delete p.basePrice;
+                delete p.specifications?.manufacturingCost;
+            }
+
             return {
                 ...p,
                 id: p._id,
-                manufacturer: p.manufacturerId,
+                manufacturer: p.manufacturerId, // Keep for brand info
                 inventory: inventory ? [inventory] : []
             };
         }));

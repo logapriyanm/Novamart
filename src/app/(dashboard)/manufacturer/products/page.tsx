@@ -24,8 +24,14 @@ import { ENDPOINTS } from "@/lib/api/contract";
 
 export default function ProductMaster() {
   const [products, setProducts] = useState<any[]>([]);
+  const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const filteredProducts = products.filter(product => {
+    if (filterStatus === "ALL") return true;
+    return product.status === filterStatus;
+  });
 
   useEffect(() => {
     fetchProducts();
@@ -112,7 +118,7 @@ export default function ProductMaster() {
           </button>
           <Link
             href="/manufacturer/products/add"
-            className="px-6 py-2.5 bg-black text-white rounded-[10px] text-[11px] font-bold uppercase tracking-widest hover:bg-black/90 transition-all shadow-sm"
+            className="px-6 py-2.5 bg-primary text-white rounded-[10px] text-[11px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-sm"
           >
             New Product
           </Link>
@@ -157,16 +163,40 @@ export default function ProductMaster() {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <button className="px-6 py-2 bg-white border border-slate-200 rounded-full text-xs font-bold text-[#1E293B] shadow-sm hover:bg-slate-50 transition-all whitespace-nowrap">
+        <button
+          onClick={() => setFilterStatus("ALL")}
+          className={`px-6 py-2 rounded-[10px] text-xs font-bold transition-all whitespace-nowrap ${filterStatus === "ALL"
+            ? "bg-white border border-slate-200 text-[#1E293B] shadow-sm"
+            : "bg-slate-50 border border-transparent text-slate-500 hover:bg-white hover:border-slate-200"
+            }`}
+        >
           All Products
         </button>
-        <button className="px-6 py-2 bg-slate-50 border border-transparent rounded-full text-xs font-bold text-slate-500 hover:bg-white hover:border-slate-200 transition-all whitespace-nowrap">
+        <button
+          onClick={() => setFilterStatus("APPROVED")}
+          className={`px-6 py-2 rounded-[10px] text-xs font-bold transition-all whitespace-nowrap ${filterStatus === "APPROVED"
+            ? "bg-emerald-50 border border-emerald-100 text-emerald-600 shadow-sm"
+            : "bg-slate-50 border border-transparent text-slate-500 hover:bg-white hover:border-slate-200"
+            }`}
+        >
           Live
         </button>
-        <button className="px-6 py-2 bg-slate-50 border border-transparent rounded-full text-xs font-bold text-slate-500 hover:bg-white hover:border-slate-200 transition-all whitespace-nowrap">
+        <button
+          onClick={() => setFilterStatus("PENDING")}
+          className={`px-6 py-2 rounded-[10px] text-xs font-bold transition-all whitespace-nowrap ${filterStatus === "PENDING"
+            ? "bg-amber-50 border border-amber-100 text-amber-600 shadow-sm"
+            : "bg-slate-50 border border-transparent text-slate-500 hover:bg-white hover:border-slate-200"
+            }`}
+        >
           Pending Approval
         </button>
-        <button className="px-6 py-2 bg-slate-50 border border-transparent rounded-full text-xs font-bold text-slate-500 hover:bg-white hover:border-slate-200 transition-all whitespace-nowrap">
+        <button
+          onClick={() => setFilterStatus("DRAFT")}
+          className={`px-6 py-2 rounded-[10px] text-xs font-bold transition-all whitespace-nowrap ${filterStatus === "DRAFT"
+            ? "bg-slate-100 border border-slate-200 text-slate-600 shadow-sm"
+            : "bg-slate-50 border border-transparent text-slate-500 hover:bg-white hover:border-slate-200"
+            }`}
+        >
           Drafts
         </button>
       </div>
@@ -179,12 +209,12 @@ export default function ProductMaster() {
             <div className="px-6 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">
               Syncing Catalog...
             </div>
-          ) : products.length === 0 ? (
+          ) : filteredProducts.length === 0 ? (
             <div className="px-6 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">
-              No Products Active
+              No Products Found
             </div>
           ) : (
-            products.map((product) => (
+            filteredProducts.map((product) => (
               <div key={product.id} className="p-4 space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-16 h-16 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
@@ -200,13 +230,12 @@ export default function ProductMaster() {
                         {product.name}
                       </h4>
                       <span
-                        className={`inline-flex px-2 py-0.5 rounded-[10px] text-[8px] font-black uppercase tracking-widest shrink-0 ${
-                          product.status === "APPROVED"
-                            ? "bg-emerald-50 text-emerald-600"
-                            : product.status === "PENDING"
-                              ? "bg-amber-50 text-amber-600"
-                              : "bg-slate-100 text-slate-400"
-                        }`}
+                        className={`inline-flex px-2 py-0.5 rounded-[10px] text-[8px] font-black uppercase tracking-widest shrink-0 ${product.status === "APPROVED"
+                          ? "bg-emerald-50 text-emerald-600"
+                          : product.status === "PENDING"
+                            ? "bg-amber-50 text-amber-600"
+                            : "bg-slate-100 text-slate-400"
+                          }`}
                       >
                         {product.status}
                       </span>
@@ -272,17 +301,17 @@ export default function ProductMaster() {
                     Syncing Catalog...
                   </td>
                 </tr>
-              ) : products.length === 0 ? (
+              ) : filteredProducts.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
                     className="px-6 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest"
                   >
-                    No Products Active
+                    No Products Found
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
+                filteredProducts.map((product) => (
                   <tr
                     key={product.id}
                     className="group hover:bg-slate-50 transition-all"
@@ -313,13 +342,12 @@ export default function ProductMaster() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex px-2 py-0.5 rounded-[10px] text-[9px] font-bold uppercase tracking-widest ${
-                          product.status === "APPROVED"
-                            ? "bg-emerald-50 text-emerald-600"
-                            : product.status === "PENDING"
-                              ? "bg-amber-50 text-amber-600"
-                              : "bg-slate-100 text-slate-400"
-                        }`}
+                        className={`inline-flex px-2 py-0.5 rounded-[10px] text-[9px] font-bold uppercase tracking-widest ${product.status === "APPROVED"
+                          ? "bg-emerald-50 text-emerald-600"
+                          : product.status === "PENDING"
+                            ? "bg-amber-50 text-amber-600"
+                            : "bg-slate-100 text-slate-400"
+                          }`}
                       >
                         {product.status}
                       </span>
@@ -350,7 +378,7 @@ export default function ProductMaster() {
         {/* Pagination */}
         <div className="p-6 border-t border-slate-50 flex items-center justify-between bg-slate-50/30">
           <p className="text-xs font-bold text-slate-500">
-            Showing {products.length} products
+            Showing {filteredProducts.length} products
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -359,7 +387,7 @@ export default function ProductMaster() {
             >
               <FaChevronLeft className="w-3 h-3" />
             </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-[10px] bg-[#0F6CBD] text-white text-xs font-black shadow-md shadow-blue-500/20">
+            <button className="w-8 h-8 flex items-center justify-center rounded-[10px] bg-primary text-white text-xs font-black shadow-md shadow-primary/20">
               1
             </button>
             <button

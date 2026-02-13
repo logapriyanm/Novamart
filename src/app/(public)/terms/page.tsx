@@ -35,7 +35,7 @@ export default function TermsPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black uppercase tracking-widest text-black mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black tracking-widest text-black mb-6"
                     >
                         <FileText className="w-3 h-3" />
                         Legal Framework
@@ -60,9 +60,9 @@ export default function TermsPage() {
                                 <div className="w-10 h-10 rounded-[5px] bg-black/5 flex items-center justify-center text-black">
                                     <section.icon className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-xl font-black text-foreground uppercase tracking-wide italic">{section.title}</h2>
+                                <h2 className="text-xl font-black text-foreground tracking-wide italic">{section.title}</h2>
                             </div>
-                            <p className="text-foreground/40 text-[11px] font-black uppercase tracking-widest pl-14 leading-relaxed italic">
+                            <p className="text-foreground/40 text-[11px] font-black tracking-widest pl-14 leading-relaxed italic">
                                 "{section.content}"
                             </p>
                         </div>
@@ -70,8 +70,8 @@ export default function TermsPage() {
 
                     <div className="pt-12 border-t border-black/10">
                         <div className="bg-black/5 rounded-[10px] p-8 border border-black/20">
-                            <h3 className="text-[10px] font-black text-black uppercase tracking-[0.3em] mb-4 italic">Questions?</h3>
-                            <p className="text-xs text-foreground/60 font-black uppercase tracking-widest leading-relaxed italic">
+                            <h3 className="text-[10px] font-black text-black tracking-[0.3em] mb-4 italic">Questions?</h3>
+                            <p className="text-xs text-foreground/60 font-black tracking-widest leading-relaxed italic">
                                 For detailed legal inquiries regarding our governance model, please contact <span className="text-black underline underline-offset-4 cursor-pointer hover:text-black/60 transition-colors italic">legal@novamart.com</span> or consult our help center.
                             </p>
                         </div>

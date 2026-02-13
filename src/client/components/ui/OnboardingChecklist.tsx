@@ -93,7 +93,7 @@ export default function OnboardingChecklist({ role }: OnboardingChecklistProps) 
                     title: 'Request manufacturer access',
                     description: 'Connect with manufacturers to start ordering',
                     completed: completedSteps?.firstActionTaken || false,
-                    action: { label: 'Find Manufacturers', href: '/seller/sourcing' }
+                    action: { label: 'Find Manufacturers', href: '/seller/manufacturers' }
                 }
             ],
             MANUFACTURER: [

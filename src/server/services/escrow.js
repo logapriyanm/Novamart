@@ -116,10 +116,11 @@ class EscrowService {
             // 4. Ledger Entry (Audit Log)
             AuditLog.create({
                 action: 'FUNDS_SETTLED_SPLIT',
-                entityType: 'ESCROW',
-                entityId: updatedEscrow._id,
-                userId: 'SYSTEM_FINANCE',
-                metadata: {
+                entity: updatedEscrow._id,
+                actorId: 'SYSTEM_FINANCE',
+                role: 'SYSTEM',
+                details: {
+                    entityType: 'ESCROW',
                     distribution: {
                         manufacturer: mfgPayout,
                         dealer: dealerPayout,

@@ -100,9 +100,9 @@ export default function AddProductPage() {
                                 />
                                 <span className="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Units</span>
                             </div>
-                            <p className="text-[10px] font-bold text-foreground/40 flex items-center gap-1.5 pl-1">
+                            <div className="text-[10px] font-bold text-foreground/40 flex items-center gap-1.5 pl-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-foreground/20"></div> Min 5 units required for active listing.
-                            </p>
+                            </div>
                         </div>
 
                         {/* Price & Discount Row */}

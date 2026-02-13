@@ -25,19 +25,14 @@ import { useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import Loader from '@/client/components/ui/Loader';
 
-const socket = io(
-  typeof window !== "undefined"
-    ? window.location.origin.replace("3000", "5000")
-    : "http://localhost:5000",
-  {
-    auth: {
-      token:
-        typeof window !== "undefined"
-          ? localStorage.getItem("auth_token")
-          : null,
-    },
-  },
-);
+
+// Socket moved to component level
+const getSocketUrl = () => {
+  if (typeof window !== "undefined") {
+    return window.location.origin.replace("3000", "5000");
+  }
+  return "http://localhost:5000";
+};
 
 interface ChatRoomProps {
   negotiationId: string;
@@ -61,6 +56,19 @@ interface Message {
 export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
   const router = useRouter();
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [socket, setSocket] = useState<any>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    const newSocket = io(getSocketUrl(), {
+      auth: { token }
+    });
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
   const [negotiation, setNegotiation] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -81,12 +89,14 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
   }, [negotiation]);
 
   useEffect(() => {
-    if (chatId) {
+    if (chatId && socket) {
       socket.emit("join-room", chatId);
     }
-  }, [chatId]);
+  }, [chatId, socket]);
 
   useEffect(() => {
+    if (!socket) return;
+
     const handleMessage = (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
     };
@@ -94,7 +104,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
     return () => {
       socket.off("chat:message", handleMessage);
     };
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -158,7 +168,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
 
       await apiClient.put(`/negotiation/${negotiationId}`, payload);
 
-      if (message.trim() && chatId) {
+      if (message.trim() && chatId && socket) {
         socket.emit("chat:message", {
           chatId,
           message: message.trim(),
@@ -166,7 +176,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
         });
       }
 
-      if (offerDetails && chatId) {
+      if (offerDetails && chatId && socket) {
         socket.emit("chat:message", {
           chatId,
           message:

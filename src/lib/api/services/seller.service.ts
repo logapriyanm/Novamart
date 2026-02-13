@@ -2,6 +2,14 @@ import { apiClient } from '../client';
 import { ENDPOINTS } from '../contract';
 
 export const sellerService = {
+    async getProfile(): Promise<any> {
+        return apiClient.get('/seller/profile');
+    },
+
+    async updateProfile(data: any): Promise<any> {
+        return apiClient.put('/seller/profile', data);
+    },
+
     async getAnalytics(): Promise<any> {
         return apiClient.get('/seller/analytics');
     },

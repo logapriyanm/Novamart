@@ -181,8 +181,36 @@ export const updateNegotiation = async (req, res) => {
             $push: { chatLog: chatEntry }
         };
 
+        // Strict State Transition Validation
+        if (status) {
+            const currentStatus = negotiation.status;
+            const validTransitions = {
+                'OPEN': ['ACCEPTED', 'REJECTED', 'NEGOTIATING'],
+                'NEGOTIATING': ['ACCEPTED', 'REJECTED', 'OPEN'],
+                'ACCEPTED': ['ORDER_REQUESTED', 'DEAL_CLOSED'], // Deal Closed logic?
+                'DEAL_CLOSED': ['ORDER_FULFILLED'],
+                'ORDER_REQUESTED': ['ORDER_FULFILLED'],
+                'REJECTED': [],
+                'ORDER_FULFILLED': []
+            };
+
+            // Allow 'OPEN' -> 'NEGOTIATING' via offer update implicit logic if status not explicitly sent? 
+            // Here status IS explicitly sent.
+            if (!validTransitions[currentStatus]?.includes(status)) {
+                return res.status(400).json({
+                    error: 'INVALID_STATE_TRANSITION',
+                    message: `Cannot move from ${currentStatus} to ${status}`
+                });
+            }
+        }
+
         if (offerUpdate) updateData.currentOffer = parseFloat(offerUpdate);
         if (status) updateData.status = status;
+
+        // Auto-transition to NEGOTIATING if offer is made on OPEN
+        if (offerUpdate && negotiation.status === 'OPEN' && !status) {
+            updateData.status = 'NEGOTIATING';
+        }
 
         const updatedNegotiation = await Negotiation.findByIdAndUpdate(negotiationId, updateData, { new: true });
 
@@ -315,6 +343,7 @@ export const updateNegotiation = async (req, res) => {
                 message: notificationMessage,
                 link: role === 'SELLER' ? '/manufacturer/negotiations' : '/seller/negotiations'
             });
+
         } else if (message || newOffer) {
             await Notification.create({
                 userId: recipientUserId,
@@ -325,6 +354,21 @@ export const updateNegotiation = async (req, res) => {
                     : `${senderName}: ${message?.substring(0, 50)}${message?.length > 50 ? '...' : ''}`,
                 link: role === 'SELLER' ? '/seller/negotiations' : '/manufacturer/negotiations'
             });
+        }
+
+        // Real-time Socket Broadcast
+        if (req.io) {
+            const chatId = (await Chat.findOne({ type: 'NEGOTIATION', contextId: negotiationId }))?._id;
+            if (chatId) {
+                // Emit system message if created
+                // We created Message models above but didn't capture the object to emit.
+                // ideally we should capture the 'message' object from Message.create calls.
+                // For now, simpler to emit a generic 'negotiation:update' event
+                req.io.to(chatId.toString()).emit('negotiation:update', {
+                    negotiation: updatedNegotiation,
+                    trigger: status || (offerUpdate ? 'OFFER' : 'MESSAGE')
+                });
+            }
         }
 
         res.json({ success: true, data: updatedNegotiation });

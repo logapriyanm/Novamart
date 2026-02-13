@@ -24,7 +24,7 @@ const roleOptions: RoleOption[] = [
             'Track orders in real-time'
         ],
         bestFor: 'Individual buyers looking for home appliances and electronics',
-        color: 'from-blue-400 to-blue-600'
+        color: 'from-slate-700 to-slate-900'
     },
     {
         role: 'SELLER',
@@ -39,7 +39,7 @@ const roleOptions: RoleOption[] = [
             'Subscription-based benefits'
         ],
         bestFor: 'Retailers and wholesalers buying in bulk to resell',
-        color: 'from-green-400 to-green-600'
+        color: 'from-success to-emerald-600'
     },
     {
         role: 'MANUFACTURER',
@@ -54,7 +54,7 @@ const roleOptions: RoleOption[] = [
             'Track production milestones'
         ],
         bestFor: 'Product manufacturers and suppliers selling to sellers',
-        color: 'from-purple-400 to-purple-600'
+        color: 'from-primary to-blue-700'
     }
 ];
 
@@ -123,18 +123,19 @@ export default function RoleSelectionCards({ selectedRole, onSelectRole }: RoleS
             </div>
 
             {/* Help Text */}
-            <div className="bg-blue-50 border border-blue-200 rounded-[15px] p-4 flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-[10px] flex items-center justify-center shrink-0">
+            <div className="bg-primary/5 border border-primary/10 rounded-[15px] p-4 flex items-start gap-3">
+                <div className="w-8 h-8 bg-primary rounded-[10px] flex items-center justify-center shrink-0">
                     <FaStar className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                    <p className="text-sm font-black text-blue-900 mb-1">Not sure which to choose?</p>
-                    <p className="text-xs font-bold text-blue-700">
+                    <p className="text-sm font-black text-primary mb-1">Not sure which to choose?</p>
+                    <p className="text-xs font-bold text-slate-600">
                         Choose <strong>Customer</strong> if you're buying for yourself. Choose <strong>Seller</strong> if you're buying to resell.
                         Choose <strong>Manufacturer</strong> if you're selling products.
                     </p>
                 </div>
             </div>
+            {/* End Help Text */}
         </div>
     );
 }

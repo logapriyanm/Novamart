@@ -93,7 +93,9 @@ export const updateOrderStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { status, reason, metadata } = req.body;
-        const updated = await orderService.updateStatus(id, status, { reason, metadata });
+        const userId = req.user._id;
+        const role = req.user.role;
+        const updated = await orderService.updateStatus(id, status, { reason, metadata, userId, role });
 
         // Email Notifications are now handled by EmailSubscriber via system events
 

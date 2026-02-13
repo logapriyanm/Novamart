@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const KYCDocumentSchema = new mongoose.Schema({
-    userId: { type: String, required: true, index: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     role: { type: String, required: true },
     documents: [{
         type: { type: String, required: true }, // e.g., GST, PAN, IEC

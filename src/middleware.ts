@@ -41,6 +41,7 @@ export function middleware(request: NextRequest) {
             if (payload.role === 'ADMIN') return NextResponse.redirect(new URL('/admin', request.url));
             if (payload.role === 'MANUFACTURER') return NextResponse.redirect(new URL('/manufacturer/dashboard', request.url));
             if (payload.role === 'SELLER') return NextResponse.redirect(new URL('/seller/dashboard', request.url));
+            if (payload.role === 'CUSTOMER') return NextResponse.redirect(new URL('/customer', request.url));
         }
         return NextResponse.redirect(new URL('/', request.url));
     }

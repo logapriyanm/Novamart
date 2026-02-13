@@ -6,6 +6,10 @@ export const manufacturerService = {
         return apiClient.get('/manufacturer/profile');
     },
 
+    async updateProfile(data: any): Promise<any> {
+        return apiClient.put('/manufacturer/profile', data);
+    },
+
     async getStats(): Promise<any> {
         return apiClient.get('/manufacturer/stats');
     },

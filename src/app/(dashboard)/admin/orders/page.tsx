@@ -77,10 +77,10 @@ export default function OrderOversightPanel() {
         const idMatch = o?._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             o?.id?.toLowerCase().includes(searchTerm.toLowerCase());
         const customerMatch = o?.customer?.name?.toLowerCase().includes(searchTerm.toLowerCase());
-        const dealerMatch = o?.dealer?.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            o?.manufacturer?.businessName?.toLowerCase().includes(searchTerm.toLowerCase());
+        const sellerMatch = o?.sellerId?.businessName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            o?.seller?.businessName?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const searchCondition = idMatch || customerMatch || dealerMatch;
+        const searchCondition = idMatch || customerMatch || sellerMatch;
 
         // Status Filter
         const statusMatch = filters.status.length === 0 || filters.status.includes(o.status);
@@ -113,7 +113,7 @@ export default function OrderOversightPanel() {
         <div className="min-h-[600px] flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
                 <FaBoxOpen className="w-8 h-8 text-slate-300 animate-bounce" />
-                <p className="text-sm font-semibold text-slate-400 animate-pulse">Loading Supply Chain...</p>
+                <p className="text-sm font-bold text-slate-400 animate-pulse">Loading Supply Chain...</p>
             </div>
         </div>
     );
@@ -122,14 +122,14 @@ export default function OrderOversightPanel() {
         <div className="space-y-8 animate-fade-in pb-12 font-sans text-slate-800 bg-slate-50/50 min-h-screen p-6">
             {/* Header */}
             <div className="flex flex-col gap-2 border-b border-slate-200 pb-6">
-                <Link href="/admin" className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors mb-2">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors mb-2">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Supply Chain Oversight</h1>
-                        <p className="text-sm text-slate-500 font-medium mt-1">Ecosystem-Wide Order Monitoring & Audit</p>
+                        <h1 className="text-3xl font-black tracking-tight text-slate-900 UPPERCASE ITALIC">Supply Chain Oversight</h1>
+                        <p className="text-sm text-slate-500 font-bold mt-1">Ecosystem-Wide Order Monitoring & Audit</p>
                     </div>
                 </div>
             </div>
@@ -139,8 +139,8 @@ export default function OrderOversightPanel() {
                 {stats.map((stat) => (
                     <div key={stat.label} className="bg-white rounded-[10px] p-6 border border-slate-200 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                         <div>
-                            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1.5">{stat.label}</p>
-                            <h3 className="text-2xl font-bold text-slate-900">{stat.value}</h3>
+                            <p className="text-sm font-bold text-slate-500 mb-1.5">{stat.label}</p>
+                            <h3 className="text-2xl font-black text-slate-900">{stat.value}</h3>
                         </div>
                         <div className={`w-10 h-10 rounded-[10px] ${stat.bg} ${stat.color} flex items-center justify-center`}>
                             <stat.icon className="w-5 h-5" />
@@ -153,8 +153,8 @@ export default function OrderOversightPanel() {
             <div className="bg-white rounded-[10px] border border-slate-200 shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Global Transaction Stream</h2>
-                        <p className="text-xs text-slate-500 mt-0.5">Real-time Order Distribution Data</p>
+                        <h2 className="text-sm font-bold text-slate-800">Global Transaction Stream</h2>
+                        <p className="text-sm text-slate-500 mt-0.5">Real-time Order Distribution Data</p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="relative w-64">
@@ -164,12 +164,12 @@ export default function OrderOversightPanel() {
                                 placeholder="Search Orders..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-white border border-slate-200 rounded-[10px] py-2 pl-9 pr-4 text-xs font-medium focus:outline-none focus:border-indigo-500 transition-colors"
+                                className="w-full bg-white border border-slate-200 rounded-[10px] py-2 pl-9 pr-4 text-sm font-medium focus:outline-none focus:border-indigo-500 transition-colors"
                             />
                         </div>
                         <button
                             onClick={() => setIsFilterOpen(true)}
-                            className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[10px] hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
+                            className="px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-[10px] hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
                         >
                             <FaFilter className="w-3 h-3" />
                             Filter {(filters.status.length > 0 || filters.dateRange !== 'ALL' || filters.minValue) && <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>}
@@ -189,35 +189,35 @@ export default function OrderOversightPanel() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-slate-200 bg-slate-50/30">
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wide">Order Protocol</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wide">Buyer/Entity</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wide">Dealer/Seller</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wide text-center">Status</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wide text-center">Value Index</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wide text-right">Actions</th>
+                                <th className="px-6 py-4 text-sm font-bold text-slate-500">Order Protocol</th>
+                                <th className="px-6 py-4 text-sm font-bold text-slate-500">Buyer/Entity</th>
+                                <th className="px-6 py-4 text-sm font-bold text-slate-500">Dealer/Seller</th>
+                                <th className="px-6 py-4 text-sm font-bold text-slate-500 text-center">Status</th>
+                                <th className="px-6 py-4 text-sm font-bold text-slate-500 text-center">Value Index</th>
+                                <th className="px-6 py-4 text-sm font-bold text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filteredOrders.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="p-12 text-center text-slate-400 text-sm font-medium">No orders found matching your search.</td>
+                                    <td colSpan={6} className="p-12 text-center text-slate-400 text-sm font-bold">No orders found matching your search.</td>
                                 </tr>
                             ) : filteredOrders.map((order) => (
                                 <tr key={order._id || order.id} className="hover:bg-slate-50 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-bold text-slate-900">ORD-{(order._id || order.id || '').slice(0, 8).toUpperCase()}</span>
-                                            <span className="text-xs text-slate-500 mt-0.5">{new Date(order.createdAt).toLocaleDateString()}</span>
+                                            <span className="text-sm text-slate-500 mt-0.5">{new Date(order.createdAt).toLocaleDateString()}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-slate-700">
-                                        {order.customer?.name || 'Guest'}
+                                    <td className="px-6 py-4 text-sm font-bold text-slate-700">
+                                        {order.customerId?.name || order.customer?.name || 'Guest'}
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-medium text-indigo-600">
-                                        {order.dealer?.businessName || 'Verified Seller'}
+                                    <td className="px-6 py-4 text-sm font-bold text-indigo-600">
+                                        {order.sellerId?.businessName || order.seller?.businessName || 'Verified Seller'}
                                     </td>
                                     <td className="px-6 py-4 text-center">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-[10px] text-xs font-bold uppercase tracking-wide ${order.status === 'DELIVERED' || order.status === 'SHIPPED' ? 'bg-emerald-50 text-emerald-700' :
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-[10px] text-sm font-bold ${order.status === 'DELIVERED' || order.status === 'SHIPPED' ? 'bg-emerald-50 text-emerald-700' :
                                             order.status === 'CANCELLED' ? 'bg-rose-50 text-rose-700' :
                                                 'bg-blue-50 text-blue-700'
                                             }`}>
@@ -226,7 +226,7 @@ export default function OrderOversightPanel() {
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <p className="text-sm font-bold text-slate-900">₹{Number(order.totalAmount).toLocaleString()}</p>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase mt-0.5">{Number(order.totalAmount) > 50000 ? 'High Value' : 'Standard'}</p>
+                                        <p className="text-sm font-bold text-slate-400 mt-0.5">{Number(order.totalAmount) > 50000 ? 'High Value' : 'Standard'}</p>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -260,7 +260,7 @@ export default function OrderOversightPanel() {
                 </div>
 
                 <div className="p-4 border-t border-slate-200 bg-slate-50/50 flex justify-center">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <p className="text-sm font-bold text-slate-400 flex items-center gap-2">
                         <FaCheckCircle className="w-3 h-3 text-emerald-500" />
                         Supply Chain Data Persisted • Full Logistic Transparency Active
                     </p>

@@ -57,12 +57,12 @@ const InstructionButton: React.FC = () => {
                     {/* Pulsing ring behind (if needed, currently shadow handles it) */}
 
                     <span className="relative z-10 flex items-center justify-center">
-                        <HelpCircle className="w-5 h-5 md:w-6 md:h-6 text-blue-600 fill-blue-50" strokeWidth={2.5} />
+                        <HelpCircle className="w-5 h-5 md:w-6 md:h-6 text-primary fill-primary/10" strokeWidth={2.5} />
                     </span>
 
                     {/* Subtle pulse animation inside */}
                     <motion.div
-                        className="absolute inset-0 bg-blue-100 rounded-full opacity-0"
+                        className="absolute inset-0 bg-primary/20 rounded-full opacity-0"
                         animate={{ scale: [1, 1.5], opacity: [0.3, 0] }}
                         transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
                     />

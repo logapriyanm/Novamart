@@ -30,22 +30,25 @@ export const getAdminOverview = async (req, res) => {
                 $group: {
                     _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
                     revenue: { $sum: "$totalAmount" },
-                    commission: { $sum: "$commissionAmount" }
+                    commission: { $sum: "$commissionAmount" },
+                    count: { $sum: 1 }
                 }
             },
             { $sort: { _id: 1 } }
         ]);
+
+        const totalGMV = revenueData.reduce((acc, curr) => acc + curr.revenue, 0);
+        const totalCommission = revenueData.reduce((acc, curr) => acc + curr.commission, 0);
 
         // Format for Recharts
         const revenueChart = revenueData.map(item => ({
             date: item._id,
             revenue: item.revenue,
             commission: item.commission,
-            gmv: item.revenue // Assuming GMV ~ Total Revenue for now
+            gmv: item.revenue
         }));
 
-        // 2. User Growth (App wide)
-        // Hard to do historic count without "createdAt" grouping on Users, assuming Users have timestamps
+        // 2. User Growth
         const userGrowthData = await User.aggregate([
             {
                 $match: { createdAt: { $gte: start, $lte: end } }
@@ -62,7 +65,6 @@ export const getAdminOverview = async (req, res) => {
             { $sort: { "_id.date": 1 } }
         ]);
 
-        // Process User Growth for Stacked Bar
         const userGrowthMap = {};
         userGrowthData.forEach(item => {
             const date = item._id.date;
@@ -72,6 +74,7 @@ export const getAdminOverview = async (req, res) => {
             if (item._id.role === 'MANUFACTURER') userGrowthMap[date].manufacturers += item.count;
         });
         const userGrowthChart = Object.values(userGrowthMap).sort((a, b) => a.date.localeCompare(b.date));
+        const totalMerchants = await User.countDocuments({ role: { $in: ['SELLER', 'MANUFACTURER'] } });
 
         // 3. Order Status Distribution
         const orderStatusData = await Order.aggregate([
@@ -80,18 +83,97 @@ export const getAdminOverview = async (req, res) => {
         ]);
         const orderStatusChart = orderStatusData.map(item => ({ name: item._id, value: item.value }));
 
+        // 4. Category Dominance (from sold items)
+        const categoryData = await Order.aggregate([
+            { $match: { status: { $in: ['PAID', 'DELIVERED'] }, createdAt: { $gte: start } } },
+            { $unwind: "$items" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            { $unwind: "$product" },
+            {
+                $group: {
+                    _id: "$product.category",
+                    count: { $sum: "$items.quantity" },
+                    revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
+                }
+            },
+            { $sort: { revenue: -1 } },
+            { $limit: 5 }
+        ]);
+
+        const totalCategoryRevenue = categoryData.reduce((acc, curr) => acc + curr.revenue, 0);
+        const categoryDominance = categoryData.map(cat => ({
+            name: cat._id || 'Uncategorized',
+            value: cat.revenue,
+            share: totalCategoryRevenue ? Math.round((cat.revenue / totalCategoryRevenue) * 100) + '%' : '0%'
+        }));
+
+        // 5. Dispute Ratio
+        // Assuming Dispute model exists or we track via Order status 'DISPUTED' (if applicable) or separate collection
+        // For now, using Order status 'CANCELLED' as proxy for "issues" if no Dispute model ready-to-use here
+        const disputeCount = await Order.countDocuments({ status: 'CANCELLED', createdAt: { $gte: start } });
+        const totalOrders = await Order.countDocuments({ createdAt: { $gte: start } });
+        const disputeRatio = totalOrders ? ((disputeCount / totalOrders) * 100).toFixed(2) + '%' : '0%';
+
         res.json({
             success: true,
             data: {
+                macroStats: {
+                    quarterlyGMV: totalGMV,
+                    merchantCount: totalMerchants,
+                    disputeRatio
+                },
                 revenueChart,
                 userGrowthChart,
-                orderStatusChart
+                orderStatusChart,
+                categoryDominance
             }
         });
 
     } catch (error) {
         console.error('Admin Analytics Error:', error);
         res.status(500).json({ success: false, error: 'Failed to fetch admin analytics' });
+    }
+};
+
+export const getQualityAudit = async (req, res) => {
+    try {
+        // Fetch products and aggregate mock performance stats 
+        // (Since we don't have a granular "Quality" score in DB, we verify against Orders)
+        const products = await Product.find().select('name category price status').limit(20).lean();
+
+        // For each product, find return rate (cancelled/returned orders)
+        // This is expensive N+1, but limits to 20 for "Queue"
+        const auditData = await Promise.all(products.map(async (p) => {
+            const totalOrders = await Order.countDocuments({ "items.productId": p._id });
+            const returns = await Order.countDocuments({ "items.productId": p._id, status: { $in: ['CANCELLED', 'RETURNED'] } });
+
+            const returnRate = totalOrders ? Math.round((returns / totalOrders) * 100) : 0;
+
+            let status = 'STABLE';
+            if (returnRate > 10) status = 'AT_RISK';
+            if (p.status === 'DRAFT') status = 'REVIEW';
+
+            return {
+                id: p._id,
+                name: p.name,
+                category: p.category,
+                returnRate: returnRate + '%',
+                complaints: 0, // Placeholder until Complaint model linked
+                status
+            };
+        }));
+
+        res.json({ success: true, data: auditData });
+    } catch (error) {
+        console.error('Quality Audit Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to audit products' });
     }
 };
 

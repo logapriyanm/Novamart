@@ -13,6 +13,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../context/CartContext';
 import { toast } from 'sonner';
 import OptimizedImage from './OptimizedImage';
+import VerifiedBadge from '../common/VerifiedBadge';
 
 interface ProductCardProps {
     id: string;
@@ -94,9 +95,8 @@ export default function CustomerProductCard({
                 {/* Top Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
                     {seller.isVerified && (
-                        <div className="px-2 py-1 bg-blue-50/90 backdrop-blur-sm border border-blue-100 text-blue-600 text-sm font-semibold rounded-[4px] flex items-center gap-1 shadow-sm">
-                            <FaCheckCircle className="w-2.5 h-2.5" />
-                            Verified
+                        <div className="shadow-sm z-10 w-fit rounded-full">
+                            <VerifiedBadge type="SELLER" size="sm" showText={true} />
                         </div>
                     )}
                     {highlights.freeDelivery && (

@@ -45,7 +45,7 @@ export default function ContactPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black uppercase tracking-widest text-black mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black tracking-widest text-black mb-6"
                     >
                         <Globe className="w-3 h-3" />
                         Global Support
@@ -83,9 +83,9 @@ export default function ContactPage() {
                                     <div className={`w-12 h-12 rounded-[5px] ${method.bg} ${method.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                                         <method.icon className="w-6 h-6" />
                                     </div>
-                                    <h3 className="text-[10px] font-black text-foreground/40 uppercase tracking-widest mb-2">{method.title}</h3>
+                                    <h3 className="text-[10px] font-black text-foreground/40 tracking-widest mb-2">{method.title}</h3>
                                     <p className="text-lg font-black text-black mb-2 italic">{method.value}</p>
-                                    <p className="text-xs text-foreground/40 font-bold uppercase tracking-widest">{method.description}</p>
+                                    <p className="text-xs text-foreground/40 font-bold tracking-widest">{method.description}</p>
                                 </motion.div>
                             ))}
                         </div>
@@ -93,7 +93,7 @@ export default function ContactPage() {
                         {/* Social Links */}
                         <div className="bg-black p-10 rounded-[10px] text-white overflow-hidden relative group">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform" />
-                            <h3 className="text-[10px] font-black uppercase tracking-widest mb-8 relative z-10 opacity-40 italic">Follow Progress</h3>
+                            <h3 className="text-[10px] font-black tracking-widest mb-8 relative z-10 opacity-40 italic">Follow Progress</h3>
                             <div className="flex gap-4 relative z-10">
                                 {[Twitter, Github, Globe].map((Icon, i) => (
                                     <button key={i} className="w-12 h-12 rounded-[5px] bg-white/10 flex items-center justify-center hover:bg-white text-white hover:text-black transition-all">
@@ -114,7 +114,7 @@ export default function ContactPage() {
                         <form className="space-y-8">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-black/40 uppercase tracking-widest ml-1">Full Name</label>
+                                    <label className="text-[10px] font-black text-black/40 tracking-widest ml-1">Full Name</label>
                                     <input
                                         type="text"
                                         placeholder="John Doe"
@@ -122,7 +122,7 @@ export default function ContactPage() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-black/40 uppercase tracking-widest ml-1">Email Address</label>
+                                    <label className="text-[10px] font-black text-black/40 tracking-widest ml-1">Email Address</label>
                                     <input
                                         type="email"
                                         placeholder="john@company.com"
@@ -132,7 +132,7 @@ export default function ContactPage() {
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-black/40 uppercase tracking-widest ml-1">Subject</label>
+                                <label className="text-[10px] font-black text-black/40 tracking-widest ml-1">Subject</label>
                                 <select className="w-full bg-white/40 border border-black/10 rounded-[10px] px-6 py-4 text-sm font-bold focus:outline-none focus:border-black/50 transition-all appearance-none">
                                     <option>Partnership Inquiry</option>
                                     <option>Support Request</option>
@@ -142,7 +142,7 @@ export default function ContactPage() {
                             </div>
 
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-black/40 uppercase tracking-widest ml-1">Your Message</label>
+                                <label className="text-[10px] font-black text-black/40 tracking-widest ml-1">Your Message</label>
                                 <textarea
                                     rows={5}
                                     placeholder="How can our specialists assist you today?"
@@ -150,7 +150,7 @@ export default function ContactPage() {
                                 ></textarea>
                             </div>
 
-                            <button className="w-full py-5 bg-black text-white font-black text-sm rounded-[10px] hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-black/20 flex items-center justify-center gap-3 uppercase tracking-widest">
+                            <button className="w-full py-5 bg-black text-white font-black text-sm rounded-[10px] hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-black/20 flex items-center justify-center gap-3 tracking-widest">
                                 <Send className="w-4 h-4" />
                                 Deploy Inquiry
                             </button>

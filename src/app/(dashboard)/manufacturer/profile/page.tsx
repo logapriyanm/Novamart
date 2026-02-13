@@ -22,24 +22,28 @@ import {
     FaGlobe,
     FaRocket,
     FaUserCircle,
-    FaCamera
+    FaCamera,
+    FaUpload,
+    FaClock
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRealProfile } from '@/client/hooks/useRealProfile';
 import { useAuth } from '@/client/hooks/useAuth';
 import { mediaService } from '@/lib/api/services/media.service';
+import KYCUploadModal from '@/client/components/verification/KYCUploadModal';
 
 export default function ManufacturerProfilePage() {
     const { user } = useAuth();
     const { profile, isLoading, error, updateProfile, refetch } = useRealProfile<any>('manufacturer');
     const [activeSection, setActiveSection] = useState('account');
     const [isSaving, setIsSaving] = useState(false);
+    const [kycModalOpen, setKycModalOpen] = useState(false);
 
     if (isLoading) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
             <div className="text-center space-y-4">
                 <div className="w-10 h-10 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">Syncing Industrial DNA...</p>
+                <p className="text-xs font-semibold tracking-wider text-slate-600">Syncing Industrial DNA...</p>
             </div>
         </div>
     );
@@ -52,7 +56,7 @@ export default function ManufacturerProfilePage() {
                 </div>
                 <h2 className="text-lg font-bold text-slate-900">Operational Failure</h2>
                 <p className="text-sm text-slate-600 font-medium">{error}</p>
-                <button onClick={refetch} className="w-full py-3 bg-slate-900 text-white rounded-[10px] text-xs font-bold uppercase tracking-wide hover:bg-slate-800 transition-all">Retry Handshake</button>
+                <button onClick={refetch} className="w-full py-3 bg-slate-900 text-white rounded-[10px] text-xs font-bold tracking-wide hover:bg-slate-800 transition-all">Retry Handshake</button>
             </div>
         </div>
     );
@@ -72,7 +76,7 @@ export default function ManufacturerProfilePage() {
         <div className="space-y-8 animate-fade-in pb-12 text-slate-800 font-sans">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <Link href="/manufacturer" className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider hover:text-slate-900 transition-colors w-fit">
+                <Link href="/manufacturer" className="flex items-center gap-2 text-xs font-bold text-slate-600 tracking-wider hover:text-slate-900 transition-colors w-fit">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Command Dashboard
                 </Link>
@@ -98,7 +102,7 @@ export default function ManufacturerProfilePage() {
                                     <s.icon className="w-4 h-4" />
                                 </div>
                                 <div className="text-left">
-                                    <h4 className="text-sm font-bold uppercase tracking-wide">{s.name}</h4>
+                                    <h4 className="text-sm font-bold tracking-wide">{s.name}</h4>
                                     <p className={`text-[10px] font-medium mt-0.5 ${activeSection === s.id ? 'text-white/70' : 'text-slate-400'}`}>{s.desc}</p>
                                 </div>
                                 <FaChevronRight className={`ml-auto w-3 h-3 transition-transform ${activeSection === s.id ? 'translate-x-1' : 'opacity-0'}`} />
@@ -109,24 +113,94 @@ export default function ManufacturerProfilePage() {
                     {/* Verification Sidebar Card */}
                     <div className="bg-slate-900 rounded-[10px] p-6 text-white relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-800/50 blur-2xl rounded-full" />
-                        <h3 className="text-[10px] font-bold uppercase tracking-wider mb-6 opacity-70 flex items-center gap-2">
+                        <h3 className="text-[10px] font-bold tracking-wider mb-6 opacity-70 flex items-center gap-2">
                             <FaShieldAlt className="w-3.5 h-3.5 text-emerald-400" />
                             Entity Governance
                         </h3>
                         <div className="space-y-4">
                             <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center ${profile.isVerified ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                                <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center ${profile.isVerified
+                                    ? 'bg-emerald-500/20 text-emerald-400'
+                                    : profile.verificationStatus === 'PENDING'
+                                        ? 'bg-amber-500/20 text-amber-400'
+                                        : profile.verificationStatus === 'REJECTED'
+                                            ? 'bg-rose-500/20 text-rose-400'
+                                            : 'bg-slate-500/20 text-slate-400'
+                                    }`}>
                                     <FaCheckCircle className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Verification Status</p>
-                                    <p className="text-xs font-bold">{profile.isVerified ? 'VERIFIED ENTITY' : 'AUDIT PENDING'}</p>
+                                    <p className="text-[10px] font-bold text-slate-400 tracking-wider">Verification Status</p>
+                                    <p className="text-xs font-bold">
+                                        {profile.isVerified
+                                            ? 'VERIFIED ENTITY'
+                                            : profile.verificationStatus === 'PENDING'
+                                                ? 'UNDER REVIEW'
+                                                : profile.verificationStatus === 'REJECTED'
+                                                    ? 'REJECTED'
+                                                    : 'NOT SUBMITTED'}
+                                    </p>
                                 </div>
                             </div>
-                            {!profile.isVerified && (
-                                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-[8px] flex items-center gap-3">
-                                    <FaLock className="text-amber-500 w-3.5 h-3.5" />
-                                    <p className="text-[10px] font-medium text-amber-200 uppercase tracking-wide leading-relaxed">Product publishing restricted until verified</p>
+
+                            {/* Show upload button for unverified manufacturers */}
+                            {!profile.isVerified && profile.verificationStatus === 'NONE' && (
+                                <>
+                                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-[8px] flex items-center gap-3">
+                                        <FaLock className="text-amber-500 w-3.5 h-3.5" />
+                                        <p className="text-[10px] font-medium text-amber-200 tracking-wide leading-relaxed">Product publishing restricted until verified</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setKycModalOpen(true)}
+                                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] font-black text-xs tracking-wide transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+                                    >
+                                        <FaUpload className="w-3.5 h-3.5" />
+                                        Submit for Verification
+                                    </button>
+                                </>
+                            )}
+
+                            {/* Show status for pending */}
+                            {profile.verificationStatus === 'PENDING' && (
+                                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-[8px] text-center">
+                                    <FaClock className="w-5 h-5 text-blue-400 mx-auto mb-2" />
+                                    <p className="text-[10px] font-bold text-blue-200 tracking-wide">Documents Under Admin Review</p>
+                                    <p className="text-[9px] text-blue-300 mt-1">Expected response: 24-48 hours</p>
+                                </div>
+                            )}
+
+                            {/* Show resubmit for rejected */}
+                            {profile.verificationStatus === 'REJECTED' && (
+                                <>
+                                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-[8px]">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <FaExclamationTriangle className="text-rose-400 w-3.5 h-3.5" />
+                                            <p className="text-[10px] font-bold text-rose-200 tracking-wide">Verification Rejected</p>
+                                        </div>
+                                        {profile.rejectionReason && (
+                                            <p className="text-[9px] text-rose-300 leading-relaxed">{profile.rejectionReason}</p>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => setKycModalOpen(true)}
+                                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[8px] font-bold text-[10px] tracking-wide transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <FaSync className="w-3 h-3" />
+                                        Resubmit Documents
+                                    </button>
+                                </>
+                            )}
+
+                            {/* Show verified badge */}
+                            {profile.isVerified && (
+                                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-[8px] flex items-center gap-3">
+                                    <FaCheckCircle className="text-emerald-400 w-5 h-5" />
+                                    <div>
+                                        <p className="text-[10px] font-bold text-emerald-200 tracking-wide">Fully Verified Entity</p>
+                                        {profile.verifiedAt && (
+                                            <p className="text-[9px] text-emerald-300 mt-0.5">Verified on {new Date(profile.verifiedAt).toLocaleDateString()}</p>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -173,6 +247,13 @@ export default function ManufacturerProfilePage() {
                     </div>
                 </div>
             </div>
+
+            {/* KYC Upload Modal */}
+            <KYCUploadModal
+                isOpen={kycModalOpen}
+                onClose={() => setKycModalOpen(false)}
+                role="MANUFACTURER"
+            />
         </div>
     );
 }
@@ -230,7 +311,7 @@ function AccountSection({ profile, user, onSave, isSaving }: any) {
 
                 <div className="flex-1 space-y-6 w-full">
                     <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide ml-1">Full Identity Name</label>
+                        <label className="text-xs font-semibold text-slate-400 tracking-wide ml-1">Full Identity Name</label>
                         <div className="flex items-center gap-2">
                             <input
                                 className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-bold focus:outline-none"
@@ -240,7 +321,7 @@ function AccountSection({ profile, user, onSave, isSaving }: any) {
                             {profile.isVerified && (
                                 <div className="shrink-0 group relative">
                                     <img src="/verify.png" className="w-6 h-6 object-contain" alt="Verified" />
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[8px] font-black tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                                         Verified Manufacturer
                                     </div>
                                 </div>
@@ -248,7 +329,7 @@ function AccountSection({ profile, user, onSave, isSaving }: any) {
                         </div>
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide ml-1">Registered Email Access</label>
+                        <label className="text-xs font-semibold text-slate-400 tracking-wide ml-1">Registered Email Access</label>
                         <input
                             className="w-full bg-slate-100 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium text-slate-500 cursor-not-allowed"
                             value={formData.email}
@@ -258,7 +339,7 @@ function AccountSection({ profile, user, onSave, isSaving }: any) {
                     <button
                         onClick={() => onSave(formData)}
                         disabled={isSaving}
-                        className="px-6 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[10px] shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all flex items-center gap-2"
+                        className="px-6 py-3 bg-slate-900 text-white text-xs font-bold tracking-wide rounded-[10px] shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all flex items-center gap-2"
                     >
                         <FaSave className="w-3.5 h-3.5" />
                         {isSaving ? 'Directing...' : 'Update Account DNA'}
@@ -273,7 +354,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
     return (
         <div className="mb-8">
             <h2 className="text-xl font-bold text-slate-800">{title}</h2>
-            <p className="text-slate-500 font-medium uppercase tracking-wide text-[10px] mt-1">{subtitle}</p>
+            <p className="text-slate-500 font-medium tracking-wide text-[10px] mt-1">{subtitle}</p>
         </div>
     );
 }
@@ -293,15 +374,15 @@ function CompanySection({ profile, onSave, isSaving }: any) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide ml-1">Company Legal Name</label>
+                    <label className="text-xs font-semibold text-slate-500 tracking-wide ml-1">Company Legal Name</label>
                     <input className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium focus:outline-none focus:border-slate-400 transition-colors" value={formData.companyName} onChange={e => setFormData({ ...formData, companyName: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide ml-1">Registration Index (CIN)</label>
+                    <label className="text-xs font-semibold text-slate-500 tracking-wide ml-1">Registration Index (CIN)</label>
                     <input className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium focus:outline-none focus:border-slate-400 transition-colors" value={formData.registrationNo} onChange={e => setFormData({ ...formData, registrationNo: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide ml-1">Business Category</label>
+                    <label className="text-xs font-semibold text-slate-500 tracking-wide ml-1">Business Category</label>
                     <select className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium focus:outline-none focus:border-slate-400 transition-colors appearance-none" value={formData.businessType} onChange={e => setFormData({ ...formData, businessType: e.target.value })} >
                         <option value="">Select Category</option>
                         <option value="Private Limited">Private Limited</option>
@@ -310,16 +391,16 @@ function CompanySection({ profile, onSave, isSaving }: any) {
                     </select>
                 </div>
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide ml-1">Official Email</label>
+                    <label className="text-xs font-semibold text-slate-500 tracking-wide ml-1">Official Email</label>
                     <input className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium focus:outline-none focus:border-slate-400 transition-colors" value={formData.officialEmail} onChange={e => setFormData({ ...formData, officialEmail: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide ml-1">Corporate Hotline</label>
+                    <label className="text-xs font-semibold text-slate-500 tracking-wide ml-1">Corporate Hotline</label>
                     <input className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium focus:outline-none focus:border-slate-400 transition-colors" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                 </div>
             </div>
 
-            <button onClick={() => onSave(formData)} disabled={isSaving} className="px-6 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[10px] shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all flex items-center gap-2">
+            <button onClick={() => onSave(formData)} disabled={isSaving} className="px-6 py-3 bg-slate-900 text-white text-xs font-bold tracking-wide rounded-[10px] shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all flex items-center gap-2">
                 <FaSave className="w-3.5 h-3.5" /> {isSaving ? 'Syncing...' : 'Save Corporate Profile'}
             </button>
         </div>
@@ -339,20 +420,20 @@ function FactorySection({ profile, onSave, isSaving }: any) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide ml-1">Primary Manufacturing Hub</label>
+                    <label className="text-xs font-semibold text-slate-500 tracking-wide ml-1">Primary Manufacturing Hub</label>
                     <textarea rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium focus:outline-none focus:border-slate-400" value={formData.factoryAddress} onChange={e => setFormData({ ...formData, factoryAddress: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide ml-1">Monthly Throughput Capacity</label>
+                    <label className="text-xs font-semibold text-slate-500 tracking-wide ml-1">Monthly Throughput Capacity</label>
                     <input className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium focus:outline-none focus:border-slate-400" placeholder="e.g. 10,000 Units" value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: e.target.value })} />
                 </div>
                 <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide ml-1">Operational Categories</label>
+                    <label className="text-xs font-semibold text-slate-500 tracking-wide ml-1">Operational Categories</label>
                     <input className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-3 px-4 text-sm font-medium focus:outline-none focus:border-slate-400" placeholder="Electronics, Textiles, etc." value={formData.categoriesProduced} onChange={e => setFormData({ ...formData, categoriesProduced: e.target.value })} />
                 </div>
             </div>
 
-            <button onClick={() => onSave({ ...formData, categoriesProduced: formData.categoriesProduced.split(',').map((c: string) => c.trim()) })} disabled={isSaving} className="px-6 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[10px] shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all flex items-center gap-2">
+            <button onClick={() => onSave({ ...formData, categoriesProduced: formData.categoriesProduced.split(',').map((c: string) => c.trim()) })} disabled={isSaving} className="px-6 py-3 bg-slate-900 text-white text-xs font-bold tracking-wide rounded-[10px] shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all flex items-center gap-2">
                 <FaSave className="w-3.5 h-3.5" /> {isSaving ? 'Syncing...' : 'Update Factory Intel'}
             </button>
         </div>
@@ -371,7 +452,7 @@ function ComplianceSection({ profile, onSave, isSaving }: any) {
                             <FaIdCard className="w-4 h-4" />
                         </div>
                         <div>
-                            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Verified GSTIN</p>
+                            <p className="text-xs font-semibold text-slate-400 tracking-wide">Verified GSTIN</p>
                             <p className="text-sm font-bold text-slate-900">{profile.gstNumber || 'AUDIT REQUIRED'}</p>
                         </div>
                     </div>
@@ -392,10 +473,10 @@ function CertificationCard({ title, status }: any) {
         <div className="p-6 bg-white border border-slate-200 rounded-[10px] shadow-sm hover:border-slate-300 transition-all group">
             <div className="flex items-center justify-between mb-3">
                 <FaCertificate className="text-slate-600 w-5 h-5" />
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-[4px] uppercase tracking-wide">{status}</span>
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-[4px] tracking-wide">{status}</span>
             </div>
-            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">{title}</h4>
-            <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-wide">Validated via Gov portal</p>
+            <h4 className="text-sm font-bold text-slate-900 tracking-wide">{title}</h4>
+            <p className="text-[10px] font-medium text-slate-400 mt-1 tracking-wide">Validated via Gov portal</p>
         </div>
     );
 }
@@ -410,10 +491,10 @@ function BankSection({ profile, onSave, isSaving }: any) {
                 <FaUniversity className="absolute top-6 right-6 text-slate-200 w-12 h-12" />
                 <div className="space-y-6 relative z-10">
                     <div>
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Authenticated Bank Account</p>
+                        <p className="text-xs font-semibold text-slate-400 tracking-wide mb-1">Authenticated Bank Account</p>
                         <p className="text-lg font-bold text-slate-900">HDFC BANK • XXXX-8891</p>
                     </div>
-                    <button className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wide hover:translate-x-1 transition-transform">
+                    <button className="flex items-center gap-2 text-xs font-bold text-slate-700 tracking-wide hover:translate-x-1 transition-transform">
                         Rotate Settlement Access <FaSync className="w-3 h-3" />
                     </button>
                 </div>
@@ -434,20 +515,20 @@ function BrandAssetsSection({ profile, onSave, isSaving }: any) {
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                 <div className="md:col-span-4 space-y-2">
-                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Corporate Logo</label>
+                    <label className="text-xs font-semibold text-slate-400 tracking-wide">Corporate Logo</label>
                     <div className="aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-[10px] flex flex-col items-center justify-center text-slate-400 gap-3 group hover:border-slate-300 transition-all cursor-pointer overflow-hidden">
                         {formData.logo ? (
                             <img src={formData.logo} className="w-full h-full object-contain p-4" />
                         ) : (
                             <>
                                 <FaCamera className="w-8 h-8 group-hover:scale-110 transition-transform" />
-                                <span className="text-[10px] font-bold uppercase tracking-wide">Upload Master SVG/PNG</span>
+                                <span className="text-[10px] font-bold tracking-wide">Upload Master SVG/PNG</span>
                             </>
                         )}
                     </div>
                 </div>
                 <div className="md:col-span-8 space-y-2">
-                    <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Brand Narrative</label>
+                    <label className="text-xs font-semibold text-slate-400 tracking-wide">Brand Narrative</label>
                     <textarea
                         rows={8}
                         className="w-full bg-slate-50 border border-slate-200 rounded-[10px] py-4 px-6 text-sm font-medium focus:outline-none focus:border-slate-400"
@@ -458,7 +539,7 @@ function BrandAssetsSection({ profile, onSave, isSaving }: any) {
                 </div>
             </div>
 
-            <button onClick={() => onSave(formData)} disabled={isSaving} className="px-6 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide rounded-[10px] shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all flex items-center gap-2">
+            <button onClick={() => onSave(formData)} disabled={isSaving} className="px-6 py-3 bg-slate-900 text-white text-xs font-bold tracking-wide rounded-[10px] shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all flex items-center gap-2">
                 <FaSave className="w-3.5 h-3.5" /> {isSaving ? 'Directing...' : 'Deploy Brand Assets'}
             </button>
         </div>
@@ -479,7 +560,7 @@ function DealersSection({ profile }: any) {
                                     <FaStore className="w-4 h-4" />
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wide">{dlr.businessName}</h4>
+                                    <h4 className="text-sm font-bold text-slate-800 tracking-wide">{dlr.businessName}</h4>
                                     <p className="text-[10px] font-medium text-slate-400 mt-0.5">{dlr.city}, {dlr.state}</p>
                                 </div>
                             </div>
@@ -489,8 +570,8 @@ function DealersSection({ profile }: any) {
                 ) : (
                     <div className="md:col-span-2 p-12 bg-slate-50 border border-dashed border-slate-200 rounded-[10px] text-center space-y-4">
                         <FaUsers className="w-8 h-8 text-slate-300 mx-auto" />
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">No partnerships active in registered regions</p>
-                        <Link href="/manufacturer/dealers" className="text-xs font-bold text-slate-900 uppercase tracking-wide hover:underline inline-block mt-4">Manage Dealer Requests →</Link>
+                        <p className="text-xs font-semibold text-slate-400 tracking-wide">No partnerships active in registered regions</p>
+                        <Link href="/manufacturer/dealers" className="text-xs font-bold text-slate-900 tracking-wide hover:underline inline-block mt-4">Manage Dealer Requests →</Link>
                     </div>
                 )}
             </div>
@@ -510,7 +591,7 @@ function SecuritySection({ profile }: any) {
                             <FaShieldAlt className="w-4 h-4" />
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Master 2FA Protocol</h4>
+                            <h4 className="text-sm font-bold text-slate-900 tracking-wide">Master 2FA Protocol</h4>
                             <p className="text-[10px] font-medium text-slate-400 mt-0.5">Identity validated via hardware biometric token</p>
                         </div>
                     </div>
@@ -521,10 +602,10 @@ function SecuritySection({ profile }: any) {
 
                 <div className="p-6 bg-slate-50 border border-slate-200 rounded-[10px] flex items-center justify-between">
                     <div>
-                        <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Supply Channel Access</h4>
+                        <h4 className="text-sm font-bold text-slate-900 tracking-wide">Supply Channel Access</h4>
                         <p className="text-[10px] font-medium text-slate-400 mt-0.5 text-rose-500">Warning: Deactivation stops all active dealer sourcing</p>
                     </div>
-                    <button className="px-6 py-2.5 bg-rose-500 text-white text-[9px] font-bold uppercase tracking-wide rounded-[8px] hover:bg-rose-600 transition-all">Deactivate</button>
+                    <button className="px-6 py-2.5 bg-rose-500 text-white text-[9px] font-bold tracking-wide rounded-[8px] hover:bg-rose-600 transition-all">Deactivate</button>
                 </div>
             </div>
         </div>

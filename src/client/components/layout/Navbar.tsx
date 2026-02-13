@@ -221,7 +221,7 @@ export default function Navbar() {
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-2 pt-2 w-64 z-50"
+                                        className="absolute right-0 mt-2 pt-2 w-64 z-[9999]"
                                     >
                                         <div className="bg-white rounded-[16px] border py-4 overflow-hidden shadow-2xl ring-1 ring-black/5">
                                             {isAuthenticated ? (
@@ -341,7 +341,7 @@ export default function Navbar() {
                                                     exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
                                                     whileHover={{ scale: 1.05 }}
                                                     onClick={sidebarContext.toggleCategorySidebar}
-                                                    className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap border border-white/20 flex items-center gap-1.5 z-50"
+                                                    className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap border border-white/20 flex items-center gap-1.5 z-50"
                                                 >
                                                     <span className="relative flex h-2 w-2">
                                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>

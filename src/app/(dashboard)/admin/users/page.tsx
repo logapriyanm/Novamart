@@ -105,14 +105,14 @@ export default function UserManagementPortal() {
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-[10px] font-bold text-black uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-black hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-black text-black tracking-tight uppercase italic">Identity Oversight</h1>
-                        <p className="text-foreground/40 font-bold uppercase tracking-widest text-[10px] mt-1">Global User Directory & Privilege Governance</p>
+                        <p className="text-foreground/40 font-bold text-sm mt-1">Global User Directory & Privilege Governance</p>
                     </div>
                 </div>
             </div>
@@ -123,9 +123,9 @@ export default function UserManagementPortal() {
                     <button
                         key={role}
                         onClick={() => setSelectedRole(role)}
-                        className={`px-6 py-3 rounded-[10px] text-[10px] font-bold uppercase tracking-widest transition-all ${selectedRole === role
-                            ? 'bg-black text-white'
-                            : 'bg-white text-foreground/40 border border-foreground/10 hover:border-black'
+                        className={`px-6 py-3 rounded-[10px] text-sm font-bold transition-all ${selectedRole === role
+                            ? 'bg-primary text-white shadow-md'
+                            : 'bg-white text-foreground/40 border border-foreground/10 hover:border-primary/50'
                             }`}
                     >
                         {role === 'SELLER' || role === 'MANUFACTURER' || role === 'CUSTOMER' || role === 'ADMIN' ? role + 'S' : role}
@@ -149,7 +149,7 @@ export default function UserManagementPortal() {
                         ))}
                         {displayedList.length === 0 && (
                             <div className="p-8 text-center bg-white rounded-[10px] border border-slate-100 shadow-sm">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No users found</p>
+                                <p className="text-sm font-bold text-slate-400">No users found</p>
                             </div>
                         )}
                     </div>
@@ -157,11 +157,11 @@ export default function UserManagementPortal() {
                     {/* Desktop Table View */}
                     <div className="hidden md:block bg-white rounded-[10px] border border-foreground/10 shadow-sm overflow-hidden">
                         <div className="p-8 border-b border-foreground/10 bg-background/50 flex items-center justify-between">
-                            <h2 className="text-sm font-black text-black uppercase tracking-widest flex items-center gap-3">
+                            <h2 className="text-sm font-black text-black flex items-center gap-3">
                                 <FaUsers className="text-black" />
                                 Active Identity Ledger
                             </h2>
-                            <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">
+                            <p className="text-sm font-bold text-foreground/40">
                                 {displayedList.length} Entities Found
                             </p>
                         </div>
@@ -170,16 +170,16 @@ export default function UserManagementPortal() {
                             <table className="w-full text-left">
                                 <thead>
                                     <tr className="border-b border-foreground/10">
-                                        <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest">User Entity</th>
-                                        <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest">Privilege Level</th>
-                                        <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest text-center">Protocol Status</th>
-                                        <th className="px-10 py-5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest text-right">Actions</th>
+                                        <th className="px-10 py-5 text-sm font-bold text-foreground/40">User Entity</th>
+                                        <th className="px-10 py-5 text-sm font-bold text-foreground/40">Privilege Level</th>
+                                        <th className="px-10 py-5 text-sm font-bold text-foreground/40 text-center">Protocol Status</th>
+                                        <th className="px-10 py-5 text-sm font-bold text-foreground/40 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
                                     {displayedList.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="p-10 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                            <td colSpan={4} className="p-10 text-center text-sm font-bold text-slate-400">
                                                 No entities found in this registry.
                                             </td>
                                         </tr>
@@ -187,12 +187,12 @@ export default function UserManagementPortal() {
                                         <tr key={user._id || user.id} className="hover:bg-slate-50 group transition-colors">
                                             <td className="px-10 py-6">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-[10px] bg-black flex items-center justify-center text-white text-xs font-black group-hover:scale-110 transition-transform">
+                                                    <div className="w-12 h-12 rounded-[10px] bg-black flex items-center justify-center text-white text-sm font-black group-hover:scale-110 transition-transform">
                                                         {(user.name || user.email || 'U').substring(0, 2).toUpperCase()}
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-black text-black leading-none">{user.name || 'Unknown User'}</p>
-                                                        <p className="text-[10px] font-bold text-foreground/40 mt-1.5">{user.email || 'No Email'}</p>
+                                                        <p className="text-sm font-bold text-foreground/40 mt-1.5">{user.email || 'No Email'}</p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -215,11 +215,11 @@ export default function UserManagementPortal() {
                                                             <FaUserTie className="text-black w-3 h-3 cursor-help" />
                                                         </Tooltip>
                                                     )}
-                                                    <span className="text-[10px] font-bold text-black uppercase tracking-widest">{user.role}</span>
+                                                    <span className="text-sm font-bold text-black">{user.role}</span>
                                                 </div>
                                             </td>
                                             <td className="px-10 py-6 text-center">
-                                                <span className={`inline-flex items-center px-4 py-1.5 rounded-[10px] text-[9px] font-bold uppercase tracking-wider ${(user.status === 'Active' || user.isVerified) ? 'bg-emerald-100 text-emerald-700' :
+                                                <span className={`inline-flex items-center px-4 py-1.5 rounded-[10px] text-sm font-bold ${(user.status === 'Active' || user.isVerified) ? 'bg-emerald-100 text-emerald-700' :
                                                     (user.status === 'Banned' || user.isVerified === false) ? 'bg-rose-100 text-rose-700' :
                                                         'bg-amber-100 text-amber-700'
                                                     }`}>

@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             switch (role) {
                 case 'MANUFACTURER': router.push('/manufacturer/dashboard'); break;
                 case 'SELLER': router.push('/seller/dashboard'); break;
-                case 'CUSTOMER': router.push('/'); break;
+                case 'CUSTOMER': router.push('/customer'); break;
                 default: router.push('/');
             }
         }

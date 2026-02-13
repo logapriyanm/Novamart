@@ -127,7 +127,7 @@ export const toggleListing = async (req, res) => {
 export const getSellerStats = async (req, res) => {
     const sellerId = req.user.seller?._id || req.user.seller?.id;
     try {
-        const stats = await sellerService.getSalesReport(sellerId);
+        const stats = await sellerService.getDashboardStats(sellerId);
         res.json({
             success: true,
             data: stats
@@ -219,12 +219,27 @@ export const updateProfile = async (req, res) => {
     const sellerId = req.user.seller?._id || req.user.seller?.id;
     const { section, data } = req.body;
     try {
+        const { Seller, User } = await import('../models/index.js');
+
+        // Check for critical section updates
+        const criticalSections = ['BUSINESS', 'BANK', 'GST']; // Add GST if it's a separate section in frontend
+        const requiresVerificationReset = criticalSections.includes(section);
+
         const result = await sellerService.updateProfile(sellerId, section, data);
+
+        if (requiresVerificationReset) {
+            await Seller.findByIdAndUpdate(sellerId, {
+                isVerified: false,
+                verificationStatus: 'PENDING'
+            });
+            await User.findByIdAndUpdate(req.user.id, { isVerified: false });
+        }
 
         await auditService.logAction('PROFILE_UPDATE', 'SELLER', sellerId, {
             userId: req.user.id,
             section,
             newData: data,
+            resetVerification: requiresVerificationReset,
             req
         });
 
@@ -238,7 +253,7 @@ export const updateProfile = async (req, res) => {
 
         res.json({
             success: true,
-            message: `Profile ${section} updated successfully`,
+            message: requiresVerificationReset ? `Profile ${section} updated. Critical changes require re-verification.` : `Profile ${section} updated successfully`,
             data: result
         });
     } catch (error) {
@@ -333,6 +348,22 @@ export const getMyRequests = async (req, res) => {
     }
 };
 
+export const replyToReview = async (req, res) => {
+    const sellerId = req.user.seller?._id || req.user.seller?.id;
+    const { reviewId } = req.params;
+    const { response } = req.body;
+    try {
+        const result = await sellerService.replyToReview(sellerId, reviewId, response);
+        res.json({
+            success: true,
+            message: 'Response posted successfully',
+            data: result
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+};
+
 export default {
     getMyInventory,
     getInventoryItem,
@@ -350,5 +381,6 @@ export default {
     getPublicSellerProfile,
     getManufacturers,
     requestManufacturerAccess,
-    getMyRequests
+    getMyRequests,
+    replyToReview
 };

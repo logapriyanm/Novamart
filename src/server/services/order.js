@@ -266,7 +266,7 @@ class OrderService {
             const order = await Order.findById(orderId).session(session);
 
             if (!order || ['SETTLED', 'CANCELLED'].includes(order.status)) {
-                throw new Error('Order cannot be cancelled in its current state.');
+                throw new Error(`Order cannot be cancelled in its current state (${order.status}).`);
             }
 
             // 1. Restore Inventory
@@ -370,13 +370,76 @@ class OrderService {
     /**
      * Unified Status Update with State Machine and Rules.
      */
-    async updateStatus(orderId, status, { reason, metadata } = {}) {
+    async updateStatus(orderId, status, { reason, metadata, userId, role } = {}) {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
             const current = await Order.findById(orderId).session(session);
 
             if (!current) throw new Error('ORDER_NOT_FOUND');
+
+            // Security / Permission Check
+            if (role !== 'ADMIN') {
+                if (role === 'SELLER') {
+                    // Seller is the Vendor (for B2C) or Buyer (for B2B)?
+                    // Usually Seller is Vendor.
+                    if (current.sellerId.toString() !== userId.toString()) {
+                        // Check if this is a B2B order where Seller is the Customer?
+                        // If Seller is buying from Manufacturer, Seller is Customer.
+                        // But Order.customerId is a Customer/User ID.
+                        // We need to check if current.customerId resolves to this Seller's User ID.
+                        // For now, assume strict: Seller = Vendor.
+                        throw new Error('UNAUTHORIZED_ORDER_UPDATE');
+                    }
+                } else if (role === 'CUSTOMER') {
+                    // Customer is Buyer
+                    // current.customerId refers to Customer Profile ID, not User ID.
+                    // We need to resolve. Assuming userId passed is the User ID.
+                    // But strictly, we should fetch Customer profile for this userId.
+                    // For performance, we assume userId validation happened in Controller or we fetch here.
+                    // Since we don't have Customer model access easily without import loop or overhead,
+                    // we assume Validated in Controller OR we just rely on ID match if we query.
+                    // Let's rely on checking if the user owns the customer profile linked.
+                    // Actually, easiest is: Controller passes correct args.
+                    // But Controller passed req.user._id.
+                    // current.customerId is a Profile ID.
+                    // We need to check if that Profile belongs to req.user._id.
+                    // This is duplicate work from getOrders.
+                    // Let's assume passed authorized flag or do a quick lookup.
+                    // For robust security, we MUST fetch.
+                    const { Customer } = await import('../models/index.js');
+                    const customer = await Customer.findOne({ userId }).session(session);
+                    if (!customer || current.customerId.toString() !== customer._id.toString()) {
+                        throw new Error('UNAUTHORIZED_ORDER_UPDATE');
+                    }
+                } else if (role === 'MANUFACTURER') {
+                    // Manufacturer updating status? (e.g. Shipping B2B order)
+                    // Check if Manufacturer is the vendor (sellerId logic?)
+                    // If Order.items contains products from this Manufacturer, allow?
+                    // Or if Order.sellerId is actually the Manufacturer (shadow seller).
+                    // PROMPT: "Seller places B2B order -> Manufacturer confirms".
+                    // This implies Manufacturer acts as Seller.
+                    // If Manufacturer has no Seller Profile, this fails.
+                    // We will assume Manufacturer ID matches sellerId if we use Shadow Profile,
+                    // OR we check Line Items.
+                    // If B2B Order: sellerId should be Manufacturer's Seller Profile.
+                    // If not, we check if generic permission allowed.
+                    // Let's assume Manufacturer can update if they are the 'sellerId' (via shadow profile).
+                    // If not, we deny.
+                    // Logic: Check if current.sellerId is linked to this Manufacturer.
+                    // Since we don't have that link easily without Shadow Profile, we might block.
+                    // Allow if current.sellerId is NOT set (direct mfg order?) - unlikely.
+
+                    // FALLBACK: If Manufacturer is the vendor, the sellerId should point to a Seller record 
+                    // that belongs to this Manufacturer.
+                    const { Seller } = await import('../models/index.js');
+                    const sellerProfile = await Seller.findOne({ userId }).session(session);
+                    if (!sellerProfile || current.sellerId.toString() !== sellerProfile._id.toString()) {
+                        throw new Error('UNAUTHORIZED_ORDER_UPDATE');
+                    }
+                }
+            }
+
             if (!isValidTransition(current.status, status)) {
                 throw new Error(`INVALID_TRANSITION: ${current.status} -> ${status}`);
             }

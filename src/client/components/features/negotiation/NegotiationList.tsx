@@ -38,7 +38,7 @@ export default function NegotiationList() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-black text-[#1E293B] flex items-center gap-3">
-        <FaHandshake className="text-[#10367D]" /> Negotiations
+        <FaHandshake className="text-primary" /> Negotiations
       </h2>
 
       <div className="grid grid-cols-1 gap-4">
@@ -82,16 +82,15 @@ export default function NegotiationList() {
 
               <div className="flex items-center gap-4">
                 <div
-                  className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                    neg.status === "ACCEPTED" ||
+                  className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${neg.status === "ACCEPTED" ||
                     neg.status === "ORDER_FULFILLED"
-                      ? "bg-emerald-100 text-emerald-600"
-                      : neg.status === "REJECTED"
-                        ? "bg-rose-100 text-rose-600"
-                        : neg.status === "ORDER_REQUESTED"
-                          ? "bg-blue-100 text-blue-600"
-                          : "bg-amber-100 text-amber-600"
-                  }`}
+                    ? "bg-emerald-100 text-emerald-600"
+                    : neg.status === "REJECTED"
+                      ? "bg-rose-100 text-rose-600"
+                      : neg.status === "ORDER_REQUESTED"
+                        ? "bg-blue-100 text-blue-600"
+                        : "bg-amber-100 text-amber-600"
+                    }`}
                 >
                   {neg.status.replace("_", " ")}
                 </div>
@@ -118,7 +117,7 @@ export default function NegotiationList() {
                   {neg.status === "ACCEPTED" && neg.manufacturer && (
                     <button
                       onClick={() => handleUpdate(neg.id, "ORDER_FULFILLED")}
-                      className="px-4 py-2 bg-[#10367D] text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#10367D]/90 transition-all shadow-lg shadow-[#10367D]/10"
+                      className="px-4 py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10"
                     >
                       Fulfill Deal
                     </button>
@@ -131,7 +130,7 @@ export default function NegotiationList() {
             {neg.chatLog && neg.chatLog.length > 0 && (
               <div className="mt-4 p-4 bg-slate-50/50 rounded-2xl text-[11px] text-slate-600 border border-slate-100/50">
                 <p className="font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <FaComments className="text-[#10367D]/40" /> Timeline
+                  <FaComments className="text-primary/40" /> Timeline
                 </p>
                 <div className="space-y-3">
                   {(neg.chatLog as any[])
@@ -139,11 +138,10 @@ export default function NegotiationList() {
                     .map((msg: any, i: number) => (
                       <div key={i} className="flex items-start gap-2">
                         <span
-                          className={`font-black text-[9px] px-1.5 py-0.5 rounded uppercase ${
-                            msg.sender === "SYSTEM"
-                              ? "bg-blue-100 text-blue-600"
-                              : "bg-slate-200 text-slate-600"
-                          }`}
+                          className={`font-black text-[9px] px-1.5 py-0.5 rounded uppercase ${msg.sender === "SYSTEM"
+                            ? "bg-primary/10 text-primary"
+                            : "bg-slate-200 text-slate-600"
+                            }`}
                         >
                           {msg.sender}
                         </span>

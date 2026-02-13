@@ -161,9 +161,9 @@ class ApiClient {
             if (error.status === 401 && this.refreshToken && endpoint !== '/auth/refresh') {
                 return await this.handleTokenRefresh<T>(endpoint, method, body, options);
             }
-            
-            // Only log non-network errors in development
-            if (process.env.NODE_ENV === 'development' && !error.isNetworkError) {
+
+            // Only log non-network errors in development, and skip 401s (handled by auth flow)
+            if (process.env.NODE_ENV === 'development' && !error.isNetworkError && error.status !== 401) {
                 console.error(`API Error [${method} ${endpoint}]:`, error);
             }
             throw error;

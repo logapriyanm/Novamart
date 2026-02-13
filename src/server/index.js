@@ -1,6 +1,9 @@
 import './env.js'; // MUST BE FIRST
 import express from 'express';
 import { validateEnv } from './config/env.js';
+
+// Validate environment variables early
+validateEnv();
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -22,7 +25,6 @@ import trackingRoutes from './routes/tracking/trackingRoutes.js';
 import chatRoutes from './routes/chat/chatRoutes.js';
 import productRoutes from './routes/products/productRoutes.js';
 import notificationRoutes from './routes/notifications.js';
-import mongodbRoutes from './routes/mongodb.js';
 import homeRoutes from './routes/home/homeRoutes.js';
 import cmsRoutes from './routes/home/cmsRoutes.js';
 import reviewRoutes from './routes/review/reviewRoutes.js';
@@ -34,11 +36,9 @@ import paymentRoutes from './routes/payments/index.js';
 import cartRoutes from './routes/cart/cartRoutes.js';
 import escrowRoutes from './routes/escrow/escrowRoutes.js';
 import verificationRoutes from './routes/verification/verificationRoutes.js';
-import subscriptionRoutes from './routes/subscription/subscriptionRoutes.js';
 import negotiationRoutes from './routes/negotiation/negotiationRoutes.js';
 import userRoutes from './routes/users/index.js';
 import mediaRoutes from './routes/media/mediaRoutes.js';
-import poolingRoutes from './routes/pooling/poolingRoutes.js';
 import collaborationRoutes from './routes/collaboration/collaborationRoutes.js';
 import customManufacturingRoutes from './routes/customManufacturing/customManufacturingRoutes.js';
 import customEscrowRoutes from './routes/customEscrow/customEscrowRoutes.js';
@@ -98,6 +98,12 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/auth', authRoutes);
+
+// Inject Socket.IO into Request
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
 
 // Socket.IO Logic
 io.use(async (socket, next) => {
@@ -204,7 +210,6 @@ app.use('/api/tracking', trackingRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/mongodb', mongodbRoutes);
 
 app.use('/api/cms', cmsRoutes);
 app.use('/api/home', homeRoutes);
@@ -214,11 +219,9 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/escrow', escrowRoutes);
 app.use('/api/verification', verificationRoutes);
-app.use('/api/subscription', subscriptionRoutes);
 app.use('/api/negotiation', negotiationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/media', mediaRoutes);
-app.use('/api/pooling', poolingRoutes);
 app.use('/api/collaboration', collaborationRoutes);
 app.use('/api/custom-manufacturing', customManufacturingRoutes);
 app.use('/api/custom-escrow', customEscrowRoutes);

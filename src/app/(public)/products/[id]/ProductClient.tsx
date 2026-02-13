@@ -35,6 +35,7 @@ import Link from 'next/link';
 import Loader from '@/client/components/ui/Loader';
 import CustomerProductCard from '@/client/components/ui/CustomerProductCard';
 import ReviewList from '@/client/components/features/reviews/ReviewList';
+import VerifiedBadge from '@/client/components/common/VerifiedBadge';
 
 interface ProductClientProps {
     id: string;
@@ -221,7 +222,7 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                                     {primarySeller?.businessName || 'NovaMart Official'}
                                 </Link>
                                 {primarySeller?.isVerified && (
-                                    <FaCheckCircle className="w-3.5 h-3.5 text-primary" title="Verified Seller" />
+                                    <VerifiedBadge type="SELLER" size="sm" showText={true} />
                                 )}
                             </div>
                             <h1 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-4">
@@ -262,7 +263,7 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Sold by {primarySeller.businessName}</p>
-                                            {primarySeller.isVerified && <FaCheckCircle className="w-3 h-3 text-primary" />}
+                                            {primarySeller.isVerified && <VerifiedBadge type="SELLER" size="sm" showText={false} />}
                                         </div>
                                         <div className="flex items-center gap-4 mt-1">
                                             <div className="flex items-center gap-1">

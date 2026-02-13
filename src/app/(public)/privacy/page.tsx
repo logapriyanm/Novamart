@@ -30,7 +30,7 @@ export default function PrivacyPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black uppercase tracking-widest text-black mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black tracking-widest text-black mb-6"
                     >
                         <Shield className="w-3 h-3" />
                         Privacy Safeguards
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
                             <div className="w-12 h-12 rounded-[5px] bg-black/5 text-black flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-all">
                                 <pillar.icon className="w-6 h-6" />
                             </div>
-                            <h3 className="text-[10px] font-black text-foreground/40 uppercase tracking-widest mb-2 italic">{pillar.title}</h3>
+                            <h3 className="text-[10px] font-black text-foreground/40 tracking-widest mb-2 italic">{pillar.title}</h3>
                             <p className="text-[11px] text-foreground/60 font-bold leading-relaxed italic">"{pillar.description}"</p>
                         </motion.div>
                     ))}
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
                     <div className="flex gap-6 items-start">
                         <Database className="w-8 h-8 text-black shrink-0" />
                         <div className="space-y-4">
-                            <h2 className="text-2xl font-black text-foreground uppercase tracking-tight italic">Information We Collect</h2>
+                            <h2 className="text-2xl font-black text-foreground tracking-tight italic">Information We Collect</h2>
                             <p className="text-sm text-foreground/60 font-medium leading-relaxed italic">
                                 We collect information strictly required for **KYC (Know Your Customer)** and **KYB (Know Your Business)** verification, as well as transactional logs for auditability. This includes legal names, registration certificate data, and location-based trade signals.
                             </p>
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
                     <div className="flex gap-6 items-start pt-12 border-t border-black/10">
                         <Search className="w-8 h-8 text-black shrink-0" />
                         <div className="space-y-4">
-                            <h2 className="text-2xl font-black text-foreground uppercase tracking-tight italic">Your Rights</h2>
+                            <h2 className="text-2xl font-black text-foreground tracking-tight italic">Your Rights</h2>
                             <p className="text-sm text-foreground/60 font-medium leading-relaxed italic">
                                 Under our governance model, you have the right to audit your own data records and request account closure. However, transactional ledgers relating to financial settlements must be retained for auditing periods required by international trade law.
                             </p>

@@ -13,26 +13,27 @@ import { useAuth } from '@/client/hooks/useAuth';
 import Loader from '@/client/components/ui/Loader';
 import DashboardSkeleton from '@/client/components/ui/DashboardSkeleton';
 import SellerAnalyticsDashboard from '@/client/components/features/dashboard/seller/SellerAnalyticsDashboard';
-
-const mockSalesData = [
-    { name: 'Mon', sales: 12000 },
-    { name: 'Tue', sales: 19000 },
-    { name: 'Wed', sales: 15000 },
-    { name: 'Thu', sales: 22000 },
-    { name: 'Fri', sales: 28000 },
-    { name: 'Sat', sales: 35000 },
-    { name: 'Sun', sales: 32000 },
-];
+import { apiClient } from '@/lib/api/client';
 
 export default function SellerDashboard() {
     const { user } = useAuth();
-    const [isLoading, setIsLoading] = useState(false); // Mock loading for consistency
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState<any>(null);
 
-    // Simulate loading
     useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
+        const fetchStats = async () => {
+            try {
+                // Use apiClient for automatic token handling and base URL
+                const data = await apiClient.get<any>('/seller/analytics');
+                setStats(data);
+            } catch (error) {
+                console.error('Failed to fetch dashboard stats:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchStats();
     }, []);
 
     if (isLoading) {
@@ -44,13 +45,8 @@ export default function SellerDashboard() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60 font-sans">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Market <span className="text-primary text-indigo-600">Portal</span></h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Market <span className="text-primary">Portal</span></h1>
                     <p className="text-sm font-medium text-slate-400 mt-2">Sales Overview & Network Management</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Link href="/seller/marketplace" className="px-6 py-2.5 bg-indigo-600 text-white rounded-[10px] hover:bg-indigo-700 transition-all text-sm font-bold shadow-lg shadow-indigo-100 flex items-center gap-2">
-                        <FaStore className="w-3.5 h-3.5" /> Browse Marketplace
-                    </Link>
                 </div>
             </div>
 
@@ -58,35 +54,35 @@ export default function SellerDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard
                     icon={FaWallet}
-                    label="Total Sales"
-                    value="₹4.2L"
-                    trend="+8%"
+                    label="Total Revenue"
+                    value={`₹${(stats?.finance?.totalRevenue || 0).toLocaleString()}`}
+                    trend={`₹${(stats?.finance?.todaySales || 0).toLocaleString()} Today`}
                     color="text-emerald-600"
                     bgColor="bg-emerald-50"
                 />
                 <StatsCard
                     icon={FaShoppingCart}
                     label="Active Orders"
-                    value="14"
-                    trend="Processing"
-                    color="text-blue-600"
-                    bgColor="bg-blue-50"
+                    value={stats?.orders?.active || 0}
+                    trend={`${stats?.orders?.pending || 0} Pending`}
+                    color="text-primary"
+                    bgColor="bg-primary/5"
                 />
                 <StatsCard
                     icon={FaHandshake}
                     label="Negotiations"
-                    value="3"
-                    trend="Pending"
+                    value={stats?.negotiations?.active || 0}
+                    trend={`${stats?.network?.pendingRequests || 0} Requests`}
                     color="text-amber-600"
                     bgColor="bg-amber-50"
                 />
                 <StatsCard
                     icon={FaStore}
                     label="Inventory Value"
-                    value="₹12.5L"
-                    trend="Healthy"
-                    color="text-indigo-600"
-                    bgColor="bg-indigo-50"
+                    value={`₹${(stats?.inventory?.value || 0).toLocaleString()}`}
+                    trend={`${stats?.inventory?.totalProducts || 0} Products`}
+                    color="text-slate-600"
+                    bgColor="bg-slate-50"
                 />
             </div>
 
@@ -100,32 +96,29 @@ export default function SellerDashboard() {
                 <div className="space-y-6">
                     <div className="card-enterprise p-8 bg-white">
                         <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-sm font-bold text-slate-500">Action Queue</h3>
+                            <h3 className="text-sm font-bold text-slate-500">Network Status</h3>
                         </div>
                         <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex items-start gap-4 p-4 rounded-[10px] hover:bg-slate-50 transition-all table-row-enterprise border border-slate-100/50">
-                                    <div className="w-10 h-10 rounded-[10px] bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 shadow-sm border border-amber-50/50">
-                                        <FaClock className="w-4 h-4" />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-900 tracking-tight">Order #ORD-202{i}</p>
-                                        <p className="text-sm font-medium text-slate-400 mt-0.5">Confirm receipt to release escrow</p>
-                                    </div>
-                                </div>
-                            ))}
+                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-[10px] border border-slate-100">
+                                <span className="text-sm font-medium text-slate-600">Active Manufacturers</span>
+                                <span className="text-lg font-bold text-slate-900">{stats?.network?.activeManufacturers || 0}</span>
+                            </div>
+                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-[10px] border border-slate-100">
+                                <span className="text-sm font-medium text-slate-600">Escrow Held</span>
+                                <span className="text-lg font-bold text-slate-900">₹{(stats?.finance?.escrowHeld || 0).toLocaleString()}</span>
+                            </div>
                         </div>
-                        <button className="w-full mt-8 py-3 bg-slate-50 text-slate-500 text-sm font-bold rounded-[10px] hover:bg-slate-100 hover:text-slate-900 transition-all">
-                            View Mission Board
-                        </button>
+                        <Link href="/seller/manufacturers" className="block w-full mt-8 py-3 bg-slate-50 text-slate-600 text-center text-sm font-bold rounded-[10px] hover:bg-slate-100 transition-all">
+                            Find Manufacturers
+                        </Link>
                     </div>
 
-                    <div className="bg-indigo-600 rounded-[10px] p-8 text-white relative overflow-hidden shadow-xl group">
+                    <div className="bg-slate-900 rounded-[10px] p-8 text-white relative overflow-hidden shadow-xl group">
                         <div className="relative z-10">
-                            <p className="text-sm font-bold text-indigo-200 mb-2 opacity-80">Membership Cluster</p>
+                            <p className="text-sm font-bold text-slate-400 mb-2 opacity-80">Membership Cluster</p>
                             <h3 className="text-xl font-bold mb-1 tracking-tight">Platinum Seller</h3>
-                            <p className="text-sm font-medium text-indigo-100/60 mb-8">Validated thru Dec 2026</p>
-                            <button className="px-6 py-2.5 bg-white text-indigo-600 text-sm font-bold rounded-[10px] hover:bg-indigo-50 active:scale-[0.98] transition-all shadow-sm">
+                            <p className="text-sm font-medium text-slate-400/60 mb-8">Validated thru Dec 2026</p>
+                            <button className="px-6 py-2.5 bg-white text-slate-900 text-sm font-bold rounded-[10px] hover:bg-slate-50 active:scale-[0.98] transition-all shadow-sm">
                                 Upgrade Plan
                             </button>
                         </div>

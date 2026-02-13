@@ -93,8 +93,9 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                 id: p.id,
                 inventoryId: p.inventory?.[0]?._id,
                 name: p.name,
-                price: p.inventory?.[0]?.price || p.basePrice,
-                originalPrice: p.inventory?.[0]?.originalPrice || p.basePrice,
+                price: p.inventory?.[0]?.price || 0, // Fallback to 0 if no retail price
+                originalPrice: p.inventory?.[0]?.originalPrice || 0,
+                // basePrice is removed by backend for security
                 image: p.images?.[0] || 'https://placehold.co/400x400?text=No+Image',
                 brand: p.manufacturer?.companyName || 'NovaMart',
                 spec: p.category,
@@ -175,7 +176,7 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
 
     return (
         <div className="min-h-screen py-35 ">
-           
+
 
             <div className="max-w-[1440px] mx-auto px-4 xs:px-6 py-6 xs:py-10 flex flex-col lg:flex-row gap-6 lg:gap-10">
                 {/* 2️⃣ LEFT: FILTER SIDEBAR */}

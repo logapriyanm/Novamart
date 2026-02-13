@@ -23,7 +23,7 @@ export const getUsers = async (req, res) => {
 
             return {
                 ...user.toObject(),
-                name: customer?.name || manufacturer?.companyName || dealer?.businessName || 'User',
+                name: customer?.name || manufacturer?.companyName || seller?.businessName || 'User',
                 manufacturer,
                 dealer: seller,
                 customer,

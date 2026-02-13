@@ -116,11 +116,11 @@ function ProfileContent() {
                             <div className="flex-1 text-center md:text-left">
                                 <div className="flex items-center justify-center md:justify-between mb-4">
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight">Personal Information</h3>
-                                    <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+                                    <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-[10px] text-[10px] font-black tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
                                         <FaEdit className="w-3 h-3" /> Edit Profile
                                     </button>
                                 </div>
-                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">{user?.role} ACCOUNT · ID: {user?.id?.slice(0, 8)}</p>
+                                <p className="text-slate-400 text-xs font-bold tracking-widest">{user?.role} ACCOUNT · ID: {user?.id?.slice(0, 8)}</p>
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -131,7 +131,7 @@ function ProfileContent() {
                                 { label: 'Primary Address', value: user?.address || '123 Enterprise Way, Tech City, 560001', icon: FaMapMarkerAlt },
                             ].map((field, idx) => (
                                 <div key={idx} className="space-y-2 p-6 bg-slate-50/50 rounded-[10px] border border-slate-100">
-                                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 tracking-widest">
                                         <field.icon className="w-3 h-3 text-blue-600" />
                                         {field.label}
                                     </div>
@@ -145,9 +145,9 @@ function ProfileContent() {
                 return (
                     <div className="space-y-4">
                         {loading ? (
-                            <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Orders...</div>
+                            <div className="p-10 text-center text-slate-400 font-bold tracking-widest text-xs">Loading Orders...</div>
                         ) : orders.length === 0 ? (
-                            <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-[10px]">No orders found.</div>
+                            <div className="p-10 text-center text-slate-400 font-bold tracking-widest text-xs border border-slate-100 rounded-[10px]">No orders found.</div>
                         ) : (
                             orders.map((order: any, idx: number) => (
                                 <Card key={order.id || idx} className="p-6 border-none shadow-lg shadow-blue-600/5 bg-white rounded-[10px] flex items-center gap-6 group hover:translate-x-2 transition-all duration-300 cursor-pointer" onClick={() => router.push(`/customer/orders`)}>
@@ -155,14 +155,14 @@ function ProfileContent() {
                                         <FaBox className="w-8 h-8 text-slate-300" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{order.id ? `NM-${order.id.slice(0, 5).toUpperCase()}` : 'ORDER'}</p>
+                                        <p className="text-[10px] font-black text-slate-400 tracking-widest leading-none mb-1">{order.id ? `NM-${order.id.slice(0, 5).toUpperCase()}` : 'ORDER'}</p>
                                         <h4 className="font-black text-slate-800 mb-2">{order.items?.[0]?.linkedProduct?.name || `Order #${order.id.slice(0, 5)}`} {order.items?.length > 1 && `+ ${order.items.length - 1} more`}</h4>
-                                        <span className={`px-3 py-1 rounded-[10px] text-[9px] font-black uppercase tracking-widest ${order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+                                        <span className={`px-3 py-1 rounded-[10px] text-[9px] font-black tracking-widest ${order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
                                             {order.status}
                                         </span>
                                     </div>
                                     <div className="text-right pr-4">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total</p>
+                                        <p className="text-[10px] font-black text-slate-400 tracking-widest mb-1">Total</p>
                                         <p className="text-sm font-black text-slate-800">₹{Number(order.totalAmount).toLocaleString()}</p>
                                     </div>
                                 </Card>
@@ -180,7 +180,7 @@ function ProfileContent() {
                             <h3 className="text-2xl font-black text-slate-800 tracking-tight">Need Assistance?</h3>
                             <p className="text-slate-400 text-sm font-bold mt-2">Our technical experts are available 24/7 to resolve your issues.</p>
                         </div>
-                        <button className="px-10 py-4 bg-blue-600 text-white rounded-[10px] text-[11px] font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all transform active:scale-95">
+                        <button className="px-10 py-4 bg-blue-600 text-white rounded-[10px] text-[11px] font-black tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all transform active:scale-95">
                             Open New Support Ticket
                         </button>
                     </Card>
@@ -189,9 +189,9 @@ function ProfileContent() {
                 return (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {loading ? (
-                            <div className="col-span-2 p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Reviews...</div>
+                            <div className="col-span-2 p-10 text-center text-slate-400 font-bold tracking-widest text-xs">Loading Reviews...</div>
                         ) : reviews.length === 0 ? (
-                            <div className="col-span-2 p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-[10px]">No reviews found.</div>
+                            <div className="col-span-2 p-10 text-center text-slate-400 font-bold tracking-widest text-xs border border-slate-100 rounded-[10px]">No reviews found.</div>
                         ) : (
                             reviews.map((review: any, i: number) => (
                                 <Card key={review.id || i} className="p-6 border-none shadow-lg shadow-blue-600/5 bg-white rounded-[10px] space-y-4">
@@ -232,7 +232,7 @@ function ProfileContent() {
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight">Shipping Address</h3>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Manage your delivery location</p>
+                                    <p className="text-xs font-bold text-slate-400 tracking-widest">Manage your delivery location</p>
                                 </div>
                             </div>
 
@@ -254,7 +254,7 @@ function ProfileContent() {
                             }}>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1 mb-1 block">Primary Address</label>
+                                        <label className="text-[10px] font-black text-slate-400 tracking-widest pl-1 mb-1 block">Primary Address</label>
                                         <textarea
                                             name="address"
                                             defaultValue={user?.address}
@@ -266,7 +266,7 @@ function ProfileContent() {
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="px-8 py-3 bg-slate-900 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-black transition-all disabled:opacity-50"
+                                            className="px-8 py-3 bg-slate-900 text-white rounded-[10px] text-[10px] font-black tracking-widest shadow-lg hover:bg-black transition-all disabled:opacity-50"
                                         >
                                             {loading ? 'Saving...' : 'Update Address'}
                                         </button>
@@ -282,7 +282,7 @@ function ProfileContent() {
                                 </div>
                                 <div>
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight">Payment Methods</h3>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Secured by Razorpay</p>
+                                    <p className="text-xs font-bold text-slate-400 tracking-widest">Secured by Razorpay</p>
                                 </div>
                             </div>
                             <p className="text-sm font-bold text-slate-500 italic">
@@ -296,7 +296,7 @@ function ProfileContent() {
                 return (
                     <Card className="p-12 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px] text-center">
                         <FaComments className="w-16 h-16 text-slate-200 mx-auto mb-6" />
-                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter">No Active Conversations</h3>
+                        <h3 className="text-xl font-black text-slate-800 tracking-tighter">No Active Conversations</h3>
                         <p className="text-slate-400 text-sm font-bold mt-2">Start a chat with a dealer to discuss bulk orders.</p>
                     </Card>
                 );
@@ -334,7 +334,7 @@ function ProfileContent() {
 export default function ProfilePage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 font-black text-[#10367D] uppercase tracking-[0.3em] animate-pulse">
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 font-black text-[#10367D] tracking-[0.3em] animate-pulse">
                 Decrypting Profile Data...
             </div>
         }>

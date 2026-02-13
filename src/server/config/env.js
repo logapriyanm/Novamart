@@ -6,7 +6,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load .env file
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+// Go up 3 levels: src/server/config -> src/server -> src -> root
+dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 const requiredEnvVars = [
     'MONGODB_URI',

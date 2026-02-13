@@ -150,7 +150,7 @@ export default function SellerInventoryPage() {
                       No assets acquired in this region
                     </p>
                     <Link
-                      href="/seller/sourcing"
+                      href="/seller/sourced-products"
                       className="text-xs font-black text-[#10367D] underline uppercase tracking-widest"
                     >
                       Visit Sourcing Terminal

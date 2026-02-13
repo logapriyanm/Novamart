@@ -42,10 +42,6 @@ export default function ManufacturerInventory() {
                     <h1 className="text-3xl font-black tracking-tight italic">Bulk <span className="text-[#10367D]">Portfolio</span></h1>
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Production Planning & Governance Queue</p>
                 </div>
-                <Link href="/manufacturer/products/add" className="px-10 py-5 bg-[#10367D] text-white rounded-[10px] font-black text-xs uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-3">
-                    <FaPlus className="w-3 h-3" />
-                    Initialize New Batch
-                </Link>
             </div>
 
             {/* Stats Overview */}

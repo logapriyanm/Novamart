@@ -87,3 +87,36 @@ export const verifyDocument = async (req, res) => {
         res.status(500).json({ message: 'Failed to verify document' });
     }
 };
+
+export const deleteDocument = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { documentId } = req.params;
+
+        const kycDoc = await KYCDocument.findOne({ userId });
+        if (!kycDoc) return res.status(404).json({ message: 'KYC Record not found' });
+
+        // Filter out the document to delete
+        kycDoc.documents = kycDoc.documents.filter(d => d._id.toString() !== documentId);
+
+        // If no documents left, reset status
+        if (kycDoc.documents.length === 0) {
+            kycDoc.status = 'PENDING'; // Or NONE/INITIAL
+        }
+
+        await kycDoc.save();
+
+        // Check if user status needs reset
+        // If they were PENDING verification and removed docs, maybe keep PENDING or move to INACTIVE?
+        // For now, if no docs, we can't verify them.
+        if (kycDoc.documents.length === 0) {
+            await User.findByIdAndUpdate(userId, { status: 'PENDING', isVerified: false });
+        }
+
+        res.json({ success: true, message: 'Document deleted', data: kycDoc });
+    } catch (error) {
+        console.error('Delete Doc Error:', error);
+        res.status(500).json({ message: 'Failed to delete document' });
+    }
+};
+

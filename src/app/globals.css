@@ -57,8 +57,8 @@
 
   /* Typography System - Production Standards */
   h1 {
-    @apply text-3xl md:text-4xl font-bold italic;
-    /* 28-32px, italic as required */
+    @apply text-3xl md:text-4xl font-bold italic uppercase;
+    /* 28-32px, italic and uppercase as required */
   }
 
   h2 {
@@ -171,7 +171,7 @@
 
   /* Card Standard: Enterprise (Clean Borders, Subtle Shadows) */
   .card-enterprise {
-    @apply bg-white border border-slate-100 rounded-[12px] shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden;
+    @apply bg-white border border-slate-100 rounded-[10px] shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden;
   }
 
   /* Table Row Spacing Utility */

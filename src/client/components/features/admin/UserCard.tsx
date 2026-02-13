@@ -52,7 +52,7 @@ export default function UserCard({ user, selectedRole, onVerify }: UserCardProps
                 {(selectedRole === 'MANUFACTURER' || selectedRole === 'SELLER') && !user.isVerified && (
                     <button
                         onClick={() => onVerify(user, selectedRole)}
-                        className="ml-auto px-3 py-1.5 bg-black text-white text-xs font-bold rounded-[5px] hover:bg-slate-800 transition-colors shadow-sm"
+                        className="ml-auto px-3 py-1.5 bg-primary text-white text-xs font-bold rounded-[5px] hover:bg-primary/90 transition-colors shadow-sm"
                     >
                         Verify
                     </button>

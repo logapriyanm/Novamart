@@ -43,13 +43,12 @@ router.get('/stats', manufacturerController.getManufacturerStats); // Alias
 /**
  * Profile & Settings
  */
-router.get('/profile', manufacturerController.getProfile);
-router.put('/profile', manufacturerController.updateProfile);
-
 /**
- * Public Manufacturer List (For Dealer Marketplace)
+ * Profile & Settings
+ * Allow PENDING status for profile read (to check approval status)
  */
-router.get('/all', manufacturerController.getAllManufacturers);
+router.get('/profile', authorize(['MANUFACTURER'], [], ['ACTIVE', 'UNDER_VERIFICATION', 'PENDING']), manufacturerController.getProfile);
+router.put('/profile', authorize(['MANUFACTURER'], [], ['ACTIVE', 'UNDER_VERIFICATION']), manufacturerController.updateProfile);
 
 export default router;
 

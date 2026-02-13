@@ -64,11 +64,6 @@ export default function ManufacturerDashboard() {
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900">Production <span className="text-indigo-600">Monitor</span></h1>
                     <p className="text-sm font-medium text-slate-400 mt-2">Global Operations & Manufacturer Analytics</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <Link href="/manufacturer/products/add" className="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-[10px] hover:bg-slate-800 transition-all shadow-sm">
-                        + New SKU
-                    </Link>
-                </div>
             </div>
 
             {/* Core KPIs */}
@@ -94,8 +89,8 @@ export default function ManufacturerDashboard() {
                     label="Dealer Network"
                     value={profile?.dealersApproved?.length?.toString() || '0'}
                     trend="Growing"
-                    color="text-indigo-600"
-                    bgColor="bg-indigo-50/50"
+                    color="text-primary"
+                    bgColor="bg-primary/10"
                 />
                 <StatsCard
                     icon={FaClipboardList}

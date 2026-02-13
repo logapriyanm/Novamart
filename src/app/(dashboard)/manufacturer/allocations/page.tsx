@@ -117,7 +117,7 @@ export default function StockAllocationManager() {
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="px-10 py-5 bg-[#10367D] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-3"
+                    className="px-10 py-5 bg-[#10367D] text-white rounded-[10px] font-black text-xs uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all flex items-center gap-3"
                 >
                     <FaPlus className="w-3 h-3" />
                     New Allocation

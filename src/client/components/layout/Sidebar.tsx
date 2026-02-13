@@ -171,44 +171,40 @@ const sellerMenuGroups: MenuGroup[] = [
         ],
     },
     {
-        label: 'Manufacturer Marketplace',
+        label: 'Sourcing & Network',
+        icon: FaNetworkWired,
+        items: [
+            { name: 'Manufacturer Network', icon: FaIndustry, path: '/seller/manufacturers' },
+            { name: 'Sourced Products', icon: FaBox, path: '/seller/sourced-products' },
+            { name: 'Negotiations', icon: FaHandshake, path: '/seller/negotiations' },
+        ],
+    },
+    {
+        label: 'Retail Operations',
         icon: FaStore,
         items: [
-            { name: 'Browse Marketplace', icon: FaSearch, path: '/seller/marketplace' },
-            { name: 'Pending Requests', icon: FaTasks, path: '/seller/pending' },
-            { name: 'Negotiations', icon: FaHandshake, path: '/seller/negotiations' },
-            { name: 'Collaboration', icon: FaProjectDiagram, path: '/seller/collaboration' },
-        ],
-    },
-    {
-        label: 'My Inventory & Sales',
-        icon: FaBox,
-        items: [
-            { name: 'Products', icon: ProductsIcon, path: '/seller/products' },
-            { name: 'Allocations', icon: FaLayerGroup, path: '/seller/allocations' },
+            { name: 'Retail Products', icon: ProductsIcon, path: '/seller/products' },
             { name: 'Inventory', icon: FaWarehouse, path: '/seller/inventory' },
-            { name: 'Custom Requests', icon: FaClipboardCheck, path: '/seller/custom-requests' },
-            { name: 'Sourcing', icon: FaNetworkWired, path: '/seller/sourcing' },
-            { name: 'Pooling', icon: FaCubes, path: '/seller/pooling' },
-            { name: 'Orders', icon: LogisticsIcon, path: '/seller/orders' },
+            { name: 'Customer Orders', icon: LogisticsIcon, path: '/seller/orders' },
         ],
     },
     {
-        label: 'Reports & Analytics',
+        label: 'Finance & Performance',
         icon: FaChartBar,
         items: [
+            { name: 'Payments & Earnings', icon: WalletIcon, path: '/seller/payments' },
             { name: 'Analytics', icon: FaChartLine, path: '/seller/analytics' },
-            { name: 'Subscription', icon: FaCrown, path: '/seller/subscription' },
+            { name: 'Reviews & Ratings', icon: ReviewsIcon, path: '/seller/reviews' },
         ],
     },
     {
-        label: 'Account',
+        label: 'Account & Communication',
         icon: FaUserCog,
         items: [
-            { name: 'Profile', icon: FaUserTie, path: '/seller/profile' },
+            { name: 'Notifications', icon: FaBell, path: '/seller/notifications' },
             { name: 'Messages', icon: FaEnvelope, path: '/seller/messages' },
+            { name: 'Profile & Business', icon: FaUserTie, path: '/seller/profile' },
             { name: 'Settings', icon: SettingsIcon, path: '/seller/settings' },
-            { name: 'Support', icon: SupportIcon, path: '/seller/support' },
         ],
     },
 ];
@@ -231,7 +227,6 @@ const manufacturerMenuGroups: MenuGroup[] = [
             { name: 'Products', icon: ProductsIcon, path: '/manufacturer/products' },
             { name: 'Inventory', icon: FaWarehouse, path: '/manufacturer/inventory' },
             { name: 'Allocations', icon: FaLayerGroup, path: '/manufacturer/allocations' },
-            { name: 'Custom Orders', icon: FaClipboardCheck, path: '/manufacturer/custom-orders' },
             { name: 'Pricing Rules', icon: FaTag, path: '/manufacturer/pricing' },
         ],
     },
@@ -239,8 +234,8 @@ const manufacturerMenuGroups: MenuGroup[] = [
         label: 'Seller Network',
         icon: FaNetworkWired,
         items: [
-            { name: 'Seller Requests', icon: FaUserCheck, path: '/manufacturer/sellers/requests' },
-            { name: 'Approved Sellers', icon: SellersIcon, path: '/manufacturer/sellers' },
+            { name: 'Seller Requests', icon: FaUserCheck, path: '/manufacturer/dealers/requests' },
+            { name: 'Approved Sellers', icon: SellersIcon, path: '/manufacturer/dealers' },
             { name: 'Negotiations', icon: FaHandshake, path: '/manufacturer/negotiations' },
         ],
     },
@@ -353,7 +348,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 onClick={onClose}
                 title={isCollapsed ? item.name : ''}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-[10px] transition-all group text-sm ${isActive
-                    ? 'bg-primary text-white'
+                    ? (['ADMIN', 'MANUFACTURER', 'SELLER'].includes(role) ? 'bg-black text-white' : 'bg-primary text-white')
                     : 'text-foreground/50 hover:bg-muted hover:text-foreground'
                     } ${isCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : ''}`}
             >
@@ -418,7 +413,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     {!isCollapsed && (
                         <div className="overflow-hidden whitespace-nowrap flex flex-col">
                             <h1 className="text-xl font-bold text-foreground tracking-tight italic letter-spacing-4">NovaMart</h1>
-                            <span className="text-xs font-medium text-primary mt-0.5">Enterprise Portal</span>
+                            <span className="text-sm font-medium text-primary mt-0.5">Enterprise Portal</span>
                         </div>
                     )}
                 </div>
@@ -468,13 +463,13 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                                         <h3 className="text-sm font-medium text-foreground truncate">{user?.name || 'User'}</h3>
                                         <CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" />
                                     </div>
-                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">
+                                    <p className="text-sm font-medium text-muted-foreground mt-0.5">
                                         {user?.role === 'CUSTOMER' ? 'Retail Partner' : `${user?.role} Access`}
                                     </p>
                                 </div>
                             </div>
                             <div className="space-y-2 mt-2 px-2">
-                                <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+                                <div className="flex items-center justify-between text-sm font-medium text-muted-foreground">
                                     <span>Account Status</span>
                                     <span className="text-emerald-600">Verified</span>
                                 </div>

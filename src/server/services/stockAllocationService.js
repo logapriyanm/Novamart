@@ -16,60 +16,89 @@ class StockAllocationService {
      * Updates or creates an inventory record with allocation constraints.
      */
     async allocateStock(mfgId, { productId, sellerId, region, quantity, sellerBasePrice, sellerMoq, maxMargin }) {
-        // 1. Verify Product Ownership
-        const product = await Product.findById(productId);
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            // 1. Verify Product Ownership & Stock Availability
+            const product = await Product.findById(productId).session(session);
 
-        if (!product || product.manufacturerId.toString() !== mfgId.toString()) {
-            throw new Error('UNAUTHORIZED_PRODUCT_ALLOCATION');
-        }
+            if (!product || product.manufacturerId.toString() !== mfgId.toString()) {
+                throw new Error('UNAUTHORIZED_PRODUCT_ALLOCATION');
+            }
 
-        // 2. Ensure Seller is in network (Approved)
-        const manufacturer = await Manufacturer.findById(mfgId);
+            // Check if Manufacturer has enough unallocated stock
+            if (product.stockQuantity < quantity) {
+                throw new Error(`INSUFFICIENT_STOCK: Available ${product.stockQuantity}, Requested ${quantity}`);
+            }
 
-        if (!manufacturer.approvedBy?.includes(sellerId)) {
-            // Automatically add to network if allocating stock
-            await Manufacturer.findByIdAndUpdate(mfgId, {
-                $addToSet: { approvedBy: sellerId }
-            });
-        }
+            // 2. Ensure Seller is in network (Approved)
+            const manufacturer = await Manufacturer.findById(mfgId).session(session);
 
-        // 3. Check if seller is blocked
-        const isBlocked = await ManufacturerSellerBlock.findOne({
-            manufacturerId: mfgId,
-            sellerId: sellerId,
-            isActive: true
-        });
+            if (!manufacturer.approvedBy?.includes(sellerId)) {
+                await Manufacturer.findByIdAndUpdate(mfgId, {
+                    $addToSet: { approvedBy: sellerId }
+                }, { session });
+            }
 
-        if (isBlocked) {
-            throw new Error('SELLER_IS_BLOCKED');
-        }
+            // 3. Check if seller is blocked
+            const isBlocked = await ManufacturerSellerBlock.findOne({
+                manufacturerId: mfgId,
+                sellerId: sellerId,
+                isActive: true
+            }).session(session);
 
-        // 4. Update or Create Inventory Record
-        const query = { productId, sellerId, region };
-        const existingInventory = await Inventory.findOne(query);
+            if (isBlocked) {
+                throw new Error('SELLER_IS_BLOCKED');
+            }
 
-        if (existingInventory) {
-            return await Inventory.findByIdAndUpdate(existingInventory._id, {
-                $inc: { allocatedStock: quantity },
-                sellerBasePrice: sellerBasePrice || product.basePrice,
-                sellerMoq: sellerMoq || 1,
-                maxMargin: maxMargin || 20,
-                isAllocated: true,
-                price: existingInventory.price || sellerBasePrice || product.basePrice
-            }, { new: true });
-        } else {
-            return await Inventory.create({
-                productId,
-                sellerId,
-                region,
-                stock: 0,
-                allocatedStock: quantity,
-                sellerBasePrice: sellerBasePrice || product.basePrice,
-                sellerMoq: sellerMoq || 1,
-                maxMargin: maxMargin || 20,
-                isAllocated: true,
-                price: sellerBasePrice || product.basePrice
-            });
+            // 4. Update or Create Inventory Record
+            const query = { productId, sellerId, region };
+            const existingInventory = await Inventory.findOne(query).session(session);
+
+            let result;
+            if (existingInventory) {
+                result = await Inventory.findByIdAndUpdate(existingInventory._id, {
+                    $inc: { allocatedStock: quantity }, // Total allocated increases
+                    sellerBasePrice: sellerBasePrice || product.basePrice,
+                    sellerMoq: sellerMoq || 1,
+                    maxMargin: maxMargin || 20,
+                    isAllocated: true,
+                    // If previously allocated, price logic persists unless overwritten
+                    price: existingInventory.price || sellerBasePrice || product.basePrice
+                }, { new: true, session });
+            } else {
+                result = await Inventory.create([{
+                    productId,
+                    sellerId,
+                    region,
+                    stock: 0, // Actual physical stock held by seller is 0 until shipment? 
+                    // Wait, if allocation = physical transfer?
+                    // Prompt says "Inventory Model: Total Stock – Allocated to sellers = Available Stock".
+                    // Usually Allocation != Shipment. Allocation is "Reserved for Seller".
+                    // Seller might "Pull" stock later. 
+                    // But here, let's track allocatedStock explicitly.
+                    allocatedStock: quantity,
+                    sellerBasePrice: sellerBasePrice || product.basePrice,
+                    sellerMoq: sellerMoq || 1,
+                    maxMargin: maxMargin || 20,
+                    isAllocated: true,
+                    price: sellerBasePrice || product.basePrice
+                }], { session });
+                result = result[0];
+            }
+
+            // 5. Deduct from Manufacturer Global Stock
+            await Product.findByIdAndUpdate(productId, {
+                $inc: { stockQuantity: -quantity }
+            }, { session });
+
+            await session.commitTransaction();
+            return result;
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
         }
     }
 

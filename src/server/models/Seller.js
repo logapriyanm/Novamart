@@ -25,6 +25,15 @@ const SellerSchema = new mongoose.Schema({
         communication: { type: Number, default: 0 }
     },
     isVerified: { type: Boolean, default: false },
+    verificationStatus: {
+        type: String,
+        enum: ['NONE', 'PENDING', 'VERIFIED', 'REJECTED'],
+        default: 'NONE'
+    },
+    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    verifiedAt: { type: Date },
+    verificationNotes: { type: String },
+    rejectionReason: { type: String },
     approvedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Manufacturer' }],
 
     // Subscription tier caching (for performance)

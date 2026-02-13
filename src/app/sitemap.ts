@@ -5,7 +5,7 @@ async function getProducts() {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
         const res = await fetch(`${apiUrl}/products`, { next: { revalidate: 3600 } });
         const json = await res.json();
-        return json.success ? json.data : [];
+        return (json.success && Array.isArray(json.data)) ? json.data : [];
     } catch (error) {
         console.error('Sitemap: Failed to fetch products', error);
         return [];
@@ -17,7 +17,7 @@ async function getCategories() {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
         const res = await fetch(`${apiUrl}/products/categories`, { next: { revalidate: 86400 } });
         const json = await res.json();
-        return json.success ? json.data : [];
+        return (json.success && Array.isArray(json.data)) ? json.data : [];
     } catch (error) {
         console.error('Sitemap: Failed to fetch categories', error);
         return [];

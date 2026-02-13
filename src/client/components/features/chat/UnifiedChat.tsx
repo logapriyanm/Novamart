@@ -12,6 +12,7 @@ import { io } from 'socket.io-client';
 import { apiClient } from '@/lib/api/client';
 import { chatService } from '@/lib/api/services/chat.service';
 import { useSearchParams } from 'next/navigation';
+import VerifiedBadge from '@/client/components/common/VerifiedBadge';
 
 const SOCKET_URL = typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') : 'http://localhost:5000';
 
@@ -35,7 +36,7 @@ export default function UnifiedChat({ currentUserRole, currentUserId }: UnifiedC
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         const s = io(SOCKET_URL, { auth: { token } });
         setSocket(s);
         fetchChats();
@@ -163,13 +164,18 @@ export default function UnifiedChat({ currentUserRole, currentUserId }: UnifiedC
                                     onClick={() => setSelectedChat(chat)}
                                     className={`p-6 hover:bg-slate-50 transition-all cursor-pointer group flex items-start gap-4 relative ${isSelected ? 'bg-blue-50/50' : ''}`}
                                 >
-                                    {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#10367D]" />}
-                                    <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center transition-all shadow-sm ${isSelected ? 'bg-[#10367D] text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-[#10367D] group-hover:text-white'}`}>
+                                    {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />}
+                                    <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center transition-all shadow-sm ${isSelected ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-primary group-hover:text-white'}`}>
                                         <FaCommentDots className="w-5 h-5" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start mb-1">
-                                            <h4 className="text-xs font-black text-[#1E293B] uppercase tracking-tight truncate">{participantName}</h4>
+                                            <h4 className="text-xs font-black text-[#1E293B] uppercase tracking-tight truncate flex items-center gap-2">
+                                                {participantName}
+                                                {otherParticipants.length === 1 && otherParticipants[0].role && (
+                                                    <VerifiedBadge type={otherParticipants[0].role} size="sm" showText={false} />
+                                                )}
+                                            </h4>
                                             <span className="text-[7px] font-bold text-slate-400 uppercase">{new Date(chat.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
                                         <p className="text-[9px] font-bold text-slate-500 truncate mb-2 uppercase tracking-tight">
@@ -204,14 +210,24 @@ export default function UnifiedChat({ currentUserRole, currentUserId }: UnifiedC
                             className="h-full flex flex-col"
                         >
                             {/* Header */}
-                            <div className="p-6 border-b border-slate-50 bg-[#10367D] text-white flex items-center justify-between shadow-xl z-10">
+                            <div className="p-6 border-b border-slate-50 bg-slate-900 text-white flex items-center justify-between shadow-xl z-10">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-[10px] bg-white/10 flex items-center justify-center border border-white/10 font-black">
                                         <FaUserCircle className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-black uppercase tracking-widest">
+                                        <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
                                             {selectedChat.participants.filter((p: any) => p.userId !== currentUserId).map((p: any) => p.name).join(', ') || 'Partners'}
+                                            {selectedChat.participants.filter((p: any) => p.userId !== currentUserId).length === 1 &&
+                                                selectedChat.participants.find((p: any) => p.userId !== currentUserId)?.role && (
+                                                    <div className="bg-white/10 rounded-full">
+                                                        <VerifiedBadge
+                                                            type={selectedChat.participants.find((p: any) => p.userId !== currentUserId)?.role}
+                                                            size="sm"
+                                                            showText={true}
+                                                        />
+                                                    </div>
+                                                )}
                                         </h3>
                                         <div className="flex items-center gap-2 mt-1">
                                             <span className="text-[8px] font-black text-blue-200 uppercase tracking-widest">{selectedChat.type}</span>
@@ -243,7 +259,7 @@ export default function UnifiedChat({ currentUserRole, currentUserId }: UnifiedC
                                     const isMe = m.senderId === currentUserId;
                                     return (
                                         <div key={i} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                                            <div className={`max-w-[75%] p-4 rounded-[10px] text-[11px] font-medium leading-relaxed shadow-sm ${isMe ? 'bg-[#10367D] text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100 shadow-md'
+                                            <div className={`max-w-[75%] p-4 rounded-[10px] text-[11px] font-medium leading-relaxed shadow-sm ${isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100 shadow-md'
                                                 }`}>
                                                 {m.message}
                                             </div>
@@ -279,7 +295,7 @@ export default function UnifiedChat({ currentUserRole, currentUserId }: UnifiedC
                                         <button
                                             onClick={sendMessage}
                                             disabled={!input.trim() || sending}
-                                            className="w-12 h-12 bg-[#10367D] text-white rounded-[10px] flex items-center justify-center hover:bg-blue-900 transition-all shadow-xl shadow-blue-900/20 active:scale-95 disabled:grayscale disabled:opacity-50"
+                                            className="w-12 h-12 bg-primary text-white rounded-[10px] flex items-center justify-center hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 active:scale-95 disabled:grayscale disabled:opacity-50"
                                         >
                                             <FaPaperPlane className="w-4 h-4" />
                                         </button>

@@ -8,6 +8,7 @@ import stockAllocationService from '../services/stockAllocationService.js';
 import auditService from '../services/audit.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import logger from '../lib/logger.js';
+import mongoose from 'mongoose';
 
 /**
  * Handle Seller Application (Approve/Reject)
@@ -103,7 +104,7 @@ export const getAllocations = async (req, res) => {
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
-        const allocations = await stockAllocationService.getAllocations(mfgId);
+        const allocations = await stockAllocationService.getManufacturerAllocations(mfgId);
         res.json({ success: true, data: allocations });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -157,33 +158,54 @@ export const getManufacturerStats = async (req, res) => {
         const totalProducts = await Product.countDocuments({ manufacturerId: mfgId });
         const approvedProducts = await Product.countDocuments({ manufacturerId: mfgId, status: 'APPROVED' });
 
-        // Total dealers/sellers in network
+        // Network Stats
         const totalDealers = await Seller.countDocuments({
             'manufacturerNetwork.manufacturerId': mfgId,
             'manufacturerNetwork.status': 'APPROVED'
         });
 
-        // Orders statistics
-        const orders = await Order.find({})
-            .populate('items.product')
-            .lean();
-
-        const manufacturerOrders = orders.filter(o =>
-            o.items.some(i => i.product?.manufacturerId?.toString() === mfgId.toString())
-        );
-
-        const totalOrders = manufacturerOrders.length;
-        const totalRevenue = manufacturerOrders.reduce((sum, order) => {
-            const orderRevenue = order.items
-                .filter(i => i.product?.manufacturerId?.toString() === mfgId.toString())
-                .reduce((itemSum, item) => itemSum + (item.price * item.quantity), 0);
-            return sum + orderRevenue;
-        }, 0);
-
-        // Recent orders (last 30 days)
+        // Orders Stats via Aggregation (Performance Optimized)
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const recentOrders = manufacturerOrders.filter(o => new Date(o.createdAt) >= thirtyDaysAgo);
+
+        const stats = await Order.aggregate([
+            { $unwind: "$items" },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            { $unwind: "$product" },
+            {
+                $match: {
+                    "product.manufacturerId": new mongoose.Types.ObjectId(mfgId)
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
+                    uniqueOrderIds: { $addToSet: "$_id" },
+                    recentOrderIds: {
+                        $addToSet: {
+                            $cond: [{ $gte: ["$createdAt", thirtyDaysAgo] }, "$_id", "$$REMOVE"]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    totalRevenue: 1,
+                    totalOrders: { $size: "$uniqueOrderIds" },
+                    recentOrders: { $size: "$recentOrderIds" }
+                }
+            }
+        ]);
+
+        const orderStats = stats[0] || { totalRevenue: 0, totalOrders: 0, recentOrders: 0 };
 
         res.json({
             success: true,
@@ -197,9 +219,9 @@ export const getManufacturerStats = async (req, res) => {
                     totalDealers,
                 },
                 orders: {
-                    total: totalOrders,
-                    recent: recentOrders.length,
-                    totalRevenue
+                    total: orderStats.totalOrders,
+                    recent: orderStats.recentOrders,
+                    totalRevenue: orderStats.totalRevenue
                 }
             }
         });
@@ -269,7 +291,17 @@ export const updateProfile = async (req, res) => {
         const { Manufacturer } = await import('../models/index.js');
 
         // Remove fields that shouldn't be updated directly
-        const { _id, userId, createdAt, __v, ...updateData } = req.body;
+        const { _id, userId, createdAt, __v, isVerified, verificationStatus, ...updateData } = req.body;
+
+        // Check for critical field changes that require re-verification
+        const criticalFields = ['companyName', 'gstNumber', 'registrationNo', 'bankDetails'];
+        const hasCriticalUpdates = criticalFields.some(field => Object.keys(updateData).includes(field));
+
+        if (hasCriticalUpdates) {
+            updateData.isVerified = false;
+            updateData.verificationStatus = 'PENDING';
+            // Optionally notify admin or user
+        }
 
         const updatedProfile = await Manufacturer.findByIdAndUpdate(
             mfgId,
@@ -281,13 +313,20 @@ export const updateProfile = async (req, res) => {
             return res.status(404).json({ success: false, error: 'PROFILE_NOT_FOUND' });
         }
 
+        // Check if we need to update User status as well (e.g. if REJECTED -> PENDING)
+        if (hasCriticalUpdates) {
+            const User = (await import('../models/index.js')).User;
+            await User.findByIdAndUpdate(userId, { isVerified: false });
+        }
+
         await auditService.logAction('PROFILE_UPDATE', 'MANUFACTURER', mfgId, {
             userId: req.user.id,
             newData: updateData,
+            resetVerification: hasCriticalUpdates,
             req
         });
 
-        res.json({ success: true, message: 'Profile updated successfully', data: updatedProfile });
+        res.json({ success: true, message: hasCriticalUpdates ? 'Profile updated. critical changes require re-verification.' : 'Profile updated successfully', data: updatedProfile });
     } catch (error) {
         logger.error('Error updating manufacturer profile:', error);
         res.status(400).json({ success: false, error: error.message });
