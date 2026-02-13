@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import {
     User,
     Session,
-    Dealer,
+    Seller,
     Manufacturer,
     Customer,
     Badge
@@ -71,9 +71,9 @@ export const register = async (req, res) => {
             status: (roleUpper === 'CUSTOMER') ? 'ACTIVE' : 'PENDING'
         }], { session });
 
-        if (roleUpper === 'DEALER') {
+        if (roleUpper === 'SELLER' || roleUpper === 'DEALER') {
             const { businessName, gstNumber, businessAddress, bankDetails } = profileData;
-            await Dealer.create([{
+            await Seller.create([{
                 userId: user._id,
                 businessName,
                 gstNumber,
@@ -112,6 +112,12 @@ export const register = async (req, res) => {
             userId: user._id,
             role: user.role,
             status: user.status
+        });
+
+        // 3. Send Welcome Email
+        // Note: Send email *after* transaction commit to ensure user exists
+        emailService.sendWelcomeEmail(user).catch(err => {
+            logger.error('Failed to send welcome email to %s:', user.email, err);
         });
 
         const { accessToken, refreshToken } = generateTokens(user);
@@ -471,8 +477,7 @@ export const forgotPassword = async (req, res) => {
         });
 
         // Send Email
-        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
-        await emailService.sendEmail(email, emailService.emailTemplates.passwordReset(user, resetLink));
+        await emailService.sendPasswordResetEmail(user, resetToken);
 
         await auditService.logAction('FORGOT_PASSWORD_REQUEST', 'USER', user.id, { email, req });
 

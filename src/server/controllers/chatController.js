@@ -1,12 +1,12 @@
-import { Chat, Message, Dealer, Manufacturer, Order, Negotiation, DealerSubscription, Customer } from '../models/index.js';
+import { Chat, Message, Seller, Manufacturer, Order, Negotiation, SellerSubscription, Customer } from '../models/index.js';
 import mongoose from 'mongoose';
 
 const checkSubscription = async (userId, requiredTier = 'PRO') => {
-    const dealer = await Dealer.findOne({ userId });
-    if (!dealer) return false;
+    const seller = await Seller.findOne({ userId });
+    if (!seller) return false;
 
-    const activeSub = await DealerSubscription.findOne({
-        dealerId: dealer._id,
+    const activeSub = await SellerSubscription.findOne({
+        dealerId: seller._id,
         status: 'ACTIVE'
     }).populate('planId').sort({ endDate: -1 });
 
@@ -29,16 +29,16 @@ export const createChat = async (req, res) => {
         if ((senderRole === 'DEALER' && receiverRole === 'MANUFACTURER') ||
             (senderRole === 'MANUFACTURER' && receiverRole === 'DEALER')) {
 
-            const dealerId = senderRole === 'DEALER' ? req.user.dealer?._id : (await Dealer.findOne({ userId: receiverId }))?._id;
+            const dealerId = senderRole === 'DEALER' ? req.user.dealer?._id : (await Seller.findOne({ userId: receiverId }))?._id;
             const mfrId = senderRole === 'MANUFACTURER' ? req.user.manufacturer?._id : (await Manufacturer.findOne({ userId: receiverId }))?._id;
 
             if (!dealerId || !mfrId) {
                 return res.status(404).json({ message: 'Dealer or Manufacturer profile not found' });
             }
 
-            const dealer = await Dealer.findById(dealerId);
+            const seller = await Seller.findById(dealerId);
             if (type !== 'NEGOTIATION') {
-                const isApproved = dealer?.approvedBy?.some(id => id.toString() === mfrId.toString());
+                const isApproved = seller?.approvedBy?.some(id => id.toString() === mfrId.toString());
                 if (!isApproved) {
                     return res.status(403).json({
                         message: 'Official partnership required to initiate chat.',
@@ -63,9 +63,9 @@ export const createChat = async (req, res) => {
             if (!order) return res.status(404).json({ message: 'Order not found' });
 
             const customer = await Customer.findOne({ userId: senderRole === 'CUSTOMER' ? senderId : receiverId });
-            const dealer = await Dealer.findOne({ userId: senderRole === 'DEALER' ? senderId : receiverId });
+            const seller = await Seller.findOne({ userId: senderRole === 'DEALER' ? senderId : receiverId });
 
-            if (order.customerId.toString() !== customer?._id.toString() || order.dealerId.toString() !== dealer?._id.toString()) {
+            if (order.customerId.toString() !== customer?._id.toString() || order.dealerId.toString() !== seller?._id.toString()) {
                 return res.status(403).json({ message: 'Unauthorized: Participation in order required' });
             }
         }
@@ -74,10 +74,10 @@ export const createChat = async (req, res) => {
             const negotiation = await Negotiation.findById(contextId);
             if (!negotiation) return res.status(404).json({ message: 'Negotiation not found' });
 
-            const dealer = await Dealer.findOne({ userId: senderRole === 'DEALER' ? senderId : receiverId });
+            const seller = await Seller.findOne({ userId: senderRole === 'DEALER' ? senderId : receiverId });
             const mfr = await Manufacturer.findOne({ userId: senderRole === 'MANUFACTURER' ? senderId : receiverId });
 
-            if (negotiation.dealerId.toString() !== dealer?._id.toString() || negotiation.manufacturerId.toString() !== mfr?._id.toString()) {
+            if (negotiation.dealerId.toString() !== seller?._id.toString() || negotiation.manufacturerId.toString() !== mfr?._id.toString()) {
                 return res.status(403).json({ message: 'Unauthorized: Participation in negotiation required' });
             }
         }

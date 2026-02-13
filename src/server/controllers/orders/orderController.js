@@ -2,6 +2,7 @@ import orderService from '../../services/order.js';
 import logger from '../../lib/logger.js';
 import shipmentService from '../../services/shipmentService.js';
 import disputeService from '../../services/dispute.js';
+import emailService from '../../services/emailService.js';
 import { Customer } from '../../models/index.js';
 
 export const createOrder = async (req, res) => {
@@ -24,7 +25,7 @@ export const createOrder = async (req, res) => {
             const customer = await Customer.findOne({ userId });
             if (!customer) throw new Error('Customer profile required');
             customerId = customer._id;
-            
+
             // Re-check idempotency with customerId
             if (idempotencyKey) {
                 const existingOrder = await orderService.findOrderByIdempotencyKey(idempotencyKey, customerId);
@@ -92,6 +93,10 @@ export const updateOrderStatus = async (req, res) => {
         const { id } = req.params;
         const { status, reason, metadata } = req.body;
         const updated = await orderService.updateStatus(id, status, { reason, metadata });
+
+        // Email Notifications are now handled by EmailSubscriber via system events
+
+
         res.json({ success: true, data: updated });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });

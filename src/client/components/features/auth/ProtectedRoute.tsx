@@ -30,7 +30,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
                 switch (user.role) {
                     case 'ADMIN': router.replace('/admin/dashboard'); break;
                     case 'MANUFACTURER': router.replace('/manufacturer/dashboard'); break;
-                    case 'DEALER': router.replace('/dealer/dashboard'); break;
+                    case 'SELLER': router.replace('/seller/dashboard'); break;
                     case 'CUSTOMER': router.replace('/customer/orders'); break;
                     default: router.replace('/');
                 }

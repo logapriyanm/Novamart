@@ -3,7 +3,7 @@
  * Manages the state-driven wallet logic for the platform.
  */
 
-import { Escrow, Order, Dispute, AuditLog } from '../models/index.js';
+import { Escrow, Order, Dispute, AuditLog } from '../models/index.js'; // Dealer removed if unused, or change to Seller if needed
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import mongoose from 'mongoose';
 

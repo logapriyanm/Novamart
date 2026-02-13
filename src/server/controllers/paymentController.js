@@ -114,8 +114,8 @@ export const verifyPayment = async (req, res) => {
             });
 
             import('../services/emailService.js').then((module) => {
-                module.default.sendPaymentConfirmation(payment, order).catch(err =>
-                    logger.error('Failed to send payment confirmation email:', err)
+                module.default.sendOrderConfirmation(order._id).catch(err =>
+                    logger.error('Failed to send order confirmation email:', err)
                 );
             }).catch(() => { });
 
@@ -143,8 +143,8 @@ export const verifyPayment = async (req, res) => {
         });
 
         import('../services/emailService.js').then((module) => {
-            module.default.sendPaymentConfirmation(payment, order).catch(err =>
-                logger.error('Failed to send payment confirmation email:', err)
+            module.default.sendOrderConfirmation(order._id).catch(err =>
+                logger.error('Failed to send order confirmation email:', err)
             );
         }).catch(() => { });
 

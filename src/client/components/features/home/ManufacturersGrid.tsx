@@ -12,7 +12,7 @@ export default function ManufacturersGrid({ manufacturers = [] }: ManufacturersG
         <div className="max-w-7xl mx-auto px-6 mb-32 relative z-20">
             <div className="bg-white rounded-[10px] p-8 lg:p-12 border border-foreground/10">
                 <div className="text-center mb-10">
-                    <h2 className="text-2xl font-black text-black tracking-tight uppercase italic">Top Manufacturers</h2>
+                    <h2 className="text-2xl font-bold text-black tracking-tight">Top manufacturers</h2>
                     <p className="text-foreground/40 text-xs font-bold uppercase tracking-widest mt-2">Certified Direct Supply Partners</p>
                 </div>
 
@@ -31,7 +31,7 @@ export default function ManufacturersGrid({ manufacturers = [] }: ManufacturersG
                                 )}
                             </div>
                             <span className="text-xs font-bold text-foreground/40 mt-4 group-hover:text-black transition-colors uppercase">{brand.name}</span>
-                            {brand.location && <span className="text-[10px] font-bold text-foreground/20 mt-1 uppercase tracking-tighter">{brand.location}</span>}
+                            {brand.location && <span className="text-sm font-medium text-foreground/20 mt-1">{brand.location}</span>}
                         </div>
                     ))}
                 </div>

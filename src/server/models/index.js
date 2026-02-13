@@ -1,7 +1,8 @@
 import Session from './Session.js';
 import User from './User.js';
 import Manufacturer from './Manufacturer.js';
-import Dealer from './Dealer.js';
+
+import Seller from './Seller.js';
 import Customer from './Customer.js';
 import Product from './Product.js';
 import Inventory from './Inventory.js';
@@ -10,8 +11,9 @@ import Payment from './Payment.js';
 import Escrow from './Escrow.js';
 import Cart from './Cart.js';
 import Negotiation from './Negotiation.js';
-import DealerRequest from './DealerRequest.js';
-import ManufacturerDealerBlock from './ManufacturerDealerBlock.js';
+
+import SellerRequest from './SellerRequest.js';
+import ManufacturerSellerBlock from './ManufacturerSellerBlock.js';
 import PooledDemand from './PooledDemand.js';
 import PoolParticipant from './PoolParticipant.js';
 import Badge from './Badge.js';
@@ -22,7 +24,8 @@ import ProductMaster from './ProductMaster.js';
 import ProductVersion from './ProductVersion.js';
 import MarginRule from './MarginRule.js';
 import SubscriptionPlan from './SubscriptionPlan.js';
-import DealerSubscription from './DealerSubscription.js';
+
+import SellerSubscription from './SellerSubscription.js';
 import TaxRule from './TaxRule.js';
 import CategoryTaxonomy from './CategoryTaxonomy.js';
 import SearchIndex from './SearchIndex.js';
@@ -56,7 +59,8 @@ export {
     User,
     Session,
     Manufacturer,
-    Dealer,
+
+    Seller,
     Customer,
     Product,
     Inventory,
@@ -65,8 +69,9 @@ export {
     Escrow,
     Cart,
     Negotiation,
-    DealerRequest,
-    ManufacturerDealerBlock,
+
+    SellerRequest,
+
     PooledDemand,
     PoolParticipant,
     Badge,
@@ -77,7 +82,8 @@ export {
     ProductVersion,
     MarginRule,
     SubscriptionPlan,
-    DealerSubscription,
+
+    SellerSubscription,
     TaxRule,
 
     CategoryTaxonomy,
@@ -112,7 +118,7 @@ export default {
     User,
     Session,
     Manufacturer,
-    Dealer,
+    Seller,
     Customer,
     Product,
     Inventory,
@@ -121,8 +127,8 @@ export default {
     Escrow,
     Cart,
     Negotiation,
-    DealerRequest,
-    ManufacturerDealerBlock,
+    SellerRequest,
+    ManufacturerSellerBlock,
     PooledDemand,
     PoolParticipant,
     Badge,
@@ -133,7 +139,7 @@ export default {
     ProductVersion,
     MarginRule,
     SubscriptionPlan,
-    DealerSubscription,
+    SellerSubscription,
     TaxRule,
 
     CategoryTaxonomy,

@@ -39,7 +39,7 @@ export default function ContinueViewing({ data }: ContinueViewingProps) {
                                 <h4 className="text-xs font-black text-[#1E293B] truncate mb-1">{product.name}</h4>
                                 <div className="flex items-center gap-2">
                                     <span className="text-sm font-black text-[#10367D]">₹{Number(product.basePrice).toLocaleString()}</span>
-                                    <span className="text-[9px] font-bold text-slate-400 line-through">₹{(Number(product.basePrice) * 1.2).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                    <span className="text-xs font-medium text-slate-400 line-through">₹{(Number(product.basePrice) * 1.2).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                                 </div>
                             </div>
                             <div className="w-8 h-8 rounded-full bg-[#10367D]/5 flex items-center justify-center group-hover:bg-[#10367D] transition-colors">

@@ -21,7 +21,7 @@ class OrderService {
     /**
      * Create an order and lock inventory.
      */
-    async createOrder(customerId, dealerId, items, shippingAddress, idempotencyKey = null) {
+    async createOrder(customerId, sellerId, items, shippingAddress, idempotencyKey = null) {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
@@ -30,7 +30,7 @@ class OrderService {
             // 1. Calculate base total and validate regional inventory
             for (const item of items) {
                 const query = {
-                    dealerId,
+                    sellerId,
                     stock: { $gte: item.quantity }
                 };
 
@@ -44,7 +44,7 @@ class OrderService {
 
                 const inventory = await Inventory.findOne(query).session(session);
 
-                if (!inventory) throw new Error(`Insufficient stock for item at this dealer.`);
+                if (!inventory) throw new Error(`Insufficient stock for item at this seller.`);
 
                 // Check if negotiation exists
                 if (item.negotiationId) {
@@ -76,7 +76,7 @@ class OrderService {
             // 3. Create Order
             const [order] = await Order.create([{
                 customerId,
-                dealerId,
+                sellerId,
                 totalAmount,
                 taxAmount,
                 commissionAmount,
@@ -112,7 +112,7 @@ class OrderService {
             systemEvents.emit(EVENTS.ORDER.PLACED, {
                 order,
                 customerId,
-                dealerId
+                sellerId
             });
 
             return order;
@@ -177,7 +177,7 @@ class OrderService {
     }
 
     /**
-     * Confirm order by Dealer.
+     * Confirm order by Seller.
      */
     async confirmOrder(orderId) {
         const orderBuf = await Order.findById(orderId);
@@ -189,7 +189,7 @@ class OrderService {
                 timeline: {
                     fromState: orderBuf.status,
                     toState: 'CONFIRMED',
-                    reason: 'Dealer confirmed stock availability.'
+                    reason: 'Seller confirmed stock availability.'
                 }
             }
         }, { new: true });
@@ -312,21 +312,21 @@ class OrderService {
      * Get orders for a specific user role with filters.
      */
     async getOrders(role, userId, filters = {}) {
-        const { status, dealerId } = filters;
+        const { status, sellerId } = filters;
         const query = {};
 
-        if (role === 'DEALER') {
-            const { Dealer } = await import('../models/index.js');
-            const dealer = await Dealer.findOne({ userId });
-            if (!dealer) throw new Error('DEALER_PROFILE_NOT_FOUND');
-            query.dealerId = dealer._id;
+        if (role === 'SELLER') {
+            const { Seller } = await import('../models/index.js');
+            const seller = await Seller.findOne({ userId });
+            if (!seller) throw new Error('SELLER_PROFILE_NOT_FOUND');
+            query.sellerId = seller._id;
         } else if (role === 'CUSTOMER') {
             const { Customer } = await import('../models/index.js');
             const customer = await Customer.findOne({ userId });
             if (!customer) throw new Error('CUSTOMER_PROFILE_NOT_FOUND');
             query.customerId = customer._id;
-        } else if (role === 'ADMIN' && dealerId) {
-            query.dealerId = dealerId;
+        } else if (role === 'ADMIN' && sellerId) {
+            query.sellerId = sellerId;
         }
 
         if (status && status !== 'All') {
@@ -336,7 +336,7 @@ class OrderService {
         return await Order.find(query)
             .populate('customerId', 'name')
             .populate('items.productId', 'name images')
-            .populate('dealerId', 'businessName')
+            .populate('sellerId', 'businessName')
             .sort({ createdAt: -1 })
             .lean();
     }
@@ -348,7 +348,7 @@ class OrderService {
         const order = await Order.findById(orderId)
             .populate({ path: 'items.productId', select: 'name images manufacturerId' })
             .populate('customerId')
-            .populate('dealerId')
+            .populate('sellerId')
             .populate('escrow')
             .lean();
 
@@ -356,7 +356,7 @@ class OrderService {
 
         // Security Checks
         if (role === 'CUSTOMER' && order.customerId.userId.toString() !== userId.toString()) throw new Error('UNAUTHORIZED_ACCESS');
-        if (role === 'DEALER' && order.dealerId.userId.toString() !== userId.toString()) throw new Error('UNAUTHORIZED_ACCESS');
+        if (role === 'SELLER' && order.sellerId.userId.toString() !== userId.toString()) throw new Error('UNAUTHORIZED_ACCESS');
         if (role === 'MANUFACTURER') {
             const { Manufacturer } = await import('../models/index.js');
             const mfg = await Manufacturer.findOne({ userId });
@@ -437,7 +437,7 @@ class OrderService {
 
         for (const inv of inventories) {
             const activeOrders = await Order.find({
-                dealerId: inv.dealerId,
+                sellerId: inv.sellerId,
                 status: { $in: ['CREATED', 'PAID', 'CONFIRMED', 'SHIPPED'] },
                 'items.productId': inv.productId._id
             }).lean();
@@ -451,7 +451,7 @@ class OrderService {
                 stockDiscrepancies.push({
                     inventoryId: inv._id,
                     product: inv.productId.name,
-                    dealerId: inv.dealerId,
+                    sellerId: inv.sellerId,
                     currentLocked: inv.locked,
                     expectedLocked,
                     variance: expectedLocked - inv.locked
@@ -469,4 +469,3 @@ class OrderService {
 }
 
 export default new OrderService();
-

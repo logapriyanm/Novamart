@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { dealerService } from '@/lib/api/services/dealer.service';
+import { sellerService } from '@/lib/api/services/seller.service';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaStore, FaMapMarkerAlt, FaCalendarAlt, FaStar, FaBox, FaShieldAlt, FaComments } from 'react-icons/fa';
 import Link from 'next/link';
@@ -47,7 +47,7 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
             if (initialData) return;
             if (id) {
                 try {
-                    const data = await dealerService.getPublicProfile(id);
+                    const data = await sellerService.getPublicProfile(id);
                     setSeller(data);
                 } catch (error) {
                     console.error('Failed to fetch seller:', error);

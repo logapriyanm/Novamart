@@ -68,38 +68,41 @@ export default function CustomerProductCard({
         toast.success(newState ? 'Added to wishlist' : 'Removed from wishlist');
     };
 
+
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="bg-white border border-slate-100 rounded-[10px] overflow-hidden group transition-all duration-300 flex flex-col h-full relative text-slate-900 shadow-sm hover:shadow-xl hover:-translate-y-1"
+            className="group card-enterprise p-4 transition-all duration-300 hover:shadow-lg hover:border-blue-100 flex flex-col h-full relative"
         >
             {/* Image Container */}
             <div
-                className="aspect-square relative overflow-hidden bg-slate-50/50 cursor-pointer group-hover:bg-white transition-colors duration-500 p-4 xs:p-6 flex items-center justify-center"
+                className="aspect-[1.1/1] relative overflow-hidden bg-slate-50 rounded-[8px] mb-4 cursor-pointer"
                 onClick={() => router.push(`/products/${id}`)}
             >
-                <div className="w-full h-full relative">
+                <div className="w-full h-full flex items-center justify-center p-4">
                     <OptimizedImage
                         src={image}
                         alt={name}
-                        width={400}
-                        height={400}
-                        className="w-full h-full object-contain transition-all duration-700 group-hover:scale-110"
+                        width={300}
+                        height={300}
+                        className="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
                     />
                 </div>
 
-                {/* Badges Overlay */}
-                <div className="absolute top-3 left-3 flex flex-col gap-2">
-                    {originalPrice > price && (
-                        <div className="bg-emerald-500 text-white px-2 py-1 rounded-[5px] text-[8px] font-black uppercase tracking-widest shadow-sm">
-                            {Math.round((1 - price / originalPrice) * 100)}% Discount
+                {/* Top Badges */}
+                <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+                    {seller.isVerified && (
+                        <div className="px-2 py-1 bg-blue-50/90 backdrop-blur-sm border border-blue-100 text-blue-600 text-sm font-semibold rounded-[4px] flex items-center gap-1 shadow-sm">
+                            <FaCheckCircle className="w-2.5 h-2.5" />
+                            Verified
                         </div>
                     )}
-                    {seller.isVerified && (
-                        <div className="bg-blue-600 text-white p-1 rounded-full shadow-md" title="Authorized Dealer">
-                            <FaCheckCircle className="w-3 h-3" />
+                    {highlights.freeDelivery && (
+                        <div className="px-2 py-1 bg-emerald-50/90 backdrop-blur-sm border border-emerald-100 text-emerald-600 text-sm font-semibold rounded-[4px] flex items-center gap-1 shadow-sm">
+                            <Truck className="w-2.5 h-2.5" />
+                            Free shipping
                         </div>
                     )}
                 </div>
@@ -107,75 +110,54 @@ export default function CustomerProductCard({
                 {/* Wishlist Button */}
                 <button
                     onClick={handleWishlist}
-                    className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isWishlisted ? 'bg-rose-500 text-white shadow-lg' : 'bg-white/80 text-slate-400 border border-slate-100 hover:text-slate-900 backdrop-blur-sm shadow-sm'}`}
-                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                    className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isWishlisted ? 'bg-rose-50 text-rose-500' : 'bg-white/60 text-slate-400 hover:bg-white hover:text-rose-500'} backdrop-blur-sm`}
                 >
-                    <FaHeart className={`w-3 h-3 ${isWishlisted ? 'fill-current' : ''}`} />
+                    <FaHeart className={`w-3.5 h-3.5 ${isWishlisted ? 'fill-current' : ''}`} />
                 </button>
-
-                {/* Shipping Highlight */}
-                {highlights.freeDelivery && (
-                    <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm border border-slate-100 px-2 py-1 rounded-[5px] flex items-center gap-1.5 shadow-sm">
-                        <Truck className="w-2.5 h-2.5 text-slate-600" />
-                        <span className="text-[9px] font-bold text-slate-600 uppercase tracking-tighter">Fast Delivery</span>
-                    </div>
-                )}
             </div>
 
             {/* Content Section */}
-            <div className="p-4 flex flex-col flex-1 bg-white border-t border-slate-50">
-                <div className="mb-2">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                        {brand}
-                    </span>
-                    <h3
-                        className="font-bold text-slate-800 text-sm leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[2.5rem] cursor-pointer mt-1"
-                        onClick={() => router.push(`/products/${id}`)}
-                    >
-                        {name}
-                    </h3>
-                </div>
+            <div className="flex flex-col flex-1">
+                {/* Brand */}
+                <span className="text-sm font-semibold text-slate-400 mb-1.5">
+                    {brand}
+                </span>
+
+                {/* Product Name */}
+                <h3
+                    className="font-bold text-slate-800 text-sm leading-relaxed mb-2 line-clamp-2 min-h-[2.5rem] cursor-pointer hover:text-blue-600 transition-colors"
+                    onClick={() => router.push(`/products/${id}`)}
+                >
+                    {name}
+                </h3>
 
                 {/* Ratings */}
-                <div className="flex items-center gap-1.5 mb-4">
+                <div className="flex items-center gap-1.5 mb-3">
                     <div className="flex items-center gap-0.5">
-                        <Star className="text-amber-400 fill-current w-3 h-3" />
-                        <span className="text-[11px] font-black text-slate-900">{rating}</span>
+                        {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < Math.floor(rating) ? 'text-amber-400 fill-current' : 'text-slate-200'}`} />
+                        ))}
                     </div>
-                    <span className="text-[11px] font-bold text-slate-300">({reviewsCount})</span>
+                    <span className="text-sm font-medium text-slate-400">({reviewsCount})</span>
                 </div>
 
-                {/* Price Section */}
-                <div className="mt-auto pt-4 flex flex-col gap-4">
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-xl font-black text-slate-900">₹{price.toLocaleString()}</span>
+                <div className="mt-auto pt-2 flex items-end justify-between gap-2">
+                    <div className="flex flex-col">
                         {originalPrice > price && (
-                            <span className="text-xs text-slate-400 line-through font-medium">₹{originalPrice.toLocaleString()}</span>
+                            <span className="text-sm text-slate-400 line-through font-medium decoration-slate-300">
+                                ₹{originalPrice.toLocaleString()}
+                            </span>
                         )}
+                        <span className="text-lg font-black text-slate-900 tracking-tight">
+                            ₹{price.toLocaleString()}
+                        </span>
                     </div>
 
                     <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            if (!inventoryId || !seller.id) {
-                                toast.error('This product is unavailable.');
-                                return;
-                            }
-                            addToCart({
-                                inventoryId,
-                                productId: id,
-                                name,
-                                price,
-                                image,
-                                quantity: 1,
-                                sellerId: seller.id,
-                                sellerName: seller.name,
-                                region: 'National'
-                            });
-                        }}
-                        className="w-full py-3 bg-slate-900 text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-md active:scale-95"
+                        onClick={() => router.push(`/products/${id}`)}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-[6px] shadow-sm shadow-blue-200 transition-all active:scale-95"
                     >
-                        Add to Cart
+                        View Details
                     </button>
                 </div>
             </div>

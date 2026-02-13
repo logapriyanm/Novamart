@@ -21,6 +21,7 @@ import {
 import Link from 'next/link';
 import Loader from '@/client/components/ui/Loader';
 import { useRouter } from 'next/navigation';
+import { apiClient } from '@/lib/api/client';
 
 import { useCart } from '@/client/context/CartContext';
 import { useAuth } from '@/client/hooks/useAuth';
@@ -30,7 +31,7 @@ import { paymentService } from '@/lib/api/services/payment.service';
 import { toast } from 'sonner';
 
 export default function CheckoutPage() {
-    const { cart, total, clearCart } = useCart();
+    const { cart, total, totalSavings, clearCart } = useCart();
     const { isAuthenticated, isLoading: authLoading } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState(2);
@@ -81,29 +82,39 @@ export default function CheckoutPage() {
 
         setIsProcessing(true);
         try {
-            // Group cart items by dealer
-            const groups: { [key: string]: any[] } = {};
+            // Group cart items by seller
+            const groups: Record<string, any[]> = {};
             cart.forEach(item => {
-                const dId = item.sellerId || 'unknown';
-                if (!groups[dId]) groups[dId] = [];
-                groups[dId].push(item);
+                const sId = item.sellerId || 'unknown';
+                if (!groups[sId]) groups[sId] = [];
+                groups[sId].push(item);
             });
 
-            const dealerIds = Object.keys(groups);
+            const sellerIds = Object.keys(groups);
             const orderIds: string[] = [];
 
-            for (const dId of dealerIds) {
-                const orderRes = await orderService.createOrder({
-                    dealerId: dId,
-                    shippingAddress: addressString,
-                    items: groups[dId].map(item => ({
-                        inventoryId: item.inventoryId,
-                        quantity: item.quantity
-                    }))
+            // Create orders for each seller
+            for (const sId of sellerIds) {
+                const groupItems = groups[sId];
+                // Calculate total for this group
+                const groupTotal = groupItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+                const orderRes = await apiClient.post('/orders', {
+                    items: groupItems.map(i => ({
+                        productId: i.productId,
+                        quantity: i.quantity,
+                        price: i.price,
+                        inventoryId: i.inventoryId // Important for inventory deduction
+                    })),
+                    shippingAddress: addressString, // Using addressString from selectedAddress
+                    paymentMethod: 'ESCROW', // Defaulting to Escrow for now
+                    totalAmount: groupTotal,
+                    sellerId: sId,
+                    type: 'Standard'
                 });
 
-                if (orderRes.success) {
-                    orderIds.push(orderRes.data.id);
+                if ((orderRes as any).id) { // Assuming orderRes is the order object
+                    orderIds.push((orderRes as any).id);
                 }
             }
 
@@ -144,11 +155,11 @@ export default function CheckoutPage() {
 
                     {steps.map((s) => (
                         <div key={s.id} className="relative z-10 flex flex-col items-center gap-2">
-                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-[10px] sm:text-xs transition-all duration-300 border-2 ${step >= s.id ? 'bg-black border-black text-white shadow-lg shadow-black/20' : 'bg-white border-foreground/10 text-foreground/20'
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 border-2 ${step >= s.id ? 'bg-black border-black text-white shadow-lg shadow-black/20' : 'bg-white border-foreground/10 text-foreground/20'
                                 }`}>
                                 {step > s.id ? <HiOutlineCheckCircle className="w-5 h-5 sm:w-6 sm:h-6" /> : s.id}
                             </div>
-                            <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-widest ${step >= s.id ? 'text-black' : 'text-foreground/20'}`}>
+                            <span className={`text-xs font-medium uppercase ${step >= s.id ? 'text-black' : 'text-foreground/20'}`}>
                                 {s.label}
                             </span>
                         </div>
@@ -170,9 +181,9 @@ export default function CheckoutPage() {
                                 <HiOutlineShieldCheck className="w-8 h-8" />
                             </div>
                             <div className="space-y-1">
-                                <h4 className="text-[11px] font-black text-black uppercase tracking-[0.2em] italic">Buyer Protection Enabled</h4>
-                                <p className="text-[10px] font-bold text-foreground/60 uppercase tracking-widest leading-relaxed">
-                                    Your payment is held in a <span className="text-black font-black">Secure Escrow Account</span>. Funds are only released to the seller after you confirm receipt and inspection of your items.
+                                <h4 className="text-sm font-bold text-black italic">Buyer Protection Enabled</h4>
+                                <p className="text-sm font-medium text-foreground/60 leading-relaxed">
+                                    Your payment is held in a <span className="text-black font-bold">Secure Escrow Account</span>. Funds are only released to the seller after you confirm receipt and inspection of your items.
                                 </p>
                             </div>
                         </div>
@@ -180,84 +191,86 @@ export default function CheckoutPage() {
                         {/* Step 2: Shipping Address */}
                         <section className="space-y-6">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-2xl font-black text-foreground flex items-center gap-3 italic uppercase">
-                                    <span className="text-black text-3xl italic">1.</span> Shipping Address
-                                </h3>
-                                <button
-                                    onClick={() => setShowAddressForm(true)}
-                                    className="text-[10px] font-black text-black uppercase tracking-[0.2em] flex items-center gap-2 hover:opacity-70 transition-opacity"
-                                >
-                                    <HiOutlinePlus className="w-4 h-4" /> Add New
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {addresses.map((addr) => (
-                                    <div
-                                        key={addr.id}
-                                        onClick={() => setSelectedAddressId(addr.id)}
-                                        className={`p-6 xs:p-8 rounded-[10px] border-2 transition-all cursor-pointer relative group ${selectedAddressId === addr.id ? 'border-black bg-white shadow-xl shadow-black/5' : 'border-foreground/5 bg-white/50 hover:border-black/20'
-                                            }`}
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-2xl font-bold text-foreground flex items-center gap-3 italic">
+                                        <span className="text-black text-3xl italic">1.</span> Shipping Address
+                                    </h3>
+                                    <button
+                                        onClick={() => setShowAddressForm(true)}
+                                        className="text-sm font-bold text-black flex items-center gap-2 hover:opacity-70 transition-opacity"
                                     >
-                                        <div className="flex items-start justify-between mb-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${selectedAddressId === addr.id ? 'bg-black text-white' : 'bg-surface text-foreground/20'}`}>
-                                                    {addr.type === 'office' ? <HiOutlineOfficeBuilding className="w-6 h-6" /> : <HiOutlineHome className="w-6 h-6" />}
+                                        <HiOutlinePlus className="w-4 h-4" /> Add New
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {addresses.map((addr) => (
+                                        <div
+                                            key={addr.id}
+                                            onClick={() => setSelectedAddressId(addr.id)}
+                                            className={`p-6 xs:p-8 rounded-[10px] border-2 transition-all cursor-pointer relative group ${selectedAddressId === addr.id ? 'border-black bg-white shadow-xl shadow-black/5' : 'border-foreground/5 bg-white/50 hover:border-black/20'
+                                                }`}
+                                        >
+                                            <div className="flex items-start justify-between mb-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${selectedAddressId === addr.id ? 'bg-black text-white' : 'bg-surface text-foreground/20'}`}>
+                                                        {addr.type === 'office' ? <HiOutlineOfficeBuilding className="w-6 h-6" /> : <HiOutlineHome className="w-6 h-6" />}
+                                                    </div>
+                                                    <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{addr.label}</span>
                                                 </div>
-                                                <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{addr.label}</span>
+                                                {selectedAddressId === addr.id && <HiOutlineCheckCircle className="text-black w-6 h-6" />}
                                             </div>
-                                            {selectedAddressId === addr.id && <HiOutlineCheckCircle className="text-black w-6 h-6" />}
+                                            <div className="space-y-1.5 opacity-60">
+                                                <p className="text-xs font-black text-foreground">{addr.name}</p>
+                                                <p className="text-[10px] font-bold text-foreground uppercase tracking-widest leading-relaxed">
+                                                    {addr.line1}<br />
+                                                    {addr.city}, {addr.state} {addr.zip}
+                                                </p>
+                                            </div>
+                                            <div className="mt-8 flex gap-4">
+                                                <button className="text-[9px] font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-black transition-colors">Edit</button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setAddresses(addresses.filter(a => a.id !== addr.id));
+                                                    }}
+                                                    className="text-[9px] font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-red-500 transition-colors"
+                                                >Delete</button>
+                                            </div>
                                         </div>
-                                        <div className="space-y-1.5 opacity-60">
-                                            <p className="text-xs font-black text-foreground">{addr.name}</p>
-                                            <p className="text-[10px] font-bold text-foreground uppercase tracking-widest leading-relaxed">
-                                                {addr.line1}<br />
-                                                {addr.city}, {addr.state} {addr.zip}
-                                            </p>
-                                        </div>
-                                        <div className="mt-8 flex gap-4">
-                                            <button className="text-[9px] font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-black transition-colors">Edit</button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setAddresses(addresses.filter(a => a.id !== addr.id));
-                                                }}
-                                                className="text-[9px] font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-red-500 transition-colors"
-                                            >Delete</button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                                </div>  
                         </section>
 
                         {/* Step 3: Payment Method (Placeholder) */}
                         <section className="space-y-6">
-                            <h3 className="text-2xl font-black text-foreground flex items-center gap-3 italic uppercase">
+                            <h3 className="text-2xl font-bold text-foreground flex items-center gap-3 italic">
                                 <span className="text-black text-3xl italic">2.</span> Payment Method
                             </h3>
                             <div className="bg-surface rounded-[10px] p-6 xs:p-10 border border-foreground/5">
-                                <p className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em] mb-4">Secure Payment Options</p>
+                                <p className="text-xs font-bold text-foreground/40 uppercase tracking-[0.3em] mb-4">Secure Payment Options</p>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-white p-4 rounded-[10px] border-2 border-black/20 flex items-center gap-3">
                                         <HiOutlineCreditCard className="text-black w-5 h-5" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Razorpay Checkout</span>
+                                        <span className="text-sm font-medium">Razorpay Checkout</span>
                                     </div>
                                     <div className="opacity-30 grayscale pointer-events-none p-4 flex items-center gap-3">
                                         <HiOutlineLibrary className="w-5 h-5" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Wire Transfer</span>
+                                        <span className="text-sm font-medium">Wire Transfer</span>
                                     </div>
                                 </div>
                             </div>
                         </section>
 
                         <div className="flex items-center justify-between pt-10 border-t border-foreground/5">
-                            <button onClick={() => router.back()} className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] flex items-center gap-2 hover:text-foreground transition-all">
+                            <button onClick={() => router.back()} className="text-sm font-bold text-foreground/30 flex items-center gap-2 hover:text-foreground transition-all">
                                 <HiOutlineArrowLeft className="w-4 h-4" /> Back to Cart
                             </button>
                             <button
                                 onClick={handleCreateOrder}
                                 disabled={isProcessing || cart.length === 0}
-                                className="bg-black text-white py-5 px-12 rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 hover:scale-[1.05] transition-all flex items-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-black text-white py-5 px-12 rounded-[10px] font-bold text-sm shadow-xl shadow-black/20 hover:scale-[1.05] transition-all flex items-center gap-4 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isProcessing ? 'Processing...' : 'Continue to Payment'}
                                 <HiOutlineArrowRight className="w-4 h-4" />
@@ -269,7 +282,7 @@ export default function CheckoutPage() {
                     <aside className="lg:col-span-4 space-y-8">
                         <div className="bg-white rounded-[10px] border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02] overflow-hidden">
                             <div className="p-6 xs:p-10 border-b border-foreground/[0.03]">
-                                <h3 className="text-xl font-black text-foreground italic uppercase tracking-tight">Order <span className="text-black">Summary</span></h3>
+                                <h3 className="text-xl font-bold text-foreground italic tracking-tight">Order <span className="text-black">Summary</span></h3>
                             </div>
 
                             <div className="p-6 xs:p-10 space-y-8">
@@ -280,10 +293,10 @@ export default function CheckoutPage() {
                                                 <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
                                             </div>
                                             <div className="flex-1 space-y-1">
-                                                <h4 className="text-[11px] font-black text-foreground line-clamp-2 uppercase leading-tight tracking-tight">{item.name}</h4>
+                                                <h4 className="text-sm font-bold text-foreground line-clamp-2 leading-tight tracking-tight">{item.name}</h4>
                                                 <div className="flex items-baseline justify-between pt-1">
-                                                    <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest italic">Qty: {item.quantity}</span>
-                                                    <span className="text-xs font-black text-foreground">₹{item.price.toLocaleString()}.00</span>
+                                                    <span className="text-xs font-medium text-foreground/40 italic">Qty: {item.quantity}</span>
+                                                    <span className="text-sm font-bold text-foreground">₹{item.price.toLocaleString()}.00</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -291,25 +304,31 @@ export default function CheckoutPage() {
                                 </div>
 
                                 <div className="space-y-4 pt-8 border-t border-foreground/[0.03]">
-                                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-foreground/40 leading-none">
+                                    <div className="flex justify-between text-sm font-medium text-foreground/40 leading-none">
                                         <span>Subtotal</span>
-                                        <span className="text-foreground font-black">₹{total.toLocaleString()}.00</span>
+                                        <span className="text-foreground font-bold">₹{total.toLocaleString()}.00</span>
                                     </div>
-                                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-emerald-500 leading-none">
+                                    {totalSavings > 0 && (
+                                        <div className="flex justify-between text-sm font-medium text-emerald-600 leading-none">
+                                            <span>Total Savings</span>
+                                            <span className="font-bold">-₹{totalSavings.toLocaleString()}.00</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between text-sm font-medium text-emerald-500 leading-none">
                                         <span>Shipping</span>
-                                        <span className="font-black">FREE</span>
+                                        <span className="font-bold">FREE</span>
                                     </div>
-                                    <div className="flex justify-between text-[11px] font-black uppercase tracking-widest text-foreground/40 leading-none pb-4">
+                                    <div className="flex justify-between text-sm font-medium text-foreground/40 leading-none pb-4">
                                         <span>Estimated Tax</span>
-                                        <span className="text-foreground font-black">₹{(total * 0.08).toLocaleString()}.00</span>
+                                        <span className="text-foreground font-bold">₹{(total * 0.08).toLocaleString()}.00</span>
                                     </div>
 
                                     <div className="pt-8 border-t border-foreground/[0.03] flex justify-between items-end">
                                         <div className="space-y-1">
-                                            <p className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] leading-none">Total Secure Payment</p>
-                                            <p className="text-[8px] font-bold text-black italic uppercase leading-none">Includes buyer protection</p>
+                                            <p className="text-sm font-bold text-foreground/30 uppercase tracking-widest leading-none">Total Secure Payment</p>
+                                            <p className="text-xs font-medium text-black italic leading-none">Includes buyer protection</p>
                                         </div>
-                                        <p className="text-3xl font-black text-black tracking-tight leading-none">
+                                        <p className="text-3xl font-bold text-black tracking-tight leading-none">
                                             ₹{(total * 1.08).toLocaleString()}.00
                                         </p>
                                     </div>
@@ -319,8 +338,8 @@ export default function CheckoutPage() {
 
                         {/* Security Badges */}
                         <div className="flex items-center justify-center gap-8 opacity-20 grayscale hover:grayscale-0 transition-all">
-                            <div className="flex items-center gap-2"><HiOutlineLockClosed className="w-4 h-4" /><span className="text-[8px] font-black uppercase tracking-widest">SSL SECURED</span></div>
-                            <div className="flex items-center gap-2"><HiOutlineShieldCheck className="w-4 h-4" /><span className="text-[8px] font-black uppercase tracking-widest">PCI COMPLIANT</span></div>
+                            <div className="flex items-center gap-2"><HiOutlineLockClosed className="w-4 h-4" /><span className="text-xs font-bold uppercase tracking-widest">SSL SECURED</span></div>
+                            <div className="flex items-center gap-2"><HiOutlineShieldCheck className="w-4 h-4" /><span className="text-xs font-bold uppercase tracking-widest">PCI COMPLIANT</span></div>
                         </div>
                     </aside>
                 </div>
@@ -345,8 +364,8 @@ export default function CheckoutPage() {
                         >
                             <div className="flex justify-between items-center mb-6 xs:mb-10">
                                 <div>
-                                    <h2 className="text-xl xs:text-2xl font-black text-foreground italic uppercase">Add New <span className="text-black">Address</span></h2>
-                                    <p className="text-[9px] xs:text-[10px] font-bold text-foreground/40 uppercase tracking-widest mt-1">Shipping destination details</p>
+                                    <h2 className="text-xl xs:text-2xl font-bold text-foreground italic">Add New <span className="text-black">Address</span></h2>
+                                    <p className="text-xs font-medium text-foreground/40 mt-1">Shipping destination details</p>
                                 </div>
                                 <button onClick={() => setShowAddressForm(false)} className="w-8 h-8 xs:w-10 xs:h-10 rounded-full bg-surface flex items-center justify-center text-foreground hover:bg-black hover:text-white transition-all">
                                     <HiOutlineX className="w-4 h-4 xs:w-5 xs:h-5" />
@@ -356,74 +375,74 @@ export default function CheckoutPage() {
                             <form onSubmit={handleAddAddress} className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xs:gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[9px] xs:text-[10px] font-black text-foreground/40 uppercase tracking-widest ml-4">Address Label</label>
+                                        <label className="text-sm font-bold text-foreground/40 ml-4">Address Label</label>
                                         <input
                                             required
                                             value={newAddress.label}
                                             onChange={e => setNewAddress({ ...newAddress, label: e.target.value })}
                                             placeholder="Home / Office / Warehouse"
-                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-sm font-medium focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[9px] xs:text-[10px] font-black text-foreground/40 uppercase tracking-widest ml-4">Recipient Name</label>
+                                        <label className="text-sm font-bold text-foreground/40 ml-4">Recipient Name</label>
                                         <input
                                             required
                                             value={newAddress.name}
                                             onChange={e => setNewAddress({ ...newAddress, name: e.target.value })}
                                             placeholder="Full Name"
-                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-sm font-medium focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-foreground/40 uppercase tracking-widest ml-4">Street Address</label>
+                                    <label className="text-sm font-bold text-foreground/40 ml-4">Street Address</label>
                                     <input
                                         required
                                         value={newAddress.line1}
                                         onChange={e => setNewAddress({ ...newAddress, line1: e.target.value })}
                                         placeholder="123 Street name, suite..."
-                                        className="w-full bg-surface border border-foreground/5 rounded-[10px] px-6 py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
+                                        className="w-full bg-surface border border-foreground/5 rounded-[10px] px-6 py-4 text-sm font-medium focus:outline-none focus:border-black transition-all"
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 xs:gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[9px] xs:text-[10px] font-black text-foreground/40 uppercase tracking-widest ml-4">City</label>
+                                        <label className="text-sm font-bold text-foreground/40 ml-4">City</label>
                                         <input
                                             required
                                             value={newAddress.city}
                                             onChange={e => setNewAddress({ ...newAddress, city: e.target.value })}
                                             placeholder="City"
-                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-sm font-medium focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[9px] xs:text-[10px] font-black text-foreground/40 uppercase tracking-widest ml-4">State</label>
+                                        <label className="text-sm font-bold text-foreground/40 ml-4">State</label>
                                         <input
                                             required
                                             value={newAddress.state}
                                             onChange={e => setNewAddress({ ...newAddress, state: e.target.value })}
                                             placeholder="State"
-                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-sm font-medium focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[9px] xs:text-[10px] font-black text-foreground/40 uppercase tracking-widest ml-4">Zip Code</label>
+                                        <label className="text-sm font-bold text-foreground/40 ml-4">Zip Code</label>
                                         <input
                                             required
                                             value={newAddress.zip}
                                             onChange={e => setNewAddress({ ...newAddress, zip: e.target.value })}
                                             placeholder="123456"
-                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-xs font-bold focus:outline-none focus:border-black transition-all"
+                                            className="w-full bg-surface border border-foreground/5 rounded-[10px] px-4 xs:px-6 py-3 xs:py-4 text-sm font-medium focus:outline-none focus:border-black transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 <button
                                     type="submit"
-                                    className="w-full bg-black text-white py-5 rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/20 hover:scale-[1.02] transition-all mt-4"
+                                    className="w-full bg-black text-white py-5 rounded-[10px] font-bold text-sm shadow-xl shadow-black/20 hover:scale-[1.02] transition-all mt-4"
                                 >
                                     Save Address
                                 </button>

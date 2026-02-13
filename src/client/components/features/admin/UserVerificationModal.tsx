@@ -7,7 +7,7 @@ interface UserVerificationModalProps {
     onClose: () => void;
     onConfirm: (isVerified: boolean) => Promise<void>;
     user: any;
-    type: 'MANUFACTURER' | 'DEALER';
+    type: 'MANUFACTURER' | 'SELLER';
 }
 
 export default function UserVerificationModal({

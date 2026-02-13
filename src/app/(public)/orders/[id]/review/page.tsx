@@ -356,14 +356,14 @@ export default function CustomerReviewPortal() {
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="text-[11px] font-black text-slate-400 hover:text-slate-900 uppercase tracking-widest transition-colors"
+                                className="text-[11px] font-black text-muted-foreground hover:text-foreground uppercase tracking-widest transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-14 py-4.5 bg-[#10367D] text-white rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-[0_10px_25px_rgba(16,54,125,0.3)] hover:bg-[#0d2a61] active:scale-95 transition-all disabled:opacity-50 italic"
+                                className="btn-primary"
                             >
                                 {isSubmitting ? 'Posting...' : 'Post Review'}
                             </button>

@@ -8,12 +8,20 @@ import { motion } from 'framer-motion';
 import { FaArrowLeft, FaBox, FaStore, FaClock, FaMoneyBillWave, FaMapMarkerAlt, FaTruck, FaStar } from 'react-icons/fa';
 import ChatWidget from '@/client/components/features/chat/ChatWidget';
 
+import ReviewModal from '@/client/components/features/reviews/ReviewModal';
+
 export default function OrderDetailsPage() {
     const params = useParams();
     const router = useRouter();
     // const { showSnackbar } = useSnackbar();
     const [order, setOrder] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [reviewModal, setReviewModal] = useState<{
+        isOpen: boolean;
+        type: 'PRODUCT' | 'SELLER';
+        targetId: string;
+        orderItemId?: string;
+    }>({ isOpen: false, type: 'PRODUCT', targetId: '' });
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -104,7 +112,12 @@ export default function OrderDetailsPage() {
                                         <p className="font-black text-slate-800 mb-2">₹{(item.price * item.quantity).toLocaleString()}</p>
                                         {order.status === 'DELIVERED' && (
                                             <button
-                                                onClick={() => router.push(`/orders/${order.id}/review?productId=${item.product?.id}`)}
+                                                onClick={() => setReviewModal({
+                                                    isOpen: true,
+                                                    type: 'PRODUCT',
+                                                    targetId: item.product?.id,
+                                                    orderItemId: item.id
+                                                })}
                                                 className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 hover:underline"
                                             >
                                                 Rate & Review
@@ -256,7 +269,11 @@ export default function OrderDetailsPage() {
                             <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Sold By</h3>
                             {order.status === 'DELIVERED' && (
                                 <button
-                                    onClick={() => router.push(`/orders/${order.id}/review`)}
+                                    onClick={() => setReviewModal({
+                                        isOpen: true,
+                                        type: 'SELLER',
+                                        targetId: order.dealer?.id // Verify if dealer ID is available here, usually it is
+                                    })}
                                     className="text-[10px] font-black uppercase tracking-widest text-amber-500 hover:text-amber-600 flex items-center gap-1"
                                 >
                                     <FaStar /> Rate Seller
@@ -268,7 +285,7 @@ export default function OrderDetailsPage() {
                                 <FaStore />
                             </div>
                             <div>
-                                <p className="font-bold text-slate-800">{order.dealer?.businessName || 'Dealer Name'}</p>
+                                <p className="font-bold text-slate-800">{order.dealer?.businessName || 'Seller Name'}</p>
                                 <p className="text-xs text-slate-500">Verified Seller</p>
                             </div>
                         </div>
@@ -277,8 +294,8 @@ export default function OrderDetailsPage() {
                         <div className="relative z-50">
                             <ChatWidget
                                 productId={order.id}
-                                dealerId={order.dealer?.userId || 'dealer-id'}
-                                dealerName={order.dealer?.businessName || 'Seller'}
+                                sellerId={order.dealer?.userId || 'dealer-id'}
+                                sellerName={order.dealer?.businessName || 'Seller'}
                                 contextType="ORDER"
                             />
                         </div>
@@ -301,6 +318,15 @@ export default function OrderDetailsPage() {
                     </div>
                 </div>
             </div>
+
+            <ReviewModal
+                isOpen={reviewModal.isOpen}
+                onClose={() => setReviewModal({ ...reviewModal, isOpen: false })}
+                type={reviewModal.type}
+                orderId={order.id}
+                targetId={reviewModal.targetId}
+                orderItemId={reviewModal.orderItemId}
+            />
         </div>
     );
 }

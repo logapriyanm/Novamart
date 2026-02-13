@@ -7,7 +7,7 @@ import Breadcrumb from '@/client/components/ui/Breadcrumb';
 // Common mapping for URL segments to readable labels
 const SEGMENT_LABELS: Record<string, string> = {
     'admin': 'Admin', // Usually hidden by Home > Admin logic, but good to have
-    'dealer': 'Dealer',
+    'seller': 'Seller',
     'manufacturer': 'Manufacturer',
     'customer': 'Customer',
     'users': 'User Management',
@@ -21,7 +21,7 @@ const SEGMENT_LABELS: Record<string, string> = {
     'allocations': 'Allocations',
     'custom-orders': 'Custom Orders',
     'pricing': 'Pricing Rules',
-    'dealers': 'Dealers',
+    'sellers': 'Sellers',
     'negotiations': 'Negotiations',
     'notifications': 'Notifications',
     'messages': 'Messages',

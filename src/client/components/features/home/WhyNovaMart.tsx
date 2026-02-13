@@ -16,13 +16,14 @@ interface WhyNovaMartProps {
 
 export default function WhyNovaMart({ features = [] }: WhyNovaMartProps) {
     return (
-        <section className="py-10 md:py-14 bg-white rounded-[10px] border border-foreground/10 overflow-hidden">
+        <section className="py-10 md:py-14 bg-gradient-to-b from-slate-50 to-white rounded-[24px] border border-white/50 overflow-hidden relative">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-black/5 to-transparent" />
             <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
                 <div className="text-center max-w-3xl mx-auto mb-10 md:mb-16">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/5 border border-foreground/10 text-[10px] font-black uppercase tracking-widest text-black mb-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/5 border border-foreground/10 text-sm font-semibold text-black mb-4">
                         Platform Governance
                     </div>
-                    <h2 className="text-3xl xs:text-4xl lg:text-5xl font-black text-black tracking-tight mb-6 uppercase italic">
+                    <h2 className="text-3xl xs:text-4xl lg:text-5xl font-bold text-black tracking-tight mb-6">
                         Why the world trusts <span className="text-black/40">NovaMart</span>
                     </h2>
                     <p className="text-sm xs:text-base text-foreground/60 font-medium italic">
@@ -34,12 +35,12 @@ export default function WhyNovaMart({ features = [] }: WhyNovaMartProps) {
                     {features.map((feature, idx) => {
                         const Icon = typeof feature.icon === 'string' ? (iconMap[feature.icon] || FaShieldAlt) : (feature.icon || FaShieldAlt);
                         return (
-                            <div key={idx} className="p-6 xs:p-8 rounded-[10px] bg-white border border-foreground/10 hover:border-black/20 transition-all duration-300 group">
-                                <div className="w-12 h-12 xs:w-14 xs:h-14 rounded-[10px] bg-black/5 flex items-center justify-center text-black mb-6 group-hover:bg-black group-hover:text-white transition-all duration-300">
+                            <div key={idx} className="p-6 xs:p-8 rounded-[20px] bg-white/40 backdrop-blur-xl border border-white/50 hover:border-white/80 transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
+                                <div className="w-12 h-12 xs:w-14 xs:h-14 rounded-[16px] bg-white/60 backdrop-blur-md flex items-center justify-center text-slate-900 mb-6 group-hover:bg-[#10367D] group-hover:text-white transition-all duration-300 border border-white/50 shadow-sm">
                                     <Icon className="w-5 h-5 xs:w-6 xs:h-6" />
                                 </div>
-                                <h3 className="text-base xs:text-lg font-black text-foreground mb-3 xs:mb-4">{feature.title}</h3>
-                                <p className="text-[13px] xs:text-sm font-medium text-foreground/50 leading-relaxed italic">
+                                <h3 className="text-base xs:text-lg font-black text-slate-900 mb-3 xs:mb-4">{feature.title}</h3>
+                                <p className="text-[13px] xs:text-sm font-medium text-slate-500 leading-relaxed italic">
                                     "{feature.desc}"
                                 </p>
                             </div>

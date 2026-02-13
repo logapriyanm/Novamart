@@ -50,14 +50,14 @@ export default function BrandsPage() {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-blue-600/10 border border-blue-600/20 text-[10px] font-black uppercase tracking-widest text-blue-600 mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary mb-6"
                     >
                         <FaCertificate className="w-3 h-3" />
                         Verification Program
                     </motion.div>
-                    <h1 className="text-5xl font-black text-slate-900 leading-tight italic uppercase tracking-tighter">
+                    <h1 className="text-5xl font-black text-foreground leading-tight italic uppercase tracking-tighter">
                         Verified <br />
-                        <span className="text-blue-600">Manufacturer Network</span>
+                        <span className="text-primary">Manufacturer Network</span>
                     </h1>
                     <p className="mt-6 text-lg text-slate-500 font-medium italic max-w-2xl leading-relaxed">
                         NovaMart connects you directly to the source. Our Verified Brand program ensures you only deal with manufacturers who meet our strict 50-point quality audit.

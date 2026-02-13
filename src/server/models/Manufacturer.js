@@ -17,7 +17,7 @@ const ManufacturerSchema = new mongoose.Schema({
     brandDescription: { type: String },
     marketingMaterials: [String],
     bankDetails: { type: mongoose.Schema.Types.Mixed, required: true },
-    approvedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Dealer' }],
+    approvedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Seller' }],
     averageRating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 }
 }, {

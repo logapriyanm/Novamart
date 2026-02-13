@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/client/hooks/useAuth';
 import {
     FaThLarge as DashboardIcon,
-    FaUsers as DealersIcon,
+    FaUsers as SellersIcon,
     FaUsers,
     FaIndustry,
     FaCube as ProductsIcon,
@@ -103,7 +103,7 @@ const adminMenuGroups: MenuGroup[] = [
         items: [
             { name: 'All Users', icon: FaUsers, path: '/admin/users' },
             { name: 'Manufacturers', icon: FaIndustry, path: '/admin/manufacturers' },
-            { name: 'Dealers', icon: DealersIcon, path: '/admin/dealers' },
+            { name: 'Sellers', icon: SellersIcon, path: '/admin/sellers' },
             { name: 'Verification', icon: FaShieldAlt, path: '/admin/verification' },
             { name: 'Badges', icon: FaAward, path: '/admin/badges' },
         ],
@@ -160,55 +160,55 @@ const customerMenuItems: MenuItem[] = [
 ];
 
 // =============================================================================
-// DEALER MENU (24 pages → 5 groups)
+// SELLER MENU (24 pages → 5 groups)
 // =============================================================================
-const dealerMenuGroups: MenuGroup[] = [
+const sellerMenuGroups: MenuGroup[] = [
     {
         label: 'Dashboard',
         icon: DashboardIcon,
         items: [
-            { name: 'Dashboard', icon: DashboardIcon, path: '/dealer' },
+            { name: 'Dashboard', icon: DashboardIcon, path: '/seller' },
         ],
     },
     {
         label: 'Manufacturer Marketplace',
         icon: FaStore,
         items: [
-            { name: 'Browse Marketplace', icon: FaSearch, path: '/dealer/marketplace' },
-            { name: 'Pending Requests', icon: FaTasks, path: '/dealer/pending' },
-            { name: 'Negotiations', icon: FaHandshake, path: '/dealer/negotiations' },
-            { name: 'Collaboration', icon: FaProjectDiagram, path: '/dealer/collaboration' },
+            { name: 'Browse Marketplace', icon: FaSearch, path: '/seller/marketplace' },
+            { name: 'Pending Requests', icon: FaTasks, path: '/seller/pending' },
+            { name: 'Negotiations', icon: FaHandshake, path: '/seller/negotiations' },
+            { name: 'Collaboration', icon: FaProjectDiagram, path: '/seller/collaboration' },
         ],
     },
     {
         label: 'My Inventory & Sales',
         icon: FaBox,
         items: [
-            { name: 'Products', icon: ProductsIcon, path: '/dealer/products' },
-            { name: 'Allocations', icon: FaLayerGroup, path: '/dealer/allocations' },
-            { name: 'Inventory', icon: FaWarehouse, path: '/dealer/inventory' },
-            { name: 'Custom Requests', icon: FaClipboardCheck, path: '/dealer/custom-requests' },
-            { name: 'Sourcing', icon: FaNetworkWired, path: '/dealer/sourcing' },
-            { name: 'Pooling', icon: FaCubes, path: '/dealer/pooling' },
-            { name: 'Orders', icon: LogisticsIcon, path: '/dealer/orders' },
+            { name: 'Products', icon: ProductsIcon, path: '/seller/products' },
+            { name: 'Allocations', icon: FaLayerGroup, path: '/seller/allocations' },
+            { name: 'Inventory', icon: FaWarehouse, path: '/seller/inventory' },
+            { name: 'Custom Requests', icon: FaClipboardCheck, path: '/seller/custom-requests' },
+            { name: 'Sourcing', icon: FaNetworkWired, path: '/seller/sourcing' },
+            { name: 'Pooling', icon: FaCubes, path: '/seller/pooling' },
+            { name: 'Orders', icon: LogisticsIcon, path: '/seller/orders' },
         ],
     },
     {
         label: 'Reports & Analytics',
         icon: FaChartBar,
         items: [
-            { name: 'Analytics', icon: FaChartLine, path: '/dealer/analytics' },
-            { name: 'Subscription', icon: FaCrown, path: '/dealer/subscription' },
+            { name: 'Analytics', icon: FaChartLine, path: '/seller/analytics' },
+            { name: 'Subscription', icon: FaCrown, path: '/seller/subscription' },
         ],
     },
     {
         label: 'Account',
         icon: FaUserCog,
         items: [
-            { name: 'Profile', icon: FaUserTie, path: '/dealer/profile' },
-            { name: 'Messages', icon: FaEnvelope, path: '/dealer/messages' },
-            { name: 'Settings', icon: SettingsIcon, path: '/dealer/settings' },
-            { name: 'Support', icon: SupportIcon, path: '/dealer/support' },
+            { name: 'Profile', icon: FaUserTie, path: '/seller/profile' },
+            { name: 'Messages', icon: FaEnvelope, path: '/seller/messages' },
+            { name: 'Settings', icon: SettingsIcon, path: '/seller/settings' },
+            { name: 'Support', icon: SupportIcon, path: '/seller/support' },
         ],
     },
 ];
@@ -236,11 +236,11 @@ const manufacturerMenuGroups: MenuGroup[] = [
         ],
     },
     {
-        label: 'Dealer Network',
+        label: 'Seller Network',
         icon: FaNetworkWired,
         items: [
-            { name: 'Dealer Requests', icon: FaUserCheck, path: '/manufacturer/dealers/requests' },
-            { name: 'Approved Dealers', icon: DealersIcon, path: '/manufacturer/dealers' },
+            { name: 'Seller Requests', icon: FaUserCheck, path: '/manufacturer/sellers/requests' },
+            { name: 'Approved Sellers', icon: SellersIcon, path: '/manufacturer/sellers' },
             { name: 'Negotiations', icon: FaHandshake, path: '/manufacturer/negotiations' },
         ],
     },
@@ -271,7 +271,7 @@ const manufacturerMenuGroups: MenuGroup[] = [
 interface SidebarProps {
     isOpen: boolean;
     onClose: () => void;
-    role?: 'ADMIN' | 'CUSTOMER' | 'DEALER' | 'MANUFACTURER';
+    role?: 'ADMIN' | 'CUSTOMER' | 'SELLER' | 'MANUFACTURER';
     isCollapsed?: boolean;
 }
 
@@ -302,7 +302,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
     // Determine which config to use
     const isGrouped = role !== 'CUSTOMER';
     const menuGroups = role === 'ADMIN' ? adminMenuGroups
-        : role === 'DEALER' ? dealerMenuGroups
+        : role === 'SELLER' ? sellerMenuGroups
             : role === 'MANUFACTURER' ? manufacturerMenuGroups
                 : [];
 
@@ -334,7 +334,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
 
     // --- NavItem ---
     const NavItem = ({ item }: { item: MenuItem }) => {
-        const dashboardPaths = ['/admin', '/dealer', '/manufacturer', '/customer'];
+        const dashboardPaths = ['/admin', '/seller', '/manufacturer', '/customer'];
         const isDashboard = dashboardPaths.includes(item.path);
 
         const isActive = pathname === item.path || (
@@ -352,13 +352,13 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 href={item.path}
                 onClick={onClose}
                 title={isCollapsed ? item.name : ''}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-[10px] transition-all group text-[13px] ${isActive
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-[10px] transition-all group text-sm ${isActive
                     ? 'bg-black text-white'
                     : 'text-foreground/50 hover:bg-muted hover:text-foreground'
                     } ${isCollapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : ''}`}
             >
                 <item.icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-foreground/40 group-hover:text-foreground/60'}`} />
-                {!isCollapsed && <span className="text-sm font-bold tracking-tight whitespace-nowrap">{item.name}</span>}
+                {!isCollapsed && <span className="text-sm font-medium tracking-tight whitespace-nowrap">{item.name}</span>}
             </Link>
         );
     };
@@ -371,9 +371,9 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
         return (
             <button
                 onClick={() => toggleGroup(group.label)}
-                className="w-full flex items-center justify-between px-4 py-2 mt-3 first:mt-0 cursor-pointer group"
+                className="w-full flex items-center justify-between px-4 py-2 mt-3 first:mt-0 cursor-pointer "
             >
-                <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.15em] group-hover:text-foreground/70 transition-colors">
+                <span className="text-sm font-medium text-muted-foreground/60 tracking-wide group-hover:text-foreground/70 transition-colors">
                     {group.label}
                 </span>
                 <motion.span
@@ -412,13 +412,13 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
             >
                 {/* Logo Section */}
                 <div className={`p-6 flex items-center ${isCollapsed ? 'justify-center p-4' : 'gap-3'}`}>
-                    <div className="w-10 h-10 bg-white rounded-[10px] flex items-center justify-center p-1.5 shadow-sm flex-shrink-0 border border-foreground/10">
+                    <div className="w-10 h-10 rounded-[10px] flex items-center justify-center p-1.5 border border-border bg-white">
                         <img src="/assets/Novamart.png" alt="N" className="w-full h-full object-contain" />
                     </div>
                     {!isCollapsed && (
                         <div className="overflow-hidden whitespace-nowrap flex flex-col">
-                            <h1 className="text-lg font-black text-foreground tracking-tighter leading-none">NovaMart</h1>
-                            <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em] mt-0.5">Enterprise Portal</span>
+                            <h1 className="text-xl font-bold text-foreground tracking-tight italic letter-spacing-4">NovaMart</h1>
+                            <span className="text-xs font-medium text-primary mt-0.5">Enterprise Portal</span>
                         </div>
                     )}
                 </div>
@@ -433,7 +433,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                                 placeholder="Search menu…"
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
-                                className="w-full bg-muted/40 border border-border/50 rounded-[10px] py-2 pl-8 pr-8 text-[12px] font-medium focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 transition-all placeholder:text-foreground/30"
+                                className="w-full bg-white border border-border rounded-[10px] py-2 pl-8 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all placeholder:text-muted-foreground"
                             />
                             {searchQuery && (
                                 <button
@@ -447,10 +447,10 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     </div>
                 )}
 
-                {/* Workspace Label (Dealer only) */}
-                {!isCollapsed && role === 'DEALER' && !searchQuery && (
+                {/* Workspace Label (Seller only) */}
+                {!isCollapsed && role === 'SELLER' && !searchQuery && (
                     <div className="px-6 py-1">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Workspace</p>
+                        <p className="text-sm font-medium text-muted-foreground">Workspace</p>
                     </div>
                 )}
 
@@ -458,27 +458,27 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 <nav className="flex-1 px-3 py-1 overflow-y-auto no-scrollbar">
                     {/* Customer Profile Section (unchanged) */}
                     {role === 'CUSTOMER' && !isCollapsed && (
-                        <div className="mb-6 p-4 bg-muted/20 rounded-[10px] border border-border/50">
+                        <div className="mb-6 p-4 bg-white rounded-[10px] border border-border">
                             <div className="flex items-center gap-4 p-2">
-                                <div className="w-12 h-12 bg-black rounded-[10px] flex items-center justify-center text-white font-black text-lg shadow-sm">
+                                <div className="w-12 h-12 bg-black rounded-[10px] flex items-center justify-center text-white font-bold text-lg shadow-sm">
                                     {user?.name?.charAt(0) || 'R'}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5">
-                                        <h3 className="text-sm font-bold text-foreground truncate">{user?.name || 'User'}</h3>
+                                        <h3 className="text-sm font-medium text-foreground truncate">{user?.name || 'User'}</h3>
                                         <CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" />
                                     </div>
-                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                                    <p className="text-xs font-medium text-muted-foreground mt-0.5">
                                         {user?.role === 'CUSTOMER' ? 'Retail Partner' : `${user?.role} Access`}
                                     </p>
                                 </div>
                             </div>
                             <div className="space-y-2 mt-2 px-2">
-                                <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                                <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
                                     <span>Account Status</span>
                                     <span className="text-emerald-600">Verified</span>
                                 </div>
-                                <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                                <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: '100%' }}
@@ -489,7 +489,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                         </div>
                     )}
 
-                    {/* Grouped Navigation (Admin / Dealer / Manufacturer) */}
+                    {/* Grouped Navigation (Admin / Seller / Manufacturer) */}
                     {isGrouped && (
                         <div className="space-y-0.5">
                             {filteredGroups.map((group) => {
@@ -531,17 +531,17 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                 </nav>
 
                 {/* Bottom Section */}
-                <div className="p-4 space-y-1 bg-surface border-t border-border/10">
-                    {role === 'DEALER' && !isCollapsed && (
+                <div className="p-4 space-y-1 bg-surface border-t border-border">
+                    {role === 'SELLER' && !isCollapsed && (
                         <div className="mb-4 p-4 bg-primary/5 rounded-[10px] border border-primary/10">
                             <div className="justify-between items-center mb-2 hidden sm:flex">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Market Reputation</span>
-                                <span className="text-[10px] font-bold text-primary">Top 10%</span>
+                                <span className="text-sm font-medium text-muted-foreground">Market Reputation</span>
+                                <span className="text-sm font-bold text-primary">Top 10%</span>
                             </div>
                             <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden mb-3 hidden sm:block">
                                 <div className="h-full bg-primary w-[90%] rounded-full opacity-80"></div>
                             </div>
-                            <Link href="/dealer/subscription" className="block text-center w-full py-2 bg-white border border-primary/10 text-primary text-[10px] font-bold rounded-[10px] hover:bg-primary hover:text-white transition-all shadow-sm">
+                            <Link href="/seller/subscription" className="block text-center w-full py-2 bg-white border border-primary/10 text-primary text-sm font-medium rounded-[10px] hover:bg-primary hover:text-white transition-all shadow-sm">
                                 View Subscription
                             </Link>
                         </div>

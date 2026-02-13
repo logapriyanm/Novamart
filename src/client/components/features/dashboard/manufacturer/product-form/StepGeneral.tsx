@@ -63,7 +63,7 @@ export default function StepGeneral() {
 
                 {/* Product Name */}
                 <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-slate-500">
                         <FaTag className="w-3 h-3 text-[#0F6CBD]" /> Product Name <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -77,13 +77,13 @@ export default function StepGeneral() {
 
                 {/* Category Selection Section */}
                 <div className="space-y-4 bg-slate-50/50 p-6 rounded-[10px] border border-dashed border-slate-200">
-                    <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-slate-500">
                         <FaLayerGroup className="w-3 h-3 text-[#0F6CBD]" /> Categorization <span className="text-rose-500">*</span>
                     </label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* 1. Main Category */}
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-bold text-slate-400 uppercase">Category</label>
+                            <label className="text-xs font-medium text-slate-400">Category</label>
                             <div className="relative">
                                 <select
                                     value={selectedMainCategory}
@@ -101,7 +101,7 @@ export default function StepGeneral() {
 
                         {/* 2. Sub Category */}
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-bold text-slate-400 uppercase">Sub-Category</label>
+                            <label className="text-xs font-medium text-slate-400">Sub-category</label>
                             <div className="relative">
                                 <select
                                     value={selectedSubCategory}
@@ -122,7 +122,7 @@ export default function StepGeneral() {
 
                 {/* Description */}
                 <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-slate-500">
                         <FaAlignLeft className="w-3 h-3 text-[#0F6CBD]" /> Description <span className="text-rose-500">*</span>
                     </label>
                     <textarea
@@ -137,7 +137,7 @@ export default function StepGeneral() {
                 {/* Pricing & MOQ Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
                     <div className="space-y-2">
-                        <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-slate-500">
                             <span className="text-emerald-600">₹</span> Base Unit Price <span className="text-rose-500">*</span>
                         </label>
                         <input
@@ -149,7 +149,7 @@ export default function StepGeneral() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-slate-500">
                             <FaLayerGroup className="w-3 h-3 text-amber-500" /> MOQ (Min Order Qty) <span className="text-rose-500">*</span>
                         </label>
                         <input

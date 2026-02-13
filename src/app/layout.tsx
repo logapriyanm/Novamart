@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     twitter: {
         card: 'summary_large_image',
         title: 'NovaMart – Wholesale & B2B E-Commerce Marketplace',
-        description: 'Secure B2B2C marketplace connecting manufacturers, dealers, and buyers.',
+        description: 'Secure B2B2C marketplace connecting manufacturers, sellers, and buyers.',
         images: ['/twitter-image.jpg'],
         creator: '@novamart',
     },
@@ -119,8 +119,10 @@ export default function RootLayout({
                                                 }}
                                             />
                                             {/* Ambient Background Glows */}
-                                            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#10367D]/10 blur-[150px] rounded-full pointer-events-none" />
-                                            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#10367D]/5 blur-[150px] rounded-full pointer-events-none" />
+                                            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                                                <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#10367D]/10 blur-[150px] rounded-full" />
+                                                <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#10367D]/5 blur-[150px] rounded-full" />
+                                            </div>
 
                                             <main className="relative z-10">
                                                 {children}

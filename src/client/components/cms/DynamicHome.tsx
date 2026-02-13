@@ -68,8 +68,8 @@ export default function DynamicHome() {
     if (!isLoading && sections.length === 0) {
         return (
             <div className="text-center py-32 bg-surface rounded-[20px] border border-foreground/5 shadow-sm">
-                <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter">Welcome to NovaMart</h2>
-                <p className="text-foreground/40 font-bold uppercase tracking-widest text-[10px] mt-2">Connecting industry leaders globally.</p>
+                <h2 className="text-2xl font-bold text-foreground">Welcome to NovaMart</h2>
+                <p className="text-foreground/40 font-bold text-sm mt-2">Connecting industry leaders globally.</p>
             </div>
         );
     }

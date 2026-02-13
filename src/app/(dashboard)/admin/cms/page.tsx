@@ -305,8 +305,32 @@ function TrendingBarEditor({ content, setContent }: { content: any; setContent: 
     );
 }
 
+// ─── HELPER FOR STRING ARRAYS ──────────────────────────────────────────────────
+function StringArrayInput({ value, onChange, placeholder }: { value: string[]; onChange: (v: string[]) => void; placeholder?: string }) {
+    const [text, setText] = useState(value.join(', '));
+
+    useEffect(() => {
+        setText(value.join(', '));
+    }, [value]);
+
+    return (
+        <input
+            type="text"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onBlur={() => onChange(text.split(',').map(s => s.trim()).filter(Boolean))}
+            onKeyDown={e => {
+                if (e.key === ',') e.stopPropagation();
+            }}
+            placeholder={placeholder}
+            className="w-full bg-background border border-foreground/10 rounded-[10px] px-3 py-2 text-sm focus:border-primary outline-none"
+        />
+    );
+}
+
 function CustomerOffersEditor({ content, setContent }: { content: any; setContent: (c: any) => void }) {
     const offers = content?.offers || [];
+    // ... (rest of logic handles updates)
 
     const updateOffer = (idx: number, field: string, value: any) => {
         const updated = [...offers];
@@ -349,16 +373,19 @@ function CustomerOffersEditor({ content, setContent }: { content: any; setConten
                         <textarea
                             rows={3}
                             value={(offer.details || []).join('\n')}
-                            onChange={e => updateOffer(idx, 'details', e.target.value.split('\n').filter(Boolean))}
+                            onChange={e => updateOffer(idx, 'details', e.target.value.split('\n'))}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') e.stopPropagation();
+                            }}
                             className="w-full bg-background border border-foreground/10 rounded-[10px] px-3 py-2 text-sm focus:border-primary outline-none resize-none"
-                            placeholder="One detail per line"
+                            placeholder="One detail per line&#10;Press Enter for new line"
                         />
                     </div>
                     <div>
                         <EditorLabel>Purpose Tags (comma separated)</EditorLabel>
-                        <EditorInput
-                            value={(offer.purpose || []).join(', ')}
-                            onChange={v => updateOffer(idx, 'purpose', v.split(',').map((s: string) => s.trim()).filter(Boolean))}
+                        <StringArrayInput
+                            value={offer.purpose || []}
+                            onChange={v => updateOffer(idx, 'purpose', v)}
                             placeholder="Acquisition, Onboarding"
                         />
                     </div>

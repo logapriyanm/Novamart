@@ -18,7 +18,7 @@ interface UserCardProps {
 
 export default function UserCard({ user, selectedRole, onVerify }: UserCardProps) {
     const roleIcon = user.role === 'ADMIN' ? <FaUserShield className="text-black w-3 h-3" /> :
-        user.role === 'DEALER' ? <FaStore className="text-black w-3 h-3" /> :
+        user.role === 'SELLER' ? <FaStore className="text-black w-3 h-3" /> :
             user.role === 'MANUFACTURER' ? <FaIndustry className="text-black w-3 h-3" /> :
                 <FaUserTie className="text-black w-3 h-3" />;
 
@@ -34,11 +34,11 @@ export default function UserCard({ user, selectedRole, onVerify }: UserCardProps
                         {(user.name || user.email || 'U').substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                        <p className="text-sm font-black text-slate-900 leading-tight">{user.name || 'Unknown'}</p>
-                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">{user.email}</p>
+                        <p className="text-sm font-bold text-slate-900 leading-tight">{user.name || 'Unknown'}</p>
+                        <p className="text-xs font-bold text-slate-400 mt-0.5">{user.email}</p>
                     </div>
                 </div>
-                <div className={`px-2 py-1 rounded-[5px] border ${statusColor} text-[9px] font-black uppercase tracking-wider`}>
+                <div className={`px-2 py-1 rounded-[5px] border ${statusColor} text-xs font-bold`}>
                     {user.status || (user.isVerified ? 'Active' : 'Pending')}
                 </div>
             </div>
@@ -46,13 +46,13 @@ export default function UserCard({ user, selectedRole, onVerify }: UserCardProps
             <div className="flex items-center gap-2 pt-2 border-t border-slate-50">
                 <div className="flex items-center gap-2 bg-slate-50 px-2 py-1 rounded-[5px] border border-slate-100">
                     {roleIcon}
-                    <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">{user.role}</span>
+                    <span className="text-xs font-bold text-slate-600">{user.role}</span>
                 </div>
 
-                {(selectedRole === 'MANUFACTURER' || selectedRole === 'DEALER') && !user.isVerified && (
+                {(selectedRole === 'MANUFACTURER' || selectedRole === 'SELLER') && !user.isVerified && (
                     <button
                         onClick={() => onVerify(user, selectedRole)}
-                        className="ml-auto px-3 py-1.5 bg-black text-white text-[9px] font-black uppercase tracking-widest rounded-[5px] hover:bg-slate-800 transition-colors shadow-sm"
+                        className="ml-auto px-3 py-1.5 bg-black text-white text-xs font-bold rounded-[5px] hover:bg-slate-800 transition-colors shadow-sm"
                     >
                         Verify
                     </button>

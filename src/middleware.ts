@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Routes that require authentication
-const PROTECTED_PATHS = ['/admin', '/manufacturer', '/dealer', '/customer', '/account'];
+const PROTECTED_PATHS = ['/admin', '/manufacturer', '/seller', '/customer', '/account'];
 
 // Routes that are ONLY for guest users
 const GUEST_ONLY_PATHS = ['/auth/login', '/auth/register'];
@@ -40,7 +40,7 @@ export function middleware(request: NextRequest) {
         if (payload?.role) {
             if (payload.role === 'ADMIN') return NextResponse.redirect(new URL('/admin', request.url));
             if (payload.role === 'MANUFACTURER') return NextResponse.redirect(new URL('/manufacturer/dashboard', request.url));
-            if (payload.role === 'DEALER') return NextResponse.redirect(new URL('/dealer/dashboard', request.url));
+            if (payload.role === 'SELLER') return NextResponse.redirect(new URL('/seller/dashboard', request.url));
         }
         return NextResponse.redirect(new URL('/', request.url));
     }
@@ -56,7 +56,7 @@ export function middleware(request: NextRequest) {
         if (pathname.startsWith('/manufacturer') && role !== 'MANUFACTURER') {
             return NextResponse.redirect(new URL('/', request.url));
         }
-        if (pathname.startsWith('/dealer') && role !== 'DEALER') {
+        if (pathname.startsWith('/seller') && role !== 'SELLER') {
             return NextResponse.redirect(new URL('/', request.url));
         }
         // CUSTOMER role is allowed to access root and customer specific paths (if any)

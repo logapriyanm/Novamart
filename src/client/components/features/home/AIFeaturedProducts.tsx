@@ -25,7 +25,7 @@ export default function AIFeaturedProducts({ products }: AIFeaturedProductsProps
                         <h2 className="text-3xl font-black text-slate-800 tracking-tight italic flex items-center gap-2">
                             AI <span className="text-primary italic">Featured Picks</span>
                         </h2>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                        <p className="text-sm font-medium text-slate-400 flex items-center gap-1">
                             <HiSparkles className="text-yellow-500 w-2.5 h-2.5" />
                             Smart suggestions based on your behavior
                         </p>
@@ -46,7 +46,7 @@ export default function AIFeaturedProducts({ products }: AIFeaturedProductsProps
                         className="relative group"
                     >
                         {/* AI Badge Overlay */}
-                        <div className="absolute top-6 left-6 z-20 bg-primary shadow-lg shadow-primary/30 text-white text-[9px] font-black px-3 py-1.5 rounded-lg flex items-center gap-1.5 uppercase tracking-widest group-hover:scale-110 transition-transform cursor-default">
+                        <div className="absolute top-6 left-6 z-20 bg-primary shadow-lg shadow-primary/30 text-white text-sm font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 group-hover:scale-110 transition-transform cursor-default">
                             <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
                             98% Match
                         </div>

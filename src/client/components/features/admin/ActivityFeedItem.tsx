@@ -29,16 +29,16 @@ export default function ActivityFeedItem({ type, title, description, time, actio
 
             <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-4">
-                    <h4 className="text-sm font-black text-foreground">{title}</h4>
-                    <span className="text-[10px] font-bold text-foreground/40 uppercase">{time}</span>
+                    <h4 className="text-sm font-bold text-foreground">{title}</h4>
+                    <span className="text-xs font-bold text-foreground/40">{time}</span>
                 </div>
-                <p className="text-xs text-foreground/50 mt-1 leading-relaxed">
+                <p className="text-sm text-foreground/50 mt-1 leading-relaxed">
                     {description}
                 </p>
             </div>
 
             {actionLabel && (
-                <button className="px-4 py-1.5 bg-foreground/5 hover:bg-foreground/10 text-foreground/60 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors ml-4 self-center">
+                <button className="px-4 py-1.5 bg-foreground/5 hover:bg-foreground/10 text-foreground/60 rounded-lg text-xs font-bold transition-colors ml-4 self-center">
                     {actionLabel}
                 </button>
             )}

@@ -49,7 +49,7 @@ export default function LoginPage() {
             </div>
 
             {/* Right Panel - Login Form */}
-            <div className="w-full lg:w-1/2 bg-white flex flex-col items-center justify-center p-6 xs:p-10 sm:p-12 lg:p-24 overflow-y-auto relative">
+            <div className="w-full lg:w-1/2 bg-white flex flex-col items-center justify-center p-6 xs:p-10 sm:p-12 lg:p-24 relative">
                 {/* Mobile Back to Home Navigation */}
                 <div className="lg:hidden absolute top-6 left-6 flex items-center gap-3">
                     <Link href="/" className="flex items-center gap-2 group">

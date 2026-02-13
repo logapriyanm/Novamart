@@ -16,7 +16,7 @@ import { useSearchParams } from 'next/navigation';
 const SOCKET_URL = typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') : 'http://localhost:5000';
 
 interface UnifiedChatProps {
-    currentUserRole: 'DEALER' | 'MANUFACTURER' | 'ADMIN';
+    currentUserRole: 'SELLER' | 'MANUFACTURER' | 'ADMIN';
     currentUserId: string;
 }
 

@@ -1,5 +1,5 @@
 import poolingService from '../../services/pooling.js';
-import { Dealer } from '../../models/index.js';
+import { Seller } from '../../models/index.js';
 
 export const createPool = async (req, res) => {
     try {
@@ -17,12 +17,12 @@ export const joinPool = async (req, res) => {
         const { quantity } = req.body;
         const userId = req.user._id;
 
-        const dealer = await Dealer.findOne({ userId });
-        if (!dealer) {
+        const seller = await Seller.findOne({ userId });
+        if (!seller) {
             return res.status(403).json({ success: false, message: 'Dealer profile required' });
         }
 
-        const participant = await poolingService.joinPool(poolId, dealer._id, quantity);
+        const participant = await poolingService.joinPool(poolId, seller._id, quantity);
         res.status(200).json({ success: true, data: participant });
     } catch (error) {
         res.status(400).json({ success: false, message: error.message });

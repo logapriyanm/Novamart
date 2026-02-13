@@ -3,7 +3,7 @@
  * Handles product and seller reviews using Mongoose levels
  */
 
-import { Review, Product, Dealer, Order } from '../models/index.js';
+import { Review, Product, Seller, Order } from '../models/index.js';
 import logger from '../lib/logger.js';
 
 class ReviewService {
@@ -100,7 +100,7 @@ class ReviewService {
         ]);
 
         if (stats.length > 0) {
-            await Dealer.findByIdAndUpdate(dealerId, {
+            await Seller.findByIdAndUpdate(dealerId, {
                 averageRating: stats[0].avgRating,
                 reviewCount: stats[0].count
             });

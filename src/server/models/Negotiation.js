@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const NegotiationSchema = new mongoose.Schema({
-    dealerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dealer', required: true, index: true },
+    sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true, index: true },
     manufacturerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Manufacturer', required: true, index: true },
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true, index: true },
     status: {

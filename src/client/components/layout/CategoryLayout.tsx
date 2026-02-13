@@ -10,12 +10,14 @@ import SpecialProductsList from '../features/products/SpecialProductsList';
 import { FilterState } from '../features/products/ProductFilterSidebar';
 
 interface CategoryLayoutProps {
-    categoryName: string;
-    description: string;
     categorySlug: string;
 }
 
-export default function CategoryLayout({ categoryName, description, categorySlug }: CategoryLayoutProps) {
+export default function CategoryLayout({ categorySlug }: CategoryLayoutProps) {
+    const categoryName = categorySlug
+        ? categorySlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+        : 'Category';
+    const description = `Premium selection of high-performance ${categoryName.toLowerCase()} for your home and kitchen.`;
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     // Lifted Filter State
@@ -40,7 +42,7 @@ export default function CategoryLayout({ categoryName, description, categorySlug
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground pt-32 pb-20">
+        <div className="min-h-screen bg-background text-foreground pt-32 pb-0">
             <div className="max-w-[1920px] mx-auto px-4 lg:px-8">
                 {/* Layout Container */}
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -79,9 +81,9 @@ export default function CategoryLayout({ categoryName, description, categorySlug
                                     {isSidebarOpen ? <FaChevronLeft className="w-4 h-4" /> : <FaChevronRight className="w-4 h-4" />}
                                 </button>
                                 <div>
-                                    <h2 className="text-2xl font-black uppercase tracking-tighter">{categoryName}</h2>
+                                    <h2 className="text-3xl font-bold tracking-tight text-foreground">{categoryName}</h2>
                                     {filters.subCategory && (
-                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mt-1">Showing: {filters.subCategory}</p>
+                                        <p className="text-sm font-medium text-primary mt-1">Showing: {filters.subCategory}</p>
                                     )}
                                 </div>
                             </div>
@@ -89,7 +91,7 @@ export default function CategoryLayout({ categoryName, description, categorySlug
                                 {filters.subCategory && (
                                     <button
                                         onClick={() => handleFilterChange('subCategory', null)}
-                                        className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-all"
+                                        className="text-xs font-bold bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-all"
                                     >
                                         Clear: {filters.subCategory} ×
                                     </button>
@@ -98,16 +100,62 @@ export default function CategoryLayout({ categoryName, description, categorySlug
                         </div>
 
                         <section>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-xl font-bold uppercase tracking-wide opacity-70">Featured Products</h2>
-                                <button className="text-xs font-black text-primary uppercase tracking-widest hover:underline">View All</button>
+                            {/* Toolbar */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                                {/* Left: View Toggle */}
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleFilterChange('viewMode', 'grid')}
+                                        className={`p-2.5 rounded-lg transition-all border ${filters.viewMode !== 'list' ? 'bg-white border-foreground/10 text-primary shadow-sm' : 'bg-transparent border-transparent text-foreground/40 hover:text-foreground'}`}
+                                        title="Grid View"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                    </button>
+                                    <button
+                                        onClick={() => handleFilterChange('viewMode', 'list')}
+                                        className={`p-2.5 rounded-lg transition-all border ${filters.viewMode === 'list' ? 'bg-white border-foreground/10 text-primary shadow-sm' : 'bg-transparent border-transparent text-foreground/40 hover:text-foreground'}`}
+                                        title="List View"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                                    </button>
+                                </div>
+
+                                {/* Right: Sort By */}
+                                <div className="flex-1 w-full sm:w-auto flex md:justify-end">
+                                    <div className="w-full md:w-auto md:min-w-[300px] flex items-center justify-between gap-4 bg-white px-6 py-3.5 rounded-xl border border-foreground/10 shadow-sm cursor-pointer group hover:border-primary/20 transition-all">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-xs font-bold text-foreground">Sort By</span>
+                                        </div>
+                                        <select
+                                            className="bg-transparent text-sm font-medium outline-none text-foreground/70 cursor-pointer w-full text-right"
+                                            value={filters.sortBy || 'relevance'}
+                                            onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                                        >
+                                            <option value="relevance">Relevance</option>
+                                            <option value="price_asc">Price: Low to High</option>
+                                            <option value="price_desc">Price: High to Low</option>
+                                            <option value="rating">Top Rated</option>
+                                            <option value="newest">Newest Arrivals</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                            <FeaturedProductsGrid columns={isSidebarOpen ? 4 : 5} filters={filters} />
+
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-2xl font-bold text-foreground">Featured Products</h2>
+                                <button className="text-sm font-bold text-primary hover:underline">View All</button>
+                            </div>
+                            <FeaturedProductsGrid
+                                columns={isSidebarOpen ? 4 : 5}
+                                filters={filters}
+                                viewMode={filters.viewMode || 'grid'}
+                                categorySlug={categorySlug}
+                            />
                         </section>
 
                         <section className="bg-surface rounded-[2.5rem] p-8 lg:p-12 border border-foreground/5">
                             <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-2xl font-black uppercase tracking-tighter">Offer Products</h2>
+                                <h2 className="text-2xl font-bold tracking-tight text-foreground">Offer Products</h2>
                             </div>
                             <SpecialProductsList />
                         </section>

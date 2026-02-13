@@ -51,7 +51,7 @@ export default function StepSpecs() {
 
                 <div className="max-w-3xl">
                     <h2 className="text-3xl font-black tracking-tight text-[#1E293B]">Technical Specifications</h2>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-2">Provide precise technical data to help buyers find your products through filtered searches and technical comparisons.</p>
+                    <p className="text-slate-400 font-medium text-sm mt-2">Provide precise technical data to help buyers find your products through filtered searches and technical comparisons.</p>
                 </div>
 
                 {/* Structured Specifications (Dynamic based on Category) */}
@@ -62,7 +62,7 @@ export default function StepSpecs() {
                         </div>
                         <h3 className="text-lg font-black text-[#1E293B]">Key Specifications</h3>
                         {selectedSubCategoryConfig && (
-                            <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-[10px] font-bold uppercase">
+                            <span className="text-sm bg-slate-100 text-slate-500 px-2 py-1 rounded-[10px] font-medium">
                                 For {selectedSubCategoryConfig.label}
                             </span>
                         )}
@@ -71,7 +71,7 @@ export default function StepSpecs() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {categorySpecs.map((spec: any) => (
                             <div key={spec.id} className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <label className="text-sm font-semibold text-slate-400">
                                     {spec.label} {spec.required && <span className="text-rose-500">*</span>}
                                 </label>
                                 {spec.type === 'select' && spec.options ? (
@@ -102,7 +102,7 @@ export default function StepSpecs() {
                                             className={`w-full bg-slate-50 border border-slate-200 rounded-[10px] px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none focus:border-[#0F6CBD] transition-all ${spec.unit ? 'pr-12' : ''}`}
                                         />
                                         {spec.unit && (
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase">{spec.unit}</span>
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">{spec.unit}</span>
                                         )}
                                     </div>
                                 )}
@@ -125,7 +125,7 @@ export default function StepSpecs() {
                             </div>
                             <div>
                                 <h4 className="text-sm font-black text-[#1E293B]">Smart / IoT Enabled</h4>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Does this product support WiFi/App?</p>
+                                <p className="text-sm text-slate-400 font-medium">Does this product support WiFi/App?</p>
                             </div>
                         </div>
                         <div className={`w-6 h-6 rounded-[10px] border transition-colors flex items-center justify-center ${productData.isSmart ? 'bg-[#0F6CBD] border-[#0F6CBD]' : 'border-slate-300'}`}>
@@ -150,11 +150,11 @@ export default function StepSpecs() {
                         {Object.entries(productData.specifications).map(([key, value]) => (
                             <div key={key} className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Attribute Name</label>
+                                    <label className="text-sm font-semibold text-slate-400">Attribute name</label>
                                     <input type="text" value={key} readOnly className="w-full bg-slate-50 border border-slate-200 rounded-[10px] px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none opacity-70" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Value</label>
+                                    <label className="text-sm font-semibold text-slate-400">Value</label>
                                     <div className="flex gap-2">
                                         <input type="text" value={String(value)} readOnly className="flex-1 bg-white border border-slate-200 rounded-[10px] px-4 py-3 text-sm font-bold text-[#1E293B] focus:outline-none" />
                                         <button onClick={() => removeSpec(key)} className="p-3 text-slate-400 hover:text-rose-500 transition-colors"><FaTrash className="w-4 h-4" /></button>
@@ -166,7 +166,7 @@ export default function StepSpecs() {
                         {/* Add New Spec */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-6 rounded-[10px] border border-dashed border-slate-200">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">New Attribute Name</label>
+                                <label className="text-sm font-semibold text-slate-400">New attribute name</label>
                                 <input
                                     type="text"
                                     placeholder="e.g. Weight, Material, Voltage"
@@ -176,7 +176,7 @@ export default function StepSpecs() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Value</label>
+                                <label className="text-sm font-semibold text-slate-400">Value</label>
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
@@ -204,9 +204,9 @@ export default function StepSpecs() {
                 <div className="bg-blue-50 rounded-[10px] p-6 border border-blue-100">
                     <div className="flex items-center gap-2 mb-2">
                         <FaLightbulb className="w-3 h-3 text-[#0F6CBD]" />
-                        <span className="text-[9px] font-black text-[#0F6CBD] uppercase tracking-widest">Pro Tip</span>
+                        <span className="text-sm font-semibold text-[#0F6CBD]">Pro tip</span>
                     </div>
-                    <p className="text-[10px] text-slate-600 leading-relaxed font-medium">
+                    <p className="text-sm text-slate-600 leading-relaxed font-medium">
                         Detailed specifications improve search capability by 45%. Include units where applicable (e.g. "Weight: 2.5kg" instead of just "2.5").
                     </p>
                 </div>
@@ -284,7 +284,7 @@ export default function StepSpecs() {
                             </div>
                         </div>
                     </div>
-                    <p className="text-[9px] text-slate-400 font-medium text-center">Upload at least 3 images.</p>
+                    <p className="text-xs text-slate-400 font-medium text-center">Upload at least 3 images.</p>
                 </div>
             </div>
         </div>

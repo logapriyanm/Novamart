@@ -32,7 +32,7 @@ export default function LoginForm() {
             const role = user.role;
             if (role === 'ADMIN') router.replace('/admin/dashboard');
             else if (role === 'MANUFACTURER') router.replace('/manufacturer/dashboard');
-            else if (role === 'DEALER') router.replace('/dealer/dashboard');
+            else if (role === 'SELLER') router.replace('/seller/dashboard');
             else router.replace('/');
         }
     }, [isAuthenticated, authLoading, user, router]);
@@ -95,14 +95,14 @@ export default function LoginForm() {
         } catch (error: any) {
             // Check if it's a network error
             const errorMessage = error?.message || '';
-            const isNetworkError = errorMessage.includes('Network error') || 
-                                  errorMessage.includes('Failed to fetch') ||
-                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
-                                  errorMessage.includes('connection refused') ||
-                                  error?.isNetworkError ||
-                                  error?.status === 0 ||
-                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
-            
+            const isNetworkError = errorMessage.includes('Network error') ||
+                errorMessage.includes('Failed to fetch') ||
+                errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                errorMessage.includes('connection refused') ||
+                error?.isNetworkError ||
+                error?.status === 0 ||
+                error?.name === 'TypeError' && errorMessage.includes('fetch');
+
             if (isNetworkError) {
                 // Show user-friendly network error message
                 setErrors({ general: 'Unable to connect to server. Please ensure the backend is running.' });
@@ -141,7 +141,7 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full ">
             <div className="mb-10 text-left">
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
                     Continue your journey with NovaMart
@@ -360,8 +360,8 @@ export default function LoginForm() {
                     <div className="flex-1 h-px bg-gray-200" />
                 </div>
 
-                <div className="flex justify-center mb-6 w-full">
-                    <div className="w-full max-w-md">
+                <div className="flex justify-center mb-6 ">
+                    <div className="w-full border-[1px] border-gray-200 rounded-[10px]">
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => toast.error('Google authentication failed')}

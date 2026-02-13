@@ -28,7 +28,7 @@ const footerLinks = {
   ],
   business: [
     { name: "Manufacturer Login", href: "/auth/login?role=MANUFACTURER" },
-    { name: "Dealer Registration", href: "/auth/register?role=DEALER" },
+    { name: "Seller Registration", href: "/auth/register?role=SELLER" },
     { name: "Appliance Verification", href: "/guides/verification" },
     { name: "Bulk Ordering", href: "/products" },
     { name: "Escrow Ledger", href: "/guides/escrow" },
@@ -85,21 +85,21 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-background text-foreground pt-12 md:pt-20 pb-0 overflow-hidden relative">
+    <footer className="bg-background text-foreground pt-12 md:pt-20 pb-10 overflow-hidden relative">
       {/* Ambient Background Accents */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-primary to-primary" />
+      {/* <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-primary to-primary" /> */}
       <div className="absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-primary/5 blur-[80px] md:blur-[120px] rounded-full -mr-32 -mt-32 md:-mr-48 md:-mt-48" />
       <div className="absolute bottom-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-primary/5 blur-[80px] md:blur-[120px] rounded-full -ml-32 -mb-32 md:-ml-48 md:-mb-48" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 md:gap-12 lg:gap-8 mb-12 md:mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 md:gap-12 lg:gap-8 mb-12 md:mb-10">
           {/* Brand Section */}
           <div className="lg:col-span-4 space-y-8">
             <Link
               href="/"
               className="flex flex-col sm:flex-row items-center sm:items-start gap-4 group text-center sm:text-left"
             >
-              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center p-2.5 shadow-xl shadow-black/5 group-hover:scale-105 transition-all duration-500 border border-foreground/[0.03]">
+              <div className="w-14 h-14   flex items-center justify-center p-2.5  ">
                 <img
                   src="/assets/Novamart.png"
                   alt="NovaMart"
@@ -107,10 +107,10 @@ export default function Footer() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-3xl font-black tracking-tighter text-black leading-none uppercase italic">
+                <span className="text-3xl font-bold tracking-tighter text-black leading-none italic">
                   NovaMart
                 </span>
-                <span className="text-[10px] font-black text-black uppercase tracking-[0.3em] mt-1 italic">
+                <span className="text-sm font-semibold text-black tracking-wide mt-1">
                   Enterprise Hub
                 </span>
               </div>
@@ -118,7 +118,7 @@ export default function Footer() {
 
             <p className="text-foreground/50 text-sm font-medium leading-relaxed max-w-sm mx-auto sm:mx-0">
               India's premier B2B2C hub for high-performance home appliances.
-              Connecting verified manufacturers directly to regional dealers
+              Connecting verified manufacturers directly to regional sellers
               with zero-trust escrow governance.
             </p>
 
@@ -141,15 +141,15 @@ export default function Footer() {
             </div>
 
             <div className="space-y-3 flex flex-col items-center sm:items-start">
-              <div className="flex items-center gap-3 text-[10px] font-black text-foreground/40 uppercase tracking-widest italic">
+              <div className="flex items-center gap-3 text-sm font-medium text-foreground/40">
                 <Mail className="w-4 h-4 text-black" />
                 business@novamart.com
               </div>
-              <div className="flex items-center gap-3 text-[10px] font-black text-foreground/40 uppercase tracking-widest italic">
+              <div className="flex items-center gap-3 text-sm font-medium text-foreground/40">
                 <Phone className="w-4 h-4 text-black" />
                 +91 1800-NOVAMART
               </div>
-              <div className="flex items-center gap-3 text-[10px] font-black text-foreground/40 uppercase tracking-widest italic">
+              <div className="flex items-center gap-3 text-sm font-medium text-foreground/40">
                 <MapPin className="w-4 h-4 text-black" />
                 Mumbai, Maharashtra, India
               </div>
@@ -159,7 +159,7 @@ export default function Footer() {
           {/* Links Sections */}
           <div className="lg:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10 sm:gap-8">
             <div>
-              <h3 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-4 md:mb-8">
+              <h3 className="text-sm font-bold text-primary mb-4 md:mb-8">
                 Platform
               </h3>
               <ul className="space-y-3 md:space-y-4">
@@ -176,7 +176,7 @@ export default function Footer() {
               </ul>
             </div>
             <div>
-              <h3 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-4 md:mb-8">
+              <h3 className="text-sm font-bold text-primary mb-4 md:mb-8">
                 Business
               </h3>
               <ul className="space-y-3 md:space-y-4">
@@ -193,7 +193,7 @@ export default function Footer() {
               </ul>
             </div>
             <div>
-              <h3 className="text-xs font-black text-foreground/70 uppercase tracking-[0.2em] mb-4 md:mb-8">
+              <h3 className="text-sm font-bold text-foreground/70 mb-4 md:mb-8">
                 Support
               </h3>
               <ul className="space-y-3 md:space-y-4">
@@ -219,7 +219,7 @@ export default function Footer() {
               </ul>
             </div>
             <div>
-              <h3 className="text-[10px] font-black text-black uppercase tracking-[0.2em] mb-4 md:mb-8 italic underline underline-offset-4">
+              <h3 className="text-sm font-bold text-black mb-4 md:mb-8">
                 Legal
               </h3>
               <ul className="space-y-3 md:space-y-4">
@@ -227,7 +227,7 @@ export default function Footer() {
                   <li key={link.name}>
                     <button
                       onClick={() => handlePolicyClick(link.key)}
-                      className="text-[10px] sm:text-[11px] font-black text-foreground/40 hover:text-black transition-colors text-left uppercase tracking-widest italic"
+                      className="text-sm font-semibold text-foreground/40 cursor-pointer hover:text-black transition-colors text-left"
                     >
                       {link.name}
                     </button>
@@ -242,30 +242,30 @@ export default function Footer() {
                     <div className="flex items-center gap-4 p-4 rounded-[10px] bg-surface border border-foreground/5 shadow-xl shadow-black/5">
                         <ShieldCheck className="w-8 h-8 text-black shrink-0" />
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-wider text-black italic">Escrow Guarded</h4>
-                            <p className="text-[10px] text-foreground/40 font-bold italic">100% Payment Protection</p>
+                            <h4 className="text-sm font-bold text-black italic">Escrow Guarded</h4>
+                            <p className="text-sm text-foreground/40 font-medium italic">100% Payment Protection</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 p-4 rounded-[10px] bg-surface border border-foreground/5 shadow-xl shadow-black/5">
                         <Zap className="w-8 h-8 text-black shrink-0" />
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-wider text-black italic">Fast Logistics</h4>
-                            <p className="text-[10px] text-foreground/40 font-bold italic">Fragile-Optimized Shipping</p>
+                            <h4 className="text-sm font-bold text-black italic">Fast Logistics</h4>
+                            <p className="text-sm text-foreground/40 font-medium italic">Fragile-Optimized Shipping</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 p-4 rounded-[10px] bg-surface border border-foreground/5 shadow-xl shadow-black/5 sm:col-span-2 md:col-span-1">
                         <Globe className="w-8 h-8 text-black shrink-0" />
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-wider text-black italic">Global Reach</h4>
-                            <p className="text-[10px] text-foreground/40 font-bold italic">Verified Manufacturer Network</p>
+                            <h4 className="text-sm font-bold text-black italic">Global Reach</h4>
+                            <p className="text-sm text-foreground/40 font-medium italic">Verified Manufacturer Network</p>
                         </div>
                     </div>
                 </div> */}
 
         {/* Copyright Bar */}
-        <div className="pt-8 pb-2 border-t border-foreground/5 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-4 text-[10px] font-bold text-foreground/20 uppercase tracking-widest text-center md:text-left">
-            <span>© 2026 NovaMart B2B2C Connection Platform.</span>
+        <div className="pt-8 pb-0 border-t border-foreground/5 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-center gap-4 text-sm font-medium text-foreground/60 text-center md:text-left">
+            <span>© 2026 <span className="text-primary italic">NovaMart</span> B2B2C Connection Platform.</span>
           </div>
         </div>
       </div>

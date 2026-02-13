@@ -27,12 +27,12 @@ export const handleDealerNetwork = async (req, res) => {
         });
 
         // Notify dealer of decision
-        const { Dealer, Notification } = await import('../models/index.js');
-        const dealer = await Dealer.findById(dealerId).populate('userId');
+        const { Seller, Notification } = await import('../models/index.js');
+        const seller = await Seller.findById(dealerId).populate('userId');
 
-        if (dealer?.userId) {
+        if (seller?.userId) {
             const notifyPayload = {
-                userId: dealer.userId._id,
+                userId: seller.userId._id,
                 type: 'PARTNERSHIP',
                 title: `Partnership Request ${status}`,
                 message: status === 'APPROVED'

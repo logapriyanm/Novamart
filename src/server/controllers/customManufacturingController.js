@@ -1,4 +1,4 @@
-import { CustomProductRequest, CollaborationGroup, GroupParticipant, Dealer, Manufacturer, ProductionMilestone } from '../models/index.js';
+import { CustomProductRequest, CollaborationGroup, GroupParticipant, Seller, Manufacturer, ProductionMilestone } from '../models/index.js';
 import notificationService from '../services/notificationService.js';
 
 /**
@@ -497,8 +497,8 @@ export const respondToRequest = async (req, res) => {
 
         // Notify dealer(s)
         if (request.requestType === 'INDIVIDUAL') {
-            const dealer = await Dealer.findById(request.dealerId);
-            const dealerUser = await User.findById(dealer.userId);
+            const seller = await Seller.findById(request.dealerId);
+            const dealerUser = await User.findById(seller.userId);
             await notificationService.create({
                 userId: dealerUser._id,
                 type: accepted ? 'CUSTOM_REQUEST_APPROVED' : 'CUSTOM_REQUEST_REJECTED',
@@ -614,8 +614,8 @@ export const updateMilestone = async (req, res) => {
 
         // Notify dealers
         if (request.requestType === 'INDIVIDUAL') {
-            const dealer = await Dealer.findById(request.dealerId);
-            const dealerUser = await User.findById(dealer.userId);
+            const seller = await Seller.findById(request.dealerId);
+            const dealerUser = await User.findById(seller.userId);
             await notificationService.create({
                 userId: dealerUser._id,
                 type: 'MILESTONE_UPDATED',

@@ -1,4 +1,4 @@
-import { Negotiation, Dealer, Manufacturer, Product, Notification, Chat, Message } from '../models/index.js';
+import { Negotiation, Seller, Manufacturer, Product, Notification, Chat, Message } from '../models/index.js';
 import logger from '../lib/logger.js';
 import stockAllocationService from '../services/stockAllocationService.js';
 import mongoose from 'mongoose';
@@ -9,14 +9,14 @@ export const createNegotiation = async (req, res) => {
         const { productId, quantity, initialOffer, proposedPrice } = req.body;
         const offerPrice = proposedPrice || initialOffer;
 
-        const dealer = await Dealer.findOne({ userId });
-        if (!dealer) return res.status(403).json({ success: false, error: 'Only dealers can negotiate' });
+        const seller = await Seller.findOne({ userId });
+        if (!seller) return res.status(403).json({ success: false, error: 'Only dealers can negotiate' });
 
         const product = await Product.findById(productId).populate('manufacturerId');
         if (!product) return res.status(404).json({ success: false, error: 'Product not found' });
 
         const existing = await Negotiation.findOne({
-            dealerId: dealer._id,
+            dealerId: seller._id,
             productId: productId,
             status: 'OPEN'
         });
@@ -28,7 +28,7 @@ export const createNegotiation = async (req, res) => {
         });
 
         const negotiation = await Negotiation.create({
-            dealerId: dealer._id,
+            dealerId: seller._id,
             manufacturerId: product.manufacturerId._id,
             productId: productId,
             quantity: parseInt(quantity),
@@ -40,6 +40,32 @@ export const createNegotiation = async (req, res) => {
                 time: new Date()
             }]
         });
+
+        // Check Subscription Limits
+        const tier = seller.currentSubscriptionTier || 'BASIC';
+        const limits = {
+            'BASIC': 5,
+            'PRO': 20,
+            'ENTERPRISE': Infinity
+        };
+
+        const activeNegotiationsCount = await Negotiation.countDocuments({
+            dealerId: seller._id,
+            status: { $in: ['OPEN', 'MANUFACTURER_COUNTERED', 'DEALER_COUNTERED'] }
+        });
+
+        if (activeNegotiationsCount > limits[tier]) {
+            // Rollback creation
+            await Negotiation.findByIdAndDelete(negotiation._id);
+            return res.status(403).json({
+                success: false,
+                error: 'SUBSCRIPTION_LIMIT_REACHED',
+                message: `You have reached the negotiation limit for ${tier} plan.`,
+                limit: limits[tier],
+                current: activeNegotiationsCount,
+                upgradeUrl: '/seller/subscription'
+            });
+        }
 
         try {
             const manufacturer = await Manufacturer.findById(product.manufacturerId._id).populate('userId');
@@ -78,7 +104,7 @@ export const createNegotiation = async (req, res) => {
                     userId: manufacturer.userId._id,
                     type: 'NEGOTIATION_STARTED',
                     title: 'New Price Negotiation Request',
-                    message: `${dealer.businessName} wants to negotiate pricing for ${product.name}. Initial offer: ₹${offerPrice} for ${quantity} units.`,
+                    message: `${seller.businessName} wants to negotiate pricing for ${product.name}. Initial offer: ₹${offerPrice} for ${quantity} units.`,
                     link: `/manufacturer/negotiations/${negotiation._id}`
                 });
             }
@@ -100,9 +126,9 @@ export const getNegotiations = async (req, res) => {
 
         let query = {};
         if (role === 'DEALER') {
-            const dealer = await Dealer.findOne({ userId });
-            if (!dealer) return res.status(404).json({ message: 'Profile not found' });
-            query = { dealerId: dealer._id };
+            const seller = await Seller.findOne({ userId });
+            if (!seller) return res.status(404).json({ message: 'Profile not found' });
+            query = { dealerId: seller._id };
         } else if (role === 'MANUFACTURER') {
             const manufacturer = await Manufacturer.findOne({ userId });
             if (!manufacturer) return res.status(404).json({ message: 'Profile not found' });

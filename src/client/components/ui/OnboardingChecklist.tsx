@@ -15,7 +15,7 @@ interface OnboardingStep {
 }
 
 interface OnboardingChecklistProps {
-    role: 'CUSTOMER' | 'DEALER' | 'MANUFACTURER';
+    role: 'CUSTOMER' | 'SELLER' | 'MANUFACTURER';
 }
 
 export default function OnboardingChecklist({ role }: OnboardingChecklistProps) {
@@ -66,34 +66,34 @@ export default function OnboardingChecklist({ role }: OnboardingChecklistProps) 
                     action: { label: 'View Products', href: '/marketplace' }
                 }
             ],
-            DEALER: [
+            SELLER: [
                 {
                     id: 'profile',
                     title: 'Complete business profile',
                     description: 'Add GST number and business verification documents',
                     completed: completedSteps?.profileCompleted || false,
-                    action: { label: 'Complete Profile', href: '/dealer/profile' }
+                    action: { label: 'Complete Profile', href: '/seller/profile' }
                 },
                 {
                     id: 'verify',
                     title: 'Get verified',
                     description: 'Verification unlocks manufacturer access and wholesale pricing',
                     completed: completedSteps?.verificationCompleted || false,
-                    action: { label: 'Upload Documents', href: '/dealer/profile' }
+                    action: { label: 'Upload Documents', href: '/seller/profile' }
                 },
                 {
                     id: 'subscription',
                     title: 'Explore subscription tiers',
                     description: 'Unlock collaboration and custom manufacturing features',
                     completed: completedSteps?.featuresExplored || false,
-                    action: { label: 'View Plans', href: '/dealer/subscription' }
+                    action: { label: 'View Plans', href: '/seller/subscription' }
                 },
                 {
                     id: 'manufacturer',
                     title: 'Request manufacturer access',
                     description: 'Connect with manufacturers to start ordering',
                     completed: completedSteps?.firstActionTaken || false,
-                    action: { label: 'Find Manufacturers', href: '/dealer/sourcing' }
+                    action: { label: 'Find Manufacturers', href: '/seller/sourcing' }
                 }
             ],
             MANUFACTURER: [
@@ -107,21 +107,21 @@ export default function OnboardingChecklist({ role }: OnboardingChecklistProps) 
                 {
                     id: 'verify',
                     title: 'Get verified',
-                    description: 'Verification builds trust with dealers',
+                    description: 'Verification builds trust with sellers',
                     completed: completedSteps?.verificationCompleted || false,
                     action: { label: 'Upload Documents', href: '/manufacturer/profile' }
                 },
                 {
                     id: 'product',
                     title: 'Add your first product',
-                    description: 'List products for dealers to discover',
+                    description: 'List products for sellers to discover',
                     completed: completedSteps?.firstActionTaken || false,
                     action: { label: 'Add Product', href: '/manufacturer/products/create' }
                 },
                 {
                     id: 'pricing',
                     title: 'Set wholesale pricing',
-                    description: 'Configure dealer pricing and minimum order quantities',
+                    description: 'Configure seller pricing and minimum order quantities',
                     completed: false,
                     action: { label: 'Manage Products', href: '/manufacturer/products' }
                 }
@@ -196,14 +196,14 @@ export default function OnboardingChecklist({ role }: OnboardingChecklistProps) 
                         <div
                             key={step.id}
                             className={`flex items-start gap-4 p-4 rounded-[15px] transition-all ${step.completed
-                                    ? 'bg-green-50 border border-green-200'
-                                    : 'bg-slate-50 border border-slate-200'
+                                ? 'bg-green-50 border border-green-200'
+                                : 'bg-slate-50 border border-slate-200'
                                 }`}
                         >
                             {/* Step Number / Check */}
                             <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0 ${step.completed
-                                    ? 'bg-green-500'
-                                    : 'bg-slate-200'
+                                ? 'bg-green-500'
+                                : 'bg-slate-200'
                                 }`}>
                                 {step.completed ? (
                                     <FaCheck className="w-4 h-4 text-white" />

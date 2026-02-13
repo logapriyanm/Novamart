@@ -86,7 +86,7 @@ export default function ConfirmationModal({
                         <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${styles.iconBg} ${styles.headerText}`}>
                             <Icon className="w-6 h-6" />
                         </div>
-                        <h3 className={`text-lg font-black uppercase tracking-tight italic ${styles.headerText}`}>
+                        <h3 className={`text-lg font-bold tracking-tight ${styles.headerText}`}>
                             {title}
                         </h3>
                     </div>
@@ -103,14 +103,14 @@ export default function ConfirmationModal({
                         <button
                             onClick={onClose}
                             disabled={isLoading}
-                            className="flex-1 py-3 px-4 bg-white border border-foreground/10 rounded-[10px] text-xs font-bold uppercase tracking-widest text-foreground/60 hover:bg-slate-50 hover:text-foreground transition-colors disabled:opacity-50"
+                            className="flex-1 py-3 px-4 bg-white border border-foreground/10 rounded-[10px] text-sm font-semibold text-foreground/60 hover:bg-slate-50 hover:text-foreground transition-colors disabled:opacity-50"
                         >
                             {cancelLabel}
                         </button>
                         <button
                             onClick={onConfirm}
                             disabled={isLoading}
-                            className={`flex-1 py-3 px-4 rounded-[10px] text-xs font-bold uppercase tracking-widest shadow-lg transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${styles.buttonBg} ${styles.buttonText}`}
+                            className={`flex-1 py-3 px-4 rounded-[10px] text-sm font-semibold shadow-lg transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${styles.buttonBg} ${styles.buttonText}`}
                         >
                             {isLoading ? (
                                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -29,7 +29,7 @@ export default function FeaturedProducts() {
                         id: p.id,
                         name: p.name,
                         price: price,
-                        image: p.images?.[0] || '/assets/placeholder-product.png',
+                        image: p.images?.[0] || 'https://placehold.co/400x400?text=No+Image',
                         rating: p.averageRating || 0,
                         brand: p.manufacturer?.companyName || 'NovaMart',
                         seller: {

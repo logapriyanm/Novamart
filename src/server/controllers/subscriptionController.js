@@ -1,4 +1,4 @@
-import { SubscriptionPlan, Dealer, DealerSubscription } from '../models/index.js';
+import { SubscriptionPlan, Seller, SellerSubscription } from '../models/index.js';
 import mongoose from 'mongoose';
 
 // --- PLANS ---
@@ -55,8 +55,8 @@ export const subscribeToPlan = async (req, res) => {
         const userId = req.user._id;
         const { planId } = req.body;
 
-        const dealer = await Dealer.findOne({ userId });
-        if (!dealer) return res.status(404).json({ message: 'Dealer profile not found' });
+        const seller = await Seller.findOne({ userId });
+        if (!seller) return res.status(404).json({ message: 'Dealer profile not found' });
 
         const plan = await SubscriptionPlan.findById(planId);
         if (!plan) return res.status(404).json({ message: 'Plan not found' });
@@ -64,22 +64,22 @@ export const subscribeToPlan = async (req, res) => {
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + plan.duration);
 
-        await DealerSubscription.updateMany(
-            { dealerId: dealer._id, status: 'ACTIVE' },
+        await SellerSubscription.updateMany(
+            { dealerId: seller._id, status: 'ACTIVE' },
             { $set: { status: 'CANCELLED' } }
         );
 
-        const subscription = await DealerSubscription.create({
-            dealerId: dealer._id,
+        const subscription = await SellerSubscription.create({
+            dealerId: seller._id,
             planId: plan._id,
             endDate,
             status: 'ACTIVE'
         });
 
         // Update dealer's cached subscription tier
-        dealer.currentSubscriptionTier = plan.name;
-        dealer.subscriptionExpiresAt = endDate;
-        await dealer.save();
+        seller.currentSubscriptionTier = plan.name;
+        seller.subscriptionExpiresAt = endDate;
+        await seller.save();
 
         res.status(201).json({ success: true, data: subscription });
     } catch (error) {
@@ -91,12 +91,12 @@ export const subscribeToPlan = async (req, res) => {
 export const getMySubscription = async (req, res) => {
     try {
         const userId = req.user._id;
-        const dealer = await Dealer.findOne({ userId });
+        const seller = await Seller.findOne({ userId });
 
-        if (!dealer) return res.status(404).json({ message: 'Dealer not found' });
+        if (!seller) return res.status(404).json({ message: 'Dealer not found' });
 
-        const activeSub = await DealerSubscription.findOne({
-            dealerId: dealer._id,
+        const activeSub = await SellerSubscription.findOne({
+            dealerId: seller._id,
             status: 'ACTIVE'
         }).populate('planId').sort({ endDate: -1 });
 
@@ -109,11 +109,11 @@ export const getMySubscription = async (req, res) => {
 export const cancelSubscription = async (req, res) => {
     try {
         const userId = req.user._id;
-        const dealer = await Dealer.findOne({ userId });
-        if (!dealer) return res.status(404).json({ message: 'Dealer not found' });
+        const seller = await Seller.findOne({ userId });
+        if (!seller) return res.status(404).json({ message: 'Dealer not found' });
 
-        await DealerSubscription.updateMany(
-            { dealerId: dealer._id, status: 'ACTIVE' },
+        await SellerSubscription.updateMany(
+            { dealerId: seller._id, status: 'ACTIVE' },
             { $set: { status: 'CANCELLED' } }
         );
 
@@ -129,14 +129,14 @@ export const cancelSubscription = async (req, res) => {
 export const getSubscriptionFeatures = async (req, res) => {
     try {
         const userId = req.user._id;
-        const dealer = await Dealer.findOne({ userId });
+        const seller = await Seller.findOne({ userId });
 
-        if (!dealer) {
+        if (!seller) {
             return res.status(404).json({ message: 'Dealer not found' });
         }
 
-        const activeSub = await DealerSubscription.findOne({
-            dealerId: dealer._id,
+        const activeSub = await SellerSubscription.findOne({
+            dealerId: seller._id,
             status: 'ACTIVE',
             endDate: { $gt: new Date() }
         }).populate('planId');

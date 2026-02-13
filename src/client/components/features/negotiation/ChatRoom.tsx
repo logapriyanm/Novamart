@@ -41,7 +41,7 @@ const socket = io(
 
 interface ChatRoomProps {
   negotiationId: string;
-  userRole: "DEALER" | "MANUFACTURER";
+  userRole: "SELLER" | "MANUFACTURER";
 }
 
 interface Message {
@@ -116,7 +116,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
     if (!negotiation) return;
     try {
       const receiverId =
-        userRole === "DEALER"
+        userRole === "SELLER"
           ? typeof negotiation.manufacturerId === "object"
             ? negotiation.manufacturerId.userId
             : negotiation.manufacturerId
@@ -128,7 +128,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
         type: "NEGOTIATION",
         contextId: negotiationId,
         receiverId: receiverId,
-        receiverRole: userRole === "DEALER" ? "MANUFACTURER" : "DEALER",
+        receiverRole: userRole === "SELLER" ? "MANUFACTURER" : "SELLER",
       });
 
       if (res && res._id) {
@@ -216,8 +216,8 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
       </div>
     );
 
-  const isDealer = userRole === "DEALER";
-  const partner = isDealer ? negotiation.manufacturerId : negotiation.dealerId;
+  const isSeller = userRole === "SELLER";
+  const partner = isSeller ? negotiation.manufacturerId : negotiation.dealerId;
   const isLocked = ["ACCEPTED", "REJECTED", "ORDER_FULFILLED"].includes(
     negotiation.status,
   );
@@ -274,16 +274,16 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
             />
             <div className="pt-4 border-t border-slate-50">
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                {isDealer ? "Manufacturer" : "Dealer Account"}
+                {isSeller ? "Manufacturer" : "Seller Account"}
               </h4>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-[10px] bg-slate-900 flex items-center justify-center text-white">
-                  {isDealer ? <FaIndustry /> : <FaStore />}
+                  {isSeller ? <FaIndustry /> : <FaStore />}
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
                     <p className="text-xs font-black">
-                      {isDealer ? partner?.companyName : partner?.businessName}
+                      {isSeller ? partner?.companyName : partner?.businessName}
                     </p>
                     <FaShieldAlt className="text-emerald-500 w-3 h-3" />
                   </div>
@@ -327,16 +327,16 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                 key={m._id || i}
                 msg={m}
                 isMe={
-                  (isDealer && m.senderRole === "DEALER") ||
-                  (!isDealer && m.senderRole === "MANUFACTURER")
+                  (isSeller && m.senderRole === "SELLER") ||
+                  (!isSeller && m.senderRole === "MANUFACTURER")
                 }
                 onAccept={() => handleStatusUpdate("ACCEPTED")}
                 onReject={() => handleStatusUpdate("REJECTED")}
                 showActions={
                   !isLocked &&
                   !(
-                    (isDealer && m.senderRole === "DEALER") ||
-                    (!isDealer && m.senderRole === "MANUFACTURER")
+                    (isSeller && m.senderRole === "SELLER") ||
+                    (!isSeller && m.senderRole === "MANUFACTURER")
                   )
                 }
               />
@@ -452,12 +452,12 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
               <button
                 onClick={() =>
                   router.push(
-                    isDealer ? "/dealer/orders" : "/manufacturer/orders",
+                    isSeller ? "/seller/orders" : "/manufacturer/orders",
                   )
                 }
                 className="w-full py-4 bg-emerald-600 text-white rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-500/20 hover:scale-[1.02] transition-all"
               >
-                {isDealer ? "Raise Order Request" : "Manage Allocation"}
+                {isSeller ? "Raise Order Request" : "Manage Allocation"}
               </button>
             ) : (
               <div className="p-4 bg-blue-50/50 rounded-[10px] border border-blue-100 text-center">

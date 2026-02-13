@@ -1,4 +1,4 @@
-import { Product, User, Customer, Order, Cart, Tracking, Negotiation, Inventory, DealerRequest, Manufacturer, Dealer } from '../models/index.js';
+import { Product, User, Customer, Order, Cart, Tracking, Negotiation, Inventory, SellerRequest, Manufacturer, Seller } from '../models/index.js';
 
 class RecommendationService {
     /**
@@ -135,11 +135,11 @@ class RecommendationService {
                 }
 
                 if (user.role === 'DEALER') {
-                    const dealer = await Dealer.findOne({ userId });
-                    if (dealer) {
+                    const seller = await Seller.findOne({ userId });
+                    if (seller) {
                         const [openNegs, newAllocations] = await Promise.all([
-                            Negotiation.countDocuments({ dealerId: dealer._id, status: 'OPEN' }),
-                            Inventory.countDocuments({ dealerId: dealer._id, isAllocated: true, stock: 0 })
+                            Negotiation.countDocuments({ dealerId: seller._id, status: 'OPEN' }),
+                            Inventory.countDocuments({ dealerId: seller._id, isAllocated: true, stock: 0 })
                         ]);
                         b2bMetrics = {
                             role: 'DEALER',
@@ -153,7 +153,7 @@ class RecommendationService {
                     const manufacturer = await Manufacturer.findOne({ userId });
                     if (manufacturer) {
                         const [pendingRequests, activeNegs] = await Promise.all([
-                            DealerRequest.countDocuments({ manufacturerId: manufacturer._id, status: 'PENDING' }),
+                            SellerRequest.countDocuments({ manufacturerId: manufacturer._id, status: 'PENDING' }),
                             Negotiation.countDocuments({ manufacturerId: manufacturer._id, status: 'OPEN' })
                         ]);
                         b2bMetrics = {

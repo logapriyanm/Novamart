@@ -181,7 +181,7 @@ export default function BestsellerSlider({ products }: BestsellerSliderProps) {
                                             className="flex items-center gap-2"
                                         >
                                             <span className="text-xl font-bold text-white">{item.price}</span>
-                                            <span className="text-[10px] font-bold text-white/60 line-through uppercase tracking-widest">{item.status}</span>
+                                            <span className="text-sm font-medium text-white/60 line-through">{item.status}</span>
                                         </motion.div>
                                     )}
                                 </div>

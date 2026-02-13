@@ -110,7 +110,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
             <div className="p-4 xs:p-5 flex items-center justify-between bg-slate-50/50">
                 <div className="flex items-center gap-2">
                     <Filter className="w-4 h-4 text-slate-900" />
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Advanced Filters</h3>
+                    <h3 className="text-sm font-bold text-slate-900">Advanced filters</h3>
                 </div>
                 <button
                     onClick={resetFilters}
@@ -129,7 +129,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                 >
                     <div className="flex items-center gap-2">
                         <FaShieldAlt className={`w-4 h-4 ${filters.verifiedOnly ? 'text-blue-600' : 'text-slate-400'}`} />
-                        <span className="text-[11px] font-black uppercase tracking-wider">Verified Sellers</span>
+                        <span className="text-sm font-semibold">Verified sellers</span>
                     </div>
                     {filters.verifiedOnly && <div className="w-2 h-2 rounded-full bg-blue-600 shadow-sm" />}
                 </button>
@@ -138,7 +138,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
             {/* Categories Section */}
             <div className="p-4 xs:p-5">
                 <button onClick={() => toggleSection('categories')} className="w-full flex items-center justify-between mb-4 group">
-                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Industrial Categories</span>
+                    <span className="text-sm font-bold text-slate-900">Industrial categories</span>
                     <FaChevronDown className={`w-3 h-3 text-slate-300 transition-transform duration-300 ${openSections.includes('categories') ? 'rotate-180' : ''}`} />
                 </button>
                 {openSections.includes('categories') && (
@@ -149,8 +149,8 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                                     onClick={() => onCategoryChange && onCategoryChange(cat.slug)}
                                     className={`w-full flex items-center justify-between py-2 px-3 rounded-[8px] transition-all text-left ${currentCategory === cat.slug ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10' : 'hover:bg-slate-50 text-slate-600'}`}
                                 >
-                                    <span className="text-[10px] xs:text-[11px] font-bold uppercase tracking-wide">{cat.name}</span>
-                                    {cat.count && <span className={`text-[9px] font-black ${currentCategory === cat.slug ? 'text-blue-200' : 'text-slate-300'}`}>{cat.count}</span>}
+                                    <span className="text-sm font-semibold">{cat.name}</span>
+                                    {cat.count && <span className={`text-sm font-bold ${currentCategory === cat.slug ? 'text-blue-200' : 'text-slate-300'}`}>{cat.count}</span>}
                                 </button>
                                 {currentCategory === cat.slug && subCategoriesMapFallback[cat.slug] && (
                                     <div className="ml-4 pl-3 border-l-2 border-blue-100 flex flex-col pt-1 pb-2 gap-1">
@@ -158,7 +158,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                                             <button
                                                 key={sub}
                                                 onClick={() => onFilterChange('subCategory', sub)}
-                                                className={`text-left py-1 text-[10px] font-bold transition-colors ${filters.subCategory === sub ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}
+                                                className={`text-left py-1 text-sm font-medium transition-colors ${filters.subCategory === sub ? 'text-blue-600' : 'text-slate-400 hover:text-slate-900'}`}
                                             >
                                                 {sub}
                                             </button>
@@ -174,28 +174,28 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
             {/* Price Range Section */}
             <div className="p-4 xs:p-5 overflow-hidden">
                 <button onClick={() => toggleSection('price')} className="w-full flex items-center justify-between mb-4 group">
-                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Price Range</span>
+                    <span className="text-sm font-bold text-slate-900">Price range</span>
                     <FaChevronDown className={`w-3 h-3 text-slate-300 transition-transform duration-300 ${openSections.includes('price') ? 'rotate-180' : ''}`} />
                 </button>
                 {openSections.includes('price') && (
                     <div className="space-y-4 pt-1">
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Min (₹)</label>
+                                <label className="text-sm font-medium text-slate-400 mb-1 block">Min (₹)</label>
                                 <input
                                     type="number"
                                     value={filters.priceRange[0]}
                                     onChange={(e) => onFilterChange('priceRange', [Number(e.target.value), filters.priceRange[1]])}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-[6px] px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500 transition-all"
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-[6px] px-3 py-2 text-sm font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all"
                                 />
                             </div>
                             <div>
-                                <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Max (₹)</label>
+                                <label className="text-sm font-medium text-slate-400 mb-1 block">Max (₹)</label>
                                 <input
                                     type="number"
                                     value={filters.priceRange[1]}
                                     onChange={(e) => onFilterChange('priceRange', [filters.priceRange[0], Number(e.target.value)])}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-[6px] px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-blue-500 transition-all"
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-[6px] px-3 py-2 text-sm font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all"
                                 />
                             </div>
                         </div>
@@ -206,7 +206,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
             {/* Brands Section */}
             <div className="p-4 xs:p-5 overflow-hidden">
                 <button onClick={() => toggleSection('brands')} className="w-full flex items-center justify-between mb-4 group">
-                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Available Brands</span>
+                    <span className="text-sm font-bold text-slate-900">Available brands</span>
                     <FaChevronDown className={`w-3 h-3 text-slate-300 transition-transform duration-300 ${openSections.includes('brands') ? 'rotate-180' : ''}`} />
                 </button>
                 {openSections.includes('brands') && (
@@ -218,7 +218,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                                 placeholder="Search brands..."
                                 value={brandSearch}
                                 onChange={(e) => setBrandSearch(e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] pl-9 pr-3 py-2.5 text-[11px] font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] pl-9 pr-3 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all"
                             />
                         </div>
                         <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 thin-scrollbar">
@@ -236,10 +236,10 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                                     <div className={`w-4 h-4 rounded-[4px] border transition-all flex items-center justify-center ${filters.brands.includes(brand) ? 'bg-blue-600 border-blue-600' : 'border-slate-200 bg-white group-hover:border-slate-400'}`}>
                                         {filters.brands.includes(brand) && <FaCheckSquare className="text-white w-2.5 h-2.5" />}
                                     </div>
-                                    <span className={`text-[11px] font-bold ${filters.brands.includes(brand) ? 'text-slate-900' : 'text-slate-500 group-hover:text-slate-700'}`}>{brand}</span>
+                                    <span className={`text-sm font-medium ${filters.brands.includes(brand) ? 'text-slate-900' : 'text-slate-500 group-hover:text-slate-700'}`}>{brand}</span>
                                 </button>
                             )) : (
-                                <p className="text-[10px] text-slate-400 italic py-2">No brands found</p>
+                                <p className="text-sm text-slate-400 py-2">No brands found</p>
                             )}
                         </div>
                     </div>
@@ -249,7 +249,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
             {/* Ratings Section */}
             <div className="p-4 xs:p-5">
                 <button onClick={() => toggleSection('rating')} className="w-full flex items-center justify-between mb-4 group">
-                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">Seller Rating</span>
+                    <span className="text-sm font-bold text-slate-900">Seller rating</span>
                     <FaChevronDown className={`w-3 h-3 text-slate-300 transition-transform duration-300 ${openSections.includes('rating') ? 'rotate-180' : ''}`} />
                 </button>
                 {openSections.includes('rating') && (
@@ -270,7 +270,7 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
                                             <FaRegStar key={i} className="w-2.5 h-2.5 text-slate-200" />
                                     ))}
                                 </div>
-                                <span className={`text-[10px] font-bold ${filters.rating === rating ? 'text-slate-900' : 'text-slate-400'}`}>& Above</span>
+                                <span className={`text-sm font-medium ${filters.rating === rating ? 'text-slate-900' : 'text-slate-400'}`}>& Above</span>
                             </button>
                         ))}
                     </div>
@@ -280,8 +280,8 @@ export const ProductFilterSidebar = ({ currentCategory, onCategoryChange, filter
             {/* Technical Filter Banner */}
             <div className="p-4 xs:p-5 bg-slate-50/50">
                 <div className="px-4 py-3 bg-white border border-slate-100 rounded-[10px] text-center">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Industrial Quality</p>
-                    <p className="text-[10px] font-bold text-slate-600 leading-relaxed italic">Download technical data sheets on product detail pages.</p>
+                    <p className="text-sm font-semibold text-slate-400 mb-1">Industrial quality</p>
+                    <p className="text-sm font-medium text-slate-600 leading-relaxed">Download technical data sheets on product detail pages.</p>
                 </div>
             </div>
         </aside>

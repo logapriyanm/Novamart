@@ -21,7 +21,7 @@ interface B2BAction {
 
 interface B2BShortcutsProps {
     metrics: {
-        role: 'DEALER' | 'MANUFACTURER';
+        role: 'SELLER' | 'MANUFACTURER';
         actions: B2BAction[];
     };
 }
@@ -50,7 +50,7 @@ export default function B2BShortcuts({ metrics }: B2BShortcutsProps) {
                 <div>
                     <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
                         <span className="w-2 h-8 bg-[#FF5733] rounded-full inline-block" />
-                        {isManufacturer ? 'Manufacturer Control Center' : 'Dealer Procurement Hub'}
+                        {isManufacturer ? 'Manufacturer Control Center' : 'Seller Procurement Hub'}
                     </h2>
                     <p className="text-slate-500 mt-1 font-medium italic">
                         {isManufacturer ? 'Monitor your network and active negotiations' : 'Manage allocations and source products efficiently'}
@@ -95,7 +95,7 @@ export default function B2BShortcuts({ metrics }: B2BShortcutsProps) {
 
                                 <div className="flex items-center gap-3">
                                     <div className="hidden sm:flex flex-col items-end">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">View Details</span>
+                                        <span className="text-sm font-semibold text-slate-400">View details</span>
                                         <div className="w-8 h-1 bg-slate-100 group-hover:w-full group-hover:bg-[#FF5733] transition-all duration-500" />
                                     </div>
                                     <div className="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center group-hover:bg-[#FF5733] group-hover:border-[#FF5733] group-hover:rotate-[-45deg] transition-all duration-500">

@@ -22,20 +22,24 @@ import { apiClient } from '@/lib/api/client';
 import Loader from '@/client/components/ui/Loader';
 import { PolicyModal } from '@/client/components/ui/PolicyModal';
 
-type Role = 'MANUFACTURER' | 'DEALER' | 'CUSTOMER';
+type Role = 'MANUFACTURER' | 'SELLER' | 'CUSTOMER';
 
-export default function Register({ initialRole }: { initialRole?: Role | null }) {
+export default function Register({ searchParams }: { searchParams?: { role?: string } }) {
     const router = useRouter();
     const { login, isAuthenticated, isLoading: authLoading } = useAuth();
     // const { showSnackbar } = useSnackbar();
+
+    const initialRole = searchParams?.role?.toUpperCase() as Role | undefined;
+    const isValidRole = ['MANUFACTURER', 'SELLER', 'CUSTOMER'].includes(initialRole || '');
 
     React.useEffect(() => {
         if (isAuthenticated && !authLoading) {
             router.replace('/');
         }
     }, [isAuthenticated, authLoading, router]);
-    const [step, setStep] = useState(initialRole ? 2 : 1);
-    const [role, setRole] = useState<Role | null>(initialRole || null);
+
+    const [step, setStep] = useState(isValidRole ? 2 : 1);
+    const [role, setRole] = useState<Role | null>(isValidRole ? initialRole! : null);
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -85,7 +89,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
             }
         } else if (step === 3) {
             // Validate Business Details
-            if (role === 'DEALER' && !formData.businessName) { setErrors({ businessName: 'Business name is required' }); return; }
+            if (role === 'SELLER' && !formData.businessName) { setErrors({ businessName: 'Business name is required' }); return; }
             if (role === 'MANUFACTURER' && !formData.companyName) { setErrors({ companyName: 'Company name is required' }); return; }
             if (!formData.gstNumber) { setErrors({ gstNumber: 'GST is required' }); return; }
             if (!formData.address) { setErrors({ address: 'Address is required' }); return; }
@@ -120,7 +124,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 gstNumber: formData.gstNumber,
                 factoryAddress: formData.address,
                 businessAddress: formData.address,
-                bankDetails: {} // Placeholder
+                bankDetails: {} // NO_OPlaceholder
             };
 
             const res = await apiClient.post<any>('/auth/register', payload);
@@ -178,7 +182,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
         switch (step) {
             case 1:
                 return (
-                    <div className="space-y-6 animate-fade-in">
+                    <div className="space-y-6">
                         <div className="text-left space-y-2">
                             <h2 className="text-2xl font-bold text-gray-900">Choose your account type</h2>
                             <p className="text-sm text-gray-500">Select how you want to operate within the NovaMart Ecosystem</p>
@@ -186,22 +190,22 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                         <div className="grid grid-cols-1 gap-4">
                             {[
                                 { id: 'MANUFACTURER', label: 'Manufacturer', icon: Factory, desc: 'List direct inventory & manage bulk orders' },
-                                { id: 'DEALER', label: 'Dealer / Seller', icon: Store, desc: 'Source products & reach retail customers' },
+                                { id: 'SELLER', label: 'Seller', icon: Store, desc: 'Source products & reach retail customers' },
                                 { id: 'CUSTOMER', label: 'Individual Buyer', icon: User, desc: 'Shop securely with escrow protection' }
                             ].map((r) => (
                                 <button
                                     key={r.id}
                                     onClick={() => handleRoleSelect(r.id as Role)}
-                                    className="p-4 rounded-[10px] bg-white border border-gray-100 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all group flex items-start gap-4 text-left w-full"
+                                    className="p-4 rounded-[10px] bg-white border border-gray-100 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 transition-all group flex items-center gap-4 text-left w-full"
                                 >
-                                    <div className="w-12 h-12 rounded-[10px] bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-primary group-hover:text-white transition-all shrink-0">
+                                    <div className="w-12 h-12 rounded-[10px] bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-primary/10 group-hover:text-primary transition-all shrink-0">
                                         <r.icon className="w-6 h-6" />
                                     </div>
                                     <div>
                                         <h3 className="text-base font-bold text-gray-900 group-hover:text-primary transition-colors">{r.label}</h3>
                                         <p className="text-xs text-gray-500 mt-1 leading-relaxed">{r.desc}</p>
                                     </div>
-                                    <div className="ml-auto flex items-center justify-center w-6 h-6 rounded-full border border-gray-200 group-hover:border-primary group-hover:bg-primary group-hover:text-white transition-all opacity-0 group-hover:opacity-100">
+                                    <div className="ml-auto flex items-center justify-center w-6 h-6 rounded-full border border-gray-200 group-hover:border-gray-900 group-hover:bg-gray-900 group-hover:text-white transition-all opacity-0 group-hover:opacity-100">
                                         <ArrowRight className="w-3 h-3" />
                                     </div>
                                 </button>
@@ -450,7 +454,7 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                 <div className="relative z-10 w-full max-w-lg text-white">
                     <div className="flex items-center gap-3 mb-16">
                         <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center" >
-                            <img src="/assets/Novamart.png" alt="NovaMart" className="w-8 h-8 object-contain"/>
+                            <img src="/assets/Novamart.png" alt="NovaMart" className="w-8 h-8 object-contain" />
                         </div>
                         <span className="text-xl font-bold tracking-tight">NOVAMART</span>
                     </div>
@@ -475,13 +479,13 @@ export default function Register({ initialRole }: { initialRole?: Role | null })
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-500 font-medium"> 
+                    <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
                     </div>
                 </div>
             </div>
 
             {/* Right Panel - Register Form */}
-            <div className="w-full lg:w-1/2 bg-white flex flex-col items-center justify-center p-4 xs:p-8 sm:p-12 lg:p-24 overflow-y-auto relative">
+            <div className="w-full lg:w-1/2 bg-white flex flex-col items-center justify-center p-6 xs:p-10 sm:p-12 lg:p-24 overflow-y-auto relative">
                 {/* Mobile Back to Home Navigation */}
                 <div className="lg:hidden absolute top-6 left-6 flex items-center gap-3">
                     <Link href="/" className="flex items-center gap-2 group">

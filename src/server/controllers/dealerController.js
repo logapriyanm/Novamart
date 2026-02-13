@@ -3,7 +3,7 @@
  * Management for regional fulfillment and retail ops.
  */
 
-import dealerService from '../services/dealer.js';
+import dealerService from '../services/seller.js';
 import logger from '../lib/logger.js';
 import stockAllocationService from '../services/stockAllocationService.js';
 import orderService from '../services/order.js';
@@ -250,8 +250,8 @@ export const getPublicDealerProfile = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const { Dealer } = await import('../models/index.js');
-        const dealer = await Dealer.findById(id)
+        const { Seller } = await import('../models/index.js');
+        const dealer = await Seller.findById(id)
             .populate('userId', 'createdAt')
             .populate({
                 path: 'sellerReviews',

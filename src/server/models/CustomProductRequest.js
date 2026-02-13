@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 
 const CustomProductRequestSchema = new mongoose.Schema({
-    // Request source (either individual dealer or collaboration group)
+    // Request source (either individual seller or collaboration group)
     requestType: {
         type: String,
         enum: ['INDIVIDUAL', 'GROUP'],
         required: true
     },
-    dealerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dealer', index: true },
+    sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', index: true },
     collaborationGroupId: { type: mongoose.Schema.Types.ObjectId, ref: 'CollaborationGroup', index: true },
 
     // Manufacturer
@@ -85,7 +85,7 @@ CustomProductRequestSchema.virtual('escrow', {
 
 // Indexes for efficient queries
 CustomProductRequestSchema.index({ manufacturerId: 1, status: 1 });
-CustomProductRequestSchema.index({ dealerId: 1, status: 1 });
+CustomProductRequestSchema.index({ sellerId: 1, status: 1 });
 
 CustomProductRequestSchema.index({ createdAt: -1 });
 

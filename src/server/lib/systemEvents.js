@@ -37,6 +37,10 @@ export const EVENTS = {
     DISPUTE: {
         RAISED: 'DISPUTE.RAISED',
         RESOLVED: 'DISPUTE.RESOLVED'
+    },
+    REVIEW: {
+        CREATED: 'REVIEW.CREATED',
+        REPLIED: 'REVIEW.REPLIED'
     }
 };
 

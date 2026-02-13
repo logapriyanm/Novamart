@@ -14,15 +14,18 @@ export default {
                 'lg': '1025px',  // Desktop (≥ 1025px)
             },
             colors: {
-                primary: "#10367D", // Deep Navy (Buttons, Important Text)
-                secondary: "#74b4da", // Sky Blue (Minimal Usage)
-                accent: "#74b4da",   // Same as Secondary
-                background: "#EBEBEB", // Global Website Background
-                surface: "#EBEBEB", // Component Surface
-                foreground: "#101527", // Midnight Blue Text
-                "text-secondary": "#101527",
-                "text-muted": "#10367D",
+                primary: "#2772A0", // The ONLY Accent Color (Buttons, Active States)
+                secondary: "#171717", // Dark Gray (Text, Secondary Actions)
+                accent: "#2772A0",   // Alias for Primary
+                background: "#FFFFFF", // Pure White Background
+                surface: "#FAFAFA", // Very Light Gray Surface
+                foreground: "#000000", // Pure Black Text
+                "text-secondary": "#4B5563", // Gray-600 for secondary text
+                "text-muted": "#9CA3AF", // Gray-400 for muted text
+                success: "#10B981",
                 warning: "#F59E0B",
+                danger: "#EF4444",
+                border: "#E5E7EB", // Gray-200
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

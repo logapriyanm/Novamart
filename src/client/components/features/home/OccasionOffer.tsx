@@ -21,8 +21,8 @@ export default function OccasionOffer({ data }: OccasionOfferProps) {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             className={`relative w-full rounded-[2.5rem] p-8 mb-12 overflow-hidden shadow-2xl shadow-primary/20 bg-gradient-to-r ${isBirthday
-                    ? 'from-[#FF6B6B] to-[#FF8E53]'
-                    : 'from-[#F06292] to-[#EC407A]'
+                ? 'from-[#FF6B6B] to-[#FF8E53]'
+                : 'from-[#F06292] to-[#EC407A]'
                 }`}
         >
             {/* Background Decorations */}
@@ -49,7 +49,7 @@ export default function OccasionOffer({ data }: OccasionOfferProps) {
 
                 <div className="flex items-center gap-6">
                     <div className="text-right">
-                        <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-1">Exclusive Voucher</p>
+                        <p className="text-white/60 text-sm font-semibold mb-1">Exclusive voucher</p>
                         <p className="text-5xl font-black text-white tracking-tighter">
                             {data.discount}% <span className="text-xl">OFF</span>
                         </p>

@@ -117,7 +117,7 @@ export default function SectionRenderer({ section, user, personalizedData }: Sec
     }
 
     return (
-        <section className="scroll-mt-32">
+        <section className="scroll-mt-1">
             {section.title && section.title !== 'Hero Section' && (
                 <div className="mb-6">
                     <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tighter uppercase italic">

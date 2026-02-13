@@ -36,11 +36,11 @@ export default function SubscriptionBadge({ tier, size = 'md', showIcon = true }
     const getSizeClasses = () => {
         switch (size) {
             case 'sm':
-                return 'px-2 py-1 text-xs';
+                return 'px-3 py-1.5 text-sm';
             case 'lg':
                 return 'px-6 py-3 text-sm';
             default:
-                return 'px-4 py-2 text-xs';
+                return 'px-4 py-2 text-sm';
         }
     };
 
@@ -48,7 +48,7 @@ export default function SubscriptionBadge({ tier, size = 'md', showIcon = true }
     const styles = getStyles();
 
     return (
-        <div className={`inline-flex items-center gap-2 rounded-[10px] border font-black uppercase tracking-wider ${styles.container} ${getSizeClasses()}`}>
+        <div className={`inline-flex items-center gap-2 rounded-[10px] border font-semibold ${styles.container} ${getSizeClasses()}`}>
             {showIcon && styles.icon}
             <span>{tier}</span>
         </div>

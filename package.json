@@ -9,6 +9,7 @@
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "build": "next build",
     "start": "next start",
+    "lint": "next lint",
     "test": "node scripts/test-all.js",
     "test:all": "node scripts/test-all.js"
   },

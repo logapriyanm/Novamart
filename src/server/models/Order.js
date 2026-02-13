@@ -17,7 +17,7 @@ const TimelineSchema = new mongoose.Schema({
 
 const OrderSchema = new mongoose.Schema({
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true, index: true },
-    dealerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dealer', required: true, index: true },
+    sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true, index: true },
     status: {
         type: String,
         enum: ['CREATED', 'PAID', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'SETTLED', 'CANCELLED', 'DISPUTED', 'OUT_FOR_DELIVERY'],

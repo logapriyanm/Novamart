@@ -91,13 +91,13 @@ export default function WishlistPage() {
                         <div className="flex items-center justify-center gap-4">
                             <Link
                                 href="/auth/login"
-                                className="px-8 py-3 bg-black text-white rounded-[10px] text-sm font-bold hover:bg-black/90 transition-colors"
+                                className="btn-primary"
                             >
                                 Sign In
                             </Link>
                             <Link
                                 href="/auth/register"
-                                className="px-8 py-3 bg-white text-black border-2 border-black rounded-[10px] text-sm font-bold hover:bg-slate-50 transition-colors"
+                                className="btn-secondary"
                             >
                                 Create Account
                             </Link>
@@ -114,8 +114,8 @@ export default function WishlistPage() {
 
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-black text-black tracking-tight mb-2 italic uppercase">My Collections</h1>
-                    <p className="text-foreground/40 text-[10px] font-bold uppercase tracking-[0.2em]">Organize your procurement lists and manage saved items for future orders.</p>
+                    <h1 className="text-3xl font-black text-foreground tracking-tight mb-2 italic uppercase">My Collections</h1>
+                    <p className="text-muted-foreground/60 text-[10px] font-bold uppercase tracking-[0.2em]">Organize your procurement lists and manage saved items for future orders.</p>
                 </div>
 
                 {/* Main Layout */}
@@ -125,38 +125,38 @@ export default function WishlistPage() {
                     <div className="flex-1">
 
                         {/* Tabs */}
-                        <div className="flex items-center gap-8 border-b border-slate-200 mb-8">
+                        <div className="flex items-center gap-8 border-b border-border mb-8">
                             <button
                                 onClick={() => setActiveTab('wishlist')}
-                                className={`flex items-center gap-2 pb-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'wishlist' ? 'border-black text-black' : 'border-transparent text-foreground/20 hover:text-foreground/40'}`}
+                                className={`flex items-center gap-2 pb-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'wishlist' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground/50 hover:text-muted-foreground'}`}
                             >
-                                <FaHeart className={activeTab === 'wishlist' ? 'text-black' : 'text-foreground/10'} />
+                                <FaHeart className={activeTab === 'wishlist' ? 'text-primary' : 'text-muted-foreground/20'} />
                                 My Wishlist ({items.length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('saved')}
-                                className={`flex items-center gap-2 pb-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'saved' ? 'border-black text-black' : 'border-transparent text-foreground/20 hover:text-foreground/40'}`}
+                                className={`flex items-center gap-2 pb-4 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'saved' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground/50 hover:text-muted-foreground'}`}
                             >
-                                <FaBookmark className={activeTab === 'saved' ? 'text-black' : 'text-foreground/10'} />
+                                <FaBookmark className={activeTab === 'saved' ? 'text-primary' : 'text-muted-foreground/20'} />
                                 Saved for Later (0)
                             </button>
                         </div>
 
                         {/* Filters Toolbar */}
                         <div className="flex flex-wrap items-center gap-3 mb-8">
-                            <button className="px-4 py-2 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-black/20">
+                            <button className="px-4 py-2 bg-primary text-primary-foreground rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-primary/20">
                                 <FaThLarge /> All Items
                             </button>
-                            <button className="px-4 py-2 bg-white text-foreground/40 border border-foreground/5 hover:border-black/20 hover:text-black rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
+                            <button className="px-4 py-2 bg-white text-muted-foreground/60 border border-border hover:border-foreground/30 hover:text-foreground rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
                                 <FaLaptopHouse /> Home Office
                             </button>
-                            <button className="px-4 py-2 bg-white text-foreground/40 border border-foreground/5 hover:border-black/20 hover:text-black rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
+                            <button className="px-4 py-2 bg-white text-muted-foreground/60 border border-border hover:border-foreground/30 hover:text-foreground rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
                                 <FaUtensils /> Kitchen Upgrades
                             </button>
-                            <button className="px-4 py-2 bg-white text-foreground/40 border border-foreground/5 hover:border-black/20 hover:text-black rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
+                            <button className="px-4 py-2 bg-white text-muted-foreground/60 border border-border hover:border-foreground/30 hover:text-foreground rounded-[10px] text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors">
                                 <FaTools /> Industrial Gear
                             </button>
-                            <button className="ml-auto text-blue-600 font-bold text-xs flex items-center gap-1 hover:underline">
+                            <button className="ml-auto text-primary font-bold text-xs flex items-center gap-1 hover:underline">
                                 <FaPlus /> Create New List
                             </button>
                         </div>
@@ -164,16 +164,16 @@ export default function WishlistPage() {
                         {isLoading ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[1, 2, 3].map(i => (
-                                    <div key={i} className="h-[420px] bg-white rounded-[10px] animate-pulse border border-slate-100" />
+                                    <div key={i} className="h-[420px] bg-white rounded-[10px] animate-pulse border border-border" />
                                 ))}
                             </div>
                         ) : activeTab === 'wishlist' && displayItems.length === 0 ? (
                             <div className="col-span-full py-20 text-center">
-                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <FaHeart className="text-slate-200 text-2xl" />
+                                <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <FaHeart className="text-muted-foreground/30 text-2xl" />
                                 </div>
-                                <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">Your wishlist is empty</p>
-                                <Link href="/products" className="inline-block mt-4 text-[#10367D] font-black uppercase tracking-widest text-[10px] hover:underline">
+                                <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">Your wishlist is empty</p>
+                                <Link href="/products" className="inline-block mt-4 text-primary font-black uppercase tracking-widest text-[10px] hover:underline">
                                     Browse Products
                                 </Link>
                             </div>

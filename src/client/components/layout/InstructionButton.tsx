@@ -16,7 +16,7 @@ const InstructionButton: React.FC = () => {
 
     let tooltipText = "Help Guide";
     if (user?.role === 'CUSTOMER') tooltipText = "Customer Manual";
-    else if (user?.role === 'DEALER') tooltipText = "Dealer Manual";
+    else if (user?.role === 'SELLER') tooltipText = "Seller Manual";
     else if (user?.role === 'MANUFACTURER') tooltipText = "Manufacturer Manual";
 
     return (

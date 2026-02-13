@@ -9,11 +9,12 @@ import { HiOutlineRefresh } from 'react-icons/hi';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { manufacturerService } from '@/lib/api/services/manufacturer.service';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 
 import EmptyState from '@/client/components/ui/EmptyState';
 import Loader from '@/client/components/ui/Loader';
 import DashboardSkeleton from '@/client/components/ui/DashboardSkeleton';
+import ManufacturerAnalyticsDashboard from '@/client/components/features/dashboard/manufacturer/ManufacturerAnalyticsDashboard';
 
 const mockChartData = [
     { name: 'Jan', value: 4000 },
@@ -60,11 +61,11 @@ export default function ManufacturerDashboard() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60">
                 <div>
-                    <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">Production <span className="text-indigo-600">Monitor</span></h1>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Global Operations & Manufacturer Analytics</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Production <span className="text-indigo-600">Monitor</span></h1>
+                    <p className="text-sm font-medium text-slate-400 mt-2">Global Operations & Manufacturer Analytics</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Link href="/manufacturer/products/add" className="px-6 py-2.5 bg-black text-white text-[11px] font-black uppercase tracking-widest rounded-[10px] hover:bg-slate-800 transition-all shadow-sm">
+                    <Link href="/manufacturer/products/add" className="px-6 py-2.5 bg-black text-white text-sm font-bold rounded-[10px] hover:bg-slate-800 transition-all shadow-sm">
                         + New SKU
                     </Link>
                 </div>
@@ -111,50 +112,17 @@ export default function ManufacturerDashboard() {
                 <div className="lg:col-span-2 space-y-8">
                     {/* Revenue Chart */}
                     <div className="bg-white p-8 rounded-[10px] border border-slate-100 shadow-sm">
-                        <div className="flex items-center justify-between mb-8">
-                            <div>
-                                <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Production Volume</h3>
-                                <p className="text-lg font-bold text-slate-900 mt-1">Output Consistency</p>
-                            </div>
-                            <select className="bg-slate-50 border border-slate-200 text-[10px] font-black uppercase text-slate-600 rounded-[10px] px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20">
-                                <option>This Year</option>
-                                <option>Last Year</option>
-                            </select>
-                        </div>
-
-                        <div className="h-[300px] w-full relative overflow-hidden">
-                            {!isLoading && (
-                                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                                    <AreaChart data={mockChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                        <defs>
-                                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#10367D" stopOpacity={0.1} />
-                                                <stop offset="95%" stopColor="#10367D" stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
-                                        <Tooltip
-                                            contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                            itemStyle={{ color: '#10367D', fontSize: '11px', fontWeight: 800 }}
-                                            cursor={{ stroke: '#bfdbfe', strokeWidth: 2 }}
-                                        />
-                                        <Area type="monotone" dataKey="value" stroke="#10367D" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
-                                    </AreaChart>
-                                </ResponsiveContainer>
-                            )}
-                        </div>
+                        <ManufacturerAnalyticsDashboard />
                     </div>
 
                     {/* Inventory Health */}
                     <div className="bg-white p-8 rounded-[10px] border border-slate-100 shadow-sm">
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Inventory Health</h3>
-                                <p className="text-lg font-bold text-slate-900 mt-1">Stock Readiness</p>
+                                <h3 className="text-sm font-bold text-slate-500 mb-1">Inventory Health</h3>
+                                <p className="text-lg font-bold text-slate-900">Stock Readiness</p>
                             </div>
-                            <Link href="/manufacturer/inventory" className="text-[10px] font-black text-primary uppercase tracking-widest hover:translate-x-0.5 transition-transform">View All Assets</Link>
+                            <Link href="/manufacturer/inventory" className="text-sm font-bold text-primary hover:translate-x-0.5 transition-transform">View All Assets</Link>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="p-6 bg-amber-50/20 rounded-[10px] border border-amber-100/50 flex items-center justify-between group">
@@ -163,11 +131,11 @@ export default function ManufacturerDashboard() {
                                         <FaWarehouse className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Critical Stock</p>
-                                        <p className="text-xl font-black text-slate-900">3 Items</p>
+                                        <p className="text-sm font-medium text-amber-600">Critical Stock</p>
+                                        <p className="text-xl font-bold text-slate-900">3 Items</p>
                                     </div>
                                 </div>
-                                <span className="text-[9px] font-black text-amber-600 bg-white border border-amber-100 px-2.5 py-1 rounded-[10px] shadow-sm uppercase tracking-widest">Restock</span>
+                                <span className="text-xs font-bold text-amber-600 bg-white border border-amber-100 px-2.5 py-1 rounded-[10px] shadow-sm">Restock</span>
                             </div>
                             <div className="p-6 bg-primary/5 rounded-[10px] border border-primary/10 flex items-center justify-between group">
                                 <div className="flex items-center gap-4">
@@ -175,11 +143,11 @@ export default function ManufacturerDashboard() {
                                         <FaBox className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black text-primary uppercase tracking-widest">Global Capacity</p>
-                                        <p className="text-xl font-black text-slate-900">1,240 Units</p>
+                                        <p className="text-sm font-medium text-primary">Global Capacity</p>
+                                        <p className="text-xl font-bold text-slate-900">1,240 Units</p>
                                     </div>
                                 </div>
-                                <span className="text-[9px] font-black text-primary bg-white border border-primary/10 px-2.5 py-1 rounded-[10px] shadow-sm uppercase tracking-widest">Stable</span>
+                                <span className="text-xs font-bold text-primary bg-white border border-primary/10 px-2.5 py-1 rounded-[10px] shadow-sm">Stable</span>
                             </div>
                         </div>
                     </div>
@@ -251,18 +219,18 @@ function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
         <div className="p-6 bg-white border border-slate-100 rounded-[10px] shadow-sm flex flex-col justify-between group h-full">
             <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{label}</p>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h3>
+                    <p className="text-sm font-medium text-slate-400 mb-1.5">{label}</p>
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{value}</h3>
                 </div>
                 <div className={`w-12 h-12 ${bgColor} ${color} rounded-[10px] flex items-center justify-center transition-all group-hover:scale-110 shadow-sm`}>
                     <Icon className="w-5 h-5" />
                 </div>
             </div>
             <div className="mt-6 flex items-center gap-2">
-                <span className={`text-[9px] font-black uppercase tracking-widest ${color} bg-white px-2 py-1 rounded-[10px] border border-slate-100 shadow-sm`}>
+                <span className={`text-xs font-bold ${color} bg-white px-2 py-1 rounded-[10px] border border-slate-100 shadow-sm`}>
                     {trend}
                 </span>
-                <span className="text-[10px] font-bold text-slate-400">vs last cycle</span>
+                <span className="text-xs font-bold text-slate-400">vs last cycle</span>
             </div>
         </div>
     );

@@ -16,7 +16,7 @@ import { authRateLimiter } from './middleware/rateLimiter.js';
 import authRoutes from './routes/auth/authRoutes.js';
 import adminRoutes from './routes/admin/adminRoutes.js';
 import manufacturerRoutes from './routes/manufacturer/manufacturerRoutes.js';
-import dealerRoutes from './routes/dealer/dealerRoutes.js';
+import sellerRoutes from './routes/seller/sellerRoutes.js';
 import customerRoutes from './routes/customer/customerRoutes.js';
 import trackingRoutes from './routes/tracking/trackingRoutes.js';
 import chatRoutes from './routes/chat/chatRoutes.js';
@@ -27,6 +27,7 @@ import homeRoutes from './routes/home/homeRoutes.js';
 import cmsRoutes from './routes/home/cmsRoutes.js';
 import reviewRoutes from './routes/review/reviewRoutes.js';
 import notificationService from './services/notificationService.js';
+import './subscribers/emailSubscriber.js'; // Initialize Email Subscriber
 import { Message, Chat, User } from './models/index.js';
 import ordersRouter from './routes/orders/index.js';
 import paymentRoutes from './routes/payments/index.js';
@@ -42,7 +43,8 @@ import collaborationRoutes from './routes/collaboration/collaborationRoutes.js';
 import customManufacturingRoutes from './routes/customManufacturing/customManufacturingRoutes.js';
 import customEscrowRoutes from './routes/customEscrow/customEscrowRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
-import sellerRoutes from './routes/sellers/sellerRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
+
 
 const app = express();
 const httpServer = createServer(app);
@@ -194,7 +196,7 @@ io.on('connection', (socket) => {
 // Register API routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/manufacturer', manufacturerRoutes);
-app.use('/api/dealer', dealerRoutes);
+app.use('/api/seller', sellerRoutes);
 app.use('/api/customer', customerRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/tracking', trackingRoutes);
@@ -206,6 +208,7 @@ app.use('/api/mongodb', mongodbRoutes);
 app.use('/api/cms', cmsRoutes);
 app.use('/api/home', homeRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/analytics', analyticsRoutes);
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/escrow', escrowRoutes);
@@ -219,21 +222,19 @@ app.use('/api/collaboration', collaborationRoutes);
 app.use('/api/custom-manufacturing', customManufacturingRoutes);
 app.use('/api/custom-escrow', customEscrowRoutes);
 app.use('/api/wishlist', wishlistRoutes);
-app.use('/api/sellers', sellerRoutes);
+
 
 // Log all routes
 function printRoutes(stack, prefix = '') {
     stack.forEach((r) => {
         if (r.route && r.route.path) {
-            // console.log(`Route: ${prefix}${r.route.path}`);
+            // Route logic
         } else if (r.name === 'router' && r.handle.stack) {
             printRoutes(r.handle.stack, prefix + r.regexp.source.replace('\\/?(?=\\/|$)', '').replace('^\\', '').replace('\\/', '/'));
         }
     });
 }
-// console.log('--- Registered Routes ---');
 printRoutes(app._router.stack);
-// console.log('-------------------------');
 
 // Health check route
 app.get('/test-route', (req, res) => res.json({ success: true, message: 'Server is updating!' }));

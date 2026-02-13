@@ -12,12 +12,13 @@ import {
 import { HiOutlineRefresh } from 'react-icons/hi';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 
 import { adminService } from '@/lib/api/services/admin.service';
 import EmptyState from '@/client/components/ui/EmptyState';
 import Loader from '@/client/components/ui/Loader';
 import DashboardSkeleton from '@/client/components/ui/DashboardSkeleton';
+import AdminAnalyticsDashboard from '@/client/components/features/dashboard/admin/AdminAnalyticsDashboard';
 
 const mockActivityData = [
     { time: '00:00', users: 120 },
@@ -113,32 +114,8 @@ export default function AdminDashboard() {
             {/* Main Content Sections */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* Live Traffic / Usage Chart */}
-                <div className="xl:col-span-2 card-enterprise p-8 bg-white">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest">Platform Activity</h3>
-                            <p className="text-lg font-bold text-slate-900 mt-1">Real-time Usage Dynamics</p>
-                        </div>
-                        <span className="flex items-center gap-2 text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full ring-1 ring-emerald-500/20">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> SYSTEM LIVE
-                        </span>
-                    </div>
-                    <div className="h-[320px] w-full relative overflow-hidden">
-                        {!isLoading && (
-                            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                                <LineChart data={mockActivityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} dy={10} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                        itemStyle={{ color: '#1e293b', fontSize: '11px', fontWeight: 800 }}
-                                    />
-                                    <Line type="monotone" dataKey="users" stroke="#10367D" strokeWidth={3} dot={{ r: 4, fill: '#10367D', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, fill: '#10367D' }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        )}
-                    </div>
+                <div className="xl:col-span-2">
+                    <AdminAnalyticsDashboard />
                 </div>
 
                 {/* Recent Audit Logs */}

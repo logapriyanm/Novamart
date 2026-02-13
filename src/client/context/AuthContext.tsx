@@ -58,14 +58,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(userData);
         } catch (error: any) {
             // Silently handle network errors (backend may not be running)
-            const isNetworkError = error?.message?.includes('Failed to fetch') || 
-                                  error?.message?.includes('Network error') || 
-                                  error?.isNetworkError;
-            
+            const isNetworkError = error?.message?.includes('Failed to fetch') ||
+                error?.message?.includes('Network error') ||
+                error?.isNetworkError;
+
             if (!isNetworkError && process.env.NODE_ENV === 'development') {
                 console.error('Session hydration failed:', error);
             }
-            
+
             // If checking user fails (e.g. token expired), token refresh happens in apiClient.ts
             // But if it still fails, clear tokens.
             if (apiClient.getToken() === null || isNetworkError) {
@@ -76,9 +76,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     const retryUserData = await authService.getCurrentUser();
                     setUser(retryUserData);
                 } catch (retryError: any) {
-                    const isRetryNetworkError = retryError?.message?.includes('Failed to fetch') || 
-                                               retryError?.message?.includes('Network error') ||
-                                               retryError?.isNetworkError;
+                    const isRetryNetworkError = retryError?.message?.includes('Failed to fetch') ||
+                        retryError?.message?.includes('Network error') ||
+                        retryError?.isNetworkError;
                     if (!isRetryNetworkError) {
                         apiClient.setTokens(null, null);
                     }
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
             switch (role) {
                 case 'MANUFACTURER': router.push('/manufacturer/dashboard'); break;
-                case 'DEALER': router.push('/dealer/dashboard'); break;
+                case 'SELLER': router.push('/seller/dashboard'); break;
                 case 'CUSTOMER': router.push('/'); break;
                 default: router.push('/');
             }
@@ -128,14 +128,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error: any) {
             // Check if it's a network error (backend down)
             const errorMessage = error?.message || '';
-            const isNetworkError = errorMessage.includes('Network error') || 
-                                  errorMessage.includes('Failed to fetch') ||
-                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
-                                  errorMessage.includes('connection refused') ||
-                                  error?.isNetworkError ||
-                                  error?.status === 0 ||
-                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
-            
+            const isNetworkError = errorMessage.includes('Network error') ||
+                errorMessage.includes('Failed to fetch') ||
+                errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                errorMessage.includes('connection refused') ||
+                error?.isNetworkError ||
+                error?.status === 0 ||
+                error?.name === 'TypeError' && errorMessage.includes('fetch');
+
             if (isNetworkError) {
                 // User-friendly message for network errors
                 toast.error('Unable to connect to server. Please check if the backend is running.');
@@ -161,14 +161,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             toast.success('Login successful via Google');
         } catch (error: any) {
             const errorMessage = error?.message || '';
-            const isNetworkError = errorMessage.includes('Network error') || 
-                                  errorMessage.includes('Failed to fetch') ||
-                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
-                                  errorMessage.includes('connection refused') ||
-                                  error?.isNetworkError ||
-                                  error?.status === 0 ||
-                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
-            
+            const isNetworkError = errorMessage.includes('Network error') ||
+                errorMessage.includes('Failed to fetch') ||
+                errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                errorMessage.includes('connection refused') ||
+                error?.isNetworkError ||
+                error?.status === 0 ||
+                error?.name === 'TypeError' && errorMessage.includes('fetch');
+
             if (isNetworkError) {
                 toast.error('Unable to connect to server. Please check if the backend is running.');
             } else {
@@ -190,14 +190,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             handleAuthSuccess(response);
         } catch (error: any) {
             const errorMessage = error?.message || '';
-            const isNetworkError = errorMessage.includes('Network error') || 
-                                  errorMessage.includes('Failed to fetch') ||
-                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
-                                  errorMessage.includes('connection refused') ||
-                                  error?.isNetworkError ||
-                                  error?.status === 0 ||
-                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
-            
+            const isNetworkError = errorMessage.includes('Network error') ||
+                errorMessage.includes('Failed to fetch') ||
+                errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                errorMessage.includes('connection refused') ||
+                error?.isNetworkError ||
+                error?.status === 0 ||
+                error?.name === 'TypeError' && errorMessage.includes('fetch');
+
             if (isNetworkError) {
                 toast.error('Unable to connect to server. Please check if the backend is running.');
             } else {
@@ -219,14 +219,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             toast.success('OTP sent successfully');
         } catch (error: any) {
             const errorMessage = error?.message || '';
-            const isNetworkError = errorMessage.includes('Network error') || 
-                                  errorMessage.includes('Failed to fetch') ||
-                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
-                                  errorMessage.includes('connection refused') ||
-                                  error?.isNetworkError ||
-                                  error?.status === 0 ||
-                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
-            
+            const isNetworkError = errorMessage.includes('Network error') ||
+                errorMessage.includes('Failed to fetch') ||
+                errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                errorMessage.includes('connection refused') ||
+                error?.isNetworkError ||
+                error?.status === 0 ||
+                error?.name === 'TypeError' && errorMessage.includes('fetch');
+
             if (isNetworkError) {
                 toast.error('Unable to connect to server. Please check if the backend is running.');
             } else {
@@ -255,14 +255,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         } catch (error: any) {
             const errorMessage = error?.message || '';
-            const isNetworkError = errorMessage.includes('Network error') || 
-                                  errorMessage.includes('Failed to fetch') ||
-                                  errorMessage.includes('ERR_CONNECTION_REFUSED') ||
-                                  errorMessage.includes('connection refused') ||
-                                  error?.isNetworkError ||
-                                  error?.status === 0 ||
-                                  error?.name === 'TypeError' && errorMessage.includes('fetch');
-            
+            const isNetworkError = errorMessage.includes('Network error') ||
+                errorMessage.includes('Failed to fetch') ||
+                errorMessage.includes('ERR_CONNECTION_REFUSED') ||
+                errorMessage.includes('connection refused') ||
+                error?.isNetworkError ||
+                error?.status === 0 ||
+                error?.name === 'TypeError' && errorMessage.includes('fetch');
+
             if (isNetworkError) {
                 toast.error('Unable to connect to server. Please check if the backend is running.');
             } else {

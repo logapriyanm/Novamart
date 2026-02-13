@@ -30,7 +30,7 @@ export default function RecommendedProducts({ title, products }: RecommendedProd
 
     return (
         <div className="mb-12">
-            <h2 className="text-2xl font-black text-black mb-6 flex items-center gap-2 uppercase italic">
+            <h2 className="text-2xl font-bold text-black mb-6 flex items-center gap-2">
                 <FaStar className="text-black" /> {title}
             </h2>
 
@@ -60,7 +60,7 @@ export default function RecommendedProducts({ title, products }: RecommendedProd
 
                             <div className="mt-auto flex items-center justify-between">
                                 <p className="text-lg font-black text-black">₹{product.basePrice.toLocaleString()}</p>
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-black bg-black/5 border border-foreground/5 px-3 py-1.5 rounded-[10px] group-hover:bg-black group-hover:text-white transition-colors">
+                                <span className="text-sm font-semibold text-black bg-black/5 border border-foreground/5 px-3 py-1.5 rounded-[10px] group-hover:bg-black group-hover:text-white transition-colors">
                                     View
                                 </span>
                             </div>

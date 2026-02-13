@@ -124,13 +124,13 @@ export default function SellerProfilePage() {
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
-                    <div className="flex border-b border-slate-50 bg-slate-50/30">
+                <div className="bg-white rounded-[2rem] border border-border shadow-xl shadow-slate-200/50 overflow-hidden">
+                    <div className="flex border-b border-border bg-muted/20">
                         {['Products', 'Reviews'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-12 py-7 text-[11px] font-black uppercase tracking-[0.3em] transition-all relative ${activeTab === tab ? 'text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`px-12 py-7 text-[11px] font-black uppercase tracking-[0.3em] transition-all relative ${activeTab === tab ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                             >
                                 <span className="flex items-center gap-3">
                                     {tab === 'Products' ? <FaBox className="w-3.5 h-3.5" /> : <FaCommentAlt className="w-3.5 h-3.5" />}

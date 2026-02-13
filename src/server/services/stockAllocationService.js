@@ -1,21 +1,21 @@
 /**
  * Stock Allocation Service
- * Logic for manufacturers to allocate stock, set dealer-specific pricing and MOQ.
+ * Logic for manufacturers to allocate stock, set seller-specific pricing and MOQ.
  */
 
 import Product from '../models/Product.js';
 import Manufacturer from '../models/Manufacturer.js';
 import Inventory from '../models/Inventory.js';
 import User from '../models/User.js';
-import ManufacturerDealerBlock from '../models/ManufacturerDealerBlock.js';
+import ManufacturerSellerBlock from '../models/ManufacturerSellerBlock.js';
 import mongoose from 'mongoose';
 
 class StockAllocationService {
     /**
-     * Allocate stock to a dealer for a specific product.
+     * Allocate stock to a seller for a specific product.
      * Updates or creates an inventory record with allocation constraints.
      */
-    async allocateStock(mfgId, { productId, dealerId, region, quantity, dealerBasePrice, dealerMoq, maxMargin }) {
+    async allocateStock(mfgId, { productId, sellerId, region, quantity, sellerBasePrice, sellerMoq, maxMargin }) {
         // 1. Verify Product Ownership
         const product = await Product.findById(productId);
 
@@ -23,61 +23,58 @@ class StockAllocationService {
             throw new Error('UNAUTHORIZED_PRODUCT_ALLOCATION');
         }
 
-        // 2. Ensure Dealer is in network (Approved)
+        // 2. Ensure Seller is in network (Approved)
         const manufacturer = await Manufacturer.findById(mfgId);
 
-        if (!manufacturer.approvedBy?.includes(dealerId)) {
+        if (!manufacturer.approvedBy?.includes(sellerId)) {
             // Automatically add to network if allocating stock
             await Manufacturer.findByIdAndUpdate(mfgId, {
-                $addToSet: { approvedBy: dealerId }
+                $addToSet: { approvedBy: sellerId }
             });
         }
 
-        // 3. Check if dealer is blocked (Logic simplified for Mongoose)
-        // Note: Blocked logic in MongoDB will depend on how ManufacturerDealerBlock is implemented.
-        // For now, mirroring Prisma flow.
-        // 3. Check if dealer is blocked
-        const isBlocked = await ManufacturerDealerBlock.findOne({
+        // 3. Check if seller is blocked
+        const isBlocked = await ManufacturerSellerBlock.findOne({
             manufacturerId: mfgId,
-            dealerId: dealerId,
+            sellerId: sellerId,
             isActive: true
         });
 
         if (isBlocked) {
-            throw new Error('DEALER_IS_BLOCKED');
+            throw new Error('SELLER_IS_BLOCKED');
         }
 
         // 4. Update or Create Inventory Record
-        const query = { productId, dealerId, region };
+        const query = { productId, sellerId, region };
         const existingInventory = await Inventory.findOne(query);
 
         if (existingInventory) {
             return await Inventory.findByIdAndUpdate(existingInventory._id, {
                 $inc: { allocatedStock: quantity },
-                dealerBasePrice: dealerBasePrice || product.basePrice,
-                dealerMoq: dealerMoq || 1,
+                sellerBasePrice: sellerBasePrice || product.basePrice,
+                sellerMoq: sellerMoq || 1,
                 maxMargin: maxMargin || 20,
                 isAllocated: true,
-                price: existingInventory.price || dealerBasePrice || product.basePrice
+                price: existingInventory.price || sellerBasePrice || product.basePrice
             }, { new: true });
         } else {
             return await Inventory.create({
                 productId,
-                dealerId,
+                sellerId,
                 region,
                 stock: 0,
                 allocatedStock: quantity,
-                dealerBasePrice: dealerBasePrice || product.basePrice,
-                dealerMoq: dealerMoq || 1,
+                sellerBasePrice: sellerBasePrice || product.basePrice,
+                sellerMoq: sellerMoq || 1,
                 maxMargin: maxMargin || 20,
                 isAllocated: true,
-                price: dealerBasePrice || product.basePrice
+                price: sellerBasePrice || product.basePrice
             });
         }
     }
 
     /**
-     * Get all allocations for a manufacturer across their dealer network.
+     * Get all allocations for a manufacturer across their seller network.
      */
     async getManufacturerAllocations(mfgId) {
         const products = await Product.find({ manufacturerId: mfgId }).select('_id');
@@ -87,7 +84,7 @@ class StockAllocationService {
             productId: { $in: productIds },
             isAllocated: true
         })
-            .populate('dealerId', 'businessName city')
+            .populate('sellerId', 'businessName city')
             .populate('productId', 'name basePrice images')
             .sort({ listedAt: -1 })
             .lean();
@@ -105,8 +102,8 @@ class StockAllocationService {
 
         return await Inventory.findByIdAndUpdate(allocationId, {
             allocatedStock: updateData.allocatedStock,
-            dealerBasePrice: updateData.dealerBasePrice,
-            dealerMoq: updateData.dealerMoq,
+            sellerBasePrice: updateData.sellerBasePrice,
+            sellerMoq: updateData.sellerMoq,
             maxMargin: updateData.maxMargin
         }, { new: true });
     }
@@ -130,11 +127,11 @@ class StockAllocationService {
     }
 
     /**
-     * Get allocations for a specific dealer (for dealer dashboard).
+     * Get allocations for a specific seller (for seller dashboard).
      */
-    async getDealerAllocations(dealerId) {
+    async getSellerAllocations(sellerId) {
         return await Inventory.find({
-            dealerId,
+            sellerId,
             isAllocated: true
         })
             .populate({

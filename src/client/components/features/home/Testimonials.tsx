@@ -39,8 +39,8 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
                                     </div>
                                 </div>
                                 <h3 className="text-base font-black text-foreground mb-2">{item.title}</h3>
-                                <p className="text-[10px] text-foreground/40 leading-relaxed mb-4">{item.text}</p>
-                                <div className="flex gap-1 text-amber-400 text-[10px] mt-auto">
+                                <p className="text-sm text-foreground/40 leading-relaxed mb-4">{item.text}</p>
+                                <div className="flex gap-1 text-amber-400 text-sm mt-auto">
                                     {[...Array(item.rating)].map((_, i) => <Star key={i} />)}
                                 </div>
                             </div>
@@ -56,11 +56,11 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
                                     </div>
                                 </div>
                                 <div className="mt-2 mb-6">
-                                    <span className="text-[10px] font-bold text-foreground/40 block mb-1">{item.author}</span>
-                                    <span className="text-[8px] font-bold text-foreground/20 uppercase tracking-wider">{item.role}</span>
+                                    <span className="text-sm font-medium text-foreground/40 block mb-1">{item.author}</span>
+                                    <span className="text-xs font-medium text-foreground/20">{item.role}</span>
                                 </div>
                                 <h3 className="text-sm font-black text-foreground mb-2">{item.title}</h3>
-                                <p className="text-[10px] text-foreground/40 leading-relaxed">{item.text}</p>
+                                <p className="text-sm text-foreground/40 leading-relaxed">{item.text}</p>
                                 <div className="flex gap-1 text-amber-400 text-[8px] mt-4">
                                     {[...Array(item.rating)].map((_, i) => <Star key={i} />)}
                                 </div>
@@ -72,11 +72,11 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
                             <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-6 h-full text-center sm:text-left">
                                 <div className="flex-1">
                                     <FaQuoteLeft className="text-lg xs:text-xl text-foreground mb-3 mx-auto sm:mx-0" />
-                                    <h3 className="text-sm font-black text-foreground mb-2 italic uppercase">{item.title}</h3>
-                                    <p className="text-[11px] xs:text-[12px] text-foreground/40 leading-relaxed mb-4">{item.text}</p>
+                                    <h3 className="text-sm font-bold text-foreground mb-2">{item.title}</h3>
+                                    <p className="text-sm text-foreground/40 leading-relaxed mb-4">{item.text}</p>
                                     <div>
                                         <p className="text-xs font-black text-foreground italic">{item.author}</p>
-                                        <p className="text-[10px] font-bold text-foreground/40 uppercase tracking-tighter">{item.role}</p>
+                                        <p className="text-sm font-medium text-foreground/40">{item.role}</p>
                                     </div>
                                 </div>
                                 <div className="w-full sm:w-24 h-32 sm:h-auto rounded-[10px] overflow-hidden flex-shrink-0">
@@ -90,11 +90,11 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
                             <div className="flex flex-col justify-center h-full relative">
                                 <div className="absolute top-0 right-0 bg-background px-3 py-1 rounded-bl-[10px] flex items-center gap-1 border-b border-l border-foreground/5">
                                     <FaHeart className="text-xs text-rose-500" />
-                                    <span className="text-[10px] font-bold text-foreground/60">{item.likes} Like</span>
+                                    <span className="text-sm font-medium text-foreground/60">{item.likes} Like</span>
                                 </div>
                                 <div className="flex items-start gap-4 sm:gap-8 px-2 sm:px-4 mt-6 sm:mt-0">
                                     <div className="flex-1 text-center">
-                                        <h3 className="text-lg xs:text-xl font-black text-foreground mb-3 italic uppercase">{item.title}</h3>
+                                        <h3 className="text-lg xs:text-xl font-bold text-foreground mb-3">{item.title}</h3>
                                         <p className="text-[13px] xs:text-sm text-foreground/40 leading-relaxed max-w-lg mx-auto mb-6">{item.text}</p>
                                         <span className="text-xs xs:text-sm font-black text-foreground italic block">{item.author}</span>
                                     </div>
@@ -113,8 +113,8 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
                                     <FaQuoteRight className="text-xl text-black" />
                                 </div>
                                 <div className="mb-8">
-                                    <p className="text-[9px] xs:text-[10px] uppercase tracking-widest text-foreground/40 mb-2">What People Say</p>
-                                    <h3 className="text-xl xs:text-2xl font-black text-foreground leading-tight italic uppercase">
+                                    <p className="text-sm text-foreground/40 mb-2">What people say</p>
+                                    <h3 className="text-xl xs:text-2xl font-bold text-foreground leading-tight">
                                         {item.text}
                                     </h3>
                                 </div>
@@ -136,7 +136,7 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
                                         <p className="text-[8px] text-foreground/40">{item.role}</p>
                                     </div>
                                 </div>
-                                <p className="text-[10px] text-foreground/50 leading-relaxed italic border-l-2 border-foreground/5 pl-3">
+                                <p className="text-sm text-foreground/50 leading-relaxed italic border-l-2 border-foreground/5 pl-3">
                                     {item.text}
                                 </p>
                                 <div className="flex gap-1 text-amber-400 text-[8px]">
@@ -154,7 +154,7 @@ export default function Testimonials({ testimonials = [] }: TestimonialsProps) {
                                 <div className="flex gap-1 text-amber-400 text-[8px] mb-3">
                                     {[...Array(item.rating)].map((_, i) => <Star key={i} />)}
                                 </div>
-                                <p className="text-[10px] text-foreground/50 leading-relaxed mb-4">
+                                <p className="text-sm text-foreground/50 leading-relaxed mb-4">
                                     {item.text}
                                 </p>
                                 <span className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Isabella ..</span>

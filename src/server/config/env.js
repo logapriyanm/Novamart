@@ -18,8 +18,12 @@ const requiredEnvVars = [
     'CLOUDINARY_API_SECRET',
     'RAZORPAY_KEY_ID',
     'RAZORPAY_KEY_SECRET',
-    // 'SMTP_USER', // Optional
-    // 'SMTP_PASSWORD' // Optional
+    'RAZORPAY_KEY_SECRET',
+    'SMTP_USER',
+    'SMTP_PASSWORD',
+    'SMTP_HOST',
+    'SMTP_PORT',
+    'EMAIL_FROM'
 ];
 
 export const validateEnv = () => {
@@ -31,10 +35,6 @@ export const validateEnv = () => {
         // In production, we should exit. In dev, we might warn.
         if (process.env.NODE_ENV === 'production') {
             process.exit(1);
-        } else {
-            // console.warn('⚠️  Running in development mode with missing keys might break features.');
         }
-    } else {
-        // console.log('✅ Environment variables validated');
     }
 };

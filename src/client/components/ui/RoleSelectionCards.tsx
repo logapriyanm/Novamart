@@ -2,7 +2,7 @@ import React from 'react';
 import { FaShoppingCart, FaStore, FaIndustry, FaCheck, FaStar, FaUsers, FaCog } from 'react-icons/fa';
 
 interface RoleOption {
-    role: 'CUSTOMER' | 'DEALER' | 'MANUFACTURER';
+    role: 'CUSTOMER' | 'SELLER' | 'MANUFACTURER';
     title: string;
     subtitle: string;
     icon: React.ReactNode;
@@ -27,14 +27,14 @@ const roleOptions: RoleOption[] = [
         color: 'from-blue-400 to-blue-600'
     },
     {
-        role: 'DEALER',
-        title: 'Dealer',
+        role: 'SELLER',
+        title: 'Seller',
         subtitle: 'Buy wholesale and resell',
         icon: <FaStore className="w-8 h-8" />,
         benefits: [
             'Wholesale pricing & discounts',
             'Negotiate with manufacturers',
-            'Collaborate with other dealers',
+            'Collaborate with other sellers',
             'Custom product manufacturing',
             'Subscription-based benefits'
         ],
@@ -48,12 +48,12 @@ const roleOptions: RoleOption[] = [
         icon: <FaIndustry className="w-8 h-8" />,
         benefits: [
             'List unlimited products',
-            'Reach thousands of dealers',
+            'Reach thousands of sellers',
             'Accept custom orders',
             'Manage inventory & pricing',
             'Track production milestones'
         ],
-        bestFor: 'Product manufacturers and suppliers selling to dealers',
+        bestFor: 'Product manufacturers and suppliers selling to sellers',
         color: 'from-purple-400 to-purple-600'
     }
 ];
@@ -67,7 +67,7 @@ export default function RoleSelectionCards({ selectedRole, onSelectRole }: RoleS
     return (
         <div className="space-y-6">
             <div className="text-center mb-8">
-                <h2 className="text-2xl font-black text-[#1E293B] mb-2 italic uppercase">
+                <h2 className="text-2xl font-bold text-[#1E293B] mb-2">
                     Choose Your <span className="text-[#10367D]">Account Type</span>
                 </h2>
                 <p className="text-sm font-bold text-slate-500">
@@ -82,8 +82,8 @@ export default function RoleSelectionCards({ selectedRole, onSelectRole }: RoleS
                         type="button"
                         onClick={() => onSelectRole(option.role)}
                         className={`relative text-left p-6 rounded-[20px] border-2 transition-all ${selectedRole === option.role
-                                ? 'border-[#10367D] bg-[#10367D]/5 shadow-xl'
-                                : 'border-slate-200 hover:border-slate-300 hover:shadow-lg'
+                            ? 'border-[#10367D] bg-[#10367D]/5 shadow-xl'
+                            : 'border-slate-200 hover:border-slate-300 hover:shadow-lg'
                             }`}
                     >
                         {/* Selection Indicator */}
@@ -104,13 +104,13 @@ export default function RoleSelectionCards({ selectedRole, onSelectRole }: RoleS
 
                         {/* Best For */}
                         <div className="bg-slate-50 rounded-[10px] p-3 mb-4 border border-slate-100">
-                            <p className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Best For</p>
+                            <p className="text-sm font-semibold text-slate-400 mb-1">Best for</p>
                             <p className="text-xs font-bold text-slate-700">{option.bestFor}</p>
                         </div>
 
                         {/* Benefits */}
                         <div className="space-y-2">
-                            <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Key Benefits</p>
+                            <p className="text-sm font-semibold text-slate-400">Key benefits</p>
                             {option.benefits.map((benefit, idx) => (
                                 <div key={idx} className="flex items-start gap-2">
                                     <FaCheck className="w-3 h-3 text-green-500 mt-0.5 shrink-0" />
@@ -130,7 +130,7 @@ export default function RoleSelectionCards({ selectedRole, onSelectRole }: RoleS
                 <div>
                     <p className="text-sm font-black text-blue-900 mb-1">Not sure which to choose?</p>
                     <p className="text-xs font-bold text-blue-700">
-                        Choose <strong>Customer</strong> if you're buying for yourself. Choose <strong>Dealer</strong> if you're buying to resell.
+                        Choose <strong>Customer</strong> if you're buying for yourself. Choose <strong>Seller</strong> if you're buying to resell.
                         Choose <strong>Manufacturer</strong> if you're selling products.
                     </p>
                 </div>

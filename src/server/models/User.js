@@ -6,7 +6,7 @@ const UserSchema = new mongoose.Schema({
     password: { type: String },
     role: {
         type: String,
-        enum: ['ADMIN', 'MANUFACTURER', 'DEALER', 'CUSTOMER'],
+        enum: ['ADMIN', 'MANUFACTURER', 'SELLER', 'CUSTOMER'],
         required: true
     },
     adminRole: {
@@ -60,9 +60,9 @@ UserSchema.virtual('customer', {
     justOne: true
 });
 
-// Virtual for Dealer Profile
-UserSchema.virtual('dealer', {
-    ref: 'Dealer',
+// Virtual for Seller Profile
+UserSchema.virtual('seller', {
+    ref: 'Seller',
     localField: '_id',
     foreignField: 'userId',
     justOne: true

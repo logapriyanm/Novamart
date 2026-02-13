@@ -1,4 +1,4 @@
-import { User, Manufacturer, Dealer, Customer, KYCDocument, Badge } from '../../models/index.js';
+import { User, Manufacturer, Seller, Customer, KYCDocument, Badge } from '../../models/index.js';
 import systemEvents, { EVENTS } from '../../lib/systemEvents.js';
 import auditService from '../../services/audit.js';
 
@@ -17,7 +17,7 @@ export const getUsers = async (req, res) => {
         const enhancedUsers = await Promise.all(users.map(async (user) => {
             const userId = user._id;
             const manufacturer = await Manufacturer.findOne({ userId });
-            const dealer = await Dealer.findOne({ userId });
+            const seller = await Seller.findOne({ userId });
             const customer = await Customer.findOne({ userId });
             const kyc = await KYCDocument.findOne({ userId });
 
@@ -25,7 +25,7 @@ export const getUsers = async (req, res) => {
                 ...user.toObject(),
                 name: customer?.name || manufacturer?.companyName || dealer?.businessName || 'User',
                 manufacturer,
-                dealer,
+                dealer: seller,
                 customer,
                 documents: kyc ? kyc.documents : []
             };
@@ -88,7 +88,7 @@ export const getManufacturers = async (req, res) => {
 
 export const getDealers = async (req, res) => {
     try {
-        const dealers = await Dealer.find()
+        const dealers = await Seller.find()
             .populate('userId', 'email status')
             .populate('approvedBy')
             .sort({ createdAt: -1 });
@@ -152,7 +152,7 @@ export const verifyDealer = async (req, res) => {
     const adminId = req.user._id;
 
     try {
-        const dealer = await Dealer.findByIdAndUpdate(dealerId, { isVerified }, { new: true }).populate('userId');
+        const dealer = await Seller.findByIdAndUpdate(dealerId, { isVerified }, { new: true }).populate('userId');
 
         if (isVerified) {
             await User.findByIdAndUpdate(dealer.userId._id, { status: 'ACTIVE' });
@@ -197,14 +197,14 @@ export const updateDealerManufacturers = async (req, res) => {
     const adminId = req.user._id;
 
     try {
-        const currentDealer = await Dealer.findById(dealerId);
+        const currentDealer = await Seller.findById(dealerId);
         const isLinked = currentDealer.approvedBy.includes(manufacturerId);
 
         const updateAction = isLinked
             ? { $pull: { approvedBy: manufacturerId } }
             : { $addToSet: { approvedBy: manufacturerId } };
 
-        const updatedDealer = await Dealer.findByIdAndUpdate(dealerId, updateAction, { new: true })
+        const updatedDealer = await Seller.findByIdAndUpdate(dealerId, updateAction, { new: true })
             .populate('approvedBy')
             .populate('userId');
 

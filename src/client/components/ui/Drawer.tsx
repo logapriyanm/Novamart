@@ -45,7 +45,7 @@ export default function Drawer({ isOpen, onClose, title, children, footer, width
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
-                            <h2 className="text-lg font-black text-slate-900 tracking-tight">{title}</h2>
+                            <h2 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h2>
                             <button
                                 onClick={onClose}
                                 className="p-2 -mr-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors"

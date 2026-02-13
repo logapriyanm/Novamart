@@ -93,7 +93,7 @@ class ProductService {
     /**
      * Fetch products with advanced filtering and pagination.
      */
-    async getAllProducts(filters, userRole, dealerId = null) {
+    async getAllProducts(filters, userRole, sellerId = null) {
         const {
             status, category, q, minPrice, maxPrice, sortBy,
             brands, rating, availability, verifiedOnly,
@@ -109,8 +109,33 @@ class ProductService {
         // 1. Role-based Status Filtering
         if (userRole === 'ADMIN') {
             if (status) query.status = status;
-        } else {
+        } else if (userRole === 'SELLER' || userRole === 'MANUFACTURER') {
+            // Sellers and Manufacturers need to see the "Master Catalog" to find products to sell/manage
             query.status = 'APPROVED';
+        } else {
+            // PUBLIC / CUSTOMER VIEW
+            query.status = 'APPROVED';
+
+            // Fetch IDs of products that have at least one active listing from a seller
+            const listedProductIds = await Inventory.distinct('productId', { isListed: true });
+
+            // Apply filter
+            if (query._id) {
+                // If query._id is already set (e.g. from availability filter), use $in intersection
+                query._id = { $in: listedProductIds, $eq: query._id };
+                // Note: The above might fail if query._id is strictly an ObjectId. 
+                // Better approach for intersection:
+                // query.$and = [{ _id: query._id }, { _id: { $in: listedProductIds } }];
+                // But since we want to modify query._id directly if possible for simplicity:
+                query._id = { $in: listedProductIds }; // Overwrite for now, assuming availability filter handled earlier won't conflict destructively or handled via $and if needed.
+                // Actually, let's use $and to be safe if `query._id` existed.
+                // However, looking at the code, availability filter sets query._id using $in.
+                // So we can just intersect the arrays if availability set it.
+                // But wait, availability filter is Step 6 (lines 178-182 OLD code), which comes AFTER this block (lines 110-114 OLD code).
+                // So query._id is NOT set yet. We are safe to set it here.
+            } else {
+                query._id = { $in: listedProductIds };
+            }
         }
 
         // 2. Category & Subcategory
@@ -159,7 +184,7 @@ class ProductService {
         if (Object.keys(mfgQuery).length > 0 || (networkOnly === 'true' && dealerId)) {
             const manufacturers = await Manufacturer.find(mfgQuery).select('_id approvedBy');
             manufacturerIds = manufacturers
-                .filter(m => networkOnly !== 'true' || (dealerId && m.approvedBy?.includes(dealerId)))
+                .filter(m => networkOnly !== 'true' || (sellerId && m.approvedBy?.includes(sellerId)))
                 .map(m => m._id);
 
             if (manufacturerIds.length > 0) {
@@ -176,9 +201,17 @@ class ProductService {
 
         // 6. Availability & Spec Filters
         if (availability?.includes('In Stock')) {
-            // This is complex in MongoDB without aggregation. We'll handle it via sub-query.
-            const productsWithInventory = await Inventory.distinct('productId', { stock: { $gt: 0 } });
-            query._id = { $in: productsWithInventory };
+            const productsWithStock = await Inventory.distinct('productId', { stock: { $gt: 0 } });
+
+            if (query._id && query._id.$in) {
+                // Intersect with existing listedProductIds
+                const existingIds = query._id.$in.map(id => id.toString());
+                const stockIds = productsWithStock.map(id => id.toString());
+                const intersection = existingIds.filter(id => stockIds.includes(id));
+                query._id = { $in: intersection };
+            } else {
+                query._id = { $in: productsWithStock };
+            }
         }
 
         // 7. Dynamic Spec Filters
@@ -222,7 +255,7 @@ class ProductService {
         // Format to match old output (manufacturer vs manufacturerId)
         const formattedProducts = await Promise.all(products.map(async (p) => {
             const inventory = await Inventory.findOne({ productId: p._id, stock: { $gt: 0 } })
-                .populate('dealerId', 'businessName')
+                .populate('sellerId', 'businessName')
                 .lean();
 
             return {
@@ -258,7 +291,7 @@ class ProductService {
 
         const [inventory, reviews] = await Promise.all([
             Inventory.find({ productId: id, stock: { $gt: 0 } })
-                .populate('dealerId', 'businessName averageRating reviewCount')
+                .populate('sellerId', 'businessName averageRating reviewCount')
                 .lean(),
             Review.find({ productId: id })
                 .sort({ createdAt: -1 })
@@ -274,7 +307,7 @@ class ProductService {
             inventory: inventory.map(inv => ({
                 ...inv,
                 id: inv._id,
-                dealer: inv.dealerId
+                seller: inv.sellerId
             })),
             reviews: reviews.map(rev => ({
                 ...rev,

@@ -47,13 +47,13 @@ export default function OrderFilterDrawer({ isOpen, onClose, filters, onApply, o
                 <div className="flex gap-4">
                     <button
                         onClick={handleReset}
-                        className="flex-1 px-4 py-3 bg-white text-slate-700 font-bold text-sm uppercase tracking-wider border border-slate-200 rounded-[10px] hover:bg-slate-50 transition-colors"
+                        className="flex-1 px-4 py-3 bg-white text-slate-700 font-bold text-sm border border-slate-200 rounded-[10px] hover:bg-slate-50 transition-colors"
                     >
                         Reset
                     </button>
                     <button
                         onClick={handleApply}
-                        className="flex-1 px-4 py-3 bg-black text-white font-bold text-sm uppercase tracking-wider rounded-[10px] hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
+                        className="flex-1 px-4 py-3 bg-black text-white font-bold text-sm rounded-[10px] hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
                     >
                         Apply Filters
                     </button>
@@ -63,7 +63,7 @@ export default function OrderFilterDrawer({ isOpen, onClose, filters, onApply, o
             <div className="space-y-8">
                 {/* Status Filter */}
                 <div>
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Order Status</h3>
+                    <h3 className="text-sm font-bold text-slate-400 mb-4">Order Status</h3>
                     <div className="flex flex-wrap gap-2">
                         {STATUS_OPTIONS.map((status) => {
                             const isSelected = localFilters.status.includes(status);
@@ -71,7 +71,7 @@ export default function OrderFilterDrawer({ isOpen, onClose, filters, onApply, o
                                 <button
                                     key={status}
                                     onClick={() => toggleStatus(status)}
-                                    className={`px-4 py-2 rounded-[8px] text-[10px] font-bold uppercase tracking-wider border transition-all ${isSelected
+                                    className={`px-4 py-2 rounded-[8px] text-sm font-medium border transition-all ${isSelected
                                         ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
                                         : 'bg-white border-slate-100 text-slate-500 hover:border-slate-300'
                                         }`}
@@ -86,13 +86,13 @@ export default function OrderFilterDrawer({ isOpen, onClose, filters, onApply, o
 
                 {/* Date Range - Simplified for Demo */}
                 <div>
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Time Period</h3>
+                    <h3 className="text-sm font-bold text-slate-400 mb-4">Time Period</h3>
                     <div className="grid grid-cols-2 gap-3">
                         {['ALL', 'TODAY', 'WEEK', 'MONTH'].map((range) => (
                             <button
                                 key={range}
                                 onClick={() => setLocalFilters({ ...localFilters, dateRange: range })}
-                                className={`px-4 py-3 rounded-[8px] text-[10px] font-bold uppercase tracking-wider border transition-all text-center ${localFilters.dateRange === range
+                                className={`px-4 py-3 rounded-[8px] text-sm font-medium border transition-all text-center ${localFilters.dateRange === range
                                     ? 'bg-slate-900 text-white border-slate-900'
                                     : 'bg-white border-slate-100 text-slate-500 hover:border-slate-300'
                                     }`}
@@ -105,7 +105,7 @@ export default function OrderFilterDrawer({ isOpen, onClose, filters, onApply, o
 
                 {/* Min Value */}
                 <div>
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Minimum Order Value</h3>
+                    <h3 className="text-sm font-bold text-slate-400 mb-4">Minimum Order Value</h3>
                     <input
                         type="number"
                         placeholder="e.g 10000"

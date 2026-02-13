@@ -4,7 +4,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost
 export enum Role {
     ADMIN = 'ADMIN',
     MANUFACTURER = 'MANUFACTURER',
-    DEALER = 'DEALER',
+    SELLER = 'SELLER',
     CUSTOMER = 'CUSTOMER',
 }
 
@@ -84,10 +84,10 @@ export const ENDPOINTS = {
         PRODUCTS: '/manufacturer/products',
         ORDERS: '/manufacturer/orders',
     },
-    DEALER: {
-        DASHBOARD: '/dealer/dashboard',
-        INVENTORY: '/dealer/inventory',
-        ORDERS: '/dealer/orders',
+    SELLER: {
+        DASHBOARD: '/seller/dashboard',
+        INVENTORY: '/seller/inventory',
+        ORDERS: '/seller/orders',
     },
     ADMIN: {
         DASHBOARD: '/admin/dashboard',

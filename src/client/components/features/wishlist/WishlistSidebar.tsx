@@ -40,19 +40,19 @@ export default function WishlistSidebar() {
     return (
         <aside className="w-full lg:w-80 space-y-8">
             {/* Recommendations */}
-            <div className="bg-white rounded-[10px] p-6 border border-foreground/5 shadow-sm">
+            <div className="bg-white rounded-[10px] p-6 border border-border shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                    <span className="text-black text-lg">✨</span>
-                    <h3 className="font-black text-black text-[11px] uppercase tracking-widest italic">Recommended for You</h3>
+                    <span className="text-lg">✨</span>
+                    <h3 className="font-black text-foreground text-[11px] uppercase tracking-widest italic">Recommended for You</h3>
                 </div>
-                <p className="text-[9px] text-foreground/40 font-black uppercase tracking-widest mb-6 leading-relaxed italic">
+                <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-6 leading-relaxed italic">
                     Based on your "Home Office" wishlist and recent saves.
                 </p>
 
                 <div className="space-y-6">
                     {recommendations.map((item) => (
                         <Link href={`/products/${item.id}`} key={item.id} className="flex gap-4 group">
-                            <div className="w-12 h-12 bg-background rounded-[5px] overflow-hidden shrink-0 border border-foreground/5 group-hover:border-black/10 transition-colors">
+                            <div className="w-12 h-12 bg-muted/20 rounded-[5px] overflow-hidden shrink-0 border border-border group-hover:border-primary/20 transition-colors">
                                 <OptimizedImage
                                     src={item.image}
                                     alt={item.name}
@@ -62,11 +62,11 @@ export default function WishlistSidebar() {
                                 />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h4 className="text-[10px] font-black text-black uppercase tracking-widest line-clamp-1 group-hover:text-black/60 transition-colors italic">
+                                <h4 className="text-[10px] font-black text-foreground uppercase tracking-widest line-clamp-1 group-hover:text-primary transition-colors italic">
                                     {item.name}
                                 </h4>
-                                <p className="text-[9px] text-foreground/40 font-black uppercase tracking-widest mb-1 italic">From ${item.price.toFixed(2)}</p>
-                                <button className="text-[9px] font-black text-black uppercase tracking-widest flex items-center gap-1 hover:underline">
+                                <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-1 italic">From ${item.price.toFixed(2)}</p>
+                                <button className="text-[9px] font-black text-primary uppercase tracking-widest flex items-center gap-1 hover:underline">
                                     Quick Add <FaPlus className="w-2 h-2" />
                                 </button>
                             </div>
@@ -74,21 +74,21 @@ export default function WishlistSidebar() {
                     ))}
                 </div>
 
-                <Link href="/recommendations" className="block w-full py-3 mt-6 border border-foreground/5 text-black text-center rounded-[10px] text-[9px] font-black uppercase tracking-widest hover:bg-background transition-colors italic">
+                <Link href="/recommendations" className="block w-full py-3 mt-6 border border-border text-foreground text-center rounded-[10px] text-[9px] font-black uppercase tracking-widest hover:bg-muted/10 transition-colors italic">
                     View All Recommendations
                 </Link>
             </div>
 
             {/* Share / Team Access */}
-            <div className="bg-black/5 rounded-[10px] p-6 border border-black/10">
-                <h3 className="font-black text-black text-[11px] uppercase tracking-widest italic mb-2">Team Collection</h3>
-                <p className="text-[9px] text-foreground/40 font-black uppercase tracking-widest mb-6 leading-relaxed italic">
+            <div className="bg-muted/30 rounded-[10px] p-6 border border-border">
+                <h3 className="font-black text-foreground text-[11px] uppercase tracking-widest italic mb-2">Team Collection</h3>
+                <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-6 leading-relaxed italic">
                     Share this list with your procurement team for collaborative review.
                 </p>
 
                 <button
                     onClick={handleShare}
-                    className="w-full py-3 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-black/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 italic"
+                    className="btn-primary w-full flex items-center justify-center gap-2 italic"
                 >
                     <FaShareAlt className="w-3 h-3" />
                     Share List with Team

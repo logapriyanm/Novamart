@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const CollaborationGroupSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String },
-    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dealer', required: true, index: true },
+    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true, index: true },
     category: { type: String, required: true },
     targetQuantity: { type: Number, required: true },
     currentQuantity: { type: Number, default: 0 },

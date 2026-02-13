@@ -8,6 +8,7 @@ export const Card = ({ children, className = '', onClick }: { children: React.Re
     </div>
 );
 
+// StatusBadge fix: remove font-black
 export const StatusBadge = ({ status }: { status: string }) => {
     const getStyles = () => {
         switch (status.toUpperCase()) {
@@ -24,7 +25,7 @@ export const StatusBadge = ({ status }: { status: string }) => {
             case 'REJECTED':
             case 'DISPUTED':
                 // Primary text with subtle Primary tint
-                return 'bg-primary/5 text-primary border-primary/40 font-black';
+                return 'bg-primary/5 text-primary border-primary/40 font-bold';
             case 'HOLD':
                 return 'bg-surface text-primary/60 border-primary/10';
             default:
@@ -33,7 +34,7 @@ export const StatusBadge = ({ status }: { status: string }) => {
     };
 
     return (
-        <span className={`px-2.5 py-1 rounded-[10px] text-[10px] font-bold border uppercase tracking-wider ${getStyles()}`}>
+        <span className={`px-2.5 py-1 rounded-[10px] text-sm font-medium border ${getStyles()}`}>
             {status.replace(/_/g, ' ')}
         </span>
     );
@@ -52,8 +53,8 @@ export const StatsCard = ({ icon: Icon, label, value, colorClass }: { icon: any,
                 <Icon className={`w-5 h-5 ${colorClass.replace('bg-', 'text-')}`} />
             </div>
             <div>
-                <p className="text-[10px] font-black text-foreground/40 uppercase tracking-widest">{label}</p>
-                <p className="text-2xl font-black text-foreground tracking-tight">{value}</p>
+                <p className="text-sm font-medium text-foreground/40">{label}</p>
+                <p className="text-2xl font-bold text-foreground tracking-tight">{value}</p>
             </div>
         </div>
     </WhiteCard>
@@ -71,7 +72,7 @@ export const TrackingBadge = ({ status }: { status: string }) => {
         }
     };
     return (
-        <span className={`px-4 py-1.5 rounded-[10px] text-[9px] font-bold uppercase tracking-widest ${getColors()}`}>
+        <span className={`px-4 py-1.5 rounded-[10px] text-sm font-medium ${getColors()}`}>
             {status}
         </span>
     );
@@ -105,7 +106,7 @@ export const Stepper = ({ currentStep }: { currentStep: number }) => {
                         >
                             {isCompleted && <FaCheckCircle className="text-white w-2 h-2" />}
                         </motion.div>
-                        <span className={`text-[9px] font-bold uppercase tracking-widest ${isActive ? 'text-black' : 'text-foreground/40'}`}>
+                        <span className={`text-sm font-medium ${isActive ? 'text-black' : 'text-foreground/40'}`}>
                             {step}
                         </span>
                     </div>

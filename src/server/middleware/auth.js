@@ -25,7 +25,7 @@ const authenticate = async (req, res, next) => {
         // 1. Verify User exists and is not suspended
         const user = await User.findById(decoded.id)
             .populate('customer')
-            .populate('dealer')
+            .populate('seller')
             .populate('manufacturer');
 
         if (!user) {

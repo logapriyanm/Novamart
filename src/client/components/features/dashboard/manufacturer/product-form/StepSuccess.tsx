@@ -25,7 +25,7 @@ export default function StepSuccess() {
                         <FaCheck className="w-8 h-8" />
                     </div>
                     <h1 className="text-3xl font-black text-[#1E293B] mb-3">Product Submitted for Approval</h1>
-                    <span className="inline-block bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-[10px] mb-6">
+                    <span className="inline-block bg-blue-50 text-blue-600 text-sm font-semibold px-4 py-1.5 rounded-[10px] mb-6">
                         Order #PRD-9823
                     </span>
                     <p className="text-sm font-medium text-slate-500 max-w-lg mx-auto leading-relaxed">
@@ -38,7 +38,7 @@ export default function StepSuccess() {
 
                     {/* Left: Timeline */}
                     <div className="flex-1 p-10 border-r border-slate-50">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8">Status Timeline</p>
+                        <p className="text-sm font-semibold text-slate-400 mb-8">Status timeline</p>
 
                         <div className="space-y-8 relative">
                             {/* Vertical Line */}
@@ -51,7 +51,7 @@ export default function StepSuccess() {
                                 </div>
                                 <div>
                                     <h4 className="text-sm font-black text-[#1E293B]">Submitted</h4>
-                                    <p className="text-[10px] font-bold text-emerald-600 mt-0.5">Completed</p>
+                                    <p className="text-sm font-medium text-emerald-600 mt-0.5">Completed</p>
                                 </div>
                             </div>
 
@@ -62,7 +62,7 @@ export default function StepSuccess() {
                                 </div>
                                 <div>
                                     <h4 className="text-sm font-black text-[#1E293B]">Admin Review</h4>
-                                    <p className="text-[10px] font-bold text-slate-500 mt-0.5">In Progress — <span className="text-[#0F6CBD]">Est. 24h</span></p>
+                                    <p className="text-sm font-medium text-slate-500 mt-0.5">In progress — <span className="text-[#0F6CBD]">Est. 24h</span></p>
                                 </div>
                             </div>
 
@@ -73,7 +73,7 @@ export default function StepSuccess() {
                                 </div>
                                 <div>
                                     <h4 className="text-sm font-black text-slate-400">Quality Check</h4>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-0.5">Pending</p>
+                                    <p className="text-sm font-medium text-slate-400 mt-0.5">Pending</p>
                                 </div>
                             </div>
 
@@ -84,7 +84,7 @@ export default function StepSuccess() {
                                 </div>
                                 <div>
                                     <h4 className="text-sm font-black text-slate-400">Live on Catalog</h4>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-0.5">Pending</p>
+                                    <p className="text-sm font-medium text-slate-400 mt-0.5">Pending</p>
                                 </div>
                             </div>
                         </div>
@@ -111,7 +111,7 @@ export default function StepSuccess() {
                         </div>
 
                         <div className="mt-8 pt-8 border-t border-slate-200/50 text-center">
-                            <button className="text-[10px] font-black text-[#0F6CBD] uppercase tracking-widest hover:underline flex items-center justify-center gap-2 mx-auto">
+                            <button className="text-sm font-semibold text-[#0F6CBD] hover:underline flex items-center justify-center gap-2 mx-auto">
                                 <FaEye className="w-3 h-3" /> View Submission Details
                             </button>
                         </div>
@@ -120,7 +120,7 @@ export default function StepSuccess() {
             </div>
 
             {/* Footer Links */}
-            <div className="flex items-center gap-8 mt-12 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <div className="flex items-center gap-8 mt-12 text-sm font-medium text-slate-400">
                 <a href="#" className="hover:text-[#0F6CBD] transition-colors">Documentation</a>
                 <a href="#" className="hover:text-[#0F6CBD] transition-colors">Help Center</a>
                 <a href="#" className="hover:text-[#0F6CBD] transition-colors">Contact Support</a>

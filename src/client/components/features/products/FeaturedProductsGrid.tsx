@@ -6,23 +6,32 @@ import { apiClient } from '@/lib/api/client';
 interface FeaturedProductsGridProps {
     columns?: number;
     filters?: FilterState;
+    viewMode?: 'grid' | 'list';
+    categorySlug?: string;
 }
 
-export default function FeaturedProductsGrid({ columns = 4, filters }: FeaturedProductsGridProps) {
+export default function FeaturedProductsGrid({ columns = 4, filters, viewMode = 'grid', categorySlug }: FeaturedProductsGridProps) {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const gridClass = columns === 5
-        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
-        : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6";
+    const gridClass = viewMode === 'list'
+        ? "grid grid-cols-1 gap-6"
+        : columns === 5
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+            : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6";
 
     useEffect(() => {
+        // ... (fetch logic remains same) ...
         const fetchProducts = async () => {
             setLoading(true);
             setError(null);
             try {
                 const params: any = {};
+
+                if (categorySlug) {
+                    params.category = categorySlug;
+                }
 
                 if (filters) {
                     if (filters.priceRange) {

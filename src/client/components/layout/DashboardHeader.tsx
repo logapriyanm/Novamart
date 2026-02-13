@@ -7,7 +7,7 @@ import NotificationBell from './NotificationBell';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 
 interface DashboardHeaderProps {
-    role: 'ADMIN' | 'MANUFACTURER' | 'DEALER';
+    role: 'ADMIN' | 'MANUFACTURER' | 'SELLER';
     onMenuClick: () => void;
     searchPlaceholder?: string;
     showBadge?: boolean;
@@ -30,7 +30,7 @@ export default function DashboardHeader({
                 <div className="md:hidden flex items-center gap-3 mr-4">
                     <button
                         onClick={onMenuClick}
-                        className={`p-2 rounded-[10px] bg-slate-50 touch-target transition-all ${role === 'MANUFACTURER' || role === 'DEALER' ? 'text-indigo-600' : 'text-slate-600'
+                        className={`p-2 rounded-[10px] bg-slate-50 touch-target transition-all ${role === 'MANUFACTURER' || role === 'SELLER' ? 'text-indigo-600' : 'text-slate-600'
                             }`}
                     >
                         <Menu className="w-5 h-5" />
@@ -51,7 +51,7 @@ export default function DashboardHeader({
                     <input
                         type="text"
                         placeholder={searchPlaceholder}
-                        className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-2.5 pl-11 pr-4 text-[13px] focus:outline-none focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600/50 transition-all text-foreground placeholder:text-foreground/40 placeholder:font-black placeholder:uppercase placeholder:tracking-tighter"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600/50 transition-all text-foreground placeholder:text-foreground/40 placeholder:font-medium"
                     />
                 </div>
             </div>
@@ -59,7 +59,7 @@ export default function DashboardHeader({
             <div className="flex items-center gap-3 lg:gap-6">
                 {/* Badge (e.g., Production Center) */}
                 {showBadge && (
-                    <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-[10px] font-black tracking-widest text-indigo-600 uppercase border border-indigo-100 rounded-full shadow-sm">
+                    <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-indigo-50 text-xs font-bold text-indigo-600 border border-indigo-100 rounded-full shadow-sm">
                         {role === 'MANUFACTURER' && <ShieldCheck className="w-3.5 h-3.5" />}
                         {badgeText}
                     </div>

@@ -1,47 +1,47 @@
 @import "tailwindcss";
 
-@theme {
-  --color-primary: #000000;
-  --color-secondary: #171717;
-  --color-accent: #171717;
-  --color-background: #FFFFFF;
-  --color-foreground: #000000;
-  --color-surface: #FAFAFA;
-  --color-success: #10B981;
-  --color-danger: #EF4444;
-  --color-warning: #F59E0B;
-}
+/* Tailwind Theme Configuration */
 
 @layer base {
+
+  /* stylelint-disable at-rule-no-unknown */
   :root {
-    --primary: #000000;
+    --primary: #2772A0;
+    /* Blue Accent */
     --secondary: #171717;
-    --accent: #171717;
+    /* Dark Gray */
+    --accent: #2772A0;
     --background: #FFFFFF;
+    /* White */
     --foreground: #000000;
+    /* Black */
     --surface: #FAFAFA;
+    /* Light Gray */
     --card: #FFFFFF;
-    --border: rgba(0, 0, 0, 0.1);
-    --glass: rgba(255, 255, 255, 0.5);
+    --border: #E5E7EB;
+    /* Gray-200 */
+    --glass: rgba(255, 255, 255, 0.8);
     --success: #10B981;
     --danger: #EF4444;
     --warning: #F59E0B;
   }
 
   body {
-    @apply font-sans antialiased text-foreground bg-background overflow-x-hidden;
+    @apply font-sans antialiased overflow-x-hidden;
+    color: var(--foreground);
+    background-color: var(--background);
     font-size: 14px;
     /* Default for mobile */
   }
 
-  @screen sm {
+  @media (min-width: 640px) {
     body {
       font-size: 15px;
       /* Tablet */
     }
   }
 
-  @screen md {
+  @media (min-width: 768px) {
     body {
       font-size: 16px;
       /* Laptop/Desktop */
@@ -50,8 +50,48 @@
 
   * {
     font-family: 'Inter', sans-serif !important;
-    @apply border-foreground/10;
+    /* border-color: color-mix(in srgb, var(--foreground), transparent 90%); equivalent to 10% opacity */
+    border-color: rgba(0, 0, 0, 0.1);
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Typography System - Production Standards */
+  h1 {
+    @apply text-3xl md:text-4xl font-bold italic;
+    /* 28-32px, italic as required */
+  }
+
+  h2 {
+    @apply text-xl md:text-2xl font-semibold not-italic;
+    /* 22–24px, normal weight (non-italic) */
+  }
+
+  h3 {
+    @apply text-lg md:text-xl font-semibold not-italic;
+    /* 18–20px, normal weight (non-italic) */
+  }
+
+  h4 {
+    @apply text-base md:text-lg font-medium not-italic;
+    /* 16–18px, normal weight (non-italic) */
+  }
+
+  p,
+  span,
+  div {
+    @apply text-base;
+    /* 16px body text */
+  }
+
+  small,
+  .text-small {
+    @apply text-sm;
+    /* 14px minimum */
+  }
+
+  /* Enforce Minimum Font Size - No text below 14px */
+  * {
+    font-size: max(14px, 1em);
   }
 
   /* Responsive Container */
@@ -89,19 +129,49 @@
     border-radius: 10px !important;
   }
 
-  /* Button Standard: Primary (10px, reduced padding for clarity) */
+  /* Button Standard: Primary (Sentence case, 14px minimum) */
   .btn-primary {
-    @apply bg-primary text-white px-5 py-2.5 rounded-[10px] font-bold transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm;
+    @apply px-5 py-2.5 rounded-[10px] font-semibold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2 shadow-sm;
+    background-color: var(--primary);
+    color: white;
   }
 
-  /* Button Standard: Secondary (Consistent 10px) */
+  .btn-primary:hover {
+    background-color: color-mix(in srgb, var(--primary), black 10%);
+  }
+
+  /* Button Standard: Secondary (Sentence case, 14px minimum) */
   .btn-secondary {
-    @apply border-2 border-primary/20 text-primary px-5 py-2.5 rounded-[10px] font-bold transition-all hover:bg-primary/5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-[11px] uppercase tracking-widest flex items-center justify-center gap-2;
+    @apply border border-slate-200 bg-white px-5 py-2.5 rounded-[10px] font-semibold transition-all hover:bg-slate-50 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2;
+    color: var(--foreground);
+  }
+
+  /* Button Standard: Ghost (Sentence case, 14px minimum) */
+  .btn-ghost {
+    @apply px-4 py-2 rounded-[10px] transition-all text-sm font-medium flex items-center justify-center gap-2;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .btn-ghost:hover {
+    color: var(--primary);
+    background-color: #F8FAFC;
+    /* slate-50 */
+  }
+
+  /* Input Field Standard */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-[10px] border border-slate-200 bg-white text-sm font-medium transition-all focus:outline-none focus:ring-2 placeholder:text-slate-400 disabled:opacity-50 disabled:bg-slate-50;
+    /* focus:ring-primary/20 focus:border-primary */
+    --tw-ring-color: color-mix(in srgb, var(--primary), transparent 80%);
+  }
+
+  .input-field:focus {
+    border-color: var(--primary);
   }
 
   /* Card Standard: Enterprise (Clean Borders, Subtle Shadows) */
   .card-enterprise {
-    @apply bg-white border border-slate-200/60 rounded-[10px] shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden;
+    @apply bg-white border border-slate-100 rounded-[12px] shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden;
   }
 
   /* Table Row Spacing Utility */

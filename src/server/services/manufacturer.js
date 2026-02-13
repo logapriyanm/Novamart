@@ -1,25 +1,25 @@
 /**
  * Manufacturer Service
- * Logic for dealer network management, allocations, and analytics.
+ * Logic for seller network management, allocations, and analytics.
  */
 
-import { Manufacturer, Dealer, User, DealerRequest, Order, Escrow, Product } from '../models/index.js';
+import { Manufacturer, Seller, User, SellerRequest, Order, Escrow, Product } from '../models/index.js';
 import userService from './userService.js';
 import mongoose from 'mongoose';
 
 class ManufacturerService {
     /**
-     * Approve or Reject a Dealer's request to join the network.
+     * Approve or Reject a Seller's request to join the network.
      */
-    async handleDealerRequest(mfgId, dealerId, status) {
+    async handleDealerRequest(mfgId, sellerId, status) {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
             const requestStatus = status === 'APPROVED' ? 'APPROVED' : 'REJECTED';
 
-            // 1. Upsert the DealerRequest record
-            await DealerRequest.findOneAndUpdate(
-                { dealerId, manufacturerId: mfgId },
+            // 1. Upsert the SellerRequest record
+            await SellerRequest.findOneAndUpdate(
+                { sellerId, manufacturerId: mfgId },
                 { status: requestStatus, message: 'Updated via dashboard' },
                 { upsert: true, session }
             );
@@ -27,24 +27,24 @@ class ManufacturerService {
             // 2. If approved, connect in the many-to-many relation
             if (status === 'APPROVED') {
                 await Manufacturer.findByIdAndUpdate(mfgId, {
-                    $addToSet: { approvedBy: dealerId }
+                    $addToSet: { approvedBy: sellerId }
                 }, { session });
 
-                // Mark dealer as verified globally if this is the main authority
-                const dealer = await Dealer.findByIdAndUpdate(dealerId, { isVerified: true }, { session });
+                // Mark seller as verified globally if this is the main authority
+                const seller = await Seller.findByIdAndUpdate(sellerId, { isVerified: true }, { session });
 
-                if (dealer && dealer.userId) {
+                if (seller && seller.userId) {
                     // Ensure the User is ACTIVE
-                    await User.findByIdAndUpdate(dealer.userId, { status: 'ACTIVE' }, { session });
+                    await User.findByIdAndUpdate(seller.userId, { status: 'ACTIVE' }, { session });
                 }
             } else {
                 await Manufacturer.findByIdAndUpdate(mfgId, {
-                    $pull: { approvedBy: dealerId }
+                    $pull: { approvedBy: sellerId }
                 }, { session });
             }
 
             await session.commitTransaction();
-            return { mfgId, dealerId, status: requestStatus };
+            return { mfgId, sellerId, status: requestStatus };
         } catch (error) {
             await session.abortTransaction();
             throw error;
@@ -54,15 +54,15 @@ class ManufacturerService {
     }
 
     /**
-     * Get pending or processed dealer requests for a manufacturer.
+     * Get pending or processed seller requests for a manufacturer.
      */
     async getDealerRequests(mfgId, statusFilter = 'PENDING') {
-        const requests = await DealerRequest.find({
+        const requests = await SellerRequest.find({
             manufacturerId: mfgId,
             status: statusFilter
         })
             .populate({
-                path: 'dealerId',
+                path: 'sellerId',
                 populate: { path: 'userId', select: 'email phone' }
             })
             .sort({ createdAt: -1 })
@@ -72,29 +72,35 @@ class ManufacturerService {
         const formattedRequests = requests.map(r => ({
             ...r,
             id: r._id,
-            dealer: r.dealerId
+            dealer: r.sellerId, // Maintaining 'dealer' key for frontend compatibility
+            seller: r.sellerId
         }));
 
         if (statusFilter === 'PENDING') {
-            const explicitDealerIds = requests.map(r => r.dealerId?._id);
+            const explicitSellerIds = requests.map(r => r.sellerId?._id);
 
-            const implicitDealers = await Dealer.find({
+            const implicitSellers = await Seller.find({
                 isVerified: false,
-                _id: { $nin: explicitDealerIds }
+                _id: { $nin: explicitSellerIds }
             })
                 .populate('userId', 'email phone createdAt')
                 .lean();
 
-            const implicitRequests = implicitDealers.map(dealer => ({
-                id: `temp-${dealer._id}`,
-                dealerId: dealer._id,
+            const implicitRequests = implicitSellers.map(seller => ({
+                id: `temp-${seller._id}`,
+                dealerId: seller._id, // Deprecated key for compatibility
+                sellerId: seller._id,
                 manufacturerId: mfgId,
                 status: 'PENDING',
                 message: 'New Registration (Pending Verification)',
-                createdAt: dealer.userId?.createdAt || new Date(),
-                dealer: {
-                    ...dealer,
-                    user: dealer.userId
+                createdAt: seller.userId?.createdAt || new Date(),
+                dealer: { // Deprecated key for compatibility
+                    ...seller,
+                    user: seller.userId
+                },
+                seller: {
+                    ...seller,
+                    user: seller.userId
                 }
             }));
 

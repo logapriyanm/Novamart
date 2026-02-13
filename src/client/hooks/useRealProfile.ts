@@ -5,7 +5,7 @@ import { apiClient } from '../../lib/api/client';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 
-export function useRealProfile<T>(role: 'dealer' | 'manufacturer') {
+export function useRealProfile<T>(role: 'seller' | 'manufacturer') {
     const [profile, setProfile] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

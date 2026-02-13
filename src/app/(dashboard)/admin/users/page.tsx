@@ -29,15 +29,13 @@ export default function UserManagementPortal() {
     const [selectedRole, setSelectedRole] = useState('ALL');
     const [users, setUsers] = useState<any[]>([]);
     const [manufacturers, setManufacturers] = useState<any[]>([]);
-    const [dealers, setDealers] = useState<any[]>([]);
+    const [sellers, setSellers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Verification State
     const [verifyModalOpen, setVerifyModalOpen] = useState(false);
     const [selectedEntity, setSelectedEntity] = useState<any>(null);
-    const [entityType, setEntityType] = useState<'MANUFACTURER' | 'DEALER'>('MANUFACTURER');
-
-    // const { showSnackbar } = useSnackbar();
+    const [entityType, setEntityType] = useState<'MANUFACTURER' | 'SELLER'>('MANUFACTURER');
 
     useEffect(() => {
         fetchAllData();
@@ -45,14 +43,14 @@ export default function UserManagementPortal() {
 
     const fetchAllData = async () => {
         try {
-            const [usersData, mfgData, dealersData] = await Promise.all([
+            const [usersData, mfgData, sellersData] = await Promise.all([
                 adminService.getUsers(),
                 adminService.getManufacturers(),
-                adminService.getDealers()
+                adminService.getDealers() // Service still uses getDealers
             ]);
             setUsers(usersData || []);
             setManufacturers(mfgData || []);
-            setDealers(dealersData || []);
+            setSellers(sellersData || []);
         } catch (error) {
             console.error('Failed to fetch user data', error);
         } finally {
@@ -60,7 +58,7 @@ export default function UserManagementPortal() {
         }
     };
 
-    const handleVerifyClick = (entity: any, type: 'MANUFACTURER' | 'DEALER') => {
+    const handleVerifyClick = (entity: any, type: 'MANUFACTURER' | 'SELLER') => {
         setSelectedEntity(entity);
         setEntityType(type);
         setVerifyModalOpen(true);
@@ -71,7 +69,7 @@ export default function UserManagementPortal() {
             if (entityType === 'MANUFACTURER') {
                 await adminService.verifyManufacturer(selectedEntity._id || selectedEntity.id, isVerified);
             } else {
-                await adminService.verifyDealer(selectedEntity._id || selectedEntity.id, isVerified);
+                await adminService.verifyDealer(selectedEntity._id || selectedEntity.id, isVerified); // Service uses verifyDealer
             }
             toast.success(`${entityType} ${isVerified ? 'Verified' : 'Rejected'} Successfully`);
             fetchAllData(); // Refresh list
@@ -91,12 +89,12 @@ export default function UserManagementPortal() {
             email: m.user?.email, // Assuming relation exists from fetch
             status: m.isVerified ? 'Active' : 'Under Review'
         }));
-        if (selectedRole === 'DEALER') return dealers.map(d => ({
-            ...d,
-            name: d.businessName,
-            role: 'DEALER',
-            email: d.user?.email,
-            status: d.isVerified !== false ? 'Active' : 'Under Review' // Logic might vary
+        if (selectedRole === 'SELLER') return sellers.map(s => ({
+            ...s,
+            name: s.businessName,
+            role: 'SELLER',
+            email: s.user?.email,
+            status: s.isVerified !== false ? 'Active' : 'Under Review'
         }));
         return users.filter(u => u.role === selectedRole);
     };
@@ -121,7 +119,7 @@ export default function UserManagementPortal() {
 
             {/* Quick Role Filters */}
             <div className="flex flex-wrap gap-3">
-                {['ALL', 'ADMIN', 'DEALER', 'MANUFACTURER', 'CUSTOMER'].map((role) => (
+                {['ALL', 'ADMIN', 'SELLER', 'MANUFACTURER', 'CUSTOMER'].map((role) => (
                     <button
                         key={role}
                         onClick={() => setSelectedRole(role)}
@@ -130,7 +128,7 @@ export default function UserManagementPortal() {
                             : 'bg-white text-foreground/40 border border-foreground/10 hover:border-black'
                             }`}
                     >
-                        {role}S
+                        {role === 'SELLER' || role === 'MANUFACTURER' || role === 'CUSTOMER' || role === 'ADMIN' ? role + 'S' : role}
                     </button>
                 ))}
             </div>
@@ -204,8 +202,8 @@ export default function UserManagementPortal() {
                                                         <Tooltip content="Administrator - Full Access">
                                                             <FaUserShield className="text-black w-3 h-3 cursor-help" />
                                                         </Tooltip>
-                                                    ) : user.role === 'DEALER' ? (
-                                                        <Tooltip content="Authorized Dealer">
+                                                    ) : user.role === 'SELLER' ? (
+                                                        <Tooltip content="Authorized Seller">
                                                             <FaStore className="text-black w-3 h-3 cursor-help" />
                                                         </Tooltip>
                                                     ) : user.role === 'MANUFACTURER' ? (
@@ -230,7 +228,7 @@ export default function UserManagementPortal() {
                                             </td>
                                             <td className="px-10 py-6 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    {(selectedRole === 'MANUFACTURER' || selectedRole === 'DEALER') && !user.isVerified && (
+                                                    {(selectedRole === 'MANUFACTURER' || selectedRole === 'SELLER') && !user.isVerified && (
                                                         <button
                                                             onClick={() => handleVerifyClick(user, selectedRole as any)}
                                                             className="btn-primary"

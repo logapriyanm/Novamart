@@ -13,7 +13,7 @@ interface Message {
     createdAt: string;
 }
 
-export default function ChatWidget({ productId, dealerId, dealerName, contextType = 'PRE_PURCHASE' }: { productId: string, dealerId: string, dealerName: string, contextType?: 'PRE_PURCHASE' | 'ORDER' | 'NEGOTIATION' }) {
+export default function ChatWidget({ productId, sellerId, sellerName, contextType = 'PRE_PURCHASE' }: { productId: string, sellerId: string, sellerName: string, contextType?: 'PRE_PURCHASE' | 'ORDER' | 'NEGOTIATION' }) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -83,8 +83,8 @@ export default function ChatWidget({ productId, dealerId, dealerName, contextTyp
                 body: JSON.stringify({
                     type: contextType,
                     contextId: productId,
-                    receiverId: dealerId,
-                    receiverRole: 'DEALER'
+                    receiverId: sellerId,
+                    receiverRole: 'SELLER'
                 })
             });
             const result = await res.json();
@@ -135,8 +135,8 @@ export default function ChatWidget({ productId, dealerId, dealerName, contextTyp
                                     <FaStore className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-black uppercase tracking-widest">{dealerName}</h4>
-                                    <p className="text-[8px] font-bold text-blue-200 uppercase tracking-widest">Dealer • Online</p>
+                                    <h4 className="text-xs font-black uppercase tracking-widest">{sellerName}</h4>
+                                    <p className="text-[8px] font-bold text-blue-200 uppercase tracking-widest">Seller • Online</p>
                                 </div>
                             </div>
                             <button onClick={() => setIsOpen(false)} className="w-8 h-8 rounded-[10px] bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all">

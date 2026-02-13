@@ -29,7 +29,7 @@ export default function ActiveOrderCard() {
     if (loading) {
         return (
             <div className="bg-white p-8 rounded-[10px] shadow-sm border border-slate-100 flex items-center justify-center h-48 animate-pulse">
-                <div className="text-slate-400 text-xs font-bold uppercase tracking-widest">Loading Active Order...</div>
+                <div className="text-slate-400 text-sm font-bold">Loading Active Order...</div>
             </div>
         );
     }
@@ -41,12 +41,12 @@ export default function ActiveOrderCard() {
                     <FaShoppingBag className="w-8 h-8" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black text-slate-800">No Active Orders</h3>
-                    <p className="text-slate-400 text-xs font-bold mt-1">Start shopping to track your delivery here.</p>
+                    <h3 className="text-lg font-bold text-slate-800">No Active Orders</h3>
+                    <p className="text-slate-400 text-sm mt-1">Start shopping to track your delivery here.</p>
                 </div>
                 <button
                     onClick={() => router.push('/products')}
-                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-colors"
+                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-[10px] text-sm font-bold hover:bg-blue-700 transition-colors"
                 >
                     Browse Products
                 </button>
@@ -103,11 +103,11 @@ export default function ActiveOrderCard() {
                         <FaTruck className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-black text-[#1E293B]">Order #{activeOrder.id ? `NM-${activeOrder.id.slice(0, 5).toUpperCase()}` : '...'}</h3>
+                        <h3 className="text-lg font-bold text-[#1E293B]">Order #{activeOrder.id ? `NM-${activeOrder.id.slice(0, 5).toUpperCase()}` : '...'}</h3>
                         <p className="text-xs font-bold text-slate-400">{activeOrder.items?.length} Items · ₹{Number(activeOrder.totalAmount).toLocaleString()}</p>
                     </div>
                 </div>
-                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${activeOrder.status === 'SHIPPED' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-50 text-slate-600 border-slate-100'}`}>
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold border ${activeOrder.status === 'SHIPPED' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-50 text-slate-600 border-slate-100'}`}>
                     {activeOrder.status}
                 </span>
             </div>
@@ -155,13 +155,13 @@ export default function ActiveOrderCard() {
                         <FaMapMarkerAlt className="w-4 h-4" />
                     </div>
                     <div>
-                        <p className="text-xs font-black text-[#1E293B]">Delivery Address</p>
-                        <p className="text-[10px] font-bold text-slate-400 line-clamp-1">{activeOrder.shippingAddress || 'Address on file'}</p>
+                        <p className="text-sm font-bold text-[#1E293B]">Delivery Address</p>
+                        <p className="text-xs font-medium text-slate-400 line-clamp-1">{activeOrder.shippingAddress || 'Address on file'}</p>
                     </div>
                 </div>
                 <button
                     onClick={() => router.push(`/customer/orders`)}
-                    className="text-xs font-black text-[#0F6CBD] hover:underline uppercase tracking-wider"
+                    className="text-sm font-bold text-[#0F6CBD] hover:underline"
                 >
                     View Details
                 </button>

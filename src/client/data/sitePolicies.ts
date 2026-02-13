@@ -51,7 +51,7 @@ export const policyContent = {
         title: 'Dispute Resolution',
         content: `
             <h3 class="text-lg font-bold mb-2">Fair & Transparent Resolution</h3>
-            <p class="mb-4">NovaMart acts as a neutral mediator in disputes between Dealers and Manufacturers.</p>
+            <p class="mb-4">NovaMart acts as a neutral mediator in disputes between Sellers and Manufacturers.</p>
             <h4 class="font-bold mt-4 mb-2">Process:</h4>
             <ol class="list-decimal pl-5 space-y-2">
                 <li><strong>Ticket Creation:</strong> Raise a dispute within 48 hours of delivery for damaged/wrong goods.</li>
@@ -137,15 +137,15 @@ export const policyContent = {
             </div>
         `
     },
-    'terms-dealer': {
-        title: 'Dealer Distribution Agreement',
+    'terms-seller': {
+        title: 'Seller Distribution Agreement',
         content: `
             <div class="space-y-6">
-                <p class="italic font-bold text-foreground/80 mb-6 text-sm">Dealers act as our trusted retail partners. These terms ensure fair distribution and customer service standards.</p>
+                <p class="italic font-bold text-foreground/80 mb-6 text-sm">Sellers act as our trusted retail partners. These terms ensure fair distribution and customer service standards.</p>
                 
                 <div class="space-y-2">
                     <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">1. Retail Pricing Integrity</h4>
-                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Dealers must adhere to MSRP guidelines set by manufacturers. Predatory pricing or price-gouging during shortages is strictly prohibited."</p>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Sellers must adhere to MSRP guidelines set by manufacturers. Predatory pricing or price-gouging during shortages is strictly prohibited."</p>
                 </div>
 
                 <div class="space-y-2">
@@ -155,7 +155,7 @@ export const policyContent = {
 
                 <div class="space-y-2">
                     <h4 class="font-black uppercase tracking-tight text-foreground italic text-sm">3. Post-Sale Support</h4>
-                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Dealers are the first point of contact for end-customers. You must handle initial returns and relay verified defects to the manufacturer through the portal."</p>
+                    <p class="text-[11px] uppercase tracking-widest text-foreground/60 leading-relaxed italic">"Sellers are the first point of contact for end-customers. You must handle initial returns and relay verified defects to the manufacturer through the portal."</p>
                 </div>
             </div>
         `

@@ -3,7 +3,7 @@
  * Handles GST invoice generation and tax breakdowns.
  */
 
-import { Order, Customer, Dealer } from '../models/index.js';
+import { Order, Customer, Seller } from '../models/index.js';
 
 class InvoiceService {
     /**

@@ -48,9 +48,9 @@ export default function CategoryGrid({ categories = [] }: CategoryGridProps) {
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
                                     <IconComponent className="w-6 h-6 text-black" />
-                                    <h3 className="text-sm font-black text-black uppercase">{category.title}</h3>
+                                    <h3 className="text-sm font-bold text-black">{category.title}</h3>
                                 </div>
-                                <Link href={`/products?cat=${category.slug}`} className="text-[10px] font-bold text-black uppercase hover:underline">View All</Link>
+                                <Link href={`/products?cat=${category.slug}`} className="text-sm font-semibold text-black hover:underline">View all</Link>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -59,7 +59,7 @@ export default function CategoryGrid({ categories = [] }: CategoryGridProps) {
                                         <div className="aspect-square rounded-[10px] bg-background overflow-hidden border border-foreground/5 group-hover/item:border-black/20 transition-colors">
                                             <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500" />
                                         </div>
-                                        <span className="text-[10px] font-bold text-foreground/60 leading-tight group-hover/item:text-black transition-colors truncate uppercase">
+                                        <span className="text-sm font-medium text-foreground/60 leading-tight group-hover/item:text-black transition-colors truncate">
                                             {item.name}
                                         </span>
                                     </Link>

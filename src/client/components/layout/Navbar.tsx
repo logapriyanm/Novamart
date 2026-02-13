@@ -81,12 +81,12 @@ export default function Navbar() {
         }
     };
 
-    const profilePath = user?.role === 'DEALER' ? '/dealer/profile' :
+    const profilePath = user?.role === 'SELLER' ? '/seller/profile' :
         user?.role === 'MANUFACTURER' ? '/manufacturer/profile' :
             user?.role === 'ADMIN' ? '/admin/profile' : '/customer/profile';
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-[100] bg-background border-b border-foreground/5">
+        <header className="fixed top-0 left-0 right-0 z-[100] bg-white border-b  shadow-sm transition-all duration-300 ">
             {/* Top Row: Logo, Search, User Actions */}
             <div className="w-full mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-2">
                 <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-8">
@@ -109,27 +109,23 @@ export default function Navbar() {
 
 
                         <div className="flex-1 max-w-2xl hidden md:flex items-center mx-4 lg:mx-8">
-                            <form onSubmit={handleSearch} className="flex w-full h-10 bg-surface border-2 border-black/10 rounded-[10px] overflow-hidden shadow-sm focus-within:border-black transition-colors">
+                            <form onSubmit={handleSearch} className="flex w-full h-10 bg-surface border border-slate-200 hover:border-slate-300 rounded-[10px] overflow-hidden shadow-sm focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
 
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search products..."
-                                    className="flex-1 px-4 text-sm focus:outline-none bg-surface text-foreground font-medium placeholder:text-foreground/30"
+                                    className="flex-1 px-4 text-sm focus:outline-none bg-transparent text-foreground font-medium placeholder:text-muted-foreground/60"
                                 />
 
                                 <button
                                     type="submit"
-                                    className="bg-black hover:bg-black/90 text-background px-6 transition-colors flex items-center justify-center group relative overflow-hidden"
+                                    className="bg-primary hover:bg-primary/90 text-white px-6 transition-colors flex items-center justify-center group relative overflow-hidden"
                                     aria-label="Search products"
                                 >
                                     <div className="relative w-5 h-5 group-hover:scale-110 transition-transform">
-                                        <img
-                                            src="/assets/search-hover-spin.svg"
-                                            alt=""
-                                            className="w-full h-full object-contain brightness-0 invert"
-                                        />
+                                        <Search className="w-full h-full text-white" />
                                     </div>
                                 </button>
                             </form>
@@ -156,10 +152,10 @@ export default function Navbar() {
                             </Link>
                         )}
 
-                        {user?.role === 'DEALER' && (
-                            <Link href="/dealer" className="btn-primary">
+                        {user?.role === 'SELLER' && (
+                            <Link href="/seller" className="btn-primary">
                                 <FaStore className="w-4 h-4" />
-                                <span>Dealer</span>
+                                <span>Seller</span>
                             </Link>
                         )}
 
@@ -168,7 +164,7 @@ export default function Navbar() {
                         {/* Support - Hidden on mobile */}
                         <Link href="/contact" className="hidden md:flex flex-col items-center group gap-1">
                             <FaHeadset className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
-                            <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Support</span>
+                            <span className="text-sm font-bold text-foreground/60 group-hover:text-black transition-colors">Support</span>
                         </Link>
 
                         {isAuthenticated && <NotificationBell />}
@@ -177,11 +173,11 @@ export default function Navbar() {
                         <Link href="/cart" className="hidden md:flex flex-col items-center group gap-1 relative">
                             <div className="relative">
                                 <HiOutlineShoppingCart className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
-                                <span className="absolute -top-2 -right-2 bg-black text-background text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
+                                <span className="absolute -top-2 -right-2 bg-black text-background text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
                                     {cart.length}
                                 </span>
                             </div>
-                            <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Cart</span>
+                            <span className="text-sm font-bold text-foreground/60 group-hover:text-black transition-colors">Cart</span>
                         </Link>
                         {/* Profile Section - Hidden on mobile */}
                         <div
@@ -203,18 +199,18 @@ export default function Navbar() {
                                                 <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                                             </div>
                                         ) : (
-                                            <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black text-[10px] border border-primary/20 group-hover:bg-primary group-hover:text-background transition-all">
+                                            <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-primary font-black text-sm border border-primary/20 group-hover:bg-primary group-hover:text-background transition-all">
                                                 {user?.name?.charAt(0).toUpperCase() || 'U'}
                                             </div>
                                         )}
-                                        <span className="text-[9px] font-black text-primary uppercase tracking-tighter truncate max-w-[80px]">
+                                        <span className="text-xs font-black text-primary truncate max-w-[80px]">
                                             {user?.name?.split(' ')[0] || 'User'}
                                         </span>
                                     </>
                                 ) : (
                                     <>
                                         <HiOutlineUserCircle className="w-6 h-6 text-foreground/40 group-hover:text-black transition-colors" />
-                                        <span className="text-[10px] font-black text-foreground/60 group-hover:text-black transition-colors uppercase italic tracking-tighter">Account</span>
+                                        <span className="text-sm font-black text-foreground/60 group-hover:text-black transition-colors">Account</span>
                                     </>
                                 )}
                             </button>
@@ -225,9 +221,9 @@ export default function Navbar() {
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-0 pt-2 w-64 z-50"
+                                        className="absolute right-0 mt-2 pt-2 w-64 z-50"
                                     >
-                                        <div className="bg-surface rounded-[10px] border border-foreground/10 py-4 overflow-hidden shadow-sm">
+                                        <div className="bg-white rounded-[16px] border py-4 overflow-hidden shadow-2xl ring-1 ring-black/5">
                                             {isAuthenticated ? (
                                                 <div className="px-6 py-4 border-b border-foreground/5 mb-2">
                                                     <p className="font-black text-foreground truncate">{user?.name}</p>
@@ -243,23 +239,23 @@ export default function Navbar() {
                                             <div className="px-2 space-y-1">
                                                 <Link href={profilePath} onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <HiOutlineUser className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
-                                                    <span className="text-xs font-bold uppercase tracking-widest">My Profile</span>
+                                                    <span className="text-sm font-semibold">My profile</span>
                                                 </Link>
                                                 <Link href="/wishlist" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <FaHeart className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
-                                                    <span className="text-xs font-bold uppercase tracking-widest">My Wishlist</span>
+                                                    <span className="text-sm font-semibold">My wishlist</span>
                                                 </Link>
                                                 <Link href="/customer/reviews" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <FaStar className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
-                                                    <span className="text-xs font-bold uppercase tracking-widest">My Reviews</span>
+                                                    <span className="text-sm font-semibold">My reviews</span>
                                                 </Link>
                                                 <Link href="/profile?tab=orders" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <FaClipboardList className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
-                                                    <span className="text-xs font-bold uppercase tracking-widest">Order History</span>
+                                                    <span className="text-sm font-semibold">Order history</span>
                                                 </Link>
                                                 <Link href="/profile?tab=complaints" onClick={() => setIsProfileDropdownOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group">
                                                     <FaHeadset className="w-4 h-4 text-foreground/20 group-hover:text-primary" />
-                                                    <span className="text-xs font-bold uppercase tracking-widest">Disputes & Complaints</span>
+                                                    <span className="text-sm font-semibold">Disputes & complaints</span>
                                                 </Link>
                                             </div>
 
@@ -270,13 +266,13 @@ export default function Navbar() {
                                                         className="w-full flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-rose-500/5 text-rose-500 transition-all group"
                                                     >
                                                         <FaSignOutAlt className="w-4 h-4" />
-                                                        <span className="text-xs font-bold uppercase tracking-widest text-left"> Sign Out</span>
+                                                        <span className="text-sm font-semibold text-left">Sign out</span>
                                                     </button>
                                                 ) : (
                                                     <div className="space-y-1">
                                                         <Link href="/auth/login" onClick={() => setIsProfileDropdownOpen(false)} className="w-full flex items-center gap-3 px-4 py-3 rounded-[10px] bg-primary text-background transition-all group">
                                                             <HiOutlineUserCircle className="w-4 h-4 text-background/80" />
-                                                            <span className="text-xs font-bold uppercase tracking-widest text-left">Sign In</span>
+                                                            <span className="text-sm font-semibold text-left">Sign in</span>
                                                         </Link>
 
                                                     </div>
@@ -306,24 +302,58 @@ export default function Navbar() {
                         <div className="flex items-center gap-4">
                             {/* Categories Toggle Button (on home & products page) */}
                             {sidebarContext && (
-                                <button
-                                    onClick={sidebarContext.toggleCategorySidebar}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] text-xs font-bold uppercase tracking-wider transition-all duration-200 shrink-0 border-2 ${sidebarContext.isCategorySidebarOpen
-                                        ? 'bg-primary text-background border-primary'
-                                        : 'bg-background border-foreground/10 text-foreground/60 hover:border-primary hover:bg-primary/5'
-                                        }`}
-                                >
-                                    <div className="w-6 h-6 flex items-center justify-center">
-                                        <Lottie
-                                            lottieRef={lottieRef}
-                                            animationData={sidebarContext.isCategorySidebarOpen ? slider2 : slider1}
-                                            loop={true}
-                                            autoplay={true}
-                                            style={{ width: 24, height: 24 }}
-                                        />
-                                    </div>
-                                    <span className="font-black text-[11px] uppercase italic">{sidebarContext.isCategorySidebarOpen ? 'Close' : 'Explore'}</span>
-                                </button>
+                                <div className="relative group">
+                                    <button
+                                        onClick={sidebarContext.toggleCategorySidebar}
+                                        className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] text-sm font-bold transition-all duration-200 shrink-0 border-2 ${sidebarContext.isCategorySidebarOpen
+                                            ? 'bg-primary text-background border-primary'
+                                            : 'bg-background border-foreground/10 text-foreground/60 hover:border-primary hover:bg-primary/5'
+                                            }`}
+                                    >
+                                        <div className="w-6 h-6 flex items-center justify-center">
+                                            <Lottie
+                                                lottieRef={lottieRef}
+                                                animationData={sidebarContext.isCategorySidebarOpen ? slider2 : slider1}
+                                                loop={true}
+                                                autoplay={true}
+                                                style={{ width: 24, height: 24 }}
+                                            />
+                                        </div>
+                                        <span className="font-black text-sm">{sidebarContext.isCategorySidebarOpen ? 'Close' : 'Explore'}</span>
+                                    </button>
+
+                                    {/* Temporary Animated Hint Button */}
+                                    <AnimatePresence>
+                                        {!sidebarContext.isCategorySidebarOpen && (
+                                            <ShowTimer>
+                                                <motion.button
+                                                    initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                                                    animate={{
+                                                        opacity: 1,
+                                                        y: 0,
+                                                        scale: 1,
+                                                        transition: {
+                                                            type: 'spring',
+                                                            stiffness: 400,
+                                                            damping: 10
+                                                        }
+                                                    }}
+                                                    exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                                                    whileHover={{ scale: 1.05 }}
+                                                    onClick={sidebarContext.toggleCategorySidebar}
+                                                    className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap border border-white/20 flex items-center gap-1.5 z-50"
+                                                >
+                                                    <span className="relative flex h-2 w-2">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                                    </span>
+                                                    Start Here
+                                                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-primary opacity-100"></div>
+                                                </motion.button>
+                                            </ShowTimer>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             )}
 
                             {isProductsPage || isHomePage ? (
@@ -433,10 +463,10 @@ export default function Navbar() {
                                         </Link>
                                     )}
 
-                                    {user?.role === 'DEALER' && (
-                                        <Link href="/dealer" className="flex items-center gap-3 text-sm font-bold text-primary group" onClick={() => setIsMobileMenuOpen(false)}>
+                                    {user?.role === 'SELLER' && (
+                                        <Link href="/seller" className="flex items-center gap-3 text-sm font-bold text-primary group" onClick={() => setIsMobileMenuOpen(false)}>
                                             <FaStore className="w-5 h-5 text-primary/40 group-hover:text-primary" />
-                                            Dealer Dashboard
+                                            Seller Dashboard
                                         </Link>
                                     )}
 
@@ -444,7 +474,7 @@ export default function Navbar() {
 
                                     {/* Mobile Categories - NEW RESPONSIVE FIX */}
                                     <div className="pt-6 border-t border-foreground/5">
-                                        <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest mb-4">Product Categories</p>
+                                        <p className="text-sm font-bold text-primary/40 mb-4">Product Categories</p>
                                         <div className="grid grid-cols-2 gap-2">
                                             {mainCategories.map((cat, i) => (
                                                 <Link
@@ -462,7 +492,7 @@ export default function Navbar() {
                                     {isAuthenticated ? (
                                         <>
                                             <div className="pt-6 border-t border-foreground/5">
-                                                <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest mb-4">My Account</p>
+                                                <p className="text-sm font-bold text-primary/40 mb-4">My Account</p>
                                                 <div className="space-y-4">
                                                     <Link href={profilePath} className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
                                                         <HiOutlineUser className="w-5 h-5 text-foreground/20" />
@@ -489,7 +519,7 @@ export default function Navbar() {
                                     ) : (
                                         <>
                                             <div className="pt-6 border-t border-foreground/5">
-                                                <p className="text-[10px] font-black text-primary/40 uppercase tracking-widest mb-4">Account</p>
+                                                <p className="text-sm font-bold text-primary/40 mb-4">Account</p>
                                                 <Link href="/auth/login" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
                                                     <HiOutlineUserCircle className="w-5 h-5 text-foreground/20" />
                                                     Sign In
@@ -514,4 +544,19 @@ export default function Navbar() {
             </AnimatePresence>
         </header >
     );
+}
+
+// Helper component to handle the 5-second timer
+function ShowTimer({ children }: { children: React.ReactNode }) {
+    const [visible, setVisible] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setVisible(false);
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (!visible) return null;
+    return <>{children}</>;
 }

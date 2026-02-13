@@ -83,7 +83,7 @@ export default function PersonalizedHero({ data }: PersonalizedHeroProps) {
                                     alt={product.name}
                                     className="w-full h-full object-contain"
                                 />
-                                <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-black px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-lg">
+                                <div className="absolute top-4 right-4 bg-emerald-500 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-lg">
                                     Best Match
                                 </div>
                             </div>

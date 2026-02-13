@@ -39,8 +39,8 @@ export default function CustomerOffers({
     return (
         <section className="py-10 relative overflow-hidden">
             {/* Background elements */}
-            <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-indigo-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-blue-50 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2" />
+            <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-indigo-200/30 rounded-full blur-[120px] opacity-60 -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-2/3 h-2/3 bg-blue-200/30 rounded-full blur-[120px] opacity-60 translate-y-1/2 -translate-x-1/2" />
 
             <div className="max-w-[1300px] mx-auto px-4 lg:px-8 relative">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
@@ -78,15 +78,15 @@ export default function CustomerOffers({
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1 }}
-                                className="group relative bg-white rounded-[10px] p-10 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-200/40 border border-slate-100 transition-all duration-500"
+                                className="group relative bg-white/40 backdrop-blur-xl rounded-[24px] p-10 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-indigo-200/40 border border-white/50 transition-all duration-500 hover:-translate-y-2"
                             >
                                 {offer.badge && (
-                                    <div className="absolute top-8 right-8 px-4 py-1.5 rounded-full bg-rose-100 text-rose-600 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                                    <div className="absolute top-8 right-8 px-4 py-1.5 rounded-full bg-rose-100 text-rose-600 text-sm font-semibold">
                                         {offer.badge}
                                     </div>
                                 )}
 
-                                <div className={`w-16 h-16 rounded-2xl ${offer.lightColor || 'bg-indigo-50'} flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500`}>
+                                <div className={`w-16 h-16 rounded-[20px] ${offer.lightColor || 'bg-white/60'} backdrop-blur-md flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 border border-white/50 shadow-sm`}>
                                     <Icon className={`w-8 h-8 ${(offer.color || 'bg-indigo-600').replace('bg-', 'text-')}`} />
                                 </div>
 
@@ -110,10 +110,10 @@ export default function CustomerOffers({
                                     </ul>
 
                                     <div className="pt-6 border-t border-slate-50">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Core Purpose</p>
+                                        <p className="text-sm font-semibold text-slate-400 mb-3">Core purpose</p>
                                         <div className="flex flex-wrap gap-2">
                                             {(offer.purpose || []).map((p: string, i: number) => (
-                                                <span key={i} className="px-3 py-1 bg-slate-50 rounded-lg text-[10px] font-black text-slate-600 uppercase border border-slate-100">
+                                                <span key={i} className="px-3 py-1 bg-slate-50 rounded-lg text-sm font-semibold text-slate-600 border border-slate-100">
                                                     ✔ {p}
                                                 </span>
                                             ))}

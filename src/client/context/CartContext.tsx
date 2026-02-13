@@ -18,6 +18,7 @@ export interface CartItem {
     sellerName: string;
     region?: string;
     stock?: number;
+    originalPrice?: number;
 }
 
 interface CartContextType {
@@ -28,6 +29,7 @@ interface CartContextType {
     clearCart: () => Promise<void>;
     subtotal: number;
     total: number;
+    totalSavings: number;
     isLoading: boolean;
     refreshCart: () => Promise<void>;
 }
@@ -69,9 +71,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     price: Number(item.price),
                     image: item.product?.images?.[0] || '',
                     quantity: item.quantity,
-                    sellerId: item.dealer?.id || '',
-                    sellerName: item.dealer?.businessName || '',
-                    stock: item.stock
+                    sellerId: item.seller?.id || '',
+                    sellerName: item.seller?.businessName || '',
+                    stock: item.stock,
+                    originalPrice: Number(item.originalPrice || item.price)
                 }));
                 setCart(items);
                 // Also save to localStorage for offline access
@@ -120,9 +123,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // Add item to cart
     const addToCart = async (item: Omit<CartItem, 'id'>) => {
         if (!isAuthenticated) {
+            // Check stock for local cart
+            const existing = cart.find(i => i.inventoryId === item.inventoryId);
+            const currentQty = existing ? existing.quantity : 0;
+            const newQty = currentQty + item.quantity;
+
+            if (item.stock !== undefined && newQty > item.stock) {
+                toast.error(`Cannot add more. Only ${item.stock} left in stock.`);
+                return;
+            }
+
             // Add to localStorage
             setCart(prev => {
-                const existing = prev.find(i => i.inventoryId === item.inventoryId);
                 let updated;
                 if (existing) {
                     updated = prev.map(i =>
@@ -137,6 +149,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 return updated;
             });
             toast.success('Product added to cart');
+            return;
+        }
+
+        // Check stock for backend cart (optimistic check)
+        // We might not have the current cart item stock here if it's a new item, 
+        // but we rely on the passed 'item.stock' or the existing item's stock in context.
+        const existing = cart.find(i => i.inventoryId === item.inventoryId);
+        const currentQty = existing ? existing.quantity : 0;
+        const newQty = currentQty + item.quantity;
+
+        if (item.stock !== undefined && newQty > item.stock) {
+            toast.error(`Cannot add more. Only ${item.stock} left in stock.`);
             return;
         }
 
@@ -189,6 +213,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 const updated = prev.map(i => {
                     if (i.id === cartItemId) {
                         const newQty = Math.max(1, i.quantity + delta);
+                        if (i.stock !== undefined && newQty > i.stock) {
+                            toast.error(`Cannot add more. Only ${i.stock} left in stock.`);
+                            return i;
+                        }
                         return { ...i, quantity: newQty };
                     }
                     return i;
@@ -205,6 +233,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             const item = cart.find(i => i.id === cartItemId);
             if (item) {
                 const newQuantity = Math.max(1, item.quantity + delta);
+
+                if (item.stock !== undefined && newQuantity > item.stock) {
+                    toast.error(`Cannot add more. Only ${item.stock} left in stock.`);
+                    return;
+                }
+
                 await cartService.updateQuantity(cartItemId, newQuantity);
                 await fetchCart(); // Refresh cart
                 toast.success('Cart updated');
@@ -240,6 +274,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const totalSavings = cart.reduce((acc, item) => {
+        const original = item.originalPrice || item.price;
+        return acc + (Math.max(0, original - item.price) * item.quantity);
+    }, 0);
     const total = subtotal; // Simplified for now
 
     return (
@@ -252,6 +290,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 clearCart,
                 subtotal,
                 total,
+                totalSavings,
                 isLoading,
                 refreshCart: fetchCart
             }}

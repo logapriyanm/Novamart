@@ -36,8 +36,8 @@ const faqs = [
         answer: "Once your order is dispatched, you can track it in real-time via the 'My Orders' section. for bulk shipments, we provide detailed logistics milestones including manufacturing completion, dispatch, transit hubs, and final delivery estimation."
     },
     {
-        question: "Can I change my role from Buyer to Dealer?",
-        answer: "Yes, you can upgrade your account. Navigate to your Profile Settings and select 'Upgrade to Dealer'. You will need to submit additional business documentation and pass our dealer verification process."
+        question: "Can I change my role from Buyer to Seller?",
+        answer: "Yes, you can upgrade your account. Navigate to your Profile Settings and select 'Upgrade to Seller'. You will need to submit additional business documentation and pass our seller verification process."
     }
 ];
 
@@ -72,10 +72,10 @@ export default function SupportPage() {
                         />
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-2 text-sm text-slate-500 font-medium">
+                    <div className="flex flex-wrap justify-center gap-2 text-sm text-muted-foreground font-medium">
                         <span>Popular:</span>
                         {['Escrow process', 'Shipping logistics', 'Verification'].map((tag, i) => (
-                            <button key={i} className="text-blue-600 hover:underline px-1">{tag}{i < 2 ? ',' : ''}</button>
+                            <button key={i} className="text-primary hover:underline px-1">{tag}{i < 2 ? ',' : ''}</button>
                         ))}
                     </div>
                 </div>
@@ -116,17 +116,14 @@ export default function SupportPage() {
                         </button>
                     </motion.div>
 
-                    {/* Dealer Card */}
-                    <motion.div
-                        whileHover={{ y: -5 }}
-                        className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/5 group cursor-pointer"
-                    >
+                    {/* Seller Card */}
+                    <Link href="/seller/support" className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/5 group cursor-pointer">
                         <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                            <FaStore />
+                            <FaStore /> {/* Using FaStore as 'Store' was not imported */}
                         </div>
-                        <h3 className="text-xl font-black text-slate-800 mb-3">I am a Dealer</h3>
+                        <h3 className="text-xl font-black text-slate-800 mb-3">I am a Seller</h3>
                         <p className="text-sm text-slate-500 font-medium mb-8 leading-relaxed">
-                            Optimize your storefront, manage inventory levels, and view advanced sales analytics.
+                            Need help with sourcing, bulk orders, or negotiations? Access dedicated support for sellers.
                         </p>
                         <ul className="space-y-4 mb-8">
                             {[
@@ -139,10 +136,10 @@ export default function SupportPage() {
                                 </li>
                             ))}
                         </ul>
-                        <button className="text-blue-600 text-xs font-black uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                            View all dealer topics <FaChevronRight />
-                        </button>
-                    </motion.div>
+                        <span className="text-blue-600 text-xs font-black uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                            View all seller topics <FaChevronRight />
+                        </span>
+                    </Link>
 
                     {/* Manufacturer Card */}
                     <motion.div

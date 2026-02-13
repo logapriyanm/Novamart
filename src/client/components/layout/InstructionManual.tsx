@@ -9,7 +9,7 @@ import { useAuth } from '@/client/context/AuthContext';
 import {
     GUEST_MANUAL,
     CUSTOMER_MANUAL,
-    DEALER_MANUAL,
+    SELLER_MANUAL,
     MANUFACTURER_MANUAL,
     RoleManual
 } from '@/client/data/manualContent';
@@ -37,7 +37,7 @@ const InstructionManual: React.FC<InstructionManualProps> = ({ isOpen, onClose }
 
     let manual: RoleManual = GUEST_MANUAL;
     if (user?.role === 'CUSTOMER') manual = CUSTOMER_MANUAL;
-    else if (user?.role === 'DEALER') manual = DEALER_MANUAL;
+    else if (user?.role === 'SELLER') manual = SELLER_MANUAL;
     else if (user?.role === 'MANUFACTURER') manual = MANUFACTURER_MANUAL;
     else if (user?.role === 'ADMIN') return null; // Admin manual not exposed
 

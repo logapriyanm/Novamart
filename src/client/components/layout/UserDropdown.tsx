@@ -34,7 +34,7 @@ export default function UserDropdown() {
         switch (user.role) {
             case 'ADMIN': return '/admin/profile';
             case 'MANUFACTURER': return '/manufacturer/profile';
-            case 'DEALER': return '/dealer/profile';
+            case 'SELLER': return '/seller/profile';
             default: return '/customer/profile';
         }
     };
@@ -43,7 +43,7 @@ export default function UserDropdown() {
         switch (user.role) {
             case 'ADMIN': return '/admin/settings';
             case 'MANUFACTURER': return '/manufacturer/settings'; // Assuming standard path
-            case 'DEALER': return '/dealer/settings';
+            case 'SELLER': return '/seller/settings';
             default: return '/customer/settings';
         }
     };

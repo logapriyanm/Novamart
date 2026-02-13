@@ -34,7 +34,7 @@ export interface RoleManual {
 
 export const GUEST_MANUAL: RoleManual = {
     title: "How NovaMart Works",
-    welcomeMessage: "Welcome to NovaMart! Secure B2B2C marketplace connecting manufacturers, dealers, and buyers.",
+    welcomeMessage: "Welcome to NovaMart! Secure B2B2C marketplace connecting manufacturers, sellers, and buyers.",
     sections: [
         {
             title: "Buyer / Customer",
@@ -48,7 +48,7 @@ export const GUEST_MANUAL: RoleManual = {
             ]
         },
         {
-            title: "Dealer / Seller",
+            title: "Seller",
             description: "Source wholesale products from manufacturers and reach a wider customer base.",
             icon: Users,
             items: [
@@ -60,13 +60,13 @@ export const GUEST_MANUAL: RoleManual = {
         },
         {
             title: "Manufacturer",
-            description: "Scale your production and distribution by managing authorized dealer networks.",
+            description: "Scale your production and distribution by managing authorized seller networks.",
             icon: Briefcase,
             items: [
                 { title: "Upload Products", description: "Single or bulk upload your product catalog." },
-                { title: "Approve Dealers", description: "Control who sells your brand." },
+                { title: "Approve Sellers", description: "Control who sells your brand." },
                 { title: "Custom Orders", description: "Accept and manage personalized manufacturing requests." },
-                { title: "Stock Allocation", description: "Efficiently manage stock across your dealer network." }
+                { title: "Stock Allocation", description: "Efficiently manage stock across your seller network." }
             ]
         }
     ]
@@ -107,8 +107,8 @@ export const CUSTOMER_MANUAL: RoleManual = {
     ]
 };
 
-export const DEALER_MANUAL: RoleManual = {
-    title: "Dealer / Seller User Manual",
+export const SELLER_MANUAL: RoleManual = {
+    title: "Seller User Manual",
     welcomeMessage: "Grow your business on NovaMart with exclusive access and powerful selling tools.",
     sections: [
         {
@@ -152,16 +152,16 @@ export const MANUFACTURER_MANUAL: RoleManual = {
             icon: Package,
             items: [
                 { title: "Product Uploads", description: "Use CSV imports for large catalogs or the manual form for single items." },
-                { title: "Approval Workflow", description: "Manage dealer requests to ensure brand consistency." }
+                { title: "Approval Workflow", description: "Manage seller requests to ensure brand consistency." }
             ]
         },
         {
-            title: "Dealer Network",
+            title: "Seller Network",
             description: "Build and scale your distribution channels.",
             icon: Users,
             items: [
-                { title: "Dealer Verification", description: "Review and approve/reject dealer onboarding requests." },
-                { title: "Stock Allocation", description: "Set priority stock levels for your top-performing dealers." }
+                { title: "Seller Verification", description: "Review and approve/reject seller onboarding requests." },
+                { title: "Stock Allocation", description: "Set priority stock levels for your top-performing sellers." }
             ]
         },
         {

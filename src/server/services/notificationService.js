@@ -130,7 +130,7 @@ class NotificationService {
             title: 'Order Confirmed - NovaMart',
             message: `Order #${orderId.toString().slice(-8)} placed! Secured by NovaEscrow.`,
             metadata: { orderId: orderId.toString() },
-            channels: ['WHATSAPP', 'EMAIL', 'PUSH', 'IN_APP']
+            channels: ['WHATSAPP', 'PUSH', 'IN_APP'] // EMAIL handled by emailSubscriber
         });
 
         await this.sendNotification({
@@ -159,7 +159,8 @@ class NotificationService {
             type: 'DELIVERY',
             title: 'Order Dispatched',
             message: `Your order #${orderId.toString().slice(-8)} is on the way! Tracking: ${trackingDetails}`,
-            metadata: { orderId: orderId.toString() }
+            metadata: { orderId: orderId.toString() },
+            channels: ['PUSH', 'IN_APP'] // EMAIL handled by emailSubscriber
         });
     }
 
@@ -170,7 +171,7 @@ class NotificationService {
             title: 'Order Delivered',
             message: `Your order #${orderId.toString().slice(-8)} has been delivered. Please verify to release funds.`,
             metadata: { orderId: orderId.toString() },
-            channels: ['IN_APP', 'PUSH']
+            channels: ['IN_APP', 'PUSH'] // EMAIL handled by emailSubscriber
         });
     }
 

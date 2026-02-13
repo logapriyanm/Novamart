@@ -214,10 +214,10 @@ export default function ProductFormWizard({
                 <FaCheckCircle className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-widest">
+                <p className="text-sm font-medium text-emerald-800">
                   Verified Account
                 </p>
-                <p className="text-[9px] font-bold text-emerald-600/70">
+                <p className="text-xs font-medium text-emerald-600/70">
                   Instant Go-Live Protocol Active
                 </p>
               </div>
@@ -248,13 +248,12 @@ export default function ProductFormWizard({
               onClick={() => setCurrentStep(step.id)}
             >
               <div
-                className={`w-10 h-10 rounded-[10px] flex items-center justify-center text-sm font-bold transition-all border-2 ${
-                  currentStep > step.id
+                className={`w-10 h-10 rounded-[10px] flex items-center justify-center text-sm font-bold transition-all border-2 ${currentStep > step.id
                     ? "bg-black text-white border-black"
                     : currentStep === step.id
                       ? "bg-black text-white border-black scale-110"
                       : "bg-background text-foreground/40 border-foreground/10"
-                }`}
+                  }`}
               >
                 {currentStep > step.id ? (
                   <FaCheck className="w-3 h-3" />
@@ -263,9 +262,8 @@ export default function ProductFormWizard({
                 )}
               </div>
               <span
-                className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${
-                  currentStep >= step.id ? "text-black" : "text-foreground/20"
-                }`}
+                className={`text-sm font-medium transition-colors ${currentStep >= step.id ? "text-black" : "text-foreground/20"
+                  }`}
               >
                 {step.name}
               </span>

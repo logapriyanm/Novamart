@@ -95,7 +95,7 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                 name: p.name,
                 price: p.inventory?.[0]?.price || p.basePrice,
                 originalPrice: p.inventory?.[0]?.originalPrice || p.basePrice,
-                image: p.images?.[0] || '/assets/placeholder-product.png',
+                image: p.images?.[0] || 'https://placehold.co/400x400?text=No+Image',
                 brand: p.manufacturer?.companyName || 'NovaMart',
                 spec: p.category,
                 subCategory: p.specifications?.subCategory,
@@ -174,32 +174,32 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
     if (filters.subCategory) activeFilters.push({ key: 'subCategory', label: filters.subCategory, value: null });
 
     return (
-        <div className="min-h-screen pb-20 ">
+        <div className="min-h-screen py-20 ">
             {/* 1️⃣ TOP BAR DESIGN (ABOVE PRODUCTS) */}
             <header className="sticky top-20 z-40 bg-white border-b border-slate-200 py-4 shadow-sm">
                 <div className="max-w-[1440px] mx-auto px-4 xs:px-6">
                     {/* Breadcrumbs */}
-                    <nav className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                        <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+                    <nav className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
+                        <Link href="/" className="hover:text-primary transition-colors">Home</Link>
                         <FaChevronRight className="w-2 h-2" />
-                        <Link href="/products" className="hover:text-blue-600 transition-colors">Products</Link>
+                        <Link href="/products" className="hover:text-primary transition-colors">Products</Link>
                         <FaChevronRight className="w-2 h-2" />
-                        <span className="text-slate-600">{categoryTitle}</span>
+                        <span className="text-foreground">{categoryTitle}</span>
                     </nav>
 
                     <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-4">
-                        <div className="flex items-baseline gap-2 xs:gap-4">
+                        {/* <div className="flex items-baseline gap-2 xs:gap-4">
                             <h1 className="text-xl xs:text-2xl font-black text-slate-900 tracking-tight uppercase italic">
                                 {categoryTitle}
                             </h1>
                             <span className="text-[10px] xs:text-xs font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                                 {products.length.toLocaleString()} Products
                             </span>
-                        </div>
+                        </div> */}
 
                         <div className="flex items-center justify-between xs:justify-end gap-3 xs:gap-6">
                             {/* View Toggle */}
-                            <div className="flex items-center bg-slate-100 rounded-[10px] p-1 shadow-inner border border-slate-200">
+                            {/* <div className="flex items-center bg-slate-100 rounded-[10px] p-1 shadow-inner border border-slate-200">
                                 <button
                                     onClick={() => setViewType('grid')}
                                     className={`p-2 rounded-[8px] transition-all flex items-center justify-center ${viewType === 'grid' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
@@ -212,10 +212,10 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                                 >
                                     <FaList className="w-3.5 h-3.5" />
                                 </button>
-                            </div>
+                            </div> */}
 
                             {/* Sort Dropdown */}
-                            <div className="relative group flex-1 xs:flex-none">
+                            {/* <div className="relative group flex-1 xs:flex-none">
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
@@ -229,7 +229,7 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                                 <div className="absolute right-3 xs:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <FaChevronRight className="w-2.5 h-2.5 text-slate-400 rotate-90" />
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
@@ -242,7 +242,7 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                                 exit={{ opacity: 0, height: 0 }}
                                 className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-slate-100 overflow-hidden"
                             >
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2">Filters:</span>
+                                <span className="text-sm font-bold text-muted-foreground mr-2">Filters:</span>
                                 {activeFilters.map((f, i) => (
                                     <button
                                         key={i}
@@ -253,15 +253,15 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                                                 handleFilterChange(f.key, f.value);
                                             }
                                         }}
-                                        className="bg-blue-50 border border-blue-100 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-[5px] text-[10px] font-black uppercase flex items-center gap-2 transition-all group"
+                                        className="bg-primary/5 border border-primary/20 text-primary hover:bg-primary/10 px-3 py-1.5 rounded-[5px] text-sm font-bold flex items-center gap-2 transition-all group"
                                     >
                                         {f.label}
-                                        <FaTimes className="w-2 h-2 text-blue-300 group-hover:text-blue-500" />
+                                        <FaTimes className="w-2 h-2 text-primary/50 group-hover:text-primary" />
                                     </button>
                                 ))}
                                 <button
                                     onClick={clearAllFilters}
-                                    className="text-[10px] font-black text-slate-400 hover:text-slate-900 uppercase tracking-widest ml-2 transition-colors"
+                                    className="text-sm font-bold text-muted-foreground hover:text-foreground ml-2 transition-colors"
                                 >
                                     Clear All
                                 </button>
@@ -288,7 +288,7 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                 <main className="flex-1 min-w-0">
                     <button
                         onClick={() => setIsMobileFilterOpen(true)}
-                        className="lg:hidden w-full flex items-center justify-center gap-2 mb-6 py-4 bg-white border border-slate-200 rounded-[10px] text-xs font-black uppercase tracking-widest shadow-sm"
+                        className="lg:hidden w-full flex items-center justify-center gap-2 mb-6 py-4 bg-white border border-border rounded-[10px] text-sm font-bold shadow-sm"
                     >
                         <FaFilter className="w-3.5 h-3.5" />
                         Show Filters
@@ -317,15 +317,15 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white border-2 border-dashed border-slate-200 rounded-[20px] p-20 text-center shadow-sm">
-                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
-                                <Search className="w-8 h-8 text-slate-300" />
+                        <div className="bg-white border-2 border-dashed border-border rounded-[20px] p-20 text-center shadow-sm">
+                            <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-6 border border-border">
+                                <Search className="w-8 h-8 text-muted-foreground/50" />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-2 uppercase italic tracking-tight">No results matched</h3>
-                            <p className="text-slate-500 font-medium mb-8 italic">Adjust your filters or query to find the right equipment.</p>
+                            <h3 className="text-2xl font-bold text-foreground mb-2 tracking-tight">No results matched</h3>
+                            <p className="text-muted-foreground font-medium mb-8 italic">Adjust your filters or query to find the right equipment.</p>
                             <button
                                 onClick={clearAllFilters}
-                                className="px-10 py-4 bg-blue-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-blue-500/20 hover:scale-105 transition-all"
+                                className="btn-primary"
                             >
                                 Clear All Filters
                             </button>
@@ -343,22 +343,22 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsMobileFilterOpen(false)}
-                            className="lg:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100]"
+                            className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-[100]"
                         />
                         <motion.div
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
-                            className="lg:hidden fixed right-0 top-0 bottom-0 w-[320px] bg-white z-[101] shadow-2xl flex flex-col"
+                            className="lg:hidden fixed right-0 top-0 bottom-0 w-[320px] bg-background z-[101] shadow-2xl flex flex-col"
                         >
-                            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                            <div className="p-6 border-b border-border flex items-center justify-between bg-muted/30">
                                 <div>
-                                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Filter Results</h3>
-                                    <p className="text-[10px] font-bold text-slate-400">{products.length} Items Found</p>
+                                    <h3 className="text-sm font-bold text-foreground">Filter Results</h3>
+                                    <p className="text-xs font-medium text-muted-foreground">{products.length} Items Found</p>
                                 </div>
                                 <button
                                     onClick={() => setIsMobileFilterOpen(false)}
-                                    className="w-10 h-10 flex items-center justify-center text-slate-400"
+                                    className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground"
                                 >
                                     <FaTimes className="w-4 h-4" />
                                 </button>
@@ -376,9 +376,9 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                                 />
                             </div>
 
-                            <div className="p-6 border-t border-slate-100 grid grid-cols-2 gap-4">
-                                <button onClick={clearAllFilters} className="py-4 border border-slate-200 rounded-[10px] text-[10px] font-black uppercase tracking-widest text-slate-400">Clear</button>
-                                <button onClick={() => setIsMobileFilterOpen(false)} className="py-4 bg-blue-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest">Apply</button>
+                            <div className="p-6 border-t border-border grid grid-cols-2 gap-4">
+                                <button onClick={clearAllFilters} className="py-4 border border-border rounded-[10px] text-sm font-bold text-muted-foreground hover:text-foreground">Clear</button>
+                                <button onClick={() => setIsMobileFilterOpen(false)} className="btn-primary">Apply</button>
                             </div>
                         </motion.div>
                     </>

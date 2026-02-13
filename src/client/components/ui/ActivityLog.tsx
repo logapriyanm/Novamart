@@ -60,14 +60,14 @@ export default function ActivityLog({
         <div className={`bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden flex flex-col ${className}`}>
             {/* Header */}
             <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-                <h3 className="text-sm font-black uppercase tracking-wider text-slate-800 italic">{title}</h3>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{activities.length} Events</span>
+                <h3 className="text-sm font-bold text-slate-800 italic">{title}</h3>
+                <span className="text-sm font-bold text-slate-400">{activities.length} Events</span>
             </div>
 
             {/* List */}
             <div className="overflow-y-auto custom-scrollbar p-0" style={{ maxHeight }}>
                 {activities.length === 0 ? (
-                    <div className="p-8 text-center text-slate-400 text-xs font-medium italic">
+                    <div className="p-8 text-center text-slate-400 text-sm font-medium italic">
                         {emptyMessage}
                     </div>
                 ) : (
@@ -92,7 +92,7 @@ export default function ActivityLog({
                                                 <span className="text-slate-600">{item.action}</span>
                                                 {item.target && <span className="text-slate-800 ml-1">"{item.target}"</span>}
                                             </p>
-                                            <span className="text-[10px] font-bold text-slate-300 whitespace-nowrap uppercase tracking-wider shrink-0">
+                                            <span className="text-xs font-bold text-slate-300 whitespace-nowrap shrink-0">
                                                 {typeof item.timestamp === 'string'
                                                     ? item.timestamp
                                                     : formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
@@ -100,14 +100,14 @@ export default function ActivityLog({
                                         </div>
 
                                         {item.details && (
-                                            <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">
+                                            <p className="text-sm text-slate-500 mt-1 leading-relaxed line-clamp-2">
                                                 {item.details}
                                             </p>
                                         )}
 
                                         {/* Meta Footer */}
                                         <div className="flex items-center gap-2 mt-2">
-                                            <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-bold uppercase tracking-wider">
+                                            <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-xs font-bold">
                                                 {item.user.role || 'User'}
                                             </span>
                                         </div>

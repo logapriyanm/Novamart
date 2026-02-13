@@ -1,5 +1,7 @@
 import { Order } from '../../models/index.js';
 import orderService from '../../services/order.js';
+import emailService from '../../services/emailService.js';
+import logger from '../../lib/logger.js';
 
 /**
  * Order Lifecycle Management
@@ -11,10 +13,21 @@ export const updateOrderStatus = async (req, res) => {
     try {
         let result;
         switch (action) {
-            case 'CONFIRM': result = await orderService.confirmOrder(orderId); break;
-            case 'SHIP': result = await orderService.shipOrder(orderId, `${carrier}: ${trackingNumber}`); break;
-            case 'DELIVER': result = await orderService.deliverOrder(orderId); break;
-            case 'CANCEL': result = await orderService.cancelOrder(orderId, reason); break;
+            case 'CONFIRM':
+                result = await orderService.confirmOrder(orderId);
+                // emailService.sendOrderConfirmation(orderId); // Usually handled by payment, but if manual confirm used
+                break;
+            case 'SHIP':
+                result = await orderService.shipOrder(orderId, `${carrier}: ${trackingNumber}`);
+                emailService.sendOrderShipped(orderId, trackingNumber, carrier).catch(err => logger.error('Failed to send shipped email', err));
+                break;
+            case 'DELIVER':
+                result = await orderService.deliverOrder(orderId);
+                emailService.sendOrderDelivered(orderId).catch(err => logger.error('Failed to send delivered email', err));
+                break;
+            case 'CANCEL':
+                result = await orderService.cancelOrder(orderId, reason);
+                break;
             default: throw new Error('Invalid action');
         }
         res.json({

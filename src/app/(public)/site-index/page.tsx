@@ -20,7 +20,7 @@ const sitemapData = [
         title: "Business Functions",
         links: [
             { name: "Manufacturer Portal", href: "/auth/login?role=MANUFACTURER" },
-            { name: "Dealer Registration", href: "/auth/register?role=DEALER" },
+            { name: "Seller Registration", href: "/auth/register?role=SELLER" },
             { name: "Escrow Governance", href: "/guides/escrow" },
             { name: "Bulk Liquidation", href: "/products" }
         ]

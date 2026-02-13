@@ -1,4 +1,4 @@
-import { CollaborationGroup, GroupParticipant, Dealer, User } from '../models/index.js';
+import { CollaborationGroup, GroupParticipant, Seller, User } from '../models/index.js';
 import logger from '../lib/logger.js';
 import notificationService from '../services/notificationService.js';
 
@@ -52,7 +52,7 @@ export const createGroup = async (req, res) => {
         // Invite other dealers if provided
         if (invitedDealerIds && invitedDealerIds.length > 0) {
             for (const dealerId of invitedDealerIds) {
-                const invitedDealer = await Dealer.findById(dealerId);
+                const invitedDealer = await Seller.findById(dealerId);
                 if (invitedDealer && invitedDealer.currentSubscriptionTier === 'ENTERPRISE') {
                     await GroupParticipant.create({
                         groupId: group._id,
@@ -245,7 +245,7 @@ export const inviteDealer = async (req, res) => {
         }
 
         // Verify invited dealer exists and has ENTERPRISE subscription
-        const invitedDealer = await Dealer.findById(invitedDealerId);
+        const invitedDealer = await Seller.findById(invitedDealerId);
         if (!invitedDealer) {
             return res.status(404).json({
                 success: false,
@@ -373,7 +373,7 @@ export const joinGroup = async (req, res) => {
 
         // Notify group creator
         await notificationService.create({
-            userId: (await Dealer.findById(group.creatorId)).userId,
+            userId: (await Seller.findById(group.creatorId)).userId,
             type: 'COLLABORATION_JOINED',
             title: 'New Group Member',
             message: `A dealer has joined "${group.name}" collaboration group`,

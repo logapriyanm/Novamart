@@ -24,7 +24,7 @@ const CustomOrderEscrowSchema = new mongoose.Schema({
 
     // Payment splits for group orders
     participantPayments: [{
-        dealerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dealer', required: true },
+        sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true },
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         shareAmount: { type: Number, required: true },
         advanceShare: { type: Number, required: true },
@@ -52,6 +52,6 @@ const CustomOrderEscrowSchema = new mongoose.Schema({
 
 // Indexes for efficient queries
 CustomOrderEscrowSchema.index({ manufacturerId: 1, status: 1 });
-CustomOrderEscrowSchema.index({ 'participantPayments.dealerId': 1 });
+CustomOrderEscrowSchema.index({ 'participantPayments.sellerId': 1 });
 
 export default mongoose.models.CustomOrderEscrow || mongoose.model('CustomOrderEscrow', CustomOrderEscrowSchema);

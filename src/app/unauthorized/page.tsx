@@ -24,9 +24,9 @@ export default function UnauthorizedPage() {
                 >
                     Home
                 </Link>
-                {user?.role === 'DEALER' && (
-                    <Link href="/dealer" className="px-6 py-3 border-2 border-primary rounded-[10px] font-bold hover:bg-primary/5">
-                        Dealer Dashboard
+                {user?.role === 'SELLER' && (
+                    <Link href="/seller" className="px-6 py-3 border-2 border-primary rounded-[10px] font-bold hover:bg-primary/5">
+                        Seller Dashboard
                     </Link>
                 )}
                 {user?.role === 'MANUFACTURER' && (

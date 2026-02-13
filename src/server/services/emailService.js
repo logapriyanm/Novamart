@@ -1,26 +1,26 @@
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import logger from '../lib/logger.js';
+import EmailLog from '../models/EmailLog.js';
+import { Order, Review } from '../models/index.js';
 
-// Create email transporter
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// --- Configuration ---
+const TEMPLATE_DIR = path.join(__dirname, '../templates');
+const EMAIL_FROM = process.env.EMAIL_FROM || 'NovaMart <noreply@novamart.com>';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+// --- Transporter Setup ---
 const createTransporter = () => {
-    // For development: use mailtrap, ethereal, or Gmail
-    // For production: use SendGrid, AWS SES, etc.
-
-    if (process.env.EMAIL_SERVICE === 'gmail') {
-        return nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASSWORD // App password for Gmail
-            }
-        });
-    }
-
-    // Default: Use SMTP configuration if credentials provided
-    if (process.env.SMTP_USER && process.env.SMTP_PASSWORD) {
+    if (process.env.NODE_ENV === 'production' || (process.env.SMTP_USER && process.env.SMTP_PASSWORD)) {
         return nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
             port: parseInt(process.env.SMTP_PORT || '2525'),
+            secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASSWORD
@@ -28,11 +28,11 @@ const createTransporter = () => {
         });
     }
 
-    // Fallback: Logger transporter for development/testing
-    logger.warn('No email credentials found. Falling back to mock transporter.');
+    // Mock Transporter for Dev (if no creds)
+    logger.warn('⚠️ No SMTP credentials found. Using Mock Email Transporter.');
     return {
         sendMail: async (options) => {
-            logger.info('[MOCK EMAIL] To: %s | Subject: %s', options.to, options.subject);
+            logger.info(`[MOCK EMAIL] To: ${options.to} | Subject: ${options.subject}`);
             return { messageId: `mock-${Date.now()}` };
         }
     };
@@ -40,330 +40,396 @@ const createTransporter = () => {
 
 const transporter = createTransporter();
 
-// Email templates
-const emailTemplates = {
-    orderConfirmation: (order, customer) => ({
-        subject: `Order Confirmed #${order.id.slice(0, 8).toUpperCase()} - NovaMart`,
-        html: `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header { background: linear-gradient(135deg, #FF5733 0%, #C70039 100%); color: white; padding: 40px 30px; text-align: center; }
-        .header h1 { margin: 0; font-size: 28px; font-weight: 900; }
-        .content { padding: 40px 30px; }
-        .badge { display: inline-block; background: #10B981; color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; margin: 20px 0; }
-        .order-id { font-size: 14px; color: #666; margin-top: 10px; }
-        .section { margin: 30px 0; }
-        .section-title { font-size: 14px; font-weight: bold; color: #333; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
-        .info-box { background: #F9FAFB; border-radius: 12px; padding: 20px; margin: 15px 0; }
-        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E5E7EB; }
-        .info-row:last-child { border-bottom: none; }
-        .label { color: #6B7280; font-size: 14px; font-weight: 500; }
-        .value { color: #111827; font-size: 14px; font-weight: bold; }
-        .escrow-notice { background: #ECFDF5; border-left: 4px solid #10B981; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .escrow-notice h3 { margin: 0 0 10px 0; color: #059669; font-size: 16px; }
-        .escrow-notice p { margin: 0; color: #065F46; font-size: 14px; line-height: 1.6; }
-        .total { background: #1F2937; color: white; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0; }
-        .total-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
-        .total-amount { font-size: 32px; font-weight: 900; margin-top: 5px; }
-        .button { display: inline-block; background: #FF5733; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-        .footer { background: #F9FAFB; padding: 30px; text-align: center; color: #6B7280; font-size: 12px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎉 Order Confirmed!</h1>
-            <div class="badge">✓ Payment Secured</div>
-            <div class="order-id">Order ID: ${order.id.slice(0, 13).toUpperCase()}</div>
-        </div>
-        
-        <div class="content">
-            <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
-                Hi ${customer.user.firstName || 'Customer'},
-            </p>
-            <p style="font-size: 14px; color: #666; line-height: 1.6;">
-                Thank you for your order! We've received your payment and it's now securely held in escrow. 
-                Your order will be shipped soon.
-            </p>
-            
-            <div class="escrow-notice">
-                <h3>🛡️ Buyer Protection Active</h3>
-                <p>
-                    Your payment of ₹${Number(order.totalAmount).toLocaleString('en-IN')} is held securely in escrow. 
-                    The seller will not receive funds until you confirm delivery. You're fully protected!
-                </p>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">Order Summary</div>
-                <div class="info-box">
-                    ${order.items.map(item => `
-                        <div class="info-row">
-                            <span class="label">Item × ${item.quantity}</span>
-                            <span class="value">₹${Number(item.price).toLocaleString('en-IN')}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-            
-            <div class="total">
-                <div class="total-label">Total Paid</div>
-                <div class="total-amount">₹${Number(order.totalAmount).toLocaleString('en-IN')}</div>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">Shipping Address</div>
-                <div class="info-box">
-                    <p style="margin: 0; color: #333; font-size: 14px; line-height: 1.6;">
-                        ${order.shippingAddress || 'Address on file'}
-                    </p>
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/customer/orders/${order.id}" class="button">
-                    Track Your Order →
-                </a>
-            </div>
-            
-            <p style="font-size: 12px; color: #999; text-align: center; margin-top: 30px;">
-                Questions? Reply to this email or contact support@novamart.com
-            </p>
-        </div>
-        
-        <div class="footer">
-            <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">NovaMart</p>
-            <p style="margin: 0;">Secure B2B Marketplace with Escrow Protection</p>
-            <p style="margin: 10px 0 0 0;">© 2026 NovaMart. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-</html>
-        `
-    }),
-
-    paymentConfirmation: (payment, order, customer) => ({
-        subject: `Payment Confirmed ₹${Number(payment.amount).toLocaleString('en-IN')} - NovaMart`,
-        html: `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; padding: 40px 30px; text-align: center; }
-        .header h1 { margin: 0; font-size: 28px; font-weight: 900; }
-        .content { padding: 40px 30px; }
-        .checkmark { width: 80px; height: 80px; background: white; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-        .amount-box { background: #ECFDF5; border: 2px solid #10B981; border-radius: 12px; padding: 30px; text-align: center; margin: 20px 0; }
-        .amount-label { font-size: 14px; color: #059669; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .amount { font-size: 36px; font-weight: 900; color: #065F46; margin-top: 10px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .info-card { background: #F9FAFB; padding: 15px; border-radius: 8px; }
-        .info-card-label { font-size: 11px; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-        .info-card-value { font-size: 14px; color: #111827; font-weight: bold; }
-        .escrow-box { background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .footer { background: #F9FAFB; padding: 30px; text-align: center; color: #6B7280; font-size: 12px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="checkmark">✓</div>
-            <h1>Payment Received!</h1>
-            <p style="margin: 10px 0 0 0; opacity: 0.9;">Your payment has been securely processed</p>
-        </div>
-        
-        <div class="content">
-            <div class="amount-box">
-                <div class="amount-label">Amount Paid</div>
-                <div class="amount">₹${Number(payment.amount).toLocaleString('en-IN')}</div>
-            </div>
-            
-            <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-card-label">Transaction ID</div>
-                    <div class="info-card-value">${payment.razorpayPaymentId || 'MOCK_' + Date.now()}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-label">Order ID</div>
-                    <div class="info-card-value">#${order.id.slice(0, 8).toUpperCase()}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-label">Payment Method</div>
-                    <div class="info-card-value">${payment.method || 'Online'}</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-card-label">Status</div>
-                    <div class="info-card-value" style="color: #10B981;">✓ SUCCESS</div>
-                </div>
-            </div>
-            
-            <div class="escrow-box">
-                <h3 style="margin: 0 0 10px 0; color: #D97706; font-size: 16px;">🔒 Funds Secured in Escrow</h3>
-                <p style="margin: 0; color: #92400E; font-size: 14px; line-height: 1.6;">
-                    Your payment is held safely in our escrow system. The seller will receive payment only after you confirm delivery of your order.
-                </p>
-            </div>
-            
-            <p style="font-size: 14px; color: #666; line-height: 1.6; margin: 30px 0;">
-                This is an automated receipt for your records. Your order is being processed and will be shipped soon. 
-                You'll receive another email with tracking information.
-            </p>
-            
-            <div style="background: #F9FAFB; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0; font-size: 12px; color: #666;">
-                    <strong>Need a refund?</strong> You can request a refund from your order page if there's an issue. 
-                    All refunds are processed through the same payment method within 5-7 business days.
-                </p>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">NovaMart Payment Gateway</p>
-            <p style="margin: 0;">Secure payments powered by Razorpay</p>
-            <p style="margin: 10px 0 0 0;">© 2026 NovaMart. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-</html>
-        `
-    }),
-    passwordReset: (user, resetLink) => ({
-        subject: 'Password Reset Request - NovaMart',
-        html: `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header { background: #000; color: white; padding: 40px 30px; text-align: center; }
-        .header h1 { margin: 0; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
-        .content { padding: 40px 30px; text-align: center; }
-        .button { display: inline-block; background: #000; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 30px 0; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
-        .footer { background: #F9FAFB; padding: 30px; text-align: center; color: #6B7280; font-size: 12px; }
-        .warning { font-size: 12px; color: #999; margin-top: 20px; line-height: 1.6; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>NovaMart Security</h1>
-        </div>
-        <div class="content">
-            <h2 style="color: #333; margin-top: 0;">Password Reset Request</h2>
-            <p style="color: #666; line-height: 1.6;">
-                Hi ${user.firstName || user.email.split('@')[0]},<br>
-                We received a request to reset the password for your NovaMart account. 
-                Click the button below to set a new password.
-            </p>
-            <a href="${resetLink}" class="button">Reset Password</a>
-            <p class="warning">
-                This link will expire in 1 hour. If you didn't request this, you can safely ignore this email. 
-                Your password will remain unchanged.
-            </p>
-        </div>
-        <div class="footer">
-            <p style="margin: 0 0 10px 0; font-weight: bold; color: #333;">NovaMart Hub</p>
-            <p style="margin: 0;">Verified B2B Wholesale Ecosystem</p>
-            <p style="margin: 10px 0 0 0;">© 2026 NovaMart. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-</html>
-        `
-    })
-};
-
-// Send email function
-export const sendEmail = async (to, template) => {
+// --- Template Engine ---
+const loadTemplate = (templateName, data) => {
     try {
-        const mailOptions = {
-            from: process.env.EMAIL_FROM || 'NovaMart <noreply@novamart.com>',
-            to,
-            subject: template.subject,
-            html: template.html
+        const layoutPath = path.join(TEMPLATE_DIR, 'layout.html');
+        const templatePath = path.join(TEMPLATE_DIR, `${templateName}.html`);
+
+        // Load Base Layout
+        let layout = fs.readFileSync(layoutPath, 'utf8');
+
+        // Load Content Template
+        let content = fs.readFileSync(templatePath, 'utf8');
+
+        // Replace Content Placeholders
+        Object.keys(data).forEach(key => {
+            const regex = new RegExp(`{{${key}}}`, 'g');
+            content = content.replace(regex, data[key] || '');
+        });
+
+        // Inject Content into Layout
+        let finalHtml = layout.replace('{{content}}', content);
+
+        // Replace Global Layout Placeholders
+        const globalData = {
+            frontendUrl: FRONTEND_URL,
+            year: new Date().getFullYear(),
+            ...data
         };
 
-        const info = await transporter.sendMail(mailOptions);
-        logger.info('Email sent: %s', info.messageId);
-        return { success: true, messageId: info.messageId };
+        Object.keys(globalData).forEach(key => {
+            const regex = new RegExp(`{{${key}}}`, 'g');
+            finalHtml = finalHtml.replace(regex, globalData[key] || '');
+        });
+
+        return finalHtml;
+
     } catch (error) {
-        logger.error('Email send error:', error);
-        return { success: false, error: error.message };
+        logger.error(`Error loading template ${templateName}:`, error);
+        throw new Error('Email template loading failed');
     }
 };
 
-// Import Mongoose models
-import { Order, Customer } from '../models/index.js';
-
-// Specific email functions
-export const sendOrderConfirmation = async (order) => {
+// --- Core Send Function ---
+const sendEmail = async ({ to, subject, templateName, data, userId, emailType, orderId = null }) => {
     try {
-        // Fetch customer details if not included
-        const orderWithDetails = await Order.findById(order._id || order.id)
-            .populate({
-                path: 'customerId',
-                populate: { path: 'userId' }
-            })
-            .populate('items.productId');
-
-        if (!orderWithDetails) {
-            throw new Error('Order not found');
-        }
-
-        const customerEmail = orderWithDetails.customerId?.userId?.email;
-        if (!customerEmail) {
-            throw new Error('Customer email not found');
-        }
-
-        const template = emailTemplates.orderConfirmation(orderWithDetails, orderWithDetails.customerId);
-
-        return await sendEmail(customerEmail, template);
-    } catch (error) {
-        logger.error('Order confirmation email error:', error);
-        return { success: false, error: error.message };
-    }
-};
-
-export const sendPaymentConfirmation = async (payment, order) => {
-    try {
-        // Fetch full order with customer
-        const orderWithDetails = await Order.findById(order._id || order.id)
-            .populate({
-                path: 'customerId',
-                populate: { path: 'userId' }
+        // 1. Duplicate Prevention
+        if (emailType && userId) {
+            const existingLog = await EmailLog.findOne({
+                userId,
+                emailType,
+                orderId,
+                status: 'SENT',
+                createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) } // Prevent dupes within 24h
             });
 
-        if (!orderWithDetails) {
-            throw new Error('Order not found');
+            if (existingLog) {
+                logger.info(`🚫 Duplicate email prevented: ${emailType} for User ${userId}`);
+                return { success: true, skipped: true };
+            }
         }
 
-        const customerEmail = orderWithDetails.customerId?.userId?.email;
-        if (!customerEmail) {
-            throw new Error('Customer email not found');
+        // 2. Render HTML
+        const html = loadTemplate(templateName, data);
+
+        // 3. Send Email
+        const info = await transporter.sendMail({
+            from: EMAIL_FROM,
+            to,
+            subject,
+            html
+        });
+
+        // 4. Log Success
+        if (userId && emailType) {
+            await EmailLog.create({
+                userId,
+                emailType,
+                recipientEmail: to,
+                orderId,
+                status: 'SENT',
+                messageId: info.messageId,
+                metadata: { template: templateName }
+            });
         }
 
-        const template = emailTemplates.paymentConfirmation(payment, order, orderWithDetails.customerId);
+        logger.info(`✅ Email Sent: ${emailType} to ${to}`);
+        return { success: true, messageId: info.messageId };
 
-        return await sendEmail(customerEmail, template);
     } catch (error) {
-        logger.error('Payment confirmation email error:', error);
+        logger.error(`❌ Email Failed: ${emailType || 'Unknown'} to ${to}`, error);
+
+        // Log Failure
+        if (userId && emailType) {
+            await EmailLog.create({
+                userId,
+                emailType,
+                recipientEmail: to,
+                orderId,
+                status: 'FAILED',
+                metadata: { error: error.message }
+            });
+        }
+
+        return { success: false, error: error.message };
+    }
+};
+
+// --- Public Methods ---
+
+/**
+ * Send Welcome Email
+ */
+export const sendWelcomeEmail = async (user) => {
+    const roleMap = {
+        'CUSTOMER': 'WELCOME_CUSTOMER',
+        'SELLER': 'WELCOME_SELLER',
+        'MANUFACTURER': 'WELCOME_MANUFACTURER',
+        'ADMIN': 'WELCOME_ADMIN' // Optional
+    };
+
+    return await sendEmail({
+        to: user.email,
+        subject: 'Welcome to NovaMart! 🚀',
+        templateName: 'welcome',
+        data: {
+            name: user.name || user.firstName || 'User',
+            role: user.role.charAt(0) + user.role.slice(1).toLowerCase(),
+            email: user.email,
+            actionUrl: `${FRONTEND_URL}/${user.role.toLowerCase()}`
+        },
+        userId: user._id,
+        emailType: roleMap[user.role]
+    });
+};
+
+/**
+ * Send Forgot Password Email
+ */
+export const sendPasswordResetEmail = async (user, resetToken) => {
+    // Determine the frontend route based on role if needed, or use a generic auth route
+    // Assuming /auth/reset-password?token=...
+    const resetUrl = `${FRONTEND_URL}/auth/reset-password?token=${resetToken}&email=${encodeURIComponent(user.email)}`;
+
+    return await sendEmail({
+        to: user.email,
+        subject: 'Reset Your NovaMart Password 🔒',
+        templateName: 'forgot-password',
+        data: {
+            name: user.name || 'User',
+            actionUrl: resetUrl
+        },
+        userId: user._id,
+        emailType: 'FORGOT_PASSWORD'
+    });
+};
+
+/**
+ * Send Order Confirmation
+ */
+export const sendOrderConfirmation = async (orderId) => {
+    try {
+        const order = await Order.findById(orderId)
+            .populate('customerId')
+            .populate({ path: 'items.productId', select: 'name' });
+        // Note: In real app, might need deep population to get user email from customer
+
+        // Deep populate helper if needed (depending on your schema structure)
+        // Assuming Order -> Customer -> User (where email is)
+        // If not populated, fetch manually.
+
+        if (!order) throw new Error('Order not found');
+
+        // We need the User ID to log this email
+        // Check schema: Order.customerId might be a Customer Profile, which links to User
+        // Or if your Order schema has userId directly.
+        // Adjusting based on standard schema patterns:
+
+        // Re-fetching with correct populate if needed. 
+        // Assuming Order has 'customerId' which is the Customer Profile
+        // and Customer Profile has 'userId'.
+
+        const fullOrder = await Order.findById(orderId).populate({
+            path: 'customerId',
+            populate: { path: 'userId' }
+        });
+
+        const user = fullOrder.customerId?.userId;
+        const customerEmail = user?.email;
+
+        if (!customerEmail) {
+            throw new Error(`Customer email not found for Order ${orderId}`);
+        }
+
+        const itemsHtml = fullOrder.items.map(item => `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.productId?.name || 'Product'}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">x${item.quantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">₹${item.price}</td>
+            </tr>
+        `).join('');
+
+        return await sendEmail({
+            to: customerEmail,
+            subject: `Order Confirmed #${fullOrder._id.toString().slice(-6).toUpperCase()}`,
+            templateName: 'order-confirmation',
+            data: {
+                name: user.name || 'Customer',
+                orderId: fullOrder._id.toString().slice(-6).toUpperCase(),
+                totalAmount: `₹${fullOrder.totalAmount}`,
+                deliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString(), // Mock +5 days
+                itemsHtml,
+                actionUrl: `${FRONTEND_URL}/customer/orders/${fullOrder._id}`
+            },
+            userId: user._id,
+            emailType: 'ORDER_CONFIRMATION',
+            orderId: fullOrder._id
+        });
+
+    } catch (error) {
+        logger.error('Order Confirmation Email Error:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Send Order Shipped
+ */
+export const sendOrderShipped = async (orderId, trackingNumber = 'N/A', carrier = 'Logistics Partner') => {
+    try {
+        const fullOrder = await Order.findById(orderId).populate({
+            path: 'customerId',
+            populate: { path: 'userId' }
+        });
+
+        const user = fullOrder.customerId?.userId;
+        const customerEmail = user?.email;
+
+        if (!customerEmail) return { success: false, error: 'No email found' };
+
+        return await sendEmail({
+            to: customerEmail,
+            subject: `Your Order #${fullOrder._id.toString().slice(-6).toUpperCase()} has Shipped! 🚚`,
+            templateName: 'order-shipped',
+            data: {
+                name: user.name || 'Customer',
+                orderId: fullOrder._id.toString().slice(-6).toUpperCase(),
+                trackingNumber,
+                carrier,
+                actionUrl: `${FRONTEND_URL}/customer/orders/${fullOrder._id}`
+            },
+            userId: user._id,
+            emailType: 'ORDER_SHIPPED',
+            orderId: fullOrder._id
+        });
+
+    } catch (error) {
+        logger.error('Order Shipped Email Error:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Send Order Delivered
+ */
+export const sendOrderDelivered = async (orderId) => {
+    try {
+        const fullOrder = await Order.findById(orderId).populate({
+            path: 'customerId',
+            populate: { path: 'userId' }
+        });
+
+        const user = fullOrder.customerId?.userId;
+        const customerEmail = user?.email;
+
+        if (!customerEmail) return { success: false, error: 'No email found' };
+
+        return await sendEmail({
+            to: customerEmail,
+            subject: `Your Order #${fullOrder._id.toString().slice(-6).toUpperCase()} is Delivered! 📦`,
+            templateName: 'order-delivered',
+            data: {
+                name: user.name || 'Customer',
+                orderId: fullOrder._id.toString().slice(-6).toUpperCase(),
+                shippingAddress: fullOrder.shippingAddress || 'Your Address',
+                actionUrl: `${FRONTEND_URL}/customer/reviews/new?orderId=${fullOrder._id}`
+            },
+            userId: user._id,
+            emailType: 'ORDER_DELIVERED',
+            orderId: fullOrder._id
+        });
+
+    } catch (error) {
+        logger.error('Order Delivered Email Error:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Send New Review Notification to Seller
+ */
+export const sendReviewNotification = async (review) => {
+    try {
+        // Deep populate to get names and emails
+        // We likely need to fetch the review with populated fields if not already passed
+        // Or assume the subscriber handles fetching full data. 
+        // Let's safe-guard by fetching here or assuming data structure.
+        // Best practice: Fetch fresh data to ensure we have emails.
+        const fullReview = await Review.findById(review._id)
+            .populate({ path: 'sellerId', populate: { path: 'userId' } }) // Seller Email
+            .populate('customerId') // Customer Name
+            .populate('productId'); // Product Name
+
+        const sellerUser = fullReview.sellerId?.userId;
+        const sellerEmail = sellerUser?.email;
+
+        if (!sellerEmail) {
+            logger.warn(`No seller email found for review ${review._id}`);
+            return { success: false, error: 'No seller email' };
+        }
+
+        return await sendEmail({
+            to: sellerEmail,
+            subject: `New ${fullReview.rating}-Star Review for ${fullReview.productId?.name || 'Your Product'} 🌟`,
+            templateName: 'new-review', // We might need to create this or use specific mock log
+            data: {
+                name: sellerUser.name || 'Seller',
+                customerName: fullReview.customerId?.name || 'A Customer',
+                productName: fullReview.productId?.name || 'Product',
+                rating: fullReview.rating,
+                title: fullReview.title || 'Review',
+                comment: fullReview.comment,
+                actionUrl: `${FRONTEND_URL}/dashboard/seller/reviews` // Deep link to dashboard
+            },
+            userId: sellerUser._id,
+            emailType: 'REVIEW_RECEIVED'
+        });
+
+    } catch (error) {
+        logger.error('Review Notification Error:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+/**
+ * Send Reply Notification to Customer
+ */
+export const sendReplyNotification = async (review) => {
+    try {
+        const fullReview = await Review.findById(review._id)
+            .populate({ path: 'customerId', populate: { path: 'userId' } }) // Customer Email
+            .populate('sellerId') // Seller Business Name
+            .populate('productId');
+
+        const customerUser = fullReview.customerId?.userId;
+        const customerEmail = customerUser?.email;
+
+        if (!customerEmail) {
+            logger.warn(`No customer email found for review ${review._id}`);
+            return { success: false, error: 'No customer email' };
+        }
+
+        return await sendEmail({
+            to: customerEmail,
+            subject: `Response to your review on ${fullReview.productId?.name || 'NovaMart'} 💬`,
+            templateName: 'review-reply',
+            data: {
+                name: customerUser.name || 'Customer',
+                sellerName: fullReview.sellerId?.businessName || 'Seller',
+                productName: fullReview.productId?.name || 'Product',
+                replyText: fullReview.sellerReply?.text || '',
+                actionUrl: `${FRONTEND_URL}/products/${fullReview.productId?._id}`
+            },
+            userId: customerUser._id,
+            emailType: 'REVIEW_REPLIED'
+        });
+
+    } catch (error) {
+        logger.error('Reply Notification Error:', error);
         return { success: false, error: error.message };
     }
 };
 
 export default {
-    sendEmail,
+    sendWelcomeEmail,
+    sendPasswordResetEmail,
     sendOrderConfirmation,
-    sendPaymentConfirmation,
-    emailTemplates
+    sendOrderShipped,
+    sendOrderShipped,
+    sendOrderDelivered,
+    sendReviewNotification,
+    sendReplyNotification,
+    // Legacy export for backward compatibility if needed, but preferred to be specific
+    sendEmail
 };

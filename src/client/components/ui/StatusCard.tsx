@@ -55,7 +55,7 @@ export default function StatusCard({ title, value, subtitle, icon: Icon, theme }
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${style.iconBg}`}>
                     <Icon className={`w-5 h-5 ${style.iconColor}`} />
                 </div>
-                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${style.badgeBg}`}>
+                <span className={`px-2.5 py-1 rounded-lg text-sm font-semibold ${style.badgeBg}`}>
                     {style.badge}
                 </span>
             </div>
@@ -65,7 +65,7 @@ export default function StatusCard({ title, value, subtitle, icon: Icon, theme }
                 <div className="flex items-baseline gap-2">
                     <h3 className="text-3xl font-black text-foreground tracking-tight">{value}</h3>
                 </div>
-                <p className={`text-[11px] font-bold mt-1 ${theme === 'operational' ? 'text-emerald-500' : 'text-foreground/20'}`}>
+                <p className={`text-sm font-medium mt-1 ${theme === 'operational' ? 'text-emerald-500' : 'text-foreground/20'}`}>
                     {subtitle}
                 </p>
             </div>

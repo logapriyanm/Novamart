@@ -1,4 +1,4 @@
-import { Dealer, DealerSubscription, SubscriptionPlan } from '../models/index.js';
+import { Seller, SellerSubscription, SubscriptionPlan } from '../models/index.js';
 
 /**
  * Middleware to require a specific subscription tier
@@ -10,8 +10,8 @@ export const requireSubscription = (allowedTiers) => {
             const userId = req.user._id;
 
             // Get dealer profile
-            const dealer = await Dealer.findOne({ userId });
-            if (!dealer) {
+            const seller = await Seller.findOne({ userId });
+            if (!seller) {
                 return res.status(403).json({
                     success: false,
                     error: 'DEALER_PROFILE_REQUIRED',
@@ -21,13 +21,13 @@ export const requireSubscription = (allowedTiers) => {
 
             // Check cached subscription tier
             const now = new Date();
-            if (dealer.subscriptionExpiresAt && dealer.subscriptionExpiresAt > now) {
+            if (seller.subscriptionExpiresAt && seller.subscriptionExpiresAt > now) {
                 // Valid cached subscription
                 const tiersArray = Array.isArray(allowedTiers) ? allowedTiers : [allowedTiers];
 
-                if (tiersArray.includes(dealer.currentSubscriptionTier)) {
-                    req.dealer = dealer;
-                    req.subscriptionTier = dealer.currentSubscriptionTier;
+                if (tiersArray.includes(seller.currentSubscriptionTier)) {
+                    req.dealer = seller;
+                    req.subscriptionTier = seller.currentSubscriptionTier;
                     return next();
                 }
 
@@ -35,15 +35,15 @@ export const requireSubscription = (allowedTiers) => {
                     success: false,
                     error: 'SUBSCRIPTION_UPGRADE_REQUIRED',
                     message: `This feature requires ${tiersArray.join(' or ')} subscription`,
-                    currentTier: dealer.currentSubscriptionTier,
+                    currentTier: seller.currentSubscriptionTier,
                     requiredTiers: tiersArray,
                     upgradeUrl: '/dealer/subscription'
                 });
             }
 
             // Cache expired or not set - check database
-            const activeSub = await DealerSubscription.findOne({
-                dealerId: dealer._id,
+            const activeSub = await SellerSubscription.findOne({
+                dealerId: seller._id,
                 status: 'ACTIVE',
                 endDate: { $gt: now }
             }).populate('planId');
@@ -58,9 +58,9 @@ export const requireSubscription = (allowedTiers) => {
             }
 
             // Update cache
-            dealer.currentSubscriptionTier = activeSub.planId.name;
-            dealer.subscriptionExpiresAt = activeSub.endDate;
-            await dealer.save();
+            seller.currentSubscriptionTier = activeSub.planId.name;
+            seller.subscriptionExpiresAt = activeSub.endDate;
+            await seller.save();
 
             // Check if tier is allowed
             const tiersArray = Array.isArray(allowedTiers) ? allowedTiers : [allowedTiers];
@@ -75,7 +75,7 @@ export const requireSubscription = (allowedTiers) => {
                 });
             }
 
-            req.dealer = dealer;
+            req.dealer = seller;
             req.subscriptionTier = activeSub.planId.name;
             req.subscriptionPlan = activeSub.planId;
             next();
@@ -106,22 +106,22 @@ export const requireENTERPRISE = requireSubscription('ENTERPRISE');
 export const checkSubscriptionExpiry = async (req, res, next) => {
     try {
         const userId = req.user._id;
-        const dealer = await Dealer.findOne({ userId });
+        const seller = await Seller.findOne({ userId });
 
-        if (!dealer) return next();
+        if (!seller) return next();
 
         const now = new Date();
 
         // Check if cached expiry is in the past
-        if (dealer.subscriptionExpiresAt && dealer.subscriptionExpiresAt < now) {
+        if (seller.subscriptionExpiresAt && seller.subscriptionExpiresAt < now) {
             // Reset to BASIC
-            dealer.currentSubscriptionTier = 'BASIC';
-            dealer.subscriptionExpiresAt = null;
-            await dealer.save();
+            seller.currentSubscriptionTier = 'BASIC';
+            seller.subscriptionExpiresAt = null;
+            await seller.save();
 
             // Mark subscription as EXPIRED
-            await DealerSubscription.updateMany(
-                { dealerId: dealer._id, status: 'ACTIVE', endDate: { $lt: now } },
+            await SellerSubscription.updateMany(
+                { dealerId: seller._id, status: 'ACTIVE', endDate: { $lt: now } },
                 { $set: { status: 'EXPIRED' } }
             );
         }

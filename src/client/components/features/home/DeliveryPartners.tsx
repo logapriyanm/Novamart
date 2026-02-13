@@ -34,8 +34,8 @@ export default function DeliveryPartners({ partners = [] }: DeliveryPartnersProp
             <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
             <div className="max-w-7xl mx-auto px-6 mb-12 text-center">
-                <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Trusted Delivery <span className="text-rose-500">Partners</span></h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Fast & Secure Shipping Across India</p>
+                <h3 className="text-xl font-bold text-slate-800">Trusted delivery <span className="text-rose-500">partners</span></h3>
+                <p className="text-sm font-medium text-slate-400 mt-2">Fast & secure shipping across India</p>
             </div>
 
             <div className="flex overflow-hidden">
@@ -57,7 +57,7 @@ export default function DeliveryPartners({ partners = [] }: DeliveryPartnersProp
                                 <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
                                     <Icon className="w-8 h-8" style={{ color: partner.color }} />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{partner.name}</span>
+                                <span className="text-sm font-semibold text-slate-400">{partner.name}</span>
                             </div>
                         );
                     })}

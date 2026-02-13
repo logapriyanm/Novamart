@@ -26,24 +26,24 @@ export default function StepReview() {
             content: (
                 <div className="p-6 bg-slate-50/50 space-y-6">
                     <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Description</p>
+                        <p className="text-sm font-semibold text-slate-400 mb-2">Description</p>
                         <p className="text-xs text-slate-600 leading-relaxed max-w-4xl">
                             {productData.description || 'No description provided.'}
                         </p>
                     </div>
                     <div className="flex gap-12">
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Brand</p>
+                            <p className="text-sm font-semibold text-slate-400 mb-1">Brand</p>
                             <p className="text-xs font-bold text-[#1E293B]">My Brand</p>
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Category</p>
+                            <p className="text-sm font-semibold text-slate-400 mb-1">Category</p>
                             <p className="text-xs font-bold text-[#1E293B]">
                                 {(productData.category && CATEGORY_CONFIG[productData.category as CategoryKey]?.label) || productData.category || 'Uncategorized'}
                             </p>
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sub-Category</p>
+                            <p className="text-sm font-semibold text-slate-400 mb-1">Sub-category</p>
                             <p className="text-xs font-bold text-[#1E293B]">{productData.subCategory || 'N/A'}</p>
                         </div>
                     </div>
@@ -59,7 +59,7 @@ export default function StepReview() {
                         <div className="grid grid-cols-2 gap-4">
                             {Object.entries(productData.specifications).map(([key, value]) => (
                                 <div key={key}>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{key}</p>
+                                    <p className="text-sm font-semibold text-slate-400 mb-1">{key}</p>
                                     <p className="text-xs font-bold text-[#1E293B]">{String(value)}</p>
                                 </div>
                             ))}
@@ -76,11 +76,11 @@ export default function StepReview() {
             content: (
                 <div className="p-6 bg-slate-50/50 flex gap-12">
                     <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Base Price</p>
+                        <p className="text-sm font-semibold text-slate-400 mb-1">Base price</p>
                         <p className="text-xs font-bold text-[#1E293B]">₹{productData.basePrice || '0.00'}</p>
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">MOQ</p>
+                        <p className="text-sm font-semibold text-slate-400 mb-1">MOQ</p>
                         <p className="text-xs font-bold text-[#1E293B]">{productData.moq || '1'} Units</p>
                     </div>
                 </div>
@@ -91,7 +91,7 @@ export default function StepReview() {
             icon: FaImages,
             content: (
                 <div className="p-6 bg-slate-50/50">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Images ({productData.images.length})</p>
+                    <p className="text-sm font-semibold text-slate-400 mb-2">Images ({productData.images.length})</p>
                     <div className="flex gap-2">
                         {productData.images.length > 0 ? productData.images.map((img, idx) => (
                             <img key={idx} src={img} alt={`Product ${idx}`} className="w-16 h-16 object-cover rounded-[10px] border border-slate-200" />
@@ -108,7 +108,7 @@ export default function StepReview() {
             <div className="flex flex-col gap-1 mb-4">
                 <div className="flex justify-between items-end border-b border-primary/10 pb-4">
                     <h2 className="text-2xl font-black tracking-tight text-[#1E293B]">Review Product Details</h2>
-                    <span className="text-[10px] font-black text-[#1E293B] uppercase tracking-widest">Step 6 of 6</span>
+                    <span className="text-sm font-semibold text-[#1E293B]">Step 6 of 6</span>
                 </div>
                 <p className="text-slate-400 font-bold text-xs mt-2">Final check before admin approval and marketplace listing.</p>
             </div>
@@ -146,7 +146,7 @@ export default function StepReview() {
                                 }`}>
                                 {(productData.certifications || []).includes(cert) && <FaCheckCircle className="w-3 h-3" />}
                             </div>
-                            <span className={`text-[10px] font-bold ${(productData.certifications || []).includes(cert) ? 'text-[#0F6CBD]' : 'text-[#1E293B]'
+                            <span className={`text-sm font-medium ${(productData.certifications || []).includes(cert) ? 'text-[#0F6CBD]' : 'text-[#1E293B]'
                                 }`}>{cert}</span>
                         </div>
                     ))}
@@ -166,12 +166,12 @@ export default function StepReview() {
                 </div>
 
                 <div className="flex-1 space-y-2">
-                    <span className="bg-blue-50 text-blue-600 text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-[10px]">Draft Status</span>
+                    <span className="bg-blue-50 text-blue-600 text-sm font-semibold px-2 py-1 rounded-[10px]">Draft status</span>
                     <h3 className="text-xl font-black text-[#1E293B]">{productData.name || 'Untitled Product'}</h3>
                     <p className="text-xs font-bold text-slate-500">Category: <span className="text-[#1E293B]">{productData.category || 'N/A'}</span></p>
                     <div className="pt-2">
                         <span className="text-2xl font-black text-[#1E293B]">₹{productData.basePrice || '0.00'}</span>
-                        <span className="text-[10px] font-bold text-slate-400 ml-1">/ unit (Base)</span>
+                        <span className="text-sm font-medium text-slate-400 ml-1">/ unit (Base)</span>
                     </div>
                 </div>
             </div>

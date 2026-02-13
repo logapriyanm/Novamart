@@ -55,8 +55,8 @@ export default function RecentProducts() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h2 className="text-xl font-black text-[#1E293B]">Suggested For You</h2>
-                <Link href="/products" className="flex items-center gap-2 text-xs font-black text-[#0F6CBD] uppercase tracking-wider hover:underline">
+                <h2 className="text-xl font-bold text-[#1E293B]">Suggested For You</h2>
+                <Link href="/products" className="flex items-center gap-2 text-sm font-bold text-[#0F6CBD] hover:underline">
                     View All <FaArrowRight className="w-3 h-3" />
                 </Link>
             </div>
@@ -78,11 +78,11 @@ export default function RecentProducts() {
                             )}
                         </div>
                         <div className="space-y-1 mb-4">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.category?.name || 'Product'}</p>
-                            <h3 className="text-sm font-black text-[#1E293B] line-clamp-1" title={product.name}>{product.name}</h3>
+                            <p className="text-sm font-medium text-slate-400">{product.category?.name || 'Product'}</p>
+                            <h3 className="text-sm font-bold text-[#1E293B] line-clamp-1" title={product.name}>{product.name}</h3>
                         </div>
                         <div className="flex items-center justify-between">
-                            <p className="text-sm font-black text-[#0F6CBD]">₹{Number(product.price).toLocaleString()}</p>
+                            <p className="text-sm font-bold text-[#0F6CBD]">₹{Number(product.price).toLocaleString()}</p>
                             <button
                                 onClick={() => router.push(`/products/${product.id}`)}
                                 className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-[#1E293B] hover:bg-[#1E293B] hover:text-white transition-colors"

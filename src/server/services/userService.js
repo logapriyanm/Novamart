@@ -1,9 +1,9 @@
 /**
  * User Service
- * Centralized identity management for all roles (Customer, Dealer, Manufacturer, Admin).
+ * Centralized identity management for all roles (Customer, Seller, Manufacturer, Admin).
  */
 
-import { User, Customer, Dealer, Manufacturer } from '../models/index.js';
+import { User, Customer, Seller, Manufacturer } from '../models/index.js';
 import mongoose from 'mongoose';
 
 class UserService {
@@ -14,16 +14,16 @@ class UserService {
         const user = await User.findById(userId);
         if (!user) return null;
 
-        const [customer, dealer, manufacturer] = await Promise.all([
+        const [customer, seller, manufacturer] = await Promise.all([
             Customer.findOne({ userId }),
-            Dealer.findOne({ userId }),
+            Seller.findOne({ userId }),
             Manufacturer.findOne({ userId })
         ]);
 
         return {
             ...user.toObject(),
             customer,
-            dealer,
+            seller,
             manufacturer
         };
     }
@@ -69,7 +69,7 @@ class UserService {
                     { name: data.name },
                     { session, new: true }
                 );
-            } else if (role === 'DEALER') {
+            } else if (role === 'SELLER') {
                 const updateData = {};
                 if (section === 'business') {
                     updateData.businessName = data.businessName;
@@ -87,7 +87,7 @@ class UserService {
                     updateData.payoutBlocked = true;
                 }
 
-                updatedProfile = await Dealer.findOneAndUpdate(
+                updatedProfile = await Seller.findOneAndUpdate(
                     { userId },
                     updateData,
                     { session, new: true }

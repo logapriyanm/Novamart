@@ -1,4 +1,4 @@
-import { CustomOrderEscrow, CustomProductRequest, GroupParticipant, Dealer, Manufacturer } from '../models/index.js';
+import { CustomOrderEscrow, CustomProductRequest, GroupParticipant, Seller, Manufacturer } from '../models/index.js';
 import logger from '../lib/logger.js';
 import notificationService from '../services/notificationService.js';
 
@@ -73,10 +73,10 @@ export const createEscrow = async (req, res) => {
             }
         } else {
             // Individual order
-            const dealer = await Dealer.findById(request.dealerId);
+            const seller = await Seller.findById(request.dealerId);
             participantPayments.push({
-                dealerId: dealer._id,
-                userId: dealer.userId,
+                dealerId: seller._id,
+                userId: seller.userId,
                 shareAmount: totalAmount,
                 advanceShare: advanceAmount,
                 balanceShare: balanceAmount,

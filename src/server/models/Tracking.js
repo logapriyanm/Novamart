@@ -20,7 +20,7 @@ const TrackingSchema = new Schema({
         productId: { type: String, index: true },
         query: String, // Search terms
         category: String,
-        dealerId: String,
+        sellerId: String,
         device: String,
         browser: String,
         ip: String,
