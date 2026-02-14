@@ -177,10 +177,10 @@ function ProfileContent() {
                             <FaHeadset className="w-8 h-8" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-black text-slate-800 tracking-tight">Need Assistance?</h3>
+                            <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Need Assistance?</h1>
                             <p className="text-slate-400 text-sm font-bold mt-2">Our technical experts are available 24/7 to resolve your issues.</p>
                         </div>
-                        <button className="px-10 py-4 bg-blue-600 text-white rounded-[10px] text-[11px] font-black tracking-widest shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all transform active:scale-95">
+                        <button className="px-10 py-4 bg-blue-600 text-white rounded-[10px] text-sm font-black shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all transform active:scale-95">
                             Open New Support Ticket
                         </button>
                     </Card>

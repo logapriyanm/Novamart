@@ -7,15 +7,20 @@ import express from 'express';
 import sellerController from '../../controllers/sellerController.js';
 import authorize from '../../middleware/rbac.js';
 import authenticate from '../../middleware/auth.js';
+import requireSellerApproved from '../../middleware/requireSellerApproved.js';
 
 const router = express.Router();
 
 // Public Routes
 router.get('/public/:id', sellerController.getPublicSellerProfile);
 
-// Allow PENDING status so new sellers can see their "Application Pending" dashboard state
+// Protected Routes - Require authentication and SELLER role
 router.use(authenticate);
 router.use(authorize(['SELLER'], [], ['ACTIVE', 'UNDER_VERIFICATION', 'PENDING']));
+
+// CRITICAL: Block PENDING sellers from accessing dashboard (Phase 1 enforcement)
+// This middleware returns 403 if seller status is not ACTIVE
+router.use(requireSellerApproved);
 
 /**
  * Inventory & Pricing
@@ -52,6 +57,7 @@ router.put('/profile', sellerController.updateProfile);
  * Manufacturer Discovery & Access Requests
  */
 router.get('/manufacturers', sellerController.getManufacturers);
+router.get('/manufacturers/:id', sellerController.getManufacturerDetails);
 router.post('/request-access', sellerController.requestManufacturerAccess);
 router.get('/my-requests', sellerController.getMyRequests);
 

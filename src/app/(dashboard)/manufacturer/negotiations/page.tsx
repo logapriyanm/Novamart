@@ -15,7 +15,7 @@ export default function ManufacturerNegotiations() {
     // const { showSnackbar } = useSnackbar();
     const [negotiations, setNegotiations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterStatus, setFilterStatus] = useState<string>('OPEN');
+    const [filterStatus, setFilterStatus] = useState<string>('ALL');
 
     useEffect(() => {
         fetchNegotiations();
@@ -42,16 +42,16 @@ export default function ManufacturerNegotiations() {
             {/* Header */}
             <div className="flex flex-col gap-2">
                 <h1 className="text-3xl font-black tracking-tight text-[#1E293B]">
-                    Dealer <span className="text-[#0F6CBD]">Negotiations</span>
+                    Seller <span className="text-[#0F6CBD]">Negotiations</span>
                 </h1>
                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">
-                    Manage price negotiations with your dealer network
+                    Manage price negotiations with your seller network
                 </p>
             </div>
 
             {/* Filters */}
             <div className="flex items-center gap-4 border-b border-slate-200">
-                {['OPEN', 'ALL', 'ACCEPTED', 'REJECTED'].map((status) => (
+                {['ALL', 'REQUESTED', 'NEGOTIATING', 'ACCEPTED', 'DEAL_CLOSED'].map((status) => (
                     <button
                         key={status}
                         onClick={() => setFilterStatus(status)}
@@ -98,7 +98,7 @@ export default function ManufacturerNegotiations() {
 
                                     <div className="flex-1">
                                         <h3 className="text-lg font-black text-slate-800">
-                                            {negotiation.dealerId?.businessName || 'Unknown Dealer'}
+                                            {negotiation.sellerId?.businessName || 'Unknown Seller'}
                                         </h3>
                                         <p className="text-sm text-slate-500 font-bold mt-1 flex items-center gap-2">
                                             <FaBoxOpen className="w-3 h-3" />
@@ -118,21 +118,23 @@ export default function ManufacturerNegotiations() {
 
                                 <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-slate-50 pt-4 sm:pt-0">
                                     <span
-                                        className={`px-4 py-2 rounded-[10px] text-xs font-black uppercase tracking-wider ${negotiation.status === 'OPEN'
+                                        className={`px-4 py-2 rounded-[10px] text-xs font-black uppercase tracking-wider ${negotiation.status === 'REQUESTED'
                                             ? 'bg-blue-50 text-blue-600 border border-blue-100'
-                                            : negotiation.status === 'ACCEPTED'
-                                                ? 'bg-green-50 text-green-600 border border-green-100'
-                                                : 'bg-rose-50 text-rose-600 border border-rose-100'
+                                            : negotiation.status === 'NEGOTIATING' || negotiation.status === 'OFFER_MADE'
+                                                ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                                                : negotiation.status === 'ACCEPTED' || negotiation.status === 'DEAL_CLOSED'
+                                                    ? 'bg-green-50 text-green-600 border border-green-100'
+                                                    : 'bg-rose-50 text-rose-600 border border-rose-100'
                                             }`}
                                     >
-                                        {negotiation.status === 'ACCEPTED' && <FaCheckCircle className="inline mr-1" />}
+                                        {(negotiation.status === 'ACCEPTED' || negotiation.status === 'DEAL_CLOSED') && <FaCheckCircle className="inline mr-1" />}
                                         {negotiation.status === 'REJECTED' && <FaTimes className="inline mr-1" />}
-                                        {negotiation.status}
+                                        {negotiation.status.replace('_', ' ')}
                                     </span>
 
                                     <Link href={`/manufacturer/negotiations/${negotiation._id}`}>
                                         <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-[10px] font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
-                                            {negotiation.status === 'OPEN' ? 'Negotiate' : 'View Details'}
+                                            {negotiation.status === 'REQUESTED' || negotiation.status === 'NEGOTIATING' || negotiation.status === 'OFFER_MADE' ? 'Negotiate' : 'View Details'}
                                             <FaArrowRight className="w-3 h-3" />
                                         </button>
                                     </Link>

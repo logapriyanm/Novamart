@@ -426,7 +426,6 @@ export default {
     sendPasswordResetEmail,
     sendOrderConfirmation,
     sendOrderShipped,
-    sendOrderShipped,
     sendOrderDelivered,
     sendReviewNotification,
     sendReplyNotification,

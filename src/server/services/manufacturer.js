@@ -3,7 +3,14 @@
  * Logic for seller network management, allocations, and analytics.
  */
 
-import { Manufacturer, Seller, User, SellerRequest, Order, Escrow, Product } from '../models/index.js';
+import Manufacturer from '../models/Manufacturer.js';
+import Seller from '../models/Seller.js';
+import User from '../models/User.js';
+import SellerRequest from '../models/SellerRequest.js';
+import Order from '../models/Order.js';
+import Escrow from '../models/Escrow.js';
+import Product from '../models/Product.js';
+import Inventory from '../models/Inventory.js';
 import userService from './userService.js';
 import mongoose from 'mongoose';
 
@@ -12,44 +19,75 @@ class ManufacturerService {
      * Approve or Reject a Seller's request to join the network.
      */
     async handleDealerRequest(mfgId, sellerId, status) {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
-            const requestStatus = status === 'APPROVED' ? 'APPROVED' : 'REJECTED';
+        const MAX_RETRIES = 3;
+        let attempt = 0;
 
-            // 1. Upsert the SellerRequest record
-            await SellerRequest.findOneAndUpdate(
-                { sellerId, manufacturerId: mfgId },
-                { status: requestStatus, message: 'Updated via dashboard' },
-                { upsert: true, session }
-            );
+        while (attempt < MAX_RETRIES) {
+            const session = await mongoose.startSession();
+            session.startTransaction();
+            try {
+                const requestStatus = status === 'APPROVED' ? 'APPROVED' : 'REJECTED';
 
-            // 2. If approved, connect in the many-to-many relation
-            if (status === 'APPROVED') {
-                await Manufacturer.findByIdAndUpdate(mfgId, {
-                    $addToSet: { approvedBy: sellerId }
-                }, { session });
+                // 1. Upsert the SellerRequest record
+                // 1. Upsert the SellerRequest record with explicit field setting
+                await SellerRequest.findOneAndUpdate(
+                    { sellerId, manufacturerId: mfgId },
+                    {
+                        $set: { status: requestStatus, message: 'Updated via dashboard' },
+                        $setOnInsert: { sellerId, manufacturerId: mfgId }
+                    },
+                    { upsert: true, session, new: true }
+                );
 
-                // Mark seller as verified globally if this is the main authority
-                const seller = await Seller.findByIdAndUpdate(sellerId, { isVerified: true }, { session });
+                // 2. If approved, connect in the many-to-many relation
+                if (status === 'APPROVED') {
+                    await Manufacturer.findByIdAndUpdate(mfgId, {
+                        $addToSet: { approvedBy: sellerId }
+                    }, { session });
 
-                if (seller && seller.userId) {
-                    // Ensure the User is ACTIVE
-                    await User.findByIdAndUpdate(seller.userId, { status: 'ACTIVE' }, { session });
+                    // Add Manufacturer to Seller's approvedBy list (Bidirectional)
+                    // Also mark as verified globally and update status
+                    const seller = await Seller.findByIdAndUpdate(sellerId, {
+                        isVerified: true,
+                        verificationStatus: 'VERIFIED',
+                        $addToSet: { approvedBy: mfgId }
+                    }, { new: true, session });
+
+                    if (seller && seller.userId) {
+                        // Ensure the User is ACTIVE
+                        await User.findByIdAndUpdate(seller.userId._id || seller.userId, { status: 'ACTIVE' }, { session });
+                    }
+                } else {
+                    await Manufacturer.findByIdAndUpdate(mfgId, {
+                        $pull: { approvedBy: sellerId }
+                    }, { session });
+
+                    // Remove Manufacturer from Seller's approvedBy list
+                    await Seller.findByIdAndUpdate(sellerId, {
+                        $pull: { approvedBy: mfgId }
+                    }, { session });
                 }
-            } else {
-                await Manufacturer.findByIdAndUpdate(mfgId, {
-                    $pull: { approvedBy: sellerId }
-                }, { session });
-            }
 
-            await session.commitTransaction();
-            return { mfgId, sellerId, status: requestStatus };
-        } catch (error) {
-            await session.abortTransaction();
-            throw error;
-        } finally {
-            session.endSession();
+                await session.commitTransaction();
+                return { mfgId, sellerId, status: requestStatus };
+            } catch (error) {
+                await session.abortTransaction();
+
+                // Check for transient transaction errors or write conflicts
+                const isTransient = error.hasErrorLabel && error.hasErrorLabel('TransientTransactionError');
+                const isWriteConflict = error.code === 112 || (error.message && error.message.includes('Write conflict'));
+
+                if ((isTransient || isWriteConflict) && attempt < MAX_RETRIES - 1) {
+                    attempt++;
+                    console.log(`Retrying transaction due to conflict (Attempt ${attempt})...`);
+                    await new Promise(resolve => setTimeout(resolve, 100 * attempt)); // Exponential backoff
+                    continue;
+                }
+
+                throw error;
+            } finally {
+                session.endSession();
+            }
         }
     }
 
@@ -72,8 +110,14 @@ class ManufacturerService {
         const formattedRequests = requests.map(r => ({
             ...r,
             id: r._id,
-            dealer: r.sellerId, // Maintaining 'dealer' key for frontend compatibility
-            seller: r.sellerId
+            dealer: {
+                ...r.sellerId,
+                id: r.sellerId?._id
+            },
+            seller: {
+                ...r.sellerId,
+                id: r.sellerId?._id
+            }
         }));
 
         if (statusFilter === 'PENDING') {
@@ -96,10 +140,12 @@ class ManufacturerService {
                 createdAt: seller.userId?.createdAt || new Date(),
                 dealer: { // Deprecated key for compatibility
                     ...seller,
+                    id: seller._id,
                     user: seller.userId
                 },
                 seller: {
                     ...seller,
+                    id: seller._id,
                     user: seller.userId
                 }
             }));
@@ -194,14 +240,101 @@ class ManufacturerService {
             .populate('approvedBy');
     }
 
-    /**
-     * Update Manufacturer Profile Sections.
-     */
     async updateProfile(mfgId, section, data) {
         const mfg = await Manufacturer.findById(mfgId);
         if (!mfg) throw new Error('MANUFACTURER_NOT_FOUND');
 
         return await userService.updateFullProfile(mfg.userId, 'MANUFACTURER', section, data);
+    }
+
+    /**
+     * Get Pending Product Requests (Inventory Approvals)
+     */
+    async getPendingProductRequests(mfgId) {
+        console.log('getPendingProductRequests called for mfgId:', mfgId);
+        // Find inventory items for this manufacturer that are pending
+        const products = await Product.find({ manufacturerId: mfgId }).select('_id');
+        console.log('Found products count:', products.length);
+        const productIds = products.map(p => p._id);
+
+        const requests = await Inventory.find({
+            productId: { $in: productIds },
+            allocationStatus: 'PENDING'
+        })
+            .populate('sellerId', 'businessName city logo contactInfo')
+            .populate('productId', 'name basePrice images')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        console.log('Found pending requests:', requests.length);
+        return requests;
+    }
+
+    /**
+     * Approve Product Request (Inventory)
+     */
+    async approveProductRequest(mfgId, inventoryId) {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const inventory = await Inventory.findById(inventoryId).populate('productId').session(session);
+
+            if (!inventory) throw new Error('REQUEST_NOT_FOUND');
+            if (inventory.productId.manufacturerId.toString() !== mfgId.toString()) throw new Error('UNAUTHORIZED');
+
+            // 1. Create Allocation Record
+            const { Allocation } = await import('../models/index.js');
+            const requestedQty = inventory.requestedQuantity || 0; // Ensure requestedQuantity is saved in Inv loop
+
+            // Re-calculate price or use stored
+            const wholesalePrice = inventory.sellerBasePrice || inventory.productId.basePrice;
+
+            const [newAllocation] = await Allocation.create([{
+                type: 'DIRECT',
+                sellerId: inventory.sellerId,
+                manufacturerId: mfgId,
+                productId: inventory.productId._id,
+                allocatedQuantity: requestedQty,
+                remainingQuantity: requestedQty,
+                soldQuantity: 0,
+                negotiatedPrice: wholesalePrice,
+                minRetailPrice: wholesalePrice * 1.05,
+                status: 'ACTIVE',
+                region: inventory.region || 'Global'
+            }], { session });
+
+            // 2. Activate Inventory & Link Allocation
+            const updated = await Inventory.findByIdAndUpdate(inventoryId, {
+                allocationStatus: 'APPROVED',
+                isAllocated: true,
+                allocationId: newAllocation._id,
+                stock: requestedQty, // Grant requested stock
+                allocatedStock: requestedQty,
+                remainingQuantity: requestedQty,
+                isListed: true // Auto-list or keep hidden? User said "approved functionality", auto-list is smoother.
+            }, { new: true, session });
+
+            // 3. Notify Seller
+            const { Notification, Seller } = await import('../models/index.js');
+            const seller = await Seller.findById(inventory.sellerId).populate('userId').session(session);
+            if (seller?.userId) {
+                await Notification.create([{
+                    userId: seller.userId._id,
+                    type: 'PRODUCT_APPROVED',
+                    title: 'Product Request Approved',
+                    message: `Your request for ${inventory.productId.name} has been approved. Stock allocated: ${requestedQty}.`,
+                    link: '/seller/inventory'
+                }], { session });
+            }
+
+            await session.commitTransaction();
+            return updated;
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
     }
 }
 

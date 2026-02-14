@@ -17,7 +17,23 @@ const InventorySchema = new mongoose.Schema({
     isListed: { type: Boolean, default: false },
     listedAt: { type: Date },
     marginPercent: { type: Number },
-    maxMargin: { type: Number }
+    maxMargin: { type: Number },
+
+    // Allocation Status
+    allocationStatus: {
+        type: String,
+        enum: ['PENDING', 'APPROVED', 'REJECTED', 'NONE'],
+        default: 'APPROVED' // Default to APPROVED for backward compatibility/admin creation
+    },
+    requestedQuantity: { type: Number }, // Amount requested by seller
+
+    // NEW: Allocation-based inventory tracking
+    allocationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Allocation' }, // Link to allocation
+    soldQuantity: { type: Number, default: 0 }, // Total sold from this allocation
+    remainingQuantity: { type: Number }, // Computed: allocated - sold
+    retailPrice: { type: Number }, // Seller's retail price
+    negotiatedPrice: { type: Number }, // Price from allocation/negotiation
+    minRetailPrice: { type: Number } // Min allowed: negotiatedPrice * 1.05
 }, { timestamps: true });
 
 InventorySchema.index({ sellerId: 1, productId: 1 }, { unique: true });

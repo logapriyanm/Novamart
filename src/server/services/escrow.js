@@ -10,12 +10,39 @@ import mongoose from 'mongoose';
 class EscrowService {
     /**
      * Initialize escrow for a newly paid order.
+     * CRITICAL: Commission is calculated server-side ONLY - never from frontend
      */
-    async holdFunds(orderId, amount) {
+    async holdFunds(orderId, providedAmount, providedCommission = null) {
+        // SECURITY: Fetch order to recalculate commission server-side
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            throw new Error('Order not found for escrow initialization');
+        }
+
+        // IMMUTABLE COMMISSION RATE: 5% - NEVER TRUST CLIENT
+        const COMMISSION_RATE = 0.05;
+        const grossAmount = Number(order.totalAmount);
+        const serverCommission = grossAmount * COMMISSION_RATE;
+        const sellerNet = grossAmount - serverCommission;
+
+        // SECURITY: Ignore client provided commission and enforce server calculation
+        // We do not throw error, we simply ignore the client input to prevent any bypass attempt
+        // if (providedCommission !== null && Math.abs(providedCommission - serverCommission) > 0.01) { ... } -> REMOVED
+
+        // CRITICAL: Store immutable ledger
+        const releaseDate = new Date();
+        releaseDate.setDate(releaseDate.getDate() + 7); // T+7 auto-release
+
         return await Escrow.create({
             orderId,
-            amount,
-            status: 'HOLD'
+            amount: grossAmount,
+            grossAmount, // Total paid by customer
+            commissionAmount: serverCommission, // Platform fee (5%)
+            sellerAmount: sellerNet, // What seller receives
+            status: 'HOLD',
+            releaseDate, // Cannot release before T+7
+            createdAt: new Date()
         });
     }
 

@@ -6,8 +6,8 @@ const NegotiationSchema = new mongoose.Schema({
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true, index: true },
     status: {
         type: String,
-        enum: ['OPEN', 'ACCEPTED', 'REJECTED', 'ORDER_REQUESTED', 'ORDER_FULFILLED'],
-        default: 'OPEN',
+        enum: ['REQUESTED', 'NEGOTIATING', 'OFFER_MADE', 'ACCEPTED', 'DEAL_CLOSED', 'REJECTED'],
+        default: 'REQUESTED',
         index: true
     },
     currentOffer: { type: Number, required: true },

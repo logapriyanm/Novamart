@@ -16,8 +16,10 @@ import {
     FaTimes,
     FaCheck,
     FaExclamationTriangle,
-    FaRocket
+    FaRocket,
+    FaListOl
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 
@@ -109,7 +111,7 @@ export default function DealerAllocationView() {
                     ))
                 ) : allocations.length === 0 ? (
                     <div className="col-span-full py-20 text-center">
-                        <FaBoxOpen className="w-16 h-16 text-slate-200 mx-auto mb-6" />
+                        <MdOutlineProductionQuantityLimits className="w-16 h-16 text-slate-200 mx-auto mb-6" />
                         <h3 className="text-xl font-black italic text-slate-400 uppercase tracking-widest">No allocations found</h3>
                         <p className="text-sm font-bold text-slate-300 mt-2 uppercase tracking-tight">Partner with manufacturers to receive stock allocations</p>
                     </div>
@@ -131,7 +133,7 @@ export default function DealerAllocationView() {
                                 <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-200">
-                                    <FaBox className="w-16 h-16" />
+                                    <MdOutlineProductionQuantityLimits className="w-16 h-16" />
                                 </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -241,7 +243,7 @@ export default function DealerAllocationView() {
                                             <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-tighter italic">Cap: {selAlloc?.allocatedStock} Units</span>
                                         </div>
                                         <div className="relative">
-                                            <FaBoxOpen className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
+                                            <MdOutlineProductionQuantityLimits className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
                                             <input
                                                 required
                                                 type="number"

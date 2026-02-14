@@ -14,7 +14,7 @@ import { chatService } from '@/lib/api/services/chat.service';
 import { useSearchParams } from 'next/navigation';
 import VerifiedBadge from '@/client/components/common/VerifiedBadge';
 
-const SOCKET_URL = typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') : 'http://localhost:5000';
+const SOCKET_URL = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002/api').replace('/api', '') : 'http://localhost:5002';
 
 interface UnifiedChatProps {
     currentUserRole: 'SELLER' | 'MANUFACTURER' | 'ADMIN';

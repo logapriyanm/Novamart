@@ -17,6 +17,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import { toast } from "sonner";
 import Link from "next/link";
 import { apiClient } from "@/lib/api/client";
@@ -104,10 +105,7 @@ export default function ProductMaster() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-foreground/5 pb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#1E293B]">Product Catalog</h1>
-          <p className="text-sm text-slate-400 font-medium">
-            Manage SKUs and distribution availability.
-          </p>
+          <h1 className="text-2xl font-bold text-[#1E293B]">Product Management</h1>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -118,7 +116,7 @@ export default function ProductMaster() {
           </button>
           <Link
             href="/manufacturer/products/add"
-            className="px-6 py-2.5 bg-primary text-white rounded-[10px] text-[11px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-sm"
+            className="px-6 py-2.5 bg-primary text-black rounded-[10px] text-[11px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-sm"
           >
             New Product
           </Link>
@@ -318,13 +316,19 @@ export default function ProductMaster() {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                          <img
-                            src={product.images?.[0]}
-                            alt={product.name}
-                            className="w-full h-full object-cover rounded-[10px]"
-                          />
-                        </div>
+                        {product.images?.[0] ? (
+                          <div className="w-8 h-8 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                            <img
+                              src={product.images?.[0]}
+                              alt={product.name}
+                              className="w-full h-full object-cover rounded-[10px]"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-[10px] bg-blue-50 text-[#10367D] flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
+                            <MdOutlineProductionQuantityLimits className="w-6 h-6" />
+                          </div>
+                        )}
                         <div>
                           <h4 className="text-xs font-bold text-[#1E293B]">
                             {product.name}

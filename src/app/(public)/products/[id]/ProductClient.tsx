@@ -22,10 +22,10 @@ import {
     FaBriefcase,
     FaSearchPlus,
     FaChevronRight,
-    FaBoxOpen,
     FaFileAlt,
     FaCommentAlt
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import ChatWidget from '@/client/components/features/chat/ChatWidget';
 import { useAuth } from '@/client/hooks/useAuth';
 import { useCart } from '@/client/context/CartContext';

@@ -26,7 +26,7 @@ const OrderSchema = new mongoose.Schema({
     },
     totalAmount: { type: Number, required: true },
     taxAmount: { type: Number, required: true },
-    commissionAmount: { type: Number, required: true },
+    commissionAmount: { type: Number, required: true, immutable: true },
     shippingAddress: { type: String, required: true },
     billingAddress: { type: String },
     items: [OrderItemSchema],

@@ -79,9 +79,20 @@ export const updatePrice = async (req, res) => {
 };
 
 /**
- * Update Stock Levels
+ * Update Stock Levels - DISABLED FOR SECURITY
+ * CRITICAL: Direct stock manipulation is blocked to prevent overselling
+ * Stock can ONLY be modified via allocation deductions during order placement
  */
 export const updateStock = async (req, res) => {
+    // SECURITY LOCKDOWN: Manual stock editing is disabled
+    return res.status(403).json({
+        success: false,
+        error: 'FEATURE_DISABLED',
+        message: 'Direct stock editing is disabled for security. Stock is managed automatically via allocations and orders.',
+        hint: 'To update stock, create a new allocation from manufacturer negotiation'
+    });
+
+    /* ORIGINAL IMPLEMENTATION - DISABLED FOR SECURITY
     const sellerId = req.user.seller?._id || req.user.seller?.id;
     const { inventoryId, stock } = req.body;
     try {
@@ -101,6 +112,7 @@ export const updateStock = async (req, res) => {
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
     }
+    */
 };
 
 /**
@@ -183,6 +195,7 @@ export const sourceProduct = async (req, res) => {
             data: inventory
         });
     } catch (error) {
+        console.error('SOURCE_PRODUCT_ERROR:', error);
         res.status(400).json({ success: false, error: error.message });
     }
 };
@@ -316,10 +329,27 @@ export const getPublicSellerProfile = async (req, res) => {
 
 export const getManufacturers = async (req, res) => {
     try {
+        console.log('Fetching manufacturers for discovery...');
         const manufacturers = await sellerService.getManufacturersForDiscovery();
+        console.log(`Found ${manufacturers.length} manufacturers.`);
         res.json({ success: true, data: manufacturers });
     } catch (error) {
-        res.status(500).json({ success: false, error: 'Failed to fetch manufacturers' });
+        console.error('CRITICAL ERROR in getManufacturers:', error);
+        logger.error('getManufacturers Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch manufacturers', details: error.message });
+    }
+};
+
+export const getManufacturerDetails = async (req, res) => {
+    const sellerId = req.user.seller?._id || req.user.seller?.id;
+    const { id } = req.params;
+    try {
+        const manufacturer = await sellerService.getManufacturerDetails(id, sellerId);
+        res.json({ success: true, data: manufacturer });
+    } catch (error) {
+        console.error('CRITICAL ERROR in getManufacturerDetails:', error);
+        logger.error('getManufacturerDetails Error:', error);
+        res.status(404).json({ success: false, error: error.message });
     }
 };
 
@@ -327,6 +357,7 @@ export const requestManufacturerAccess = async (req, res) => {
     const sellerId = req.user.seller?._id || req.user.seller?.id;
     const { manufacturerId, ...metadata } = req.body;
     try {
+        if (!sellerId) throw new Error('Seller profile not found. Please complete your profile.');
         const request = await sellerService.requestAccess(sellerId, manufacturerId, metadata);
         res.status(201).json({
             success: true,
@@ -334,6 +365,8 @@ export const requestManufacturerAccess = async (req, res) => {
             data: request
         });
     } catch (error) {
+        console.error('CRITICAL ERROR in requestManufacturerAccess:', error);
+        logger.error('requestManufacturerAccess Error:', error);
         res.status(400).json({ success: false, error: error.message });
     }
 };
@@ -341,10 +374,16 @@ export const requestManufacturerAccess = async (req, res) => {
 export const getMyRequests = async (req, res) => {
     const sellerId = req.user.seller?._id || req.user.seller?.id;
     try {
+        if (!sellerId) {
+            console.warn('getMyRequests: Seller ID is missing. Returning empty list.');
+            return res.json({ success: true, data: [] });
+        }
         const requests = await sellerService.getMyAccessRequests(sellerId);
         res.json({ success: true, data: requests });
     } catch (error) {
-        res.status(500).json({ success: false, error: 'Failed to fetch requests' });
+        console.error('CRITICAL ERROR in getMyRequests:', error);
+        logger.error('getMyRequests Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch requests', details: error.message });
     }
 };
 
@@ -380,6 +419,7 @@ export default {
     updateProfile,
     getPublicSellerProfile,
     getManufacturers,
+    getManufacturerDetails,
     requestManufacturerAccess,
     getMyRequests,
     replyToReview

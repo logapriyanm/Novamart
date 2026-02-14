@@ -14,14 +14,15 @@ import {
     FaCalendarAlt,
     FaSearch,
     FaInfoCircle,
-    FaBoxOpen,
     FaTicketAlt,
     FaShieldAlt,
     FaLayerGroup,
     FaStar,
+    FaBoxOpen,
     FaUserCheck,
     FaTruck
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -58,9 +59,9 @@ const DATA_DRIVEN_COMPONENTS = [
 ];
 
 // ─── ICON OPTIONS ──────────────────────────────────────────────────────────────
-const TRUST_ICONS = ['FaShieldAlt', 'FaBoxOpen', 'FaUserCheck', 'FaLock', 'FaCheckCircle', 'FaAward'];
+const TRUST_ICONS = ['FaShieldAlt', 'MdOutlineProductionQuantityLimits', 'FaUserCheck', 'FaLock', 'FaCheckCircle', 'FaAward'];
 const OFFER_ICONS = ['FaGift', 'FaStar', 'FaCalendarAlt', 'FaLayerGroup', 'FaTicketAlt', 'FaTruck', 'FaBolt'];
-const DELIVERY_ICONS = ['FaDhl', 'FaUps', 'FaFedex', 'FaAmazon', 'FaShippingFast', 'FaTruckMoving', 'FaBoxOpen'];
+const DELIVERY_ICONS = ['FaDhl', 'FaUps', 'FaFedex', 'FaAmazon', 'FaShippingFast', 'FaTruckMoving', 'MdOutlineProductionQuantityLimits'];
 const WHY_ICONS = ['FaShieldAlt', 'FaHandshake', 'FaUserShield', 'FaGem', 'FaAward', 'FaCheckCircle'];
 const TESTIMONIAL_VARIANTS = ['service-card', 'pure-quote', 'photo-split', 'wide-likes', 'typography-hero', 'simple-card', 'centered-avatar'];
 

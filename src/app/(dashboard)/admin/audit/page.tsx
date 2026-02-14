@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { adminService } from '@/lib/api/services/admin.service';
+import Loader from '@/client/components/ui/Loader';
 
 export default function AuditLogsPanel() {
     const [auditEntries, setAuditEntries] = useState<any[]>([]);
@@ -106,11 +107,11 @@ export default function AuditLogsPanel() {
                         </thead>
                         <tbody className="divide-y divide-slate-50">
                             {loading ? (
-                                <tr>
-                                    <td colSpan={5} className="px-10 py-20 text-center">
-                                        <FaSpinner className="w-6 h-6 text-primary animate-spin mx-auto" />
-                                    </td>
-                                </tr>
+                                <td colSpan={5} className="px-10 py-20 text-center">
+                                    <div className="flex justify-center">
+                                        <Loader size="lg" variant="primary" />
+                                    </div>
+                                </td>
                             ) : filteredLogs.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-10 py-20 text-center text-slate-400 font-bold text-sm">

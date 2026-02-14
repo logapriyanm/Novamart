@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
-import { FaPlus, FaUsers, FaLock, FaCheck, FaClock, FaBox } from 'react-icons/fa';
+import { FaPlus, FaUsers, FaLock, FaCheck, FaClock } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
@@ -73,7 +74,7 @@ export default function CollaborationPage() {
             case 'ACTIVE': return <FaUsers className="w-4 h-4" />;
             case 'LOCKED': return <FaLock className="w-4 h-4" />;
             case 'COMPLETED': return <FaCheck className="w-4 h-4" />;
-            default: return <FaBox className="w-4 h-4" />;
+            default: return <MdOutlineProductionQuantityLimits className="w-4 h-4" />;
         }
     };
 

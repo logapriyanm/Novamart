@@ -38,7 +38,11 @@ const SellerSchema = new mongoose.Schema({
 
     // Subscription tier caching (for performance)
     currentSubscriptionTier: { type: String, enum: ['BASIC', 'PRO', 'ENTERPRISE'], default: 'BASIC' },
-    subscriptionExpiresAt: { type: Date }
+    subscriptionExpiresAt: { type: Date },
+
+    // Collaboration group limits
+    maxActiveGroups: { type: Number, default: 2 }, // Based on tier: BASIC=2, PRO=5, ENTERPRISE=10
+    currentActiveGroups: { type: Number, default: 0 } // Auto-computed
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

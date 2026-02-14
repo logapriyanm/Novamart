@@ -11,6 +11,8 @@ import Payment from './Payment.js';
 import Escrow from './Escrow.js';
 import Cart from './Cart.js';
 import Negotiation from './Negotiation.js';
+import Allocation from './Allocation.js';
+import GroupContribution from './GroupContribution.js';
 
 import SellerRequest from './SellerRequest.js';
 import ManufacturerSellerBlock from './ManufacturerSellerBlock.js';
@@ -69,6 +71,8 @@ export {
     Escrow,
     Cart,
     Negotiation,
+    Allocation,
+    GroupContribution,
 
     SellerRequest,
 
@@ -127,6 +131,8 @@ export default {
     Escrow,
     Cart,
     Negotiation,
+    Allocation,
+    GroupContribution,
     SellerRequest,
     ManufacturerSellerBlock,
     PooledDemand,

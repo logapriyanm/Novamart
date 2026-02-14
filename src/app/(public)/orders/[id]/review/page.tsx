@@ -3,13 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import {
-    FaStar,
-    FaCheckCircle,
-    FaCloudUploadAlt,
-    FaBox,
-    FaChevronRight
-} from 'react-icons/fa';
+import { FaStar, FaUpload, FaCheck, FaTimes, FaSpinner, FaCheckCircle, FaChevronRight, FaCloudUploadAlt } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import Loader from '@/client/components/ui/Loader';
 import { apiClient } from '@/lib/api/client';
@@ -177,7 +172,7 @@ export default function CustomerReviewPortal() {
                                 className="w-full h-full object-contain mix-blend-multiply transition-transform hover:scale-110 duration-500"
                             />
                         ) : (
-                            <FaBox className="text-slate-200 w-10 h-10" />
+                            <MdOutlineProductionQuantityLimits className="text-slate-200 w-10 h-10" />
                         )}
                     </div>
                     <div className="flex-1 min-w-0">

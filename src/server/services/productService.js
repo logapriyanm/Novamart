@@ -104,7 +104,7 @@ class ProductService {
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const take = parseInt(limit);
 
-        const query = {};
+        const query = { isDeleted: { $ne: true } }; // Exclude soft-deleted products
 
         // 1. Role-based Status Filtering
         if (userRole === 'ADMIN') {
@@ -380,7 +380,34 @@ class ProductService {
             throw new Error('UNAUTHORIZED_PRODUCT_ACCESS');
         }
 
-        return await Product.findByIdAndDelete(id);
+        // V-010: Check for active allocations before deletion
+        const { default: Allocation } = await import('../models/Allocation.js');
+        const activeAllocations = await Allocation.countDocuments({
+            productId: id,
+            status: 'ACTIVE'
+        });
+
+        if (activeAllocations > 0) {
+            throw new Error(`CANNOT_DELETE: Product has ${activeAllocations} active allocation(s). Revoke them first.`);
+        }
+
+        // V-010: Check for active orders before deletion
+        const { default: Order } = await import('../models/Order.js');
+        const activeOrders = await Order.countDocuments({
+            'items.productId': id,
+            status: { $nin: ['SETTLED', 'CANCELLED', 'REFUNDED'] }
+        });
+
+        if (activeOrders > 0) {
+            throw new Error(`CANNOT_DELETE: Product has ${activeOrders} active/pending order(s). Complete or cancel them first.`);
+        }
+
+        // V-010b: Soft delete instead of hard delete — preserve historical data
+        return await Product.findByIdAndUpdate(id, {
+            status: 'DISABLED',
+            isApproved: false,
+            isDeleted: true
+        }, { new: true });
     }
 
     /**

@@ -10,10 +10,11 @@ import {
   FaArrowRight,
   FaTruck,
   FaWrench,
+  
   FaInfoCircle,
-  FaBox,
-  FaExclamationCircle,
+  FaHistory,
 } from "react-icons/fa";
+import { MdOutlineProductionQuantityLimits } from "react-icons/md";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -135,10 +136,10 @@ export default function CreateRetailListing() {
   const marginPercent =
     inventory?.dealerBasePrice && price
       ? (
-          ((parseFloat(price) - inventory.dealerBasePrice) /
-            parseFloat(price)) *
-          100
-        ).toFixed(1)
+        ((parseFloat(price) - inventory.dealerBasePrice) /
+          parseFloat(price)) *
+        100
+      ).toFixed(1)
       : "0.0";
 
   return (
@@ -181,7 +182,7 @@ export default function CreateRetailListing() {
                       className="w-full h-full object-cover rounded-xl"
                     />
                   ) : (
-                    <FaBox className="w-8 h-8" />
+                    <MdOutlineProductionQuantityLimits className="w-8 h-8" />
                   )}
                 </div>
                 <div>
@@ -369,7 +370,7 @@ export default function CreateRetailListing() {
 
                 <div className="p-10 bg-rose-50 border border-rose-100 rounded-[3rem] flex items-center gap-8">
                   <div className="w-16 h-16 rounded-[1.8rem] bg-white text-rose-500 border border-rose-100 flex items-center justify-center shrink-0">
-                    <FaExclamationCircle className="w-8 h-8" />
+                    <FaInfoCircle className="w-8 h-8" />
                   </div>
                   <p className="text-[10px] font-bold text-rose-600 uppercase tracking-widest leading-relaxed">
                     Fulfillment SLA: 48 hours for dispatch. Failure impacts

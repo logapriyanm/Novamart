@@ -1,4 +1,4 @@
-import { Negotiation, Seller, Manufacturer, Product, Notification, Chat, Message } from '../models/index.js';
+import { Negotiation, Seller, Manufacturer, Product, Notification, Chat, Message, SellerRequest } from '../models/index.js';
 import logger from '../lib/logger.js';
 import stockAllocationService from '../services/stockAllocationService.js';
 import mongoose from 'mongoose';
@@ -15,10 +15,25 @@ export const createNegotiation = async (req, res) => {
         const product = await Product.findById(productId).populate('manufacturerId');
         if (!product) return res.status(404).json({ success: false, error: 'Product not found' });
 
+        // PHASE 2/3: Enforce Approved Partnership
+        const partnership = await SellerRequest.findOne({
+            sellerId: seller._id,
+            manufacturerId: product.manufacturerId._id,
+            status: 'APPROVED'
+        });
+
+        if (!partnership) {
+            return res.status(403).json({
+                success: false,
+                error: 'PARTNERSHIP_REQUIRED',
+                message: 'You must have an approved partnership with this manufacturer to negotiate.'
+            });
+        }
+
         const existing = await Negotiation.findOne({
             sellerId: seller._id,
             productId: productId,
-            status: 'OPEN'
+            status: 'REQUESTED'
         });
 
         if (existing) return res.status(400).json({
@@ -33,7 +48,7 @@ export const createNegotiation = async (req, res) => {
             productId: productId,
             quantity: parseInt(quantity),
             currentOffer: parseFloat(offerPrice),
-            status: 'OPEN',
+            status: 'REQUESTED',
             chatLog: [{
                 sender: 'SELLER',
                 message: `Started negotiation for ${quantity} units at ₹${offerPrice}`,
@@ -41,31 +56,8 @@ export const createNegotiation = async (req, res) => {
             }]
         });
 
-        // Check Subscription Limits
-        const tier = seller.currentSubscriptionTier || 'BASIC';
-        const limits = {
-            'BASIC': 5,
-            'PRO': 20,
-            'ENTERPRISE': Infinity
-        };
-
-        const activeNegotiationsCount = await Negotiation.countDocuments({
-            sellerId: seller._id,
-            status: { $in: ['OPEN', 'MANUFACTURER_COUNTERED', 'SELLER_COUNTERED'] }
-        });
-
-        if (activeNegotiationsCount > limits[tier]) {
-            // Rollback creation
-            await Negotiation.findByIdAndDelete(negotiation._id);
-            return res.status(403).json({
-                success: false,
-                error: 'SUBSCRIPTION_LIMIT_REACHED',
-                message: `You have reached the negotiation limit for ${tier} plan.`,
-                limit: limits[tier],
-                current: activeNegotiationsCount,
-                upgradeUrl: '/seller/subscription'
-            });
-        }
+        // NOTE: Individual negotiation is FREE - no subscription check required
+        // Subscription is only required for GROUP collaboration (Phase 5)
 
         try {
             const manufacturer = await Manufacturer.findById(product.manufacturerId._id).populate('userId');
@@ -94,9 +86,14 @@ export const createNegotiation = async (req, res) => {
                     await Message.create({
                         chatId: chat._id,
                         message: `Started negotiation for ${quantity} units at ₹${offerPrice}`,
-                        messageType: 'SYSTEM',
+                        messageType: 'OFFER',
                         senderId: userId,
-                        senderRole: 'SELLER'
+                        senderRole: 'SELLER',
+                        metadata: {
+                            price: parseFloat(offerPrice),
+                            quantity: parseInt(quantity),
+                            timeline: 'Immediate' // Default timeline
+                        }
                     });
                 }
 
@@ -185,13 +182,12 @@ export const updateNegotiation = async (req, res) => {
         if (status) {
             const currentStatus = negotiation.status;
             const validTransitions = {
-                'OPEN': ['ACCEPTED', 'REJECTED', 'NEGOTIATING'],
-                'NEGOTIATING': ['ACCEPTED', 'REJECTED', 'OPEN'],
-                'ACCEPTED': ['ORDER_REQUESTED', 'DEAL_CLOSED'], // Deal Closed logic?
-                'DEAL_CLOSED': ['ORDER_FULFILLED'],
-                'ORDER_REQUESTED': ['ORDER_FULFILLED'],
-                'REJECTED': [],
-                'ORDER_FULFILLED': []
+                'REQUESTED': ['NEGOTIATING', 'REJECTED', 'ACCEPTED'], // Fixed: Allow direct acceptance of initial request
+                'NEGOTIATING': ['OFFER_MADE', 'REJECTED'],
+                'OFFER_MADE': ['ACCEPTED', 'NEGOTIATING', 'REJECTED'],
+                'ACCEPTED': ['DEAL_CLOSED', 'REJECTED'],
+                'DEAL_CLOSED': [], // Terminal state - allocation created
+                'REJECTED': [] // Terminal state
             };
 
             // Allow 'OPEN' -> 'NEGOTIATING' via offer update implicit logic if status not explicitly sent? 
@@ -207,36 +203,106 @@ export const updateNegotiation = async (req, res) => {
         if (offerUpdate) updateData.currentOffer = parseFloat(offerUpdate);
         if (status) updateData.status = status;
 
-        // Auto-transition to NEGOTIATING if offer is made on OPEN
-        if (offerUpdate && negotiation.status === 'OPEN' && !status) {
+        // Auto-transition to NEGOTIATING if offer is made on REQUESTED
+        if (offerUpdate && negotiation.status === 'REQUESTED' && !status) {
             updateData.status = 'NEGOTIATING';
         }
 
         const updatedNegotiation = await Negotiation.findByIdAndUpdate(negotiationId, updateData, { new: true });
 
-        if (status === 'ORDER_FULFILLED' && role === 'MANUFACTURER') {
-            try {
-                await stockAllocationService.allocateStock(negotiation.manufacturerId._id, {
-                    productId: negotiation.productId,
-                    sellerId: negotiation.sellerId._id,
-                    region: 'NATIONAL',
-                    quantity: negotiation.quantity,
-                    dealerBasePrice: updatedNegotiation.currentOffer,
-                    dealerMoq: 1,
-                    maxMargin: 20
+        // Create allocation when deal closes (Phase 4)
+        if (status === 'DEAL_CLOSED' && role === 'MANUFACTURER') {
+            // Double-execution prevention: check pre-update status
+            if (negotiation.status === 'DEAL_CLOSED') {
+                return res.status(400).json({
+                    error: 'DEAL_ALREADY_CLOSED',
+                    message: 'This negotiation has already been closed. Allocation was already created.'
                 });
+            }
+
+            const dealSession = await mongoose.startSession();
+            dealSession.startTransaction();
+            try {
+                const { Allocation } = await import('../models/index.js');
+
+                // Create allocation record using new Allocation model
+                const [newAllocation] = await Allocation.create([{
+                    negotiationId: negotiation._id,
+                    type: 'INDIVIDUAL',
+                    sellerId: negotiation.sellerId._id,
+                    manufacturerId: negotiation.manufacturerId._id,
+                    productId: negotiation.productId,
+                    allocatedQuantity: negotiation.quantity,
+                    soldQuantity: 0,
+                    remainingQuantity: negotiation.quantity,
+                    negotiatedPrice: updatedNegotiation.currentOffer,
+                    minRetailPrice: updatedNegotiation.currentOffer * 1.05, // 5% commission
+                    status: 'ACTIVE'
+                }], { session: dealSession });
+
+                // Deduct from manufacturer stock
+                const { Product, Inventory } = await import('../models/index.js');
+                await Product.findByIdAndUpdate(negotiation.productId, {
+                    $inc: { stockQuantity: -negotiation.quantity }
+                }, { session: dealSession });
+
+                // CRITICAL FIX: Upsert Inventory Record for Seller
+                // Check if inventory exists for this product/seller
+                const existingInventory = await Inventory.findOne({
+                    sellerId: negotiation.sellerId._id,
+                    productId: negotiation.productId
+                }).session(dealSession);
+
+                if (existingInventory) {
+                    await Inventory.findByIdAndUpdate(existingInventory._id, {
+                        $inc: {
+                            stock: negotiation.quantity,
+                            allocatedStock: negotiation.quantity,
+                            remainingQuantity: negotiation.quantity
+                        },
+                        // Update price rules if new deal is better? 
+                        // For now, we prefer the latest negotiated price as base
+                        sellerBasePrice: updatedNegotiation.currentOffer,
+                        allocationId: newAllocation._id, // Update link to latest allocation
+                        isListed: true
+                    }, { session: dealSession });
+                } else {
+                    await Inventory.create([{
+                        sellerId: negotiation.sellerId._id,
+                        productId: negotiation.productId,
+                        region: 'Global', // Negotiation doesn't specify region usually, default or fetch from seller profile
+                        stock: negotiation.quantity,
+                        price: updatedNegotiation.currentOffer * 1.2, // Default retail price (20% margin)
+                        originalPrice: updatedNegotiation.currentOffer,
+                        isAllocated: true,
+                        allocationStatus: 'APPROVED',
+                        allocationId: newAllocation._id, // LINKED!
+                        isListed: true,
+                        listedAt: new Date(),
+                        allocatedStock: negotiation.quantity,
+                        sellerBasePrice: updatedNegotiation.currentOffer,
+                        soldQuantity: 0,
+                        remainingQuantity: negotiation.quantity
+                    }], { session: dealSession });
+                }
 
                 await Negotiation.findByIdAndUpdate(negotiationId, {
                     $push: {
                         chatLog: {
                             sender: 'SYSTEM',
-                            message: `Order Processed. ${negotiation.quantity} units allocated at ₹${updatedNegotiation.currentOffer}.`,
+                            message: `Deal Closed! ${negotiation.quantity} units allocated at ₹${updatedNegotiation.currentOffer}. Inventory updated.`,
                             time: new Date()
                         }
                     }
-                });
+                }, { session: dealSession });
+
+                await dealSession.commitTransaction();
             } catch (allocError) {
+                await dealSession.abortTransaction();
                 logger.error("Allocation Failed:", allocError);
+                return res.status(500).json({ success: false, error: 'ALLOCATION_FAILED', details: allocError.message });
+            } finally {
+                dealSession.endSession();
             }
         }
 

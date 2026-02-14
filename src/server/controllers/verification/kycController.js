@@ -106,6 +106,10 @@ export const reviewKYCDocument = async (req, res) => {
 
         const userId = kycDoc.userId._id;
         const role = kycDoc.role;
+        const previousStatus = kycDoc.status;
+
+        // Import AuditLog (Dynamic import to avoid circular dep if any, or standard if safe)
+        const { AuditLog } = await import('../../models/index.js');
 
         if (action === 'APPROVE') {
             // Update KYC document
@@ -156,6 +160,22 @@ export const reviewKYCDocument = async (req, res) => {
                 );
             }
 
+            // PHASE 5: IMMUTABLE AUDIT LOG
+            await AuditLog.create({
+                action: 'SELLER_VERIFICATION_APPROVED',
+                entityType: 'USER',
+                entityId: userId,
+                actorId: adminId,
+                role: 'ADMIN',
+                metadata: {
+                    role,
+                    previousStatus,
+                    newStatus: 'VERIFIED',
+                    ip: req.ip,
+                    timestamp: new Date()
+                }
+            });
+
             // Send approval email
             if (kycDoc.userId.email) {
                 await emailService.sendEmail({
@@ -187,6 +207,23 @@ export const reviewKYCDocument = async (req, res) => {
             } else if (role === 'SELLER') {
                 await Seller.findOneAndUpdate({ userId }, updateData);
             }
+
+            // PHASE 5: IMMUTABLE AUDIT LOG
+            await AuditLog.create({
+                action: 'SELLER_VERIFICATION_REJECTED',
+                entityType: 'USER',
+                entityId: userId,
+                actorId: adminId,
+                role: 'ADMIN',
+                metadata: {
+                    role,
+                    previousStatus,
+                    newStatus: 'REJECTED',
+                    reason: rejectionReason,
+                    ip: req.ip,
+                    timestamp: new Date()
+                }
+            });
 
             // Send rejection email
             if (kycDoc.userId.email) {

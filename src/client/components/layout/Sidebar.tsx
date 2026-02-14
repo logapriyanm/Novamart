@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/client/hooks/useAuth';
+import { AiOutlineProduct as ProductsIcon } from "react-icons/ai";
 import {
     FaThLarge as DashboardIcon,
     FaUsers as SellersIcon,
     FaUsers,
     FaIndustry,
-    FaCube as ProductsIcon,
+    FaClock,
     FaGavel as DisputesIcon,
     FaTruck as LogisticsIcon,
     FaCog as SettingsIcon,
@@ -164,17 +165,11 @@ const customerMenuItems: MenuItem[] = [
 // =============================================================================
 const sellerMenuGroups: MenuGroup[] = [
     {
-        label: 'Dashboard',
-        icon: DashboardIcon,
-        items: [
-            { name: 'Dashboard', icon: DashboardIcon, path: '/seller' },
-        ],
-    },
-    {
         label: 'Sourcing & Network',
         icon: FaNetworkWired,
         items: [
-            { name: 'Manufacturer Network', icon: FaIndustry, path: '/seller/manufacturers' },
+            { name: 'Discover Manufacturers', icon: FaSearch, path: '/seller/discovery' },
+            { name: 'My Network', icon: FaNetworkWired, path: '/seller/network' },
             { name: 'Sourced Products', icon: FaBox, path: '/seller/sourced-products' },
             { name: 'Negotiations', icon: FaHandshake, path: '/seller/negotiations' },
         ],
@@ -213,19 +208,13 @@ const sellerMenuGroups: MenuGroup[] = [
 // MANUFACTURER MENU (21 pages → 5 groups)
 // =============================================================================
 const manufacturerMenuGroups: MenuGroup[] = [
-    {
-        label: 'Dashboard',
-        icon: DashboardIcon,
-        items: [
-            { name: 'Dashboard', icon: DashboardIcon, path: '/manufacturer' },
-        ],
-    },
+
     {
         label: 'Product & Inventory',
         icon: ProductsIcon,
         items: [
             { name: 'Products', icon: ProductsIcon, path: '/manufacturer/products' },
-            { name: 'Inventory', icon: FaWarehouse, path: '/manufacturer/inventory' },
+            { name: 'Product Requests', icon: FaClock, path: '/manufacturer/products/requests' },
             { name: 'Allocations', icon: FaLayerGroup, path: '/manufacturer/allocations' },
             { name: 'Pricing Rules', icon: FaTag, path: '/manufacturer/pricing' },
         ],
@@ -413,7 +402,7 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     {!isCollapsed && (
                         <div className="overflow-hidden whitespace-nowrap flex flex-col">
                             <h1 className="text-xl font-bold text-foreground tracking-tight italic letter-spacing-4">NovaMart</h1>
-                            <span className="text-sm font-medium text-primary mt-0.5">Enterprise Portal</span>
+                            {/* <span className="text-sm font-medium text-primary mt-0.5">Enterprise Portal</span> */}
                         </div>
                     )}
                 </div>
@@ -442,12 +431,12 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     </div>
                 )}
 
-                {/* Workspace Label (Seller only) */}
+                {/* Workspace Label (Seller only)
                 {!isCollapsed && role === 'SELLER' && !searchQuery && (
                     <div className="px-6 py-1">
                         <p className="text-sm font-medium text-muted-foreground">Workspace</p>
                     </div>
-                )}
+                )} */}
 
                 {/* Primary Navigation */}
                 <nav className="flex-1 px-3 py-1 overflow-y-auto no-scrollbar">
@@ -481,6 +470,17 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                                     />
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Standalone Dashboard Link for Manufacturer & Seller */}
+                    {(role === 'MANUFACTURER' || role === 'SELLER') && (
+                        <div className="mb-2">
+                            <NavItem item={{
+                                name: 'Dashboard',
+                                icon: DashboardIcon,
+                                path: role === 'MANUFACTURER' ? '/manufacturer' : '/seller'
+                            }} />
                         </div>
                     )}
 

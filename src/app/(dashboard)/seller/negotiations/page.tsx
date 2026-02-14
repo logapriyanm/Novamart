@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-    FaComments, FaIndustry, FaBoxOpen, FaClock,
-    FaCheckCircle, FaTimes, FaArrowRight
+    FaComments, FaIndustry, FaClock,
+    FaCheckCircle, FaTimesCircle, FaArrowRight, FaPaperPlane, FaTimes
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
@@ -51,7 +52,7 @@ export default function SellerNegotiations() {
 
             {/* Filters */}
             <div className="flex items-center gap-4 border-b border-slate-200">
-                {['ALL', 'OPEN', 'ACCEPTED', 'REJECTED'].map((status) => (
+                {['ALL', 'REQUESTED', 'NEGOTIATING', 'ACCEPTED', 'DEAL_CLOSED'].map((status) => (
                     <button
                         key={status}
                         onClick={() => setFilterStatus(status)}
@@ -101,7 +102,7 @@ export default function SellerNegotiations() {
                                             {negotiation.manufacturerId?.companyName || 'Unknown Manufacturer'}
                                         </h3>
                                         <p className="text-sm text-slate-500 font-bold mt-1 flex items-center gap-2">
-                                            <FaBoxOpen className="w-3 h-3" />
+                                            <MdOutlineProductionQuantityLimits className="w-3 h-3" />
                                             {negotiation.productId?.name || 'Unknown Product'}
                                         </p>
 
@@ -118,16 +119,18 @@ export default function SellerNegotiations() {
 
                                 <div className="flex items-center gap-3">
                                     <span
-                                        className={`px-4 py-2 rounded-[10px] text-xs font-black uppercase tracking-wider ${negotiation.status === 'OPEN'
+                                        className={`px-4 py-2 rounded-[10px] text-xs font-black uppercase tracking-wider ${negotiation.status === 'REQUESTED'
                                             ? 'bg-blue-50 text-blue-600 border border-blue-100'
-                                            : negotiation.status === 'ACCEPTED'
-                                                ? 'bg-green-50 text-green-600 border border-green-100'
-                                                : 'bg-rose-50 text-rose-600 border border-rose-100'
+                                            : negotiation.status === 'NEGOTIATING' || negotiation.status === 'OFFER_MADE'
+                                                ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                                                : negotiation.status === 'ACCEPTED' || negotiation.status === 'DEAL_CLOSED'
+                                                    ? 'bg-green-50 text-green-600 border border-green-100'
+                                                    : 'bg-rose-50 text-rose-600 border border-rose-100'
                                             }`}
                                     >
-                                        {negotiation.status === 'ACCEPTED' && <FaCheckCircle className="inline mr-1" />}
+                                        {(negotiation.status === 'ACCEPTED' || negotiation.status === 'DEAL_CLOSED') && <FaCheckCircle className="inline mr-1" />}
                                         {negotiation.status === 'REJECTED' && <FaTimes className="inline mr-1" />}
-                                        {negotiation.status}
+                                        {negotiation.status.replace('_', ' ')}
                                     </span>
 
                                     <Link href={`/seller/negotiations/${negotiation._id}`}>

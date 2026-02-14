@@ -18,7 +18,7 @@ import {
 import io from 'socket.io-client';
 import { toast } from 'sonner';
 
-const SOCKET_URL = typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') : 'http://localhost:5000';
+const SOCKET_URL = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002/api').replace('/api', '') : 'http://localhost:5002';
 
 const mockEscalations = [
     { id: 'esc_1', chatId: 'chat_123', type: 'REFUND_DISPUTE', reason: 'Seller not responding to warranty claim', priority: 'HIGH', status: 'OPEN', context: 'ORD-8821' },

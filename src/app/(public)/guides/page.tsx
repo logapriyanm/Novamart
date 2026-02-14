@@ -2,14 +2,15 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaPlay, FaBox, FaTruck, FaShoppingCart, FaShieldAlt, FaQuestionCircle, FaUserCheck, FaBriefcase } from 'react-icons/fa';
+import { FaPlay, FaTruck, FaShoppingCart, FaShieldAlt, FaQuestionCircle, FaUserCheck, FaBriefcase } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import FooterPageLayout from '@/client/components/layout/FooterPageLayout';
 
 const steps = [
     {
         title: "Manufacturer Listing",
         description: "Verified manufacturers list their inventory with technical specifications and bulk pricing tiers.",
-        icon: FaBox,
+        icon: MdOutlineProductionQuantityLimits,
         color: "bg-slate-900",
         text: "text-white"
     },

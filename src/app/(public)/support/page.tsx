@@ -11,13 +11,13 @@ import {
     FaChevronRight,
     FaComments,
     FaTicketAlt,
-    FaBox,
     FaTruck,
     FaMoneyBillWave,
     FaChartLine,
     FaBullhorn,
     FaShieldAlt
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -104,7 +104,7 @@ export default function SupportPage() {
                             {[
                                 { icon: FaShieldAlt, text: 'Understanding Escrow' },
                                 { icon: FaTruck, text: 'Track Your Order' },
-                                { icon: FaBox, text: 'Refund Policy' },
+                                { icon: MdOutlineProductionQuantityLimits, text: 'Refund Policy' },
                             ].map((item, i) => (
                                 <li key={i} className="flex items-center gap-3 text-xs font-bold text-slate-700">
                                     <item.icon className="text-slate-400" /> {item.text}
@@ -127,7 +127,7 @@ export default function SupportPage() {
                         </p>
                         <ul className="space-y-4 mb-8">
                             {[
-                                { icon: FaBox, text: 'Inventory Management' },
+                                { icon: MdOutlineProductionQuantityLimits, text: 'Inventory Management' },
                                 { icon: FaChartLine, text: 'Sales Analytics' },
                                 { icon: FaBullhorn, text: 'Marketing Tools' },
                             ].map((item, i) => (

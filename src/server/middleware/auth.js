@@ -20,7 +20,7 @@ const authenticate = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, getJwtSecret());
-
+        console.log('AUTH_DEBUG: Token decoded successfully', decoded);
 
         // 1. Verify User exists and is not suspended
         const user = await User.findById(decoded.id)
@@ -29,11 +29,14 @@ const authenticate = async (req, res, next) => {
             .populate('manufacturer');
 
         if (!user) {
+            console.warn('AUTH_DEBUG: User not found for ID:', decoded.id);
             logger.warn('User not found for ID: %s', decoded.id);
             return res.status(401).json({ error: 'USER_NOT_FOUND' });
         }
+        console.log('AUTH_DEBUG: User found:', user.email, user.role, user.status);
 
         if (user.status === 'SUSPENDED') {
+            console.warn('AUTH_DEBUG: User suspended');
             return res.status(403).json({ error: 'ACCOUNT_SUSPENDED' });
         }
 
@@ -41,8 +44,14 @@ const authenticate = async (req, res, next) => {
         const session = await Session.findOne({ token });
 
         if (!session) {
+            console.log('AUTH_DEBUG: Session NOT found in DB');
             logger.info('DEBUG: Session not found in DB for token starting with: %s', token.substring(0, 10));
-        } else if (session.expiresAt < new Date()) {
+        } else {
+            console.log('AUTH_DEBUG: Session found, expiresAt:', session.expiresAt);
+        }
+
+        if (session && session.expiresAt < new Date()) {
+            console.log('AUTH_DEBUG: Session expired');
             logger.info('DEBUG: Session expired. Expires at: %s, Current time: %s', session.expiresAt, new Date());
         }
 
@@ -54,6 +63,7 @@ const authenticate = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
+        console.error('AUTH_DEBUG: Catch Error:', error.message);
         logger.error('❌ Auth Middleware Error:', { message: error.message, stack: error.stack });
         return res.status(401).json({ error: 'INVALID_TOKEN', message: error.message });
     }

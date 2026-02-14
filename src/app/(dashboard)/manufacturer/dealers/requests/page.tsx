@@ -2,15 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    FaUserCheck, FaStore, FaClock, FaMapMarkerAlt,
-    FaCheck, FaTimes, FaFileExport, FaFilter,
+    FaUserCheck, FaClock,
+    FaCheck, FaTimes, FaMapMarkerAlt,
     FaChevronLeft, FaChevronRight, FaExternalLinkAlt,
-    FaSpinner, FaCommentDots
+    FaBuilding, FaFilter, FaFileExport, FaCommentDots
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
+import Loader from '@/client/components/ui/Loader';
 
 export default function DealerRequests() {
     const [activeTab, setActiveTab] = useState('PENDING');
@@ -85,8 +87,8 @@ export default function DealerRequests() {
             <div className="space-y-4">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[10px] border border-dashed border-slate-200">
-                        <FaSpinner className="w-8 h-8 text-[#0F6CBD] animate-spin mb-4" />
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Synchronizing Request Pipeline...</p>
+                        <Loader size="lg" variant="primary" />
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-4">Synchronizing Request Pipeline...</p>
                     </div>
                 ) : requests.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[10px] border border-dashed border-slate-200">
@@ -95,7 +97,13 @@ export default function DealerRequests() {
                     </div>
                 ) : (
                     requests.map((request) => {
-                        const dealer = request.dealer;
+                        const dealer = request.dealer || request.seller;
+
+                        if (!dealer) {
+                            console.warn('Skipping request with missing dealer data:', request);
+                            return null;
+                        }
+
                         return (
                             <motion.div
                                 key={request.id}
@@ -126,7 +134,7 @@ export default function DealerRequests() {
                                                     {dealer.city}, {dealer.state}
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
-                                                    <FaStore className="w-3 h-3 text-slate-400" />
+                                                    <MdOutlineProductionQuantityLimits className="w-3 h-3 text-slate-400" />
                                                     {dealer.businessType || 'Retailer'}
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
@@ -138,7 +146,7 @@ export default function DealerRequests() {
                                     </div>
 
                                     <div className="mt-8">
-                                        <Link href={`/manufacturer/dealers/profile/${dealer.id}`} className="text-[10px] font-black uppercase tracking-widest text-[#0F6CBD] hover:underline flex items-center gap-1">
+                                        <Link href={`/manufacturer/dealers/profile/${dealer._id || dealer.id}`} className="text-[10px] font-black uppercase tracking-widest text-[#0F6CBD] hover:underline flex items-center gap-1">
                                             View Dealer Profile <FaExternalLinkAlt className="w-2 h-2" />
                                         </Link>
                                     </div>
@@ -163,13 +171,13 @@ export default function DealerRequests() {
                                         <div></div>
                                         <div className="flex items-center gap-3 w-full">
                                             <button
-                                                onClick={() => handleAction(dealer.id, 'REJECTED')}
+                                                onClick={() => handleAction(dealer._id || dealer.id, 'REJECTED')}
                                                 className="flex-1 py-3 px-4 border border-rose-100 text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-50 transition-all"
                                             >
                                                 Reject
                                             </button>
                                             <button
-                                                onClick={() => handleAction(dealer.id, 'APPROVED')}
+                                                onClick={() => handleAction(dealer._id || dealer.id, 'APPROVED')}
                                                 className="flex-1 py-3 px-4 bg-[#0F6CBD] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
                                             >
                                                 Approve <FaCheck className="w-3 h-3" />

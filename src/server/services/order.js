@@ -3,7 +3,7 @@
  * Manages order lifecycle and inventory locking.
  */
 
-import { Order, Inventory, Negotiation, TaxRule, MarginRule, Notification, AuditLog } from '../models/index.js';
+import { Order, Inventory, Negotiation, TaxRule, MarginRule, Notification, AuditLog, Allocation } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
 import { isValidTransition } from '../lib/stateMachine.js';
 import mongoose from 'mongoose';
@@ -26,73 +26,114 @@ class OrderService {
         session.startTransaction();
         try {
             let totalAmount = 0;
+            const processedItems = [];
 
-            // 1. Calculate base total and validate regional inventory
+            // PHASE 1: ATOMIC ALLOCATION DEDUCTION WITH OVERSELLING PROTECTION
             for (const item of items) {
-                const query = {
-                    sellerId,
-                    stock: { $gte: item.quantity }
-                };
-
-                if (item.inventoryId) {
-                    query._id = item.inventoryId;
-                } else if (item.productId) {
-                    query.productId = item.productId;
-                } else {
-                    throw new Error('Each item must have a productId or inventoryId.');
+                // Validation: Must have inventoryId to link to allocation
+                if (!item.inventoryId) {
+                    throw new Error('Each item must have an inventoryId linked to an allocation.');
                 }
 
-                const inventory = await Inventory.findOne(query).session(session);
+                // CRITICAL: Lock inventory row using SELECT FOR UPDATE pattern
+                // This prevents concurrent orders from overselling
+                const inventory = await Inventory.findById(item.inventoryId)
+                    .session(session)
+                    .select('+__v'); // Include version for optimistic locking
 
-                if (!inventory) throw new Error(`Insufficient stock for item at this seller.`);
-
-                // Check if negotiation exists
-                if (item.negotiationId) {
-                    const negotiation = await Negotiation.findById(item.negotiationId).session(session);
-
-                    if (!negotiation) throw new Error('Invalid negotiation ID');
-                    if (negotiation.status !== 'ACCEPTED') throw new Error('Negotiation must be ACCEPTED to place order');
-                    if (negotiation.productId.toString() !== inventory.productId.toString()) throw new Error('Negotiation product mismatch');
-
-                    item.price = negotiation.currentOffer;
-                } else {
-                    item.price = inventory.price;
+                if (!inventory) {
+                    throw new Error(`Inventory ${item.inventoryId} not found.`);
                 }
 
-                await Inventory.findByIdAndUpdate(inventory._id, {
-                    $inc: { stock: -item.quantity, locked: item.quantity }
-                }, { session });
+                // Validation: Check if inventory is linked to allocation
+                if (!inventory.allocationId) {
+                    throw new Error(`Inventory ${item.inventoryId} has no allocation. Direct sales not allowed.`);
+                }
 
+                // CRITICAL: Lock and validate allocation with SELECT FOR UPDATE
+                const allocation = await Allocation.findById(inventory.allocationId)
+                    .session(session)
+                    .select('+__v');
+
+                if (!allocation) {
+                    throw new Error(`Allocation ${inventory.allocationId} not found.`);
+                }
+
+                // OVERSELLING PROTECTION: Validate remaining quantity
+                if (allocation.remainingQuantity < item.quantity) {
+                    throw new Error(
+                        `INSUFFICIENT_STOCK: Only ${allocation.remainingQuantity} units remaining for this product. You requested ${item.quantity}.`
+                    );
+                }
+
+                // ATOMIC DEDUCTION: Update allocation quantities
+                await Allocation.findOneAndUpdate(
+                    {
+                        _id: allocation._id,
+                        __v: allocation.__v, // Optimistic locking
+                        remainingQuantity: { $gte: item.quantity } // Double-check at DB level
+                    },
+                    {
+                        $inc: {
+                            soldQuantity: item.quantity,
+                            remainingQuantity: -item.quantity
+                        },
+                        $set: { __v: allocation.__v + 1 }
+                    },
+                    { session, new: true }
+                );
+
+                // ATOMIC DEDUCTION: Update inventory
+                await Inventory.findByIdAndUpdate(
+                    inventory._id,
+                    {
+                        $inc: {
+                            soldQuantity: item.quantity,
+                            remainingQuantity: -item.quantity,
+                            stock: -item.quantity,
+                            locked: item.quantity
+                        }
+                    },
+                    { session }
+                );
+
+                // Use negotiated price from allocation, not user input
+                item.price = inventory.retailPrice || inventory.price;
                 totalAmount += Number(item.price) * item.quantity;
+
+                processedItems.push({
+                    productId: inventory.productId,
+                    inventoryId: inventory._id,
+                    allocationId: allocation._id,
+                    quantity: item.quantity,
+                    price: item.price
+                });
             }
 
-            // 2. Dynamic Rules (GST & Commission)
+            // PHASE 2: SERVER-SIDE COMMISSION CALCULATION (NEVER TRUST CLIENT)
+            const COMMISSION_RATE = 0.05; // 5% - IMMUTABLE
             const taxRule = await TaxRule.findOne({ isActive: true }).session(session) || { taxSlab: 18 };
-            const marginRule = await MarginRule.findOne({ isActive: true }).session(session) || { maxCap: 5 };
 
             const taxAmount = (totalAmount * Number(taxRule.taxSlab)) / 100;
-            const commissionAmount = (totalAmount * Number(marginRule.maxCap)) / 100;
+            const commissionAmount = totalAmount * COMMISSION_RATE; // MUST be server-calculated
+            const sellerPayout = totalAmount - commissionAmount;
 
-            // 3. Create Order
+            // PHASE 3: Create Order with immutable commission
             const [order] = await Order.create([{
                 customerId,
                 sellerId,
                 totalAmount,
                 taxAmount,
-                commissionAmount,
+                commissionAmount, // Server-calculated, immutable
+                sellerPayout, // Seller receives this after commission
                 shippingAddress,
                 status: 'CREATED',
                 idempotencyKey: idempotencyKey || null,
-                items: items.map(i => ({
-                    productId: i.productId,
-                    quantity: i.quantity,
-                    price: i.price,
-                    inventoryId: i.inventoryId
-                })),
+                items: processedItems,
                 timeline: [{
                     fromState: 'CREATED',
                     toState: 'CREATED',
-                    reason: 'Order initialized'
+                    reason: 'Order initialized with allocation deduction'
                 }]
             }], { session });
 
@@ -183,6 +224,11 @@ class OrderService {
         const orderBuf = await Order.findById(orderId);
         if (!orderBuf) throw new Error('Order not found');
 
+        // V-007: Enforce state machine validation
+        if (!isValidTransition(orderBuf.status, 'CONFIRMED')) {
+            throw new Error(`INVALID_TRANSITION: Cannot transition from ${orderBuf.status} to CONFIRMED`);
+        }
+
         return await Order.findByIdAndUpdate(orderId, {
             status: 'CONFIRMED',
             $push: {
@@ -201,6 +247,11 @@ class OrderService {
     async shipOrder(orderId, trackingNumber, carrier = 'NovaExpress') {
         const orderBuf = await Order.findById(orderId);
         if (!orderBuf) throw new Error('Order not found');
+
+        // V-007: Enforce state machine validation
+        if (!isValidTransition(orderBuf.status, 'SHIPPED')) {
+            throw new Error(`INVALID_TRANSITION: Cannot transition from ${orderBuf.status} to SHIPPED`);
+        }
 
         const order = await Order.findByIdAndUpdate(orderId, {
             status: 'SHIPPED',
@@ -234,6 +285,11 @@ class OrderService {
     async deliverOrder(orderId) {
         const orderBuf = await Order.findById(orderId);
         if (!orderBuf) throw new Error('Order not found');
+
+        // Enforce state machine validation
+        if (!isValidTransition(orderBuf.status, 'DELIVERED')) {
+            throw new Error(`INVALID_TRANSITION: Cannot transition from ${orderBuf.status} to DELIVERED`);
+        }
 
         const order = await Order.findByIdAndUpdate(orderId, {
             status: 'DELIVERED',
@@ -269,11 +325,27 @@ class OrderService {
                 throw new Error(`Order cannot be cancelled in its current state (${order.status}).`);
             }
 
-            // 1. Restore Inventory
+            // 1. ATOMIC ALLOCATION RESTORATION (CRITICAL FOR REFUNDS)
             for (const item of order.items) {
+                // Restore inventory quantities
                 await Inventory.findByIdAndUpdate(item.inventoryId, {
-                    $inc: { stock: item.quantity, locked: -item.quantity }
+                    $inc: {
+                        stock: item.quantity,
+                        locked: -item.quantity,
+                        soldQuantity: -item.quantity, // Reduce sold count
+                        remainingQuantity: item.quantity // Restore available quantity
+                    }
                 }, { session });
+
+                // CRITICAL: Restore allocation remaining quantity
+                if (item.allocationId) {
+                    await Allocation.findByIdAndUpdate(item.allocationId, {
+                        $inc: {
+                            soldQuantity: -item.quantity, // Reduce sold count
+                            remainingQuantity: item.quantity // Restore available quantity
+                        }
+                    }, { session });
+                }
             }
 
             // 2. Handle Escrow Refund
@@ -453,9 +525,25 @@ class OrderService {
                 }
             } else if (status === 'CANCELLED') {
                 for (const item of current.items) {
+                    // Restore Inventory stock
                     await Inventory.findByIdAndUpdate(item.inventoryId, {
                         $inc: { stock: item.quantity, locked: -item.quantity }
                     }, { session });
+
+                    // V-008: Restore Allocation quantities
+                    const inv = await Inventory.findById(item.inventoryId).session(session);
+                    if (inv && inv.allocationId) {
+                        await Allocation.findByIdAndUpdate(inv.allocationId, {
+                            $inc: { soldQuantity: -item.quantity, remainingQuantity: item.quantity }
+                        }, { session });
+
+                        // Reactivate allocation if it was DEPLETED
+                        const updatedAlloc = await Allocation.findById(inv.allocationId).session(session);
+                        if (updatedAlloc && updatedAlloc.status === 'DEPLETED' && updatedAlloc.remainingQuantity > 0) {
+                            updatedAlloc.status = 'ACTIVE';
+                            await updatedAlloc.save({ session });
+                        }
+                    }
                 }
                 // Handle Escrow Refund
                 const { Escrow } = await import('../models/index.js');

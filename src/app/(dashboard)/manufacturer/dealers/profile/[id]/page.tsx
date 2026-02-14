@@ -107,7 +107,7 @@ export default function ManufacturerDealerProfilePage() {
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <FaCalendarAlt className="text-slate-400" />
-                                        Joined {new Date(dealer.joinedAt).toLocaleDateString()}
+                                        Joined {dealer.joinedAt ? new Date(dealer.joinedAt).toLocaleDateString() : 'Unknown'}
                                     </div>
                                 </div>
                             </div>
@@ -124,20 +124,20 @@ export default function ManufacturerDealerProfilePage() {
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Products</p>
                                 <div className="flex items-center gap-2">
                                     <FaBoxOpen className="text-[#0F6CBD]" />
-                                    <span className="text-xl font-black text-slate-800">{dealer.stats.totalProducts}</span>
+                                    <span className="text-xl font-black text-slate-800">{dealer.stats?.totalProducts || 0}</span>
                                 </div>
                             </div>
                             <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Rating</p>
                                 <div className="flex items-center gap-2">
                                     <FaStar className="text-amber-400" />
-                                    <span className="text-xl font-black text-slate-800">{dealer.stats.averageRating ? dealer.stats.averageRating.toFixed(1) : 'N/A'}</span>
+                                    <span className="text-xl font-black text-slate-800">{dealer.stats?.averageRating ? dealer.stats.averageRating.toFixed(1) : 'N/A'}</span>
                                 </div>
                             </div>
                             <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Reviews</p>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xl font-black text-slate-800">{dealer.stats.reviewCount}</span>
+                                    <span className="text-xl font-black text-slate-800">{dealer.stats?.reviewCount || 0}</span>
                                 </div>
                             </div>
                         </div>

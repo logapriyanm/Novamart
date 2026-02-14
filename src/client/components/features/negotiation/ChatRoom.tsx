@@ -29,9 +29,9 @@ import Loader from '@/client/components/ui/Loader';
 // Socket moved to component level
 const getSocketUrl = () => {
   if (typeof window !== "undefined") {
-    return window.location.origin.replace("3000", "5000");
+    return (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002/api").replace("/api", "");
   }
-  return "http://localhost:5000";
+  return (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002/api").replace("/api", "");
 };
 
 interface ChatRoomProps {
@@ -125,19 +125,32 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
   const initializeChat = async () => {
     if (!negotiation) return;
     try {
-      const receiverId =
-        userRole === "SELLER"
-          ? typeof negotiation.manufacturerId === "object"
-            ? negotiation.manufacturerId.userId
-            : negotiation.manufacturerId
-          : typeof negotiation.dealerId === "object"
-            ? negotiation.dealerId.userId
-            : negotiation.dealerId;
+      const getReceiverId = () => {
+        if (userRole === "SELLER") {
+          const mfr = negotiation.manufacturerId;
+          // Handle populated object with userId
+          if (typeof mfr === 'object' && mfr !== null) {
+            const uid = mfr.userId;
+            return typeof uid === 'object' && uid !== null ? (uid._id || uid.toString()) : uid;
+          }
+          return mfr;
+        } else {
+          const seller = negotiation.sellerId;
+          // Handle populated object with userId
+          if (typeof seller === 'object' && seller !== null) {
+            const uid = seller.userId;
+            return typeof uid === 'object' && uid !== null ? (uid._id || uid.toString()) : uid;
+          }
+          return seller;
+        }
+      };
+
+      const receiverId = getReceiverId();
 
       const res = await apiClient.post<any>("/chat/create", {
         type: "NEGOTIATION",
         contextId: negotiationId,
-        receiverId: receiverId,
+        receiverId: typeof receiverId === 'object' ? receiverId.toString() : receiverId,
         receiverRole: userRole === "SELLER" ? "MANUFACTURER" : "SELLER",
       });
 
@@ -227,8 +240,8 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
     );
 
   const isSeller = userRole === "SELLER";
-  const partner = isSeller ? negotiation.manufacturerId : negotiation.dealerId;
-  const isLocked = ["ACCEPTED", "REJECTED", "ORDER_FULFILLED"].includes(
+  const partner = isSeller ? negotiation.manufacturerId : negotiation.sellerId;
+  const isLocked = ["DEAL_CLOSED", "REJECTED"].includes(
     negotiation.status,
   );
 
@@ -386,7 +399,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                     <button
                       onClick={() => sendMessage()}
                       disabled={sending || !message.trim()}
-                      className="p-2.5 bg-primary text-white rounded-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+                      className="p-2.5 bg-primary text-black rounded-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
                     >
                       <FaPaperPlane className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
@@ -458,7 +471,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
           </div>
 
           <div className="p-6 border-t border-slate-50">
-            {negotiation.status === "ACCEPTED" ? (
+            {negotiation.status === "DEAL_CLOSED" ? (
               <button
                 onClick={() =>
                   router.push(
@@ -467,8 +480,14 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                 }
                 className="w-full py-4 bg-emerald-600 text-white rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-500/20 hover:scale-[1.02] transition-all"
               >
-                {isSeller ? "Raise Order Request" : "Manage Allocation"}
+                {isSeller ? "View Orders" : "View Allocations"}
               </button>
+            ) : negotiation.status === "ACCEPTED" ? (
+              <div className="p-4 bg-emerald-50/50 rounded-[10px] border border-emerald-100 text-center">
+                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-relaxed">
+                  Terms accepted. Awaiting deal closure by manufacturer.
+                </p>
+              </div>
             ) : (
               <div className="p-4 bg-blue-50/50 rounded-[10px] border border-blue-100 text-center">
                 <p className="text-[9px] font-black text-primary uppercase tracking-widest leading-relaxed">
@@ -518,11 +537,11 @@ function ContextItem({ icon: Icon, label, value }: any) {
 function SummaryCard({ label, value, icon: Icon, highlighted }: any) {
   return (
     <div
-      className={`p-4 rounded-[10px] border ${highlighted ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-white text-slate-800 border-slate-100 shadow-sm"}`}
+      className={`p-4 rounded-[10px] border ${highlighted ? "bg-primary text-black border-primary shadow-lg shadow-primary/20" : "bg-white text-slate-800 border-slate-100 shadow-sm"}`}
     >
       <div className="flex justify-between items-start mb-1">
         <p
-          className={`text-[8px] font-black uppercase tracking-[0.2em] ${highlighted ? "text-white/60" : "text-slate-400"}`}
+          className={`text-[8px] font-black uppercase tracking-[0.2em] ${highlighted ? "text-black/60" : "text-slate-400"}`}
         >
           {label}
         </p>
@@ -537,11 +556,12 @@ function SummaryCard({ label, value, icon: Icon, highlighted }: any) {
 
 function StatusBadge({ status }: { status: string }) {
   const colors: any = {
-    OPEN: "bg-blue-500",
+    REQUESTED: "bg-blue-500",
+    NEGOTIATING: "bg-amber-500",
+    OFFER_MADE: "bg-orange-500",
     ACCEPTED: "bg-emerald-500",
+    DEAL_CLOSED: "bg-emerald-600",
     REJECTED: "bg-rose-500",
-    ORDER_REQUESTED: "bg-amber-500",
-    ORDER_FULFILLED: "bg-emerald-600",
   };
   return (
     <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-[10px] border border-slate-100">
@@ -772,7 +792,7 @@ function OfferModal({
             <button
               disabled={sending}
               onClick={() => onSubmit({ price, quantity, timeline, note })}
-              className="flex-[2] py-4 bg-primary text-white rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+              className="flex-[2] py-4 bg-primary text-black rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
             >
               {sending ? (
                 <FaSpinner className="animate-spin" />

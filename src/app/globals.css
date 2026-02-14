@@ -6,11 +6,11 @@
 
   /* stylelint-disable at-rule-no-unknown */
   :root {
-    --primary: #2772A0;
+    --primary: #067FF9;
     /* Blue Accent */
     --secondary: #171717;
     /* Black */
-    --accent: #2772A0;
+    --accent: #067FF9;
     --background: #FFFFFF;
     /* White */
     --foreground: #000000;

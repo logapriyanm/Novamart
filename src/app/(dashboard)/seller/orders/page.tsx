@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaArrowLeft,
-    FaBoxOpen,
     FaUserCircle,
     FaCheckCircle,
     FaRegClock,
@@ -13,6 +12,7 @@ import {
     FaTimesCircle,
     FaCommentAlt
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/client';
@@ -130,7 +130,7 @@ export default function DealerOrderManagement() {
                     <div className="flex-1 overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
                         {filteredOrders.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                                <FaBoxOpen className="w-10 h-10 mb-3 opacity-20" />
+                                <MdOutlineProductionQuantityLimits className="w-10 h-10 mb-3 opacity-20" />
                                 <p className="text-sm font-medium">No orders found</p>
                             </div>
                         ) : filteredOrders.map((order) => (
@@ -141,7 +141,7 @@ export default function DealerOrderManagement() {
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:scale-105 transition-all">
-                                        <FaBoxOpen className="w-4 h-4" />
+                                        <MdOutlineProductionQuantityLimits className="w-4 h-4" />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
@@ -281,7 +281,7 @@ export default function DealerOrderManagement() {
                         ) : (
                             <div className="h-full bg-white rounded-[10px] border border-slate-200 flex flex-col items-center justify-center text-center p-12 shadow-sm">
                                 <div className="w-16 h-16 bg-slate-50 rounded-[10px] flex items-center justify-center text-slate-300 mb-4">
-                                    <FaBoxOpen className="w-8 h-8 opacity-50" />
+                                    <MdOutlineProductionQuantityLimits className="w-8 h-8 opacity-50" />
                                 </div>
                                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Select order</h3>
                                 <p className="text-xs text-slate-500 mt-1 max-w-[200px]">View details to process fulfillment.</p>

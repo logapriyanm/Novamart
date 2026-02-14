@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { sellerService } from '@/lib/api/services/seller.service';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaStore, FaMapMarkerAlt, FaCalendarAlt, FaStar, FaBox, FaShieldAlt, FaComments } from 'react-icons/fa';
+import { FaStore, FaMapMarkerAlt, FaCalendarAlt, FaStar, FaShieldAlt, FaComments } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import { useAuth } from '@/client/hooks/useAuth';
 import { chatService } from '@/lib/api/services/chat.service';
@@ -174,7 +175,7 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
                                             {item.images?.[0] ? (
                                                 <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center"><FaBox size={40} className="text-slate-200" /></div>
+                                                <div className="w-full h-full flex items-center justify-center"><MdOutlineProductionQuantityLimits size={40} className="text-slate-200" /></div>
                                             )}
                                             <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-black shadow-sm">
                                                 {item.category?.toUpperCase()}

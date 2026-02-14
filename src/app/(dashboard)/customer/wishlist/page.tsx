@@ -38,7 +38,7 @@ export default function WishlistPage() {
 
     return (
         <div className="space-y-8 animate-fade-in max-w-7xl mx-auto pb-12">
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight">My Wishlist</h2>
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">My Wishlist</h1>
 
             {loading ? (
                 <div className="flex items-center justify-center p-12">
@@ -51,7 +51,7 @@ export default function WishlistPage() {
                     </div>
                     <h3 className="text-xl font-black text-slate-800">Your wishlist is empty</h3>
                     <p className="text-slate-400 text-sm font-bold">Save items you love to buy later.</p>
-                    <Link href="/products" className="inline-block mt-4 px-6 py-2 bg-black text-white text-xs font-bold tracking-widest rounded-lg hover:bg-slate-800 transition-all">
+                    <Link href="/products" className="inline-block mt-4 px-6 py-2 bg-black text-white text-sm font-bold tracking-widest rounded-lg hover:bg-slate-800 transition-all">
                         Browse Products
                     </Link>
                 </Card>
@@ -70,7 +70,7 @@ export default function WishlistPage() {
                             </div>
                             <div>
                                 <h3 className="text-sm font-black text-slate-800 line-clamp-1">{product.name}</h3>
-                                <p className="text-[10px] font-bold text-slate-400 tracking-widest mt-1">{product.category}</p>
+                                <p className="text-sm font-bold text-slate-400 tracking-wide mt-1">{product.category}</p>
                                 <div className="flex items-center justify-between mt-4">
                                     <span className="text-lg font-black text-slate-900">₹{product.basePrice}</span>
                                     <Link href={`/products/${product.id}`} className="p-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">

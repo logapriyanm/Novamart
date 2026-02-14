@@ -9,13 +9,13 @@ import {
     FaExclamationTriangle,
     FaSearch,
     FaArrowLeft,
-    FaBoxOpen,
     FaRegClock,
     FaEye,
     FaShippingFast,
     FaBan,
     FaFilter
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 
 import { adminService } from '@/lib/api/services/admin.service';
@@ -66,7 +66,7 @@ export default function OrderOversightPanel() {
     };
 
     const stats = [
-        { label: 'Live Orders', value: orders.filter(o => o.status !== 'CANCELLED' && o.status !== 'DELIVERED').length.toString(), icon: FaBoxOpen, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { label: 'Live Orders', value: orders.filter(o => o.status !== 'CANCELLED' && o.status !== 'DELIVERED').length.toString(), icon: MdOutlineProductionQuantityLimits, color: 'text-blue-600', bg: 'bg-blue-50' },
         { label: 'In Transit', value: orders.filter(o => o.status === 'SHIPPED').length.toString(), icon: FaTruck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         { label: 'Pending Audit', value: orders.filter(o => o.status === 'CREATED').length.toString(), icon: FaRegClock, color: 'text-amber-600', bg: 'bg-amber-50' },
         { label: 'Halted/Risk', value: orders.filter(o => o.status === 'CANCELLED').length.toString(), icon: FaExclamationTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
@@ -112,7 +112,7 @@ export default function OrderOversightPanel() {
     if (loading) return (
         <div className="min-h-[600px] flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-                <FaBoxOpen className="w-8 h-8 text-slate-300 animate-bounce" />
+                <MdOutlineProductionQuantityLimits className="w-8 h-8 text-slate-300 animate-bounce" />
                 <p className="text-sm font-bold text-slate-400 animate-pulse">Loading Supply Chain...</p>
             </div>
         </div>

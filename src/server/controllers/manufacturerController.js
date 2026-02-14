@@ -413,6 +413,33 @@ export default {
     getProfile,
     updateProfile,
     getOrders,
-    getAllManufacturers
+    getAllManufacturers,
+
+    // Product Requests
+    getPendingProductRequests: async (req, res) => {
+        const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
+        if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
+
+        try {
+            const requests = await manufacturerService.getPendingProductRequests(mfgId);
+            res.json({ success: true, data: requests });
+        } catch (error) {
+            console.error('Error in getPendingProductRequests:', error);
+            res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_REQUESTS', details: error.message });
+        }
+    },
+
+    approveProductRequest: async (req, res) => {
+        const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
+        const { inventoryId } = req.body;
+        if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
+
+        try {
+            const result = await manufacturerService.approveProductRequest(mfgId, inventoryId);
+            res.json({ success: true, message: 'Request approved', data: result });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    }
 };
 

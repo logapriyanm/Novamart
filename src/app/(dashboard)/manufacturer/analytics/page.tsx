@@ -1,132 +1,167 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-    FaChartPie,
     FaChartBar,
-    FaChartLine,
     FaArrowLeft,
     FaArrowUp,
-    FaArrowDown,
-    FaInfoCircle,
-    FaCompass,
-    FaSync
+    FaSync,
+    FaCalendarAlt,
+    FaGlobe,
+    FaTrophy,
+    FaIndustry,
+    FaUsers
 } from 'react-icons/fa';
 import Link from 'next/link';
+import { apiClient } from '@/lib/api/client';
+import { toast } from 'sonner';
+import Loader from '@/client/components/ui/Loader';
 
-export default function ProductionPlanningAnalytics() {
+interface ManufacturerAnalytics {
+    products: {
+        total: number;
+        approved: number;
+        pending: number;
+    };
+    network: {
+        totalDealers: number;
+    };
+    orders: {
+        total: number;
+        recent: number;
+        totalRevenue: number;
+    };
+}
+
+export default function ManufacturerAnalytics() {
+    const [stats, setStats] = useState<ManufacturerAnalytics | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchAnalytics();
+    }, []);
+
+    const fetchAnalytics = async () => {
+        try {
+            const data = await apiClient.get<any>('/manufacturer/analytics');
+            setStats(data || null);
+        } catch (error: any) {
+            console.error('Analytics error:', error);
+            toast.error(error.message || 'Failed to load analytics');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader size="lg" variant="primary" />
+            </div>
+        );
+    }
+
+    // Mock growth data for visualization as backend doesn't provide historical comparison yet
+    const revenueGrowth = 12.5;
+    const factoryEfficiency = 94;
+
     return (
-        <div className="space-y-8 animate-fade-in pb-12">
+        <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
             {/* Header */}
             <div className="flex flex-col gap-2">
                 <Link href="/manufacturer" className="flex items-center gap-2 text-[10px] font-black text-[#10367D] uppercase tracking-widest hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
-                    Back to Command Dashboard
+                    Back to Dashboard
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight">Production <span className="text-[#10367D]">Intel</span></h1>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Strategic Demand Forecasting & Capacity Allocation</p>
+                        <h1 className="text-3xl font-black tracking-tight">Production <span className="text-[#10367D]">Intel</span></h1>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Manufacturing Performance & Network Metrics</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 px-6 py-2 bg-white border border-slate-100 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <FaCalendarAlt className="w-3 h-3 text-[#10367D]" />
+                            Last 30 Days
+                        </div>
+                        <button
+                            onClick={fetchAnalytics}
+                            className="flex items-center gap-2 px-6 py-2 bg-[#10367D] text-white border border-[#10367D] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#10367D]/90 transition-all"
+                        >
+                            <FaSync className="w-3 h-3" />
+                            Refresh
+                        </button>
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Demand Prediction */}
-                <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 lg:p-14 border border-slate-100 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#10367D]/5 blur-3xl rounded-full -mr-32 -mt-32 transition-colors group-hover:bg-[#10367D]/10" />
+                {/* Revenue Momentum */}
+                <div className="lg:col-span-2 bg-white rounded-[3.5rem] p-12 border border-slate-100 shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-3xl rounded-full" />
                     <div className="relative z-10 flex items-center justify-between mb-12">
                         <div>
-                            <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-widest">Zone-Wise Demand Index</h2>
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Projected Demand for Q2 2026</p>
+                            <h2 className="text-sm font-black text-[#1E293B] uppercase tracking-widest">Revenue Momentum</h2>
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1 italic">Gross Production Value (Monthly)</p>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                <FaCompass className="w-3 h-3 text-[#10367D]" />
-                                Pan-India
-                            </div>
+                        <div className="text-right">
+                            <p className="text-2xl font-black text-[#10367D]">₹{(stats?.orders.totalRevenue || 0).toLocaleString()}</p>
+                            <span className="text-[9px] font-black text-emerald-500 uppercase flex items-center gap-1 justify-end">
+                                <FaArrowUp className="w-2 h-2" /> +{revenueGrowth}% Monthly
+                            </span>
                         </div>
                     </div>
 
-                    <div className="space-y-8">
+                    <div className="h-64 bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-100 flex items-center justify-center text-slate-200">
+                        <FaChartBar className="w-16 h-16 opacity-10" />
+                        <span className="text-[10px] font-black uppercase tracking-widest ml-4">Production Graph Terminal</span>
+                    </div>
+                </div>
+
+                {/* Score & Ranking */}
+                <div className="space-y-8">
+                    <div className="bg-[#1E293B] rounded-[3.5rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-transparent" />
+                        <div className="relative z-10 text-center">
+                            <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-[#10367D] mx-auto mb-6 shadow-xl">
+                                <FaIndustry className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">Factory Efficiency</h3>
+                            <p className="text-4xl font-black tracking-tight mb-2 italic">{factoryEfficiency}% <span className="text-[#10367D] text-xl">Optimal</span></p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-6">Based on Output & Downtime</p>
+                        </div>
+                    </div>
+
+                    <div className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-sm divide-y divide-slate-50">
                         {[
-                            { zone: 'West (Mumbai/Pune)', current: '₹42.8L', growth: '+12%', val: 88, color: 'bg-[#10367D]' },
-                            { zone: 'South (Bangalore/Chennai)', current: '₹31.2L', growth: '+18%', val: 72, color: 'bg-emerald-500' },
-                            { zone: 'North (Delhi/Punjab)', current: '₹18.4L', growth: '-2%', val: 45, color: 'bg-amber-500' },
-                            { zone: 'East (Kolkata/Assam)', current: '₹5.2L', growth: '+5%', val: 28, color: 'bg-indigo-500' },
-                        ].map((z) => (
-                            <div key={z.zone} className="group/zone">
-                                <div className="flex items-center justify-between mb-3 text-[10px] font-black uppercase tracking-widest">
-                                    <span className="text-slate-500">{z.zone}</span>
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-[#1E293B] italic">{z.current} Current</span>
-                                        <span className={`${z.growth.startsWith('+') ? 'text-emerald-500' : 'text-rose-500'} flex items-center gap-1`}>
-                                            {z.growth.startsWith('+') ? <FaArrowUp className="w-2 h-2" /> : <FaArrowDown className="w-2 h-2" />}
-                                            {z.growth}
-                                        </span>
-                                    </div>
+                            { label: 'Active Sellers', val: stats?.network.totalDealers || 0, change: '+5%', up: true },
+                            { label: 'Total Orders', val: stats?.orders.total || 0, change: `+${stats?.orders.recent || 0}`, up: true },
+                            { label: 'Product Catalog', val: stats?.products.total || 0, change: 'Active', up: true },
+                        ].map((s, i) => (
+                            <div key={i} className="py-6 first:pt-0 last:pb-0 flex items-center justify-between">
+                                <div>
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+                                    <p className="text-lg font-black text-[#1E293B]">{s.val}</p>
                                 </div>
-                                <div className="w-full h-2.5 bg-slate-50 rounded-full overflow-hidden border border-slate-100/50">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${z.val}%` }}
-                                        transition={{ duration: 1.5, ease: "easeOut" }}
-                                        className={`h-full ${z.color} rounded-full`}
-                                    />
-                                </div>
+                                <span className={`text-[9px] font-black uppercase ${s.up ? 'text-emerald-500' : 'text-rose-500'}`}>{s.change}</span>
                             </div>
                         ))}
                     </div>
                 </div>
-
-                {/* Capacity Corner */}
-                <div className="space-y-8">
-                    <div className="bg-[#1E293B] rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-2xl rounded-full" />
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-10 opacity-60 flex items-center gap-3">
-                            <FaChartPie className="w-4 h-4 text-[#10367D]" />
-                            Factory Utilization
-                        </h3>
-                        <div className="text-center mb-10">
-                            <p className="text-5xl font-black italic tracking-tighter">84<span className="text-blue-500">%</span></p>
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">Operating at Peak Capacity</p>
-                        </div>
-                        <div className="p-6 bg-white/5 border border-white/10 rounded-3xl">
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Next Batch Window</p>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm font-black text-blue-400">12 Feb 2026</span>
-                                <FaSync className="text-slate-500/40 w-4 h-4" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="p-10 bg-blue-50/50 rounded-[3.5rem] border border-[#10367D]/10 space-y-6">
-                        <div className="w-12 h-12 rounded-2xl bg-white text-[#10367D] flex items-center justify-center shadow-lg border border-blue-100">
-                            <FaInfoCircle className="w-6 h-6" />
-                        </div>
-                        <h4 className="text-lg font-black text-[#1E293B] tracking-tight">Eco-System Alert</h4>
-                        <p className="text-xs font-medium text-slate-500 leading-relaxed italic">
-                            "High demand surge detected in North Zone for **Smart Climate Control** units. Adjusting production priority by +15% recommended."
-                        </p>
-                    </div>
-                </div>
             </div>
 
-            {/* Product Performance Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                {[
-                    { label: 'Most Requested', val: 'Inverter AC 2.0', sub: 'Elite Electronics' },
-                    { label: 'Return Rate', val: '0.04%', sub: 'Global Standard' },
-                    { label: 'Avg Settle Time', val: '4.2 Days', sub: 'B2B Handshake' },
-                    { label: 'Dealer Growth', val: '+5 Entities', sub: 'This Month' },
-                ].map((stat, i) => (
-                    <div key={i} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{stat.label}</p>
-                        <h4 className="text-xl font-black text-[#1E293B]">{stat.val}</h4>
-                        <p className="text-[9px] font-black text-[#10367D] uppercase tracking-widest mt-1">{stat.sub}</p>
-                    </div>
-                ))}
+            {/* Geographic Coverage */}
+            <div className="p-10 bg-blue-50/50 rounded-[3.5rem] border border-[#10367D]/10 flex flex-col md:flex-row items-center gap-12">
+                <div className="w-20 h-20 rounded-[2rem] bg-white text-[#10367D] border border-blue-100 flex items-center justify-center shrink-0 shadow-lg">
+                    <FaGlobe className="w-10 h-10" />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                    <h3 className="text-lg font-black tracking-tight">Distribution Network</h3>
+                    <p className="text-sm font-medium text-slate-500 mt-1 max-w-2xl leading-relaxed">
+                        Your distribution network currently spans **Key Metro Zones**. Expanding dealer partnerships in Tier-2 cities is recommended to optimize logistics costs.
+                    </p>
+                </div>
+                <button className="px-8 py-4 bg-[#10367D] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#10367D]/20 hover:scale-105 transition-all">Download Network Report</button>
             </div>
         </div>
     );

@@ -38,7 +38,8 @@ export default function DocumentUpload({ type, label, description, onUploadSucce
             // but apiClient might need specific handling or just use fetch for this one.
             // Using standard fetch here to ensure FormData is handled correctly if apiClient is rigid.
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/verification/upload', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002/api';
+            const response = await fetch(`${apiUrl}/verification/upload`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

@@ -23,6 +23,8 @@ router.get('/dealers/requests', manufacturerController.getDealerRequests);
 router.post('/network/handle', manufacturerController.handleDealerNetwork);
 router.post('/dealers/handle', manufacturerController.handleDealerNetwork); // Alias
 router.get('/products', productController.getMyProducts);
+router.get('/products/requests', manufacturerController.getPendingProductRequests); // NEW
+router.post('/products/requests/approve', manufacturerController.approveProductRequest); // NEW
 router.get('/orders', manufacturerController.getOrders);
 
 /**

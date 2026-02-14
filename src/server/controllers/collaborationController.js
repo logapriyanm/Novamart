@@ -1,4 +1,5 @@
 import { CollaborationGroup, GroupParticipant, Seller, User } from '../models/index.js';
+import mongoose from 'mongoose';
 import logger from '../lib/logger.js';
 import notificationService from '../services/notificationService.js';
 
@@ -358,6 +359,20 @@ export const joinGroup = async (req, res) => {
             });
         }
 
+        // CRITICAL: Enforce max 4 sellers limit (Phase 5 requirement)
+        const joinedCount = await GroupParticipant.countDocuments({
+            groupId: id,
+            status: 'JOINED'
+        });
+
+        if (joinedCount >= 4) {
+            return res.status(400).json({
+                success: false,
+                error: 'GROUP_FULL',
+                message: 'This group already has the maximum of 4 sellers'
+            });
+        }
+
         // Update participant status
         participant.status = 'JOINED';
         participant.quantityCommitment = quantityCommitment;
@@ -617,6 +632,195 @@ export const cancelGroup = async (req, res) => {
     }
 };
 
+/**
+ * Allocate group deal — V-009 Collaboration Allocation Split
+ * Creates per-participant allocations based on contribution ratio.
+ * Atomic transaction across all sellers.
+ */
+export const allocateGroupDeal = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const { groupId, negotiationId, productId, manufacturerId, totalQuantity, negotiatedPrice } = req.body;
+
+        if (!groupId || !productId || !manufacturerId || !totalQuantity || !negotiatedPrice) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                error: 'MISSING_FIELDS',
+                message: 'groupId, productId, manufacturerId, totalQuantity, and negotiatedPrice are required'
+            });
+        }
+
+        // Get all JOINED participants with their commitments
+        const participants = await GroupParticipant.find({
+            groupId,
+            status: 'JOINED',
+            quantityCommitment: { $gt: 0 }
+        }).session(session);
+
+        if (participants.length === 0) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                error: 'NO_ELIGIBLE_PARTICIPANTS',
+                message: 'No participants with quantity commitments found'
+            });
+        }
+
+        // Calculate total committed
+        const totalCommitted = participants.reduce((sum, p) => sum + p.quantityCommitment, 0);
+
+        // Validate total matches negotiated quantity
+        if (totalCommitted !== totalQuantity) {
+            logger.warn(`[GroupAllocation] Committed(${totalCommitted}) != Total(${totalQuantity}). Using ratio-based split.`);
+        }
+
+        const { Allocation, Product, Inventory } = await import('../models/index.js');
+
+        // Deduct manufacturer stock ONCE for the total
+        const product = await Product.findById(productId).session(session);
+        if (!product || product.stockQuantity < totalQuantity) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                error: 'INSUFFICIENT_MANUFACTURER_STOCK',
+                message: `Manufacturer has ${product?.stockQuantity || 0} units, need ${totalQuantity}`
+            });
+        }
+
+        await Product.findByIdAndUpdate(productId, {
+            $inc: { stockQuantity: -totalQuantity }
+        }, { session });
+
+        // Create per-participant allocations
+        const createdAllocations = [];
+        let allocatedSoFar = 0;
+
+        for (let i = 0; i < participants.length; i++) {
+            const participant = participants[i];
+
+            // Calculate this participant's share (ratio-based)
+            let share;
+            if (i === participants.length - 1) {
+                // Last participant gets remainder to avoid rounding issues
+                share = totalQuantity - allocatedSoFar;
+            } else {
+                share = Math.floor((participant.quantityCommitment / totalCommitted) * totalQuantity);
+            }
+
+            allocatedSoFar += share;
+
+            // Create Allocation
+            const [allocation] = await Allocation.create([{
+                negotiationId: negotiationId || null,
+                type: 'GROUP',
+                groupId,
+                sellerId: participant.dealerId,
+                manufacturerId,
+                productId,
+                allocatedQuantity: share,
+                soldQuantity: 0,
+                remainingQuantity: share,
+                negotiatedPrice,
+                minRetailPrice: negotiatedPrice * 1.05,
+                status: 'ACTIVE'
+            }], { session });
+
+            createdAllocations.push(allocation);
+
+            // Upsert Inventory for this seller
+            const existingInv = await Inventory.findOne({
+                sellerId: participant.dealerId,
+                productId
+            }).session(session);
+
+            if (existingInv) {
+                await Inventory.findByIdAndUpdate(existingInv._id, {
+                    $inc: {
+                        stock: share,
+                        allocatedStock: share,
+                        remainingQuantity: share
+                    },
+                    sellerBasePrice: negotiatedPrice,
+                    allocationId: allocation._id,
+                    isListed: true
+                }, { session });
+            } else {
+                await Inventory.create([{
+                    sellerId: participant.dealerId,
+                    productId,
+                    region: 'Global',
+                    stock: share,
+                    price: negotiatedPrice * 1.2,
+                    originalPrice: negotiatedPrice,
+                    isAllocated: true,
+                    allocationStatus: 'APPROVED',
+                    allocationId: allocation._id,
+                    isListed: true,
+                    listedAt: new Date(),
+                    allocatedStock: share,
+                    sellerBasePrice: negotiatedPrice,
+                    soldQuantity: 0,
+                    remainingQuantity: share
+                }], { session });
+            }
+        }
+
+        // Mark group as COMPLETED
+        await CollaborationGroup.findByIdAndUpdate(groupId, {
+            status: 'COMPLETED'
+        }, { session });
+
+        await session.commitTransaction();
+
+        // Verify: total allocated must equal negotiated quantity
+        const verifyTotal = createdAllocations.reduce((sum, a) => sum + a.allocatedQuantity, 0);
+        if (verifyTotal !== totalQuantity) {
+            logger.error(`[GroupAllocation] INTEGRITY VIOLATION: allocated(${verifyTotal}) != total(${totalQuantity})`);
+        }
+
+        // Notify participants
+        for (const participant of participants) {
+            const alloc = createdAllocations.find(a => a.sellerId.toString() === participant.dealerId.toString());
+            await notificationService.create({
+                userId: participant.userId,
+                type: 'COLLABORATION_ALLOCATION',
+                title: 'Group Deal Allocation',
+                message: `You received ${alloc?.allocatedQuantity || 0} units from group deal at ₹${negotiatedPrice}/unit`,
+                metadata: { groupId, allocationId: alloc?._id }
+            });
+        }
+
+        res.json({
+            success: true,
+            message: `Group deal allocated to ${participants.length} sellers`,
+            data: {
+                totalAllocated: verifyTotal,
+                participantCount: participants.length,
+                allocations: createdAllocations.map(a => ({
+                    sellerId: a.sellerId,
+                    quantity: a.allocatedQuantity,
+                    allocationId: a._id
+                }))
+            }
+        });
+    } catch (error) {
+        await session.abortTransaction();
+        logger.error('Group Allocation Error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'GROUP_ALLOCATION_FAILED',
+            message: error.message
+        });
+    } finally {
+        session.endSession();
+    }
+};
+
 export default {
     createGroup,
     getMyGroups,
@@ -625,5 +829,6 @@ export default {
     joinGroup,
     leaveGroup,
     lockGroup,
-    cancelGroup
+    cancelGroup,
+    allocateGroupDeal
 };

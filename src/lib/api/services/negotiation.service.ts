@@ -6,7 +6,7 @@ export interface Negotiation {
     dealerId: string;
     manufacturerId: string;
     productId: string;
-    status: 'OPEN' | 'ACCEPTED' | 'REJECTED' | 'COUNTERED' | 'ORDER_REQUESTED' | 'ORDER_FULFILLED';
+    status: 'REQUESTED' | 'NEGOTIATING' | 'OFFER_MADE' | 'ACCEPTED' | 'DEAL_CLOSED' | 'REJECTED';
     currentOffer: number;
     quantity: number;
     chatLog: any[];

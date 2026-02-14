@@ -8,12 +8,13 @@ import {
     FaExclamationCircle,
     FaShieldAlt,
     FaArrowLeft,
-    FaBox,
     FaIndustry,
     FaInfoCircle,
     FaSearch,
-    FaGavel
+    FaGavel,
+    FaEdit,
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import { adminService } from '@/lib/api/services/admin.service';
 import Loader from '@/client/components/ui/Loader';
@@ -107,7 +108,7 @@ export default function AdminProductManagement() {
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 rounded-[10px] bg-white border border-slate-100 text-primary flex items-center justify-center shadow-sm">
-                                                <FaBox className="w-4 h-4" />
+                                                <MdOutlineProductionQuantityLimits className="w-4 h-4" />
                                             </div>
                                             <div>
                                                 <h4 className="text-sm font-bold text-[#1E293B]">{item.name}</h4>

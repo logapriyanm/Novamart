@@ -69,18 +69,20 @@ export default function ChartCard({
 
             {/* Content Area */}
             <div className="flex-1 min-h-[300px] relative">
-                {isLoading ? (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-10">
-                        <div className="w-8 h-8 border-4 border-slate-100 border-t-slate-800 rounded-full animate-spin"></div>
-                    </div>
-                ) : isEmpty ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                        <FaCalendarAlt className="w-8 h-8 mb-3 opacity-20" />
-                        <p className="text-sm font-medium">No data available for selected period</p>
-                    </div>
-                ) : (
-                    children
-                )}
+                <div className="absolute inset-0 w-full h-full">
+                    {isLoading ? (
+                        <div className="w-full h-full flex items-center justify-center bg-white/50 z-10">
+                            <div className="w-8 h-8 border-4 border-slate-100 border-t-slate-800 rounded-full animate-spin"></div>
+                        </div>
+                    ) : isEmpty ? (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                            <FaCalendarAlt className="w-8 h-8 mb-3 opacity-20" />
+                            <p className="text-sm font-medium">No data available for selected period</p>
+                        </div>
+                    ) : (
+                        children
+                    )}
+                </div>
             </div>
         </div>
     );

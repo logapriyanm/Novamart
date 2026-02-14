@@ -191,7 +191,16 @@ export const login = async (req, res) => {
     try {
         const user = await User.findOne({ email });
         logger.debug('User found in login - Email: %s, Role: %s, ID: %s', email, user?.role, user?._id);
-        if (!user || (user.password && !(await bcrypt.compare(password, user.password)))) {
+
+        if (!user) {
+            logger.warn('Login failed: User not found for email: %s', email);
+            return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
+        }
+
+        const isPasswordValid = user.password && (await bcrypt.compare(password, user.password));
+
+        if (!isPasswordValid) {
+            logger.warn('Login failed: Invalid password for user: %s', email);
             return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
         }
 

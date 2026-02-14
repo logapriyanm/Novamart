@@ -76,8 +76,7 @@ export const validateProduct = (req, res, next) => {
         if (isDraft) {
             req.body.basePrice = 0;
         } else {
-            // errors.basePrice = 'INVALID_PRICE'; // Temporarily disable validation
-            console.warn('WARN: basePrice invalid or missing:', basePrice);
+            errors.basePrice = 'INVALID_PRICE';
         }
     }
 

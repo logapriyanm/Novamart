@@ -8,10 +8,10 @@ import {
     FaStar,
     FaUser,
     FaStore,
-    FaBox,
     FaFilter,
     FaExclamationTriangle
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import { toast } from 'sonner';
 import { adminService } from '@/lib/api/services/admin.service';
 import { WhiteCard, StatusBadge } from '@/client/components/features/dashboard/DashboardUI';
@@ -112,7 +112,7 @@ export default function AdminReviewsPage() {
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-8 h-8 rounded-[10px] flex items-center justify-center ${review.type === 'PRODUCT' ? 'bg-blue-50 text-blue-500' : 'bg-purple-50 text-purple-500'}`}>
-                                            {review.type === 'PRODUCT' ? <FaBox className="w-3.5 h-3.5" /> : <FaStore className="w-3.5 h-3.5" />}
+                                            {review.type === 'PRODUCT' ? <MdOutlineProductionQuantityLimits className="w-3.5 h-3.5" /> : <FaStore className="w-3.5 h-3.5" />}
                                         </div>
                                         <span className="text-sm font-black text-slate-600 italic">{review.type} Review</span>
                                     </div>

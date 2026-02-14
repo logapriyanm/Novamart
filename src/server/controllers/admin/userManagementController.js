@@ -198,17 +198,41 @@ export const updateSellerManufacturers = async (req, res) => {
     const { manufacturerId } = req.body;
     const adminId = req.user._id;
 
+    const session = await User.startSession();
+    session.startTransaction();
+
     try {
-        const currentSeller = await Seller.findById(id);
+        const { Manufacturer, SellerRequest } = await import('../../models/index.js');
+
+        const currentSeller = await Seller.findById(id).session(session);
         const isLinked = currentSeller.approvedBy.includes(manufacturerId);
 
-        const updateAction = isLinked
+        // 1. Update Seller
+        const updateActionSeller = isLinked
             ? { $pull: { approvedBy: manufacturerId } }
             : { $addToSet: { approvedBy: manufacturerId } };
 
-        const updatedSeller = await Seller.findByIdAndUpdate(id, updateAction, { new: true })
+        const updatedSeller = await Seller.findByIdAndUpdate(id, updateActionSeller, { new: true, session })
             .populate('approvedBy')
             .populate('userId');
+
+        // 2. Update Manufacturer (Bidirectional Sync)
+        const updateActionMfg = isLinked
+            ? { $pull: { approvedBy: id } }
+            : { $addToSet: { approvedBy: id } };
+
+        await Manufacturer.findByIdAndUpdate(manufacturerId, updateActionMfg, { session });
+
+        // 3. Sync SellerRequest (for Dashboard Visibility)
+        const requestStatus = isLinked ? 'REJECTED' : 'APPROVED'; // If unlinking -> REJECTED, if linking -> APPROVED
+        await SellerRequest.findOneAndUpdate(
+            { sellerId: id, manufacturerId },
+            {
+                status: requestStatus,
+                message: isLinked ? 'Unlinked by Admin' : 'Linked by Admin'
+            },
+            { upsert: true, session }
+        );
 
         await auditService.logAction('SELLER_MANUFACTURER_LINK', 'SELLER', id, {
             userId: adminId,
@@ -217,14 +241,19 @@ export const updateSellerManufacturers = async (req, res) => {
             req
         });
 
+        await session.commitTransaction();
+
         res.json({
             success: true,
             message: `Manufacturer ${isLinked ? 'unlinked' : 'linked'} successfully`,
             data: updatedSeller
         });
     } catch (error) {
+        await session.abortTransaction();
         console.error('Linking failed:', error);
         res.status(400).json({ success: false, error: 'SELLER_MANUFACTURER_LINK_FAILED' });
+    } finally {
+        session.endSession();
     }
 };
 

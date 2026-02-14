@@ -18,6 +18,7 @@ import {
     FaEdit,
     FaCrown
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api/client';
 
@@ -113,7 +114,7 @@ export default function StockAllocationManager() {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-3xl font-black tracking-tight italic">Stock <span className="text-[#10367D]">Allocations</span></h1>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Dealer Network Fulfillment & Inventory Distribution</p>
+                    <p className="text-slate-400 font-bold tracking-wide text-xs mt-1">Dealer Network Fulfillment & Inventory Distribution</p>
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
@@ -132,7 +133,7 @@ export default function StockAllocationManager() {
                     { l: 'Allocated Volume', v: allocations.reduce((acc, curr) => acc + (curr.allocatedStock || 0), 0), c: 'text-amber-600', b: 'bg-amber-50' },
                 ].map((s, i) => (
                     <div key={i} className={`p-8 rounded-[10px] border border-slate-100 shadow-sm ${s.b}`}>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{s.l}</p>
+                        <p className="text-xs font-black text-slate-400 mb-2">{s.l}</p>
                         <p className={`text-3xl font-black ${s.c}`}>{s.v}</p>
                     </div>
                 ))}
@@ -144,7 +145,7 @@ export default function StockAllocationManager() {
                     <div className="flex items-center gap-6 flex-1 max-w-md">
                         <div className="relative w-full">
                             <FaSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
-                            <input type="text" placeholder="Search Allocations..." className="w-full bg-white border border-slate-100 rounded-[10px] py-3 pl-14 pr-6 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-[#10367D]/30" />
+                            <input type="text" placeholder="Search Allocations..." className="w-full bg-white border border-slate-100 rounded-[10px] py-3 pl-14 pr-6 text-xs font-bold focus:outline-none focus:border-[#10367D]/30" />
                         </div>
                     </div>
                 </div>
@@ -152,7 +153,7 @@ export default function StockAllocationManager() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="bg-slate-50/20 border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                            <tr className="bg-slate-50/20 border-b border-slate-50 text-xs font-black text-slate-400 italic">
                                 <th className="px-10 py-6 font-black">Dealer & Region</th>
                                 <th className="px-10 py-6 font-black">Product</th>
                                 <th className="px-10 py-6 font-black">Allocation Details</th>
@@ -169,7 +170,7 @@ export default function StockAllocationManager() {
                                 ))
                             ) : allocations.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-10 py-20 text-center text-slate-400 font-black uppercase tracking-widest text-[10px]">No active allocations found</td>
+                                    <td colSpan={5} className="px-10 py-20 text-center text-slate-400 font-black text-xs">No active allocations found</td>
                                 </tr>
                             ) : allocations.map((item) => (
                                 <tr key={item.id} className="group hover:bg-slate-50/50 transition-all">
@@ -193,11 +194,11 @@ export default function StockAllocationManager() {
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{item.region}</p>
+                                                    <p className="text-xs font-black text-emerald-600">{item.region}</p>
                                                     {item.dealer?.subscriptions?.[0]?.plan?.priorityAllocation && (
                                                         <>
                                                             <span className="text-slate-200">•</span>
-                                                            <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-1 italic">
+                                                            <p className="text-[9px] font-black text-amber-500 flex items-center gap-1 italic">
                                                                 Priority Partner
                                                             </p>
                                                         </>
@@ -210,24 +211,24 @@ export default function StockAllocationManager() {
                                     <td className="px-10 py-8">
                                         <div className="flex items-center gap-6">
                                             <div className="w-10 h-10 rounded-[10px] bg-[#10367D]/5 text-[#10367D] flex items-center justify-center border border-[#10367D]/10">
-                                                <FaBox className="w-4 h-4" />
+                                                <MdOutlineProductionQuantityLimits className="w-4 h-4" />
                                             </div>
                                             <div>
                                                 <h4 className="text-xs font-black text-[#1E293B]">{item.product?.name}</h4>
-                                                <p className="text-[9px] font-bold text-slate-400 uppercase">Base: ₹{Number(item.product?.basePrice).toLocaleString()}</p>
+                                                <p className="text-[9px] font-bold text-slate-400">Base: ₹{Number(item.product?.basePrice).toLocaleString()}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-10 py-8">
                                         <div className="space-y-1">
-                                            <p className="text-sm font-black text-[#1E293B] italic">{item.allocatedStock} <span className="text-slate-300 text-[9px] uppercase font-bold">Units Allocated</span></p>
-                                            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">MOQ: {item.dealerMoq || 1} Units</p>
+                                            <p className="text-sm font-black text-[#1E293B] italic">{item.allocatedStock} <span className="text-slate-300 text-[9px] font-bold">Units Allocated</span></p>
+                                            <p className="text-[10px] font-bold text-amber-600 tracking-wide">MOQ: {item.dealerMoq || 1} Units</p>
                                         </div>
                                     </td>
                                     <td className="px-10 py-8">
                                         <div className="space-y-1">
-                                            <p className="text-xs font-black text-[#10367D]">₹{Number(item.dealerBasePrice).toLocaleString()} <span className="text-[9px] text-slate-300 uppercase">Wholesale</span></p>
-                                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Max Margin: {Number(item.maxMargin)}%</p>
+                                            <p className="text-xs font-black text-[#10367D]">₹{Number(item.dealerBasePrice).toLocaleString()} <span className="text-[9px] text-slate-300">Wholesale</span></p>
+                                            <p className="text-[10px] font-bold text-blue-500 tracking-wide">Max Margin: {Number(item.maxMargin)}%</p>
                                         </div>
                                     </td>
                                     <td className="px-10 py-8 text-right">
@@ -267,7 +268,7 @@ export default function StockAllocationManager() {
                             <div className="flex justify-between items-center mb-10">
                                 <div>
                                     <h2 className="text-2xl font-black tracking-tight italic text-[#10367D]">Strategic <span className="text-[#1E293B]">Allocation</span></h2>
-                                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Configure Dealer Supply Terms</p>
+                                    <p className="text-slate-400 font-bold tracking-wide text-xs mt-1">Configure Dealer Supply Terms</p>
                                 </div>
                                 <button onClick={() => setShowModal(false)} className="w-12 h-12 rounded-[10px] bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#10367D] transition-colors">
                                     <FaTimes />
@@ -284,7 +285,7 @@ export default function StockAllocationManager() {
                                                 required
                                                 value={formData.dealerId}
                                                 onChange={(e) => setFormData({ ...formData, dealerId: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase appearance-none focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black appearance-none focus:outline-none focus:border-[#10367D]/30"
                                             >
                                                 <option value="">Select Target Dealer</option>
                                                 {dealers.map(d => (
@@ -296,12 +297,12 @@ export default function StockAllocationManager() {
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Select Product</label>
                                         <div className="relative">
-                                            <FaBox className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
+                                            <MdOutlineProductionQuantityLimits className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
                                             <select
                                                 required
                                                 value={formData.productId}
                                                 onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase appearance-none focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black appearance-none focus:outline-none focus:border-[#10367D]/30"
                                             >
                                                 <option value="">Select Master SKU</option>
                                                 {products.map(p => (
@@ -322,7 +323,7 @@ export default function StockAllocationManager() {
                                                 type="number"
                                                 value={formData.quantity}
                                                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black focus:outline-none focus:border-[#10367D]/30"
                                             />
                                         </div>
                                     </div>
@@ -336,7 +337,7 @@ export default function StockAllocationManager() {
                                                 value={formData.dealerBasePrice}
                                                 onChange={(e) => setFormData({ ...formData, dealerBasePrice: e.target.value })}
                                                 placeholder="Unit Price"
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black focus:outline-none focus:border-[#10367D]/30"
                                             />
                                         </div>
                                     </div>
@@ -346,7 +347,7 @@ export default function StockAllocationManager() {
                                             type="text"
                                             value={formData.region}
                                             onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 px-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 px-6 text-xs font-black focus:outline-none focus:border-[#10367D]/30"
                                         />
                                     </div>
                                 </div>
@@ -358,7 +359,7 @@ export default function StockAllocationManager() {
                                             type="number"
                                             value={formData.dealerMoq}
                                             onChange={(e) => setFormData({ ...formData, dealerMoq: e.target.value })}
-                                            className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 px-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 px-6 text-xs font-black focus:outline-none focus:border-[#10367D]/30"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -369,7 +370,7 @@ export default function StockAllocationManager() {
                                                 type="number"
                                                 value={formData.maxMargin}
                                                 onChange={(e) => setFormData({ ...formData, maxMargin: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black focus:outline-none focus:border-[#10367D]/30"
                                             />
                                         </div>
                                     </div>

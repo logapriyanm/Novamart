@@ -22,11 +22,7 @@ export default function SellerShell({ children }: { children: React.ReactNode })
                     role="SELLER"
                     onMenuClick={() => setIsSidebarOpen(true)}
                     searchPlaceholder="Search products, SKUs, or barcodes..."
-                    title={
-                        <h2 className="text-sm font-bold text-slate-900">
-                            Market <span className="text-indigo-600">Workspace</span>
-                        </h2>
-                    }
+                    
                 />
 
                 {/* Seller Content Area */}

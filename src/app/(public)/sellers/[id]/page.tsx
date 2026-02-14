@@ -9,11 +9,11 @@ import {
     FaStar,
     FaMapMarkerAlt,
     FaCalendarAlt,
-    FaBox,
     FaCommentAlt,
     FaArrowLeft,
     FaChevronRight
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import Loader from '@/client/components/ui/Loader';
 import { toast } from 'sonner';
@@ -133,7 +133,7 @@ export default function SellerProfilePage() {
                                 className={`px-12 py-7 text-[11px] font-black uppercase tracking-[0.3em] transition-all relative ${activeTab === tab ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                             >
                                 <span className="flex items-center gap-3">
-                                    {tab === 'Products' ? <FaBox className="w-3.5 h-3.5" /> : <FaCommentAlt className="w-3.5 h-3.5" />}
+                                    {tab === 'Products' ? <MdOutlineProductionQuantityLimits className="w-3.5 h-3.5" /> : <FaCommentAlt className="w-3.5 h-3.5" />}
                                     {tab}
                                 </span>
                                 {activeTab === tab && (

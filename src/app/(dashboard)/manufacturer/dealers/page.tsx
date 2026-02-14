@@ -25,15 +25,18 @@ export default function DealerRelationshipPortal() {
             try {
                 // Endpoint confirmed in manufacturerRoutes.js: router.get('/network', ...)
                 const data = await apiClient.get<any[]>('/manufacturer/network');
-                const mapped = data.map(d => ({
-                    id: d.id,
-                    name: d.businessName,
-                    location: `${d.city || 'Unknown'}, ${d.state || ''}`,
-                    volume: '₹0.0L', // Placeholder
-                    returns: '0%', // Placeholder
-                    rating: d.averageRating || 5.0,
-                    status: d.isVerified ? 'Active' : 'Pending'
-                }));
+
+                const mapped = (data || [])
+                    .filter(d => d && d.businessName) // Filter out nulls or incomplete records
+                    .map(d => ({
+                        id: d.id || d._id,
+                        name: d.businessName,
+                        location: `${d.city || 'Unknown'}, ${d.state || ''}`,
+                        volume: '₹0.0L', // Placeholder
+                        returns: '0%', // Placeholder
+                        rating: d.averageRating || 5.0,
+                        status: d.isVerified ? 'Active' : 'Pending'
+                    }));
                 setApprovedDealers(mapped);
             } catch (error) {
                 console.error('Failed to fetch dealers', error);

@@ -27,7 +27,7 @@ function ChartCard({ title, children, currentRange, onRangeChange }: any) {
                     </select>
                 )}
             </div>
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 w-full">
                 {children}
             </div>
         </div>

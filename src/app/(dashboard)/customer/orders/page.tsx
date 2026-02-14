@@ -149,7 +149,7 @@ export default function MyOrders() {
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">Live Tracking</h3>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Package NM-{selectedOrder.id.slice(0, 5).toUpperCase()}</p>
+                                    <p className="text-sm font-black text-slate-400 mt-1">Package NM-{selectedOrder.id.slice(0, 5).toUpperCase()}</p>
                                 </div>
                                 <button onClick={() => setIsTrackingOpen(false)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
                                     <FaTimes />
@@ -161,7 +161,7 @@ export default function MyOrders() {
                                 {selectedOrder.shipmentTracking && (
                                     <div className="p-6 bg-blue-50/50 rounded-[10px] border border-blue-100/50 flex items-center justify-between">
                                         <div>
-                                            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Carrier: {selectedOrder.shipmentTracking.carrier}</p>
+                                            <p className="text-sm font-black text-blue-400 mb-1">Carrier: {selectedOrder.shipmentTracking.carrier}</p>
                                             <p className="text-sm font-black text-slate-800 tracking-tight">ID: {selectedOrder.shipmentTracking.trackingNumber}</p>
                                         </div>
                                         <Truck className="text-blue-600 w-6 h-6" />
@@ -169,14 +169,14 @@ export default function MyOrders() {
                                 )}
 
                                 <div className="space-y-6">
-                                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Journey Timeline</h4>
+                                    <h4 className="text-sm font-black text-slate-400">Journey Timeline</h4>
                                     <div className="space-y-6 relative ml-4 border-l-2 border-slate-50 pl-8">
                                         {selectedOrder.timeline?.map((event: any, i: number) => (
                                             <div key={i} className="relative">
                                                 <div className="absolute -left-[41px] top-1 w-4 h-4 rounded-full bg-white border-4 border-blue-600 shadow-sm" />
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{new Date(event.createdAt).toLocaleString()}</p>
-                                                <p className="text-xs font-black text-slate-800 tracking-tight uppercase italic">{event.toState.replace(/_/g, ' ')}</p>
-                                                <p className="text-xs font-bold text-slate-500 mt-1">{event.reason}</p>
+                                                <p className="text-sm font-black text-slate-400 mb-1">{new Date(event.createdAt).toLocaleString()}</p>
+                                                <p className="text-sm font-black text-slate-800 tracking-tight italic">{event.toState.replace(/_/g, ' ')}</p>
+                                                <p className="text-sm font-bold text-slate-500 mt-1">{event.reason}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -203,7 +203,7 @@ export default function MyOrders() {
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">Return Request</h3>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Order NM-{selectedOrder.id.slice(0, 5).toUpperCase()}</p>
+                                    <p className="text-sm font-black text-slate-400 mt-1">Order NM-{selectedOrder.id.slice(0, 5).toUpperCase()}</p>
                                 </div>
                                 <button onClick={() => setIsDisputeOpen(false)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
                                     <FaTimes />
@@ -212,23 +212,23 @@ export default function MyOrders() {
                             <div className="p-8 space-y-6">
                                 <div className="p-6 bg-amber-50 rounded-[10px] border border-amber-100 flex items-start gap-4">
                                     <FaInfoCircle className="text-amber-600 shrink-0 mt-1" />
-                                    <p className="text-xs font-bold text-amber-700 leading-relaxed">
+                                    <p className="text-sm font-bold text-amber-700 leading-relaxed">
                                         Submitting a return request will freeze the payment in escrow. Our team will review your reason and evidence to process the refund.
                                     </p>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2 mb-2 block">Reason for Return</label>
+                                    <label className="text-sm font-black text-slate-400 pl-2 mb-2 block">Reason for Return</label>
                                     <textarea
                                         value={disputeReason}
                                         onChange={(e) => setDisputeReason(e.target.value)}
                                         placeholder="Please describe why you want to return this product (e.g. wrong item, damaged, not as described)..."
-                                        className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[150px] transition-all"
+                                        className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[150px] transition-all"
                                     />
                                 </div>
                                 <button
                                     onClick={submitDispute}
                                     disabled={isSubmittingDispute}
-                                    className="w-full py-5 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10 hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
+                                    className="w-full py-5 bg-black text-white rounded-[10px] text-sm font-black shadow-xl shadow-black/10 hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
                                 >
                                     {isSubmittingDispute ? 'Submitting...' : 'Submit Return Request'}
                                 </button>
@@ -258,12 +258,12 @@ export default function MyOrders() {
 
             {/* Header & Breadcrumbs */}
             <div>
-                <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
+                <nav className="flex items-center gap-2 text-sm font-black text-slate-400 mb-4">
                     <span>Dashboard</span>
                     <ChevronDown className="w-2.5 h-2.5 -rotate-90" />
                     <span className="text-blue-600">My Orders</span>
                 </nav>
-                <h1 className="text-3xl font-black text-slate-800 tracking-tight">My Orders</h1>
+                <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">My Orders</h1>
                 <p className="text-slate-400 font-bold mt-2">
                     Manage and track your <span className="text-slate-800">recent purchases</span> from various dealers.
                 </p>
@@ -276,7 +276,7 @@ export default function MyOrders() {
                     <input
                         type="text"
                         placeholder="Search by Order ID or Item..."
-                        className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-[10px] text-xs font-bold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white transition-all"
+                        className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white transition-all"
                     />
                 </div>
                 {[
@@ -284,7 +284,7 @@ export default function MyOrders() {
                     { label: 'Date: Last 30 Days' },
                     { label: 'Dealer: All Dealers' },
                 ].map((filter, i) => (
-                    <button key={i} className="px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-[10px] flex items-center gap-3 text-xs font-black text-slate-600 hover:bg-white hover:shadow-sm transition-all">
+                    <button key={i} className="px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-[10px] flex items-center gap-3 text-sm font-black text-slate-600 hover:bg-white hover:shadow-sm transition-all">
                         {filter.label}
                         <ChevronDown className="w-3 h-3 text-slate-400" />
                     </button>
@@ -297,7 +297,7 @@ export default function MyOrders() {
             {/* Orders List */}
             <div className="space-y-8">
                 {orders.length === 0 ? (
-                    <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs border border-slate-100 rounded-[10px]">No orders found. Start shopping!</div>
+                    <div className="p-10 text-center text-slate-400 font-bold tracking-widest text-sm border border-slate-100 rounded-[10px]">No orders found. Start shopping!</div>
                 ) : orders.map((order) => (
                     <WhiteCard key={order.id} className="p-0 border-none shadow-xl shadow-blue-600/5 overflow-hidden">
                         <div className="p-8 space-y-8">
@@ -309,7 +309,7 @@ export default function MyOrders() {
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-black text-slate-800 tracking-tight">Order #{order.displayId}</h3>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                        <p className="text-sm font-bold text-slate-400 mt-1">
                                             Dealer: <span className="text-blue-600 font-black">{order.dealer}</span>
                                         </p>
                                     </div>
@@ -317,12 +317,12 @@ export default function MyOrders() {
                                 <div className="text-right">
                                     {order.status !== 'CANCELLED' ? (
                                         <>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Amount</p>
+                                            <p className="text-sm font-black text-slate-400 leading-none mb-1">Total Amount</p>
                                             <p className="text-xl font-black text-blue-600 tracking-tight">₹{order.total.toLocaleString()}</p>
                                         </>
                                     ) : (
                                         <>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Refund Status</p>
+                                            <p className="text-sm font-black text-slate-400 leading-none mb-1">Refund Status</p>
                                             <p className="text-sm font-black text-slate-800">{order.refundStatus || 'Processed'}</p>
                                         </>
                                     )}
@@ -341,24 +341,24 @@ export default function MyOrders() {
 
                             {order.status === 'CANCELLED' && (
                                 <div className="p-6 bg-slate-50 rounded-[10px] border border-slate-100 flex items-center justify-between">
-                                    <p className="text-[11px] font-bold text-slate-500 italic">Canceled on {order.date}</p>
-                                    <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Re-order Items</button>
+                                    <p className="text-sm font-bold text-slate-500 italic">Canceled on {order.date}</p>
+                                    <button className="text-sm font-black text-blue-600 hover:underline">Re-order Items</button>
                                 </div>
                             )}
 
                             {/* Card Footer */}
                             <div className="flex flex-wrap items-center justify-between gap-6 pt-2">
                                 <div className="space-y-2">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] leading-none mb-2">Items:</p>
-                                    <p className="text-[11px] font-black text-slate-800 leading-relaxed max-w-sm">
+                                    <p className="text-sm font-bold text-slate-400 leading-none mb-2">Items:</p>
+                                    <p className="text-sm font-black text-slate-800 leading-relaxed max-w-sm">
                                         {order.items.join(', ')}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <button className="px-6 py-3 border border-slate-100 rounded-[10px] text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
+                                    <button className="px-6 py-3 border border-slate-100 rounded-[10px] text-sm font-black text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
                                         <Invoice className="w-3 h-3" /> Invoice
                                     </button>
-                                    <button onClick={() => handleTrackOrder(order.id)} className="px-6 py-3 border border-slate-100 rounded-[10px] text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all">
+                                    <button onClick={() => handleTrackOrder(order.id)} className="px-6 py-3 border border-slate-100 rounded-[10px] text-sm font-black text-slate-600 hover:bg-slate-50 transition-all">
                                         View Details
                                     </button>
                                     {order.status !== 'CANCELLED' && order.status !== 'DISPUTED' && (
@@ -366,21 +366,21 @@ export default function MyOrders() {
                                             {order.status === 'DELIVERED' && (
                                                 <button
                                                     onClick={() => handleOpenReview(order)}
-                                                    className="px-6 py-3 bg-white border border-blue-600 text-blue-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition-all shadow-sm"
+                                                    className="px-6 py-3 bg-white border border-blue-600 text-blue-600 rounded-[10px] text-sm font-black hover:bg-blue-50 transition-all shadow-sm"
                                                 >
                                                     Rate Items
                                                 </button>
                                             )}
                                             <button
                                                 onClick={order.status === 'DELIVERED' ? () => handleOpenDispute(order) : () => handleTrackOrder(order.id)}
-                                                className="px-6 py-3 bg-blue-600 text-white rounded-[10px] text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
+                                                className="px-6 py-3 bg-blue-600 text-white rounded-[10px] text-sm font-black shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
                                             >
                                                 {order.status === 'DELIVERED' ? 'Request Return' : 'Track Order'}
                                             </button>
                                         </div>
                                     )}
                                     {order.status === 'DISPUTED' && (
-                                        <div className="px-6 py-3 bg-amber-50 text-amber-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest border border-amber-100">
+                                        <div className="px-6 py-3 bg-amber-50 text-amber-600 rounded-[10px] text-sm font-black border border-amber-100">
                                             Return Requested
                                         </div>
                                     )}
@@ -404,11 +404,11 @@ export default function MyOrders() {
                         </div>
                         <div className="space-y-2">
                             <h4 className="text-base font-black tracking-tight">{item.title}</h4>
-                            <p className={`text-[11px] font-bold leading-relaxed ${item.color.includes('dark-card') ? 'text-white/60' : 'text-slate-500'}`}>
+                            <p className={`text-sm font-bold leading-relaxed ${item.color.includes('dark-card') ? 'text-white/60' : 'text-slate-500'}`}>
                                 {item.desc}
                             </p>
                         </div>
-                        <button className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 group ${item.color.includes('dark-card') ? 'text-white' : 'text-blue-600'}`}>
+                        <button className={`text-sm font-black flex items-center gap-2 group ${item.color.includes('dark-card') ? 'text-white' : 'text-blue-600'}`}>
                             {item.link}
                             <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
                         </button>
@@ -473,7 +473,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                     <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">
                         {step === 1 ? 'Rate Products' : `Rate ${order.dealer}`}
                     </h3>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Order NM-{order.id.slice(0, 5).toUpperCase()}</p>
+                    <p className="text-sm font-black text-slate-400 mt-1">Order NM-{order.id.slice(0, 5).toUpperCase()}</p>
                 </div>
                 <button onClick={onClose} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
                     <FaTimes />
@@ -486,7 +486,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                         {order.items.map((item: string, i: number) => (
                             <div key={i} className="p-6 bg-slate-50 rounded-[10px] border border-slate-100 space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <p className="text-xs font-black text-slate-800 italic uppercase">{item}</p>
+                                    <p className="text-sm font-black text-slate-800 italic uppercase">{item}</p>
                                     <div className="flex gap-1">
                                         {[1, 2, 3, 4, 5].map(star => (
                                             <button
@@ -502,7 +502,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                                 <textarea
                                     placeholder="What did you like or dislike about this item?"
                                     onChange={(e) => setRatings({ ...ratings, [i]: { ...ratings[i], comment: e.target.value } })}
-                                    className="w-full p-4 bg-white border border-slate-100 rounded-[10px] text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 min-h-[80px]"
+                                    className="w-full p-4 bg-white border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 min-h-[80px]"
                                 />
                             </div>
                         ))}
@@ -510,7 +510,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                 ) : (
                     <div className="space-y-10">
                         <div className="space-y-6">
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-center">Overall Experience</h4>
+                            <h4 className="text-sm font-black text-slate-400 text-center">Overall Experience</h4>
                             <div className="flex justify-center gap-4">
                                 {[1, 2, 3, 4, 5].map(star => (
                                     <button
@@ -531,7 +531,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                                 { label: 'Support', key: 'communication' }
                             ].map(sub => (
                                 <div key={sub.key} className="p-5 bg-slate-50 rounded-[10px] border border-slate-100 space-y-3">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">{sub.label}</p>
+                                    <p className="text-sm font-black text-slate-400 text-center">{sub.label}</p>
                                     <div className="flex justify-center gap-1">
                                         {[1, 2, 3, 4, 5].map(star => (
                                             <button
@@ -551,7 +551,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                             placeholder="Share your experience with the delivery and service..."
                             value={sellerRating.comment}
                             onChange={(e) => setSellerRating({ ...sellerRating, comment: e.target.value })}
-                            className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[120px] transition-all"
+                            className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[120px] transition-all"
                         />
                     </div>
                 )}
@@ -561,7 +561,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                 {step === 2 && (
                     <button
                         onClick={() => setStep(1)}
-                        className="px-8 py-4 bg-slate-100 text-slate-600 rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+                        className="px-8 py-4 bg-slate-100 text-slate-600 rounded-[10px] text-sm font-black hover:bg-slate-200 transition-all"
                     >
                         Back
                     </button>
@@ -569,7 +569,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                 <button
                     onClick={step === 1 ? () => setStep(2) : handleSubmit}
                     disabled={isSubmitting}
-                    className="flex-1 py-4 bg-black text-white rounded-[10px] text-[10px] font-black uppercase tracking-[0.2em] shadow-xl hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
+                    className="flex-1 py-4 bg-black text-white rounded-[10px] text-sm font-black shadow-xl hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
                 >
                     {isSubmitting ? 'Submitting...' : step === 1 ? 'Next: Rate Seller' : 'Submit Review'}
                 </button>

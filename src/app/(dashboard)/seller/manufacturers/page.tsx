@@ -5,13 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaIndustry,
     FaMapMarkerAlt,
-    FaBox,
     FaCheckCircle,
     FaPlus,
     FaSearch,
     FaFilter,
-    FaPaperPlane
+    FaPaperPlane,
+    FaUsers
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 import Loader from '@/client/components/ui/Loader';
@@ -188,7 +189,7 @@ export default function ManufacturerNetworkPage() {
                                                 {p.images?.[0] ? (
                                                     <Image src={p.images[0]} alt={p.name} width={48} height={48} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <FaBox className="w-4 h-4 text-slate-300" />
+                                                    <MdOutlineProductionQuantityLimits className="w-4 h-4 text-slate-300" />
                                                 )}
                                             </div>
                                         ))

@@ -4,15 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     FaBox,
-    FaPlus,
     FaSearch,
     FaFilter,
     FaShieldAlt,
     FaHistory,
-    FaSpinner,
+    FaPlus,
     FaStore,
     FaTags
 } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import { sellerService } from '@/lib/api/services/seller.service';
 import { toast } from 'sonner';
@@ -40,10 +40,12 @@ export default function SellerProducts() {
         }
     };
 
-    const filteredProducts = products.filter(product =>
-        product.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.sku?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredProducts = products.filter(product => {
+        const name = product.productName || product.productId?.name || '';
+        const sku = product.sku || product.productId?.sku || '';
+        return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            sku.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
     if (isLoading) {
         return (
@@ -115,30 +117,42 @@ export default function SellerProducts() {
                         >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                    <FaBox className="w-5 h-5" />
+                                    {product.allocationStatus === 'PENDING' ? (
+                                        <FaHistory className="w-5 h-5 text-amber-500" />
+                                    ) : (
+                                        <MdOutlineProductionQuantityLimits className="w-5 h-5" />
+                                    )}
                                 </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${product.stock > 10 ? 'bg-emerald-50 text-emerald-600' :
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${product.allocationStatus === 'PENDING' ? 'bg-amber-100 text-amber-700' :
+                                    product.stock > 10 ? 'bg-emerald-50 text-emerald-600' :
                                         product.stock > 0 ? 'bg-amber-50 text-amber-600' :
                                             'bg-red-50 text-red-600'
                                     }`}>
-                                    {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                                    {product.allocationStatus === 'PENDING' ? 'Request Pending' :
+                                        product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                                 </span>
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-[#10367D] transition-colors">
-                                {product.productName || 'Unnamed Product'}
+                                {product.productName || product.productId?.name || 'Unnamed Product'}
                             </h3>
-                            <p className="text-sm text-slate-500 mb-4">SKU: {product.sku || 'N/A'}</p>
+                            <p className="text-sm text-slate-500 mb-4">SKU: {product.sku || product.productId?.sku || 'N/A'}</p>
                             <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                                 <div>
                                     <p className="text-xs text-slate-400 mb-1">Price</p>
-                                    <p className="text-lg font-bold text-slate-900">₹{product.pricePerUnit?.toLocaleString() || '0'}</p>
+                                    <p className="text-lg font-bold text-slate-900">₹{product.price?.toLocaleString() || product.pricePerUnit?.toLocaleString() || '0'}</p>
                                 </div>
-                                <Link
-                                    href={`/seller/inventory/${product._id || ''}`}
-                                    className="px-4 py-2 bg-slate-50 text-slate-600 text-sm font-bold rounded-lg hover:bg-[#10367D] hover:text-white transition-all"
-                                >
-                                    View Details
-                                </Link>
+                                {product.allocationStatus === 'PENDING' ? (
+                                    <button disabled className="px-4 py-2 bg-slate-100 text-slate-400 text-sm font-bold rounded-lg cursor-not-allowed">
+                                        Pending Approval
+                                    </button>
+                                ) : (
+                                    <Link
+                                        href={`/seller/inventory/${product._id || ''}`}
+                                        className="px-4 py-2 bg-slate-50 text-slate-600 text-sm font-bold rounded-lg hover:bg-[#10367D] hover:text-white transition-all"
+                                    >
+                                        View Details
+                                    </Link>
+                                )}
                             </div>
                         </motion.div>
                     ))}

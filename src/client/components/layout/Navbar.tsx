@@ -20,6 +20,7 @@ import {
     FaHeart,
     FaShieldAlt
 } from 'react-icons/fa';
+import { AiOutlineProduct } from "react-icons/ai";
 import {
     HiOutlineShoppingCart,
     HiOutlineUserCircle,
@@ -131,7 +132,7 @@ export default function Navbar() {
                             </form>
                         </div>
                         <Link href="/products" className="btn-secondary hidden lg:flex">
-                            <FaBox className="w-4 h-4" />
+                            <AiOutlineProduct className="w-4 h-4" />
                             <span>Products</span>
                         </Link>
 
@@ -445,7 +446,7 @@ export default function Navbar() {
                                     </Link>
 
                                     <Link href="/products" className="flex items-center gap-3 text-sm font-bold text-foreground/70 hover:text-primary" onClick={() => setIsMobileMenuOpen(false)}>
-                                        <FaBox className="w-5 h-5 text-foreground/20" />
+                                        <AiOutlineProduct className="w-5 h-5 text-foreground/20" />
                                         Products
                                     </Link>
 

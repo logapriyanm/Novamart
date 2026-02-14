@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
+
 import mongoose from 'mongoose';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -91,7 +91,23 @@ app.use(cors(corsOptions));                // Restricted CORS
 app.use(express.json({ limit: '10mb' })); // Body parser with size limit
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Standard URL-encoded parser
 app.use(mongoSanitize()); // Prevent NoSQL injection ($gt, $ne, etc.)
-app.use(xss()); // Sanitize user input against XSS
+// Inline XSS sanitization (replaces deprecated xss-clean which has 'next is not a function' bug)
+app.use((req, res, next) => {
+    const sanitize = (obj) => {
+        if (typeof obj === 'string') return obj.replace(/[<>]/g, '');
+        if (Array.isArray(obj)) return obj.map(sanitize);
+        if (obj && typeof obj === 'object') {
+            const clean = {};
+            for (const [key, val] of Object.entries(obj)) {
+                clean[key] = sanitize(val);
+            }
+            return clean;
+        }
+        return obj;
+    };
+    if (req.body) req.body = sanitize(req.body);
+    next();
+});
 app.use((req, res, next) => {
     logger.info('INCOMING_REQUEST: %s %s', req.method, req.url);
     next();
@@ -303,6 +319,7 @@ const startServer = async () => {
                     serverSelectionTimeoutMS: 5000,
                 });
                 logger.info('✅ Connected to MongoDB (Chat & Tracking)');
+                console.log('✅ Connected to MongoDB URI:', process.env.MONGODB_URI.replace(/:([^:@]+)@/, ':****@'));
             } catch (err) {
                 logger.error('⚠️ MongoDB Connection Failed (Chat/Tracking features limited):', err.message);
             }
@@ -325,4 +342,3 @@ const startServer = async () => {
 };
 
 startServer();
-

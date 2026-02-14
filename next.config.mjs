@@ -23,6 +23,14 @@ const nextConfig = {
         maxInactiveAge: 25 * 1000,
         pagesBufferLength: 2,
     },
+    async rewrites() {
+        return [
+            {
+                source: '/api/:path*',
+                destination: 'http://127.0.0.1:5002/api/:path*',
+            },
+        ];
+    },
 };
 
 export default nextConfig;

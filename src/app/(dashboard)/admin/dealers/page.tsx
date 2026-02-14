@@ -43,7 +43,8 @@ export default function DealerApprovalPanel() {
         setIsLoading(true);
         try {
             const result = await adminService.getDealers();
-            setDealers(result || []);
+            // Filter out nulls or invalid objects to prevent crashes
+            setDealers((result || []).filter(d => d && (d._id || d.id)));
         } catch (error) {
             console.error('Failed to fetch dealers', error);
         } finally {
@@ -54,7 +55,7 @@ export default function DealerApprovalPanel() {
     const fetchManufacturers = async () => {
         try {
             const result = await adminService.getManufacturers();
-            setManufacturers(result || []);
+            setManufacturers((result || []).filter(m => m && (m._id || m.id)));
         } catch (error) {
             console.error('Failed to fetch manufacturers', error);
         }

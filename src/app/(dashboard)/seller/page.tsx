@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-    FaBox, FaShoppingCart, FaWallet, FaHandshake,
-    FaArrowUp, FaChartBar, FaStore, FaClock
-} from 'react-icons/fa';
+import { FaShoppingCart, FaWallet, FaHandshake, FaChartLine, FaStar, FaArrowRight, FaStore } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import Link from 'next/link';
 import { motion } from 'framer-motion';

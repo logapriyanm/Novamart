@@ -47,7 +47,7 @@ export const createChat = async (req, res) => {
                 }
             }
 
-            if (senderRole === 'SELLER') {
+            if (senderRole === 'SELLER' && type !== 'NEGOTIATION') {
                 const hasAccess = await checkSubscription(senderId, 'PRO');
                 if (!hasAccess) {
                     return res.status(403).json({

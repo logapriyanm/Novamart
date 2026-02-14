@@ -61,7 +61,7 @@ export default function NegotiationList() {
                   <p className="text-xs text-slate-500">
                     Partner:{" "}
                     <span className="font-bold">
-                      {neg.dealer?.businessName ||
+                      {neg.seller?.businessName ||
                         neg.manufacturer?.companyName}
                     </span>
                   </p>
@@ -83,11 +83,11 @@ export default function NegotiationList() {
               <div className="flex items-center gap-4">
                 <div
                   className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${neg.status === "ACCEPTED" ||
-                    neg.status === "ORDER_FULFILLED"
+                    neg.status === "DEAL_CLOSED"
                     ? "bg-emerald-100 text-emerald-600"
                     : neg.status === "REJECTED"
                       ? "bg-rose-100 text-rose-600"
-                      : neg.status === "ORDER_REQUESTED"
+                      : neg.status === "NEGOTIATING" || neg.status === "OFFER_MADE"
                         ? "bg-blue-100 text-blue-600"
                         : "bg-amber-100 text-amber-600"
                     }`}
@@ -96,7 +96,7 @@ export default function NegotiationList() {
                 </div>
 
                 <div className="flex gap-2">
-                  {neg.status === "OPEN" && (
+                  {(neg.status === "REQUESTED" || neg.status === "NEGOTIATING" || neg.status === "OFFER_MADE") && (
                     <>
                       <button
                         onClick={() => handleUpdate(neg.id, "REJECTED")}
@@ -116,7 +116,7 @@ export default function NegotiationList() {
                   )}
                   {neg.status === "ACCEPTED" && neg.manufacturer && (
                     <button
-                      onClick={() => handleUpdate(neg.id, "ORDER_FULFILLED")}
+                      onClick={() => handleUpdate(neg.id, "DEAL_CLOSED")}
                       className="px-4 py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10"
                     >
                       Fulfill Deal

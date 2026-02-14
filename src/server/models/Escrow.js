@@ -10,7 +10,7 @@ const EscrowSchema = new mongoose.Schema({
     },
     amount: { type: Number, required: true },
     releasedAt: { type: Date },
-    dealerAmount: { type: Number },
+    sellerAmount: { type: Number },
     platformFee: { type: Number },
     disputeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dispute' },
     releaseCondition: { type: String, default: 'DELIVERY_CONFIRMED' }

@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-
-  FaBox, FaSync, FaExclamationTriangle, FaIndustry, FaHistory
-} from 'react-icons/fa';
+import { FaSync, FaExclamationTriangle, FaIndustry, FaHistory, FaSearch, FaFilter, FaPlus, FaEllipsisV } from 'react-icons/fa';
+import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
@@ -145,7 +143,7 @@ export default function SellerInventoryPage() {
                     colSpan={5}
                     className="p-20 text-center flex flex-col items-center gap-4"
                   >
-                    <FaBox className="w-12 h-12 text-slate-100" />
+                    <MdOutlineProductionQuantityLimits className="w-12 h-12 text-slate-100" />
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 italic">
                       No assets acquired in this region
                     </p>
@@ -173,7 +171,7 @@ export default function SellerInventoryPage() {
                               className="w-full h-full object-cover rounded-[10px]"
                             />
                           ) : (
-                            <FaBox className="w-5 h-5" />
+                            <MdOutlineProductionQuantityLimits className="w-5 h-5" />
                           )}
                         </div>
                         <div>
