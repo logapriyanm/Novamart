@@ -8,8 +8,8 @@ import Loader from '@/client/components/ui/Loader';
 export default function VerificationPendingPage() {
     return (
         <div className="min-h-screen flex items-center justify-center p-6 bg-[#EBEBEB]">
-            <div className="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl shadow-[#10367D]/20 border border-amber-500/20 text-center animate-fade-in">
-                <div className="w-20 h-20 bg-amber-500 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-amber-500/30">
+            <div className="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl shadow-[#067FF9]/20 border border-amber-500/20 text-center animate-fade-in">
+                <div className="w-20 h-20 bg-amber-500 rounded-[10px] flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-amber-500/30">
                     <Clock className="w-10 h-10" />
                 </div>
 
@@ -24,7 +24,7 @@ export default function VerificationPendingPage() {
                         { label: 'Document Submission', done: true },
                         { label: 'Governance Audit', done: false },
                     ].map((step, i) => (
-                        <div key={i} className="flex items-center gap-3 bg-[#10367D]/5 p-3 rounded-xl border border-[#10367D]/5">
+                        <div key={i} className="flex items-center gap-3 bg-[#067FF9]/5 p-3 rounded-[10px] border border-[#067FF9]/5">
                             {step.done ? (
                                 <CheckCircle className="w-5 h-5 text-emerald-500" />
                             ) : (
@@ -40,13 +40,13 @@ export default function VerificationPendingPage() {
                 <div className="grid grid-cols-1 gap-3">
                     <Link
                         href="/"
-                        className="flex items-center justify-center gap-2 px-6 py-4 bg-[#10367D] text-white text-sm font-bold rounded-2xl hover:bg-[#1E5F86] transition-all active:scale-95 shadow-lg shadow-[#10367D]/20"
+                        className="flex items-center justify-center gap-2 px-6 py-4 bg-[#067FF9] text-white text-sm font-bold rounded-[10px] hover:bg-[#1E5F86] transition-all active:scale-95 shadow-lg shadow-[#067FF9]/20"
                     >
                         <Home className="w-4 h-4" />
                         Back to Home
                     </Link>
                     <button
-                        className="flex items-center justify-center gap-2 px-6 py-4 bg-white border border-[#10367D]/10 text-[#10367D] text-sm font-bold rounded-2xl hover:bg-[#10367D]/5 transition-all"
+                        className="flex items-center justify-center gap-2 px-6 py-4 bg-white border border-[#067FF9]/10 text-[#067FF9] text-sm font-bold rounded-[10px] hover:bg-[#067FF9]/5 transition-all"
                     >
                         <Mail className="w-4 h-4" />
                         Contact Governance Team

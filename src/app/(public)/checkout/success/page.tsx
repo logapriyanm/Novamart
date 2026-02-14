@@ -108,7 +108,7 @@ export default function OrderSuccessPage() {
                     </motion.div>
                     <div className="space-y-2">
                         <h1 className="text-5xl font-black text-foreground tracking-tight italic uppercase">Order <span className="text-black">Secured</span></h1>
-                        <p className="text-[10px] font-black text-foreground/40 uppercase tracking-[0.3em]">Confirmation ID: {(order?.id || displayOrderId).toUpperCase()}</p>
+                        <p className="text-sm font-black text-foreground/40 uppercase tracking-[0.3em]">Confirmation ID: {(order?.id || displayOrderId).toUpperCase()}</p>
                     </div>
                 </div>
 
@@ -136,10 +136,10 @@ export default function OrderSuccessPage() {
                                         <item.icon className="w-6 h-6" />
                                     </div>
                                     <div className="space-y-1">
-                                        <p className={`text-[11px] font-black uppercase tracking-widest ${item.status === 'pending' ? 'text-foreground/20' : 'text-foreground'}`}>
+                                        <p className={`text-sm font-black uppercase tracking-widest ${item.status === 'pending' ? 'text-foreground/20' : 'text-foreground'}`}>
                                             {item.label}
                                         </p>
-                                        <p className={`text-[10px] font-bold uppercase tracking-[0.05em] ${item.status === 'pending' ? 'text-foreground/10' : 'text-foreground/40'}`}>
+                                        <p className={`text-sm font-bold uppercase tracking-[0.05em] ${item.status === 'pending' ? 'text-foreground/10' : 'text-foreground/40'}`}>
                                             {item.date}
                                         </p>
                                     </div>
@@ -158,19 +158,19 @@ export default function OrderSuccessPage() {
                                 <div className="w-14 h-14 bg-white/10 rounded-[10px] flex items-center justify-center">
                                     <HiOutlineShieldCheck className="w-8 h-8" />
                                 </div>
-                                <div className="bg-white/10 px-4 py-1.5 rounded-full border border-white/20 text-[9px] font-black uppercase tracking-widest">
+                                <div className="bg-white/10 px-4 py-1.5 rounded-full border border-white/20 text-xs font-black uppercase tracking-widest">
                                     Secured
                                 </div>
                             </div>
 
                             <div className="space-y-3">
                                 <h4 className="text-xl font-black italic uppercase">Funds Held in <span className="text-white/60">Escrow</span></h4>
-                                <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest leading-relaxed">
+                                <p className="text-sm font-bold text-white/50 uppercase tracking-widest leading-relaxed">
                                     Your payment is protected by NovaMart Escrow. Funds will be autonomously released to the seller after your confirmation of receipt or after 48 hours of delivery.
                                 </p>
                             </div>
 
-                            <button className="mt-10 w-full py-4 bg-white text-black rounded-[10px] font-black text-[10px] uppercase tracking-[0.2em] hover:scale-[1.03] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                            <button className="mt-10 w-full py-4 bg-white text-black rounded-[10px] font-black text-sm uppercase tracking-[0.2em] hover:scale-[1.03] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
                                 Learn More About Protection
                                 <HiOutlineArrowRight className="w-4 h-4" />
                             </button>
@@ -182,13 +182,13 @@ export default function OrderSuccessPage() {
                                 <div className="p-3 rounded-[10px] bg-foreground/5 text-foreground/40 group-hover:bg-foreground/10 group-hover:text-foreground transition-all">
                                     <HiOutlinePrinter className="w-5 h-5" />
                                 </div>
-                                <span className="text-[9px] font-black uppercase tracking-widest text-foreground/40">Download Receipt</span>
+                                <span className="text-xs font-black uppercase tracking-widest text-foreground/40">Download Receipt</span>
                             </button>
                             <button className="bg-white border border-foreground/5 p-6 rounded-[10px] flex flex-col items-center justify-center gap-3 hover:bg-surface transition-all group">
                                 <div className="p-3 rounded-[10px] bg-foreground/5 text-foreground/40 group-hover:bg-foreground/10 group-hover:text-foreground transition-all">
                                     <HiOutlineShare className="w-5 h-5" />
                                 </div>
-                                <span className="text-[9px] font-black uppercase tracking-widest text-foreground/40">Share Details</span>
+                                <span className="text-xs font-black uppercase tracking-widest text-foreground/40">Share Details</span>
                             </button>
                         </div>
                     </div>

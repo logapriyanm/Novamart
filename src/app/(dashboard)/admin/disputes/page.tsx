@@ -56,13 +56,13 @@ export default function DisputeCenter() {
     return (
         <div className="space-y-8 animate-fade-in pb-12">
             <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#10367D] hover:translate-x-[-4px] transition-transform">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#067FF9] hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight UPPERCASE ITALIC">Dispute <span className="text-[#10367D]">Resolution</span></h1>
+                        <h1 className="text-2xl font-bold text-[#1E293B] tracking-tight uppercase italic">Dispute <span className="text-[#067FF9]">Resolution</span></h1>
                         <p className="text-slate-400 font-bold text-sm mt-1">Arbitration & Conflict Governance</p>
                     </div>
                 </div>

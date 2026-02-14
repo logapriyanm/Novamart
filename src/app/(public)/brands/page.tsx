@@ -50,7 +50,7 @@ export default function BrandsPage() {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-primary/10 border border-primary/20 text-sm font-black uppercase tracking-widest text-primary mb-6"
                     >
                         <FaCertificate className="w-3 h-3" />
                         Verification Program
@@ -90,9 +90,9 @@ export default function BrandsPage() {
                             <div className="mt-4 md:mt-0 flex gap-8 items-center">
                                 <div className="text-right">
                                     <div className="text-sm font-black text-slate-900">{brand.rating} / 5.0</div>
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Trust Score</div>
+                                    <div className="text-sm font-bold text-slate-400 uppercase tracking-tighter">Trust Score</div>
                                 </div>
-                                <button className="px-6 py-2 border border-slate-200 rounded-[10px] text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">
+                                <button className="px-6 py-2 border border-slate-200 rounded-[10px] text-sm font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all">
                                     View Catalog
                                 </button>
                             </div>
@@ -113,14 +113,14 @@ export default function BrandsPage() {
                                 <FaBuilding className="w-5 h-5 text-blue-400 mt-1" />
                                 <div>
                                     <h4 className="font-bold text-sm">Site Inspection</h4>
-                                    <p className="text-[10px] text-slate-500 italic">Physical factory audits every 12 months.</p>
+                                    <p className="text-sm text-slate-500 italic">Physical factory audits every 12 months.</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
                                 <FaHandshake className="w-5 h-5 text-blue-400 mt-1" />
                                 <div>
                                     <h4 className="font-bold text-sm">Escrow-Ready</h4>
-                                    <p className="text-[10px] text-slate-500 italic">Pre-verified financial compliance.</p>
+                                    <p className="text-sm text-slate-500 italic">Pre-verified financial compliance.</p>
                                 </div>
                             </div>
                         </div>

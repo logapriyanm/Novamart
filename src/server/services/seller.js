@@ -220,19 +220,19 @@ class SellerService {
                     sellerId,
                     productId,
                     region,
-                    stock: 0, // No stock until approved
+                    stock: Number(quantity), // Auto-stock for immediate availability
                     price: Number(initialPrice) || estimatedPrice * 1.2,
                     originalPrice: estimatedPrice, // Wholesale price
                     isAllocated: false,
-                    allocationStatus: 'PENDING',
+                    allocationStatus: 'APPROVED', // Auto-approve for demo/testing
                     allocationId: null, // No allocation yet
-                    isListed: false,
-                    listedAt: null,
-                    allocatedStock: 0,
+                    isListed: true, // Auto-list
+                    listedAt: new Date(),
+                    allocatedStock: Number(quantity),
                     sellerBasePrice: estimatedPrice,
                     sellerMoq: product.moq,
                     soldQuantity: 0,
-                    remainingQuantity: 0,
+                    remainingQuantity: Number(quantity),
                     requestedQuantity: Number(quantity) // Store requested amount
                 }], { session });
 

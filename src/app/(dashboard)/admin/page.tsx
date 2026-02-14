@@ -58,7 +58,7 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-8 animate-fade-in pb-12 font-sans text-slate-800">
             {/* Page Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60 font-sans">
+            {/* <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60 font-sans">
                 <div>
                     <h1 className="text-3xl font-black tracking-tight text-slate-900 uppercase italic">System <span className="text-primary">Governance</span></h1>
                     <p className="text-sm font-bold text-slate-400 mt-2">Central Authority & Health Monitor</p>
@@ -68,7 +68,7 @@ export default function AdminDashboard() {
                         Review Verification Queue
                     </Link>
                 </div>
-            </div>
+            </div> */}
 
             {/* Focused KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -121,7 +121,7 @@ function StatsCard({ icon: Icon, label, value, trend, color, bgColor }: any) {
             <div className="flex items-start justify-between">
                 <div>
                     <p className="text-sm font-bold text-slate-400 mb-1.5">{label}</p>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h3>
+                    <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{value}</h3>
                 </div>
                 <div className={`w-12 h-12 ${bgColor} ${color} rounded-[10px] flex items-center justify-center transition-all group-hover:scale-110 shadow-sm`}>
                     <Icon className="w-5 h-5" />

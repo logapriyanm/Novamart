@@ -39,19 +39,19 @@ export default function DealerRequests() {
     const handleAction = async (dealerId: string, status: 'APPROVED' | 'REJECTED') => {
         try {
             await apiClient.post('/manufacturer/dealers/handle', { dealerId, status });
-            toast.success(`Dealer ${status.toLowerCase()} successfully`);
+            toast.success(`Seller ${status.toLowerCase()} successfully`);
             fetchRequests();
         } catch (error: any) {
-            toast.error(error.message || `Failed to ${status.toLowerCase()} dealer`);
+            toast.error(error.message || `Failed to ${status.toLowerCase()} seller`);
         }
     };
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
+        <div className="space-y-8 animate-fade-in pb-12 text-slate-900">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-black tracking-tight text-[#1E293B]">Dealer Access Requests</h1>
-                <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Review and manage retail partnership applications from the NovaMart network.</p>
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">Seller Access Requests</h1>
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1">Review and manage retail partnership applications from the NovaMart network.</p>
             </div>
 
             {/* Action Bar */}
@@ -62,21 +62,21 @@ export default function DealerRequests() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === tab ? 'text-[#0F6CBD]' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${activeTab === tab ? 'text-[#067FF9]' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             {tab.charAt(0) + tab.slice(1).toLowerCase()}
-                            {activeTab === tab && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0F6CBD]" />}
+                            {activeTab === tab && <motion.div layoutId="tab-indicator" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#067FF9]" />}
                         </button>
                     ))}
                 </div>
 
                 {/* Filters */}
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-[10px] text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
                         <FaFilter className="w-3 h-3" />
                         Filter
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-[10px] text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
                         <FaFileExport className="w-3 h-3" />
                         Export
                     </button>
@@ -112,17 +112,17 @@ export default function DealerRequests() {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-8 flex flex-col md:flex-row gap-8"
                             >
-                                {/* Dealer Info */}
+                                {/* Seller Info */}
                                 <div className="flex-1">
                                     <div className="flex items-start gap-4">
-                                        <div className="w-16 h-16 rounded-xl bg-[#0F6CBD]/5 flex items-center justify-center text-[#0F6CBD] shadow-sm font-black text-xl">
+                                        <div className="w-16 h-16 rounded-[10px] bg-[#067FF9]/5 flex items-center justify-center text-[#067FF9] shadow-sm font-black text-xl">
                                             {dealer.businessName?.charAt(0) || 'D'}
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <h3 className="text-lg font-black text-[#1E293B]">{dealer.businessName}</h3>
+                                                <h3 className="text-lg font-black text-slate-900">{dealer.businessName}</h3>
                                                 {dealer.isVerified && (
-                                                    <span className="bg-blue-50 text-[#0F6CBD] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-100">
+                                                    <span className="bg-blue-50 text-[#067FF9] text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-100">
                                                         <FaCheck className="w-2 h-2" /> NovaMart Verified
                                                     </span>
                                                 )}
@@ -146,22 +146,22 @@ export default function DealerRequests() {
                                     </div>
 
                                     <div className="mt-8">
-                                        <Link href={`/manufacturer/dealers/profile/${dealer._id || dealer.id}`} className="text-[10px] font-black uppercase tracking-widest text-[#0F6CBD] hover:underline flex items-center gap-1">
-                                            View Dealer Profile <FaExternalLinkAlt className="w-2 h-2" />
+                                        <Link href={`/manufacturer/dealers/profile/${dealer._id || dealer.id}`} className="text-sm font-black uppercase tracking-widest text-[#067FF9] hover:underline flex items-center gap-1">
+                                            View Seller Profile <FaExternalLinkAlt className="w-2 h-2" />
                                         </Link>
                                     </div>
                                 </div>
 
                                 {/* Summary */}
                                 <div className="flex-1 border-l border-slate-100 pl-8 md:pl-8">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Request Memo</p>
+                                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Request Memo</p>
                                     <p className="text-xs font-bold text-slate-600 italic">
                                         {request.message || "Establishing a regional partnership for supply chain fulfillment."}
                                     </p>
                                     <div className="mt-4 flex flex-col gap-1">
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Contact Info</p>
-                                        <p className="text-[10px] font-bold text-slate-500">{dealer.user?.email || 'No Email'}</p>
-                                        <p className="text-[10px] font-bold text-slate-500">{dealer.user?.phone || 'No Phone'}</p>
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Contact Info</p>
+                                        <p className="text-sm font-bold text-slate-500">{dealer.user?.email || 'No Email'}</p>
+                                        <p className="text-sm font-bold text-slate-500">{dealer.user?.phone || 'No Phone'}</p>
                                     </div>
                                 </div>
 
@@ -172,13 +172,13 @@ export default function DealerRequests() {
                                         <div className="flex items-center gap-3 w-full">
                                             <button
                                                 onClick={() => handleAction(dealer._id || dealer.id, 'REJECTED')}
-                                                className="flex-1 py-3 px-4 border border-rose-100 text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-rose-50 transition-all"
+                                                className="flex-1 py-3 px-4 border border-rose-100 text-rose-600 rounded-[10px] text-xs font-black uppercase tracking-widest hover:bg-rose-50 transition-all"
                                             >
                                                 Reject
                                             </button>
                                             <button
                                                 onClick={() => handleAction(dealer._id || dealer.id, 'APPROVED')}
-                                                className="flex-1 py-3 px-4 bg-[#0F6CBD] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                                                className="flex-1 py-3 px-4 bg-[#067FF9] text-white rounded-[10px] text-xs font-black uppercase tracking-widest hover:bg-[#067FF9]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
                                             >
                                                 Approve <FaCheck className="w-3 h-3" />
                                             </button>
@@ -190,10 +190,10 @@ export default function DealerRequests() {
                                     <div className="flex flex-col justify-end items-end border-l border-slate-100 pl-8 md:pl-8 min-w-[200px]">
                                         <Link
                                             href={`/manufacturer/messages?id=${dealer.userId}`}
-                                            className="w-full py-3 px-4 bg-white border border-[#0F6CBD] text-[#0F6CBD] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-3 px-4 bg-white border border-[#067FF9] text-[#067FF9] rounded-[10px] text-sm font-black uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
                                         >
                                             <FaCommentDots className="w-3 h-3" />
-                                            Message Dealer
+                                            Message Seller
                                         </Link>
                                     </div>
                                 )}
@@ -208,10 +208,10 @@ export default function DealerRequests() {
                 <div className="flex items-center justify-between text-xs font-bold text-slate-500 mt-8">
                     <p>Showing {requests.length} records</p>
                     <div className="flex gap-2">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all disabled:opacity-50">
                             <FaChevronLeft className="w-3 h-3" />
                         </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all">
+                        <button className="w-8 h-8 flex items-center justify-center rounded-[10px] border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 transition-all">
                             <FaChevronRight className="w-3 h-3" />
                         </button>
                     </div>

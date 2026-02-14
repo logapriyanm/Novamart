@@ -49,8 +49,8 @@ export default function AdminReviewsPage() {
     return (
         <div className="space-y-10 pb-20 animate-fade-in">
             <div>
-                <h1 className="text-3xl font-black text-slate-800 tracking-tight UPPERCASE ITALIC">Review Moderation</h1>
-                <p className="text-slate-400 font-bold mt-2">
+                <h1 className="text-2xl font-bold text-slate-800 tracking-tight uppercase italic">Review Moderation</h1>
+                <p className="text-slate-400 font-medium mt-2 text-sm">
                     Maintain platform integrity by reviewing and approving customer feedback.
                 </p>
             </div>
@@ -76,13 +76,16 @@ export default function AdminReviewsPage() {
                         <button
                             key={s}
                             onClick={() => setFilter(s)}
-                            className={`px-6 py-2.5 rounded-[10px] text-sm font-black transition-all ${filter === s ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                            className={`px-6 py-2.5 rounded-[10px] text-sm font-black transition-all ${filter === s
+                                ? 'bg-black text-white shadow-lg shadow-black/20'
+                                : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                                }`}
                         >
                             {s}
                         </button>
                     ))}
                 </div>
-                <button className="w-12 h-12 bg-slate-900 text-white rounded-[10px] flex items-center justify-center hover:bg-black transition-all shadow-lg shadow-black/10">
+                <button className="w-12 h-12 bg-black text-white rounded-[10px] flex items-center justify-center hover:bg-slate-800 transition-all shadow-lg shadow-black/10">
                     <FaFilter className="w-4 h-4" />
                 </button>
             </div>
@@ -95,7 +98,7 @@ export default function AdminReviewsPage() {
                     <div className="p-20 text-center text-slate-400 font-bold border border-dashed border-slate-200 rounded-[10px]">No reviews found in this category.</div>
                 ) : reviews.filter(r => r.status === filter).map((review) => (
                     <WhiteCard key={review._id} className="p-8 hover:shadow-xl transition-all border-none overflow-hidden relative group">
-                        <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-[#067FF9]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                         <div className="flex flex-col lg:flex-row gap-10">
                             {/* Reviewer & Meta */}

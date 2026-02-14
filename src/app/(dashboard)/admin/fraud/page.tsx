@@ -26,14 +26,14 @@ export default function FraudRiskPanel() {
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-[#10367D] hover:translate-x-[-4px] transition-transform">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-[#067FF9] hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight uppercase italic">Risk <span className="text-[#10367D]">Oversight</span></h1>
-                        <p className="text-slate-400 font-bold text-sm mt-1">Automated Anomaly & Fraud Detection Engine</p>
+                        <h1 className="text-2xl font-bold text-[#1E293B] tracking-tight uppercase italic">Risk <span className="text-[#067FF9]">Oversight</span></h1>
+                        <p className="text-slate-400 font-medium text-sm mt-1">Anomaly Detection & Prevention</p>
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@ export default function FraudRiskPanel() {
                                         <p className="text-lg font-black text-[#1E293B]">{alert.score}%</p>
                                         <p className="text-sm font-bold text-slate-400">Risk Score</p>
                                     </div>
-                                    <button className="px-6 py-3 bg-white border border-slate-200 text-[#1E293B] text-sm font-black rounded-[10px] hover:bg-[#10367D] hover:text-white hover:border-[#10367D] transition-all">
+                                    <button className="px-6 py-3 bg-white border border-slate-200 text-[#1E293B] text-sm font-black rounded-[10px] hover:bg-[#067FF9] hover:text-white hover:border-[#067FF9] transition-all">
                                         Investigate
                                     </button>
                                 </div>
@@ -90,7 +90,7 @@ export default function FraudRiskPanel() {
                                 <div key={i} className="p-5 bg-white/5 rounded-[10px] border border-white/10 hover:bg-white/10 transition-all">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-[10px] bg-[#10367D]/20 flex items-center justify-center text-[#10367D]">
+                                            <div className="w-10 h-10 rounded-[10px] bg-[#067FF9]/20 flex items-center justify-center text-[#067FF9]">
                                                 <FaUserSecret className="w-5 h-5" />
                                             </div>
                                             <div>
@@ -112,7 +112,7 @@ export default function FraudRiskPanel() {
                         <h3 className="text-sm font-black text-slate-400 mb-6">Detection Presets</h3>
                         <div className="space-y-3">
                             {['Order Velocity Limit', 'Refund Threshold', 'Login Geo-Guard', 'Document MD5 Hash Check'].map((preset) => (
-                                <div key={preset} className="flex items-center justify-between p-4 bg-slate-50 rounded-[10px] border border-slate-100 group cursor-pointer hover:border-[#10367D]/20 transition-all">
+                                <div key={preset} className="flex items-center justify-between p-4 bg-slate-50 rounded-[10px] border border-slate-100 group cursor-pointer hover:border-[#067FF9]/20 transition-all">
                                     <span className="text-sm font-black text-[#1E293B]">{preset}</span>
                                     <div className="w-8 h-4 bg-emerald-500 rounded-[10px] p-1 flex justify-end">
                                         <div className="w-2 h-2 bg-white rounded-full" />

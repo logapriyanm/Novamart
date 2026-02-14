@@ -92,7 +92,7 @@ export default function ProductMaster() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
+    <div className="space-y-8 animate-fade-in pb-12 text-slate-900">
       {/* Hidden File Input */}
       <input
         type="file"
@@ -105,18 +105,18 @@ export default function ProductMaster() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-foreground/5 pb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[#1E293B]">Product Management</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Product Management</h1>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-5 py-2.5 bg-white border border-slate-200 rounded-[10px] text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+            className="px-5 py-2.5 bg-white border border-slate-200 rounded-[10px] text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
           >
             <FaFileUpload className="w-3 h-3" /> Bulk Import
           </button>
           <Link
             href="/manufacturer/products/add"
-            className="px-6 py-2.5 bg-primary text-black rounded-[10px] text-[11px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-sm"
+            className="px-6 py-2.5 bg-primary text-white rounded-[10px] text-sm font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-sm"
           >
             New Product
           </Link>
@@ -126,34 +126,34 @@ export default function ProductMaster() {
       {/* Product Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          <p className="text-sm font-black text-slate-400 uppercase tracking-widest">
             Total SKU
           </p>
-          <p className="text-3xl font-black text-[#1E293B] mt-1">
+          <p className="text-3xl font-black text-slate-900 mt-1">
             {products.length}
           </p>
         </div>
         <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm">
-          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+          <p className="text-sm font-black text-emerald-600 uppercase tracking-widest">
             Live Products
           </p>
-          <p className="text-3xl font-black text-[#1E293B] mt-1">
+          <p className="text-3xl font-black text-slate-900 mt-1">
             {products.filter((p) => p.status === "APPROVED").length}
           </p>
         </div>
         <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm">
-          <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">
+          <p className="text-sm font-black text-amber-600 uppercase tracking-widest">
             Awaiting Approval
           </p>
-          <p className="text-3xl font-black text-[#1E293B] mt-1">
+          <p className="text-3xl font-black text-slate-900 mt-1">
             {products.filter((p) => p.status === "PENDING").length}
           </p>
         </div>
         <div className="bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          <p className="text-sm font-black text-slate-400 uppercase tracking-widest">
             Draft Mode
           </p>
-          <p className="text-3xl font-black text-[#1E293B] mt-1">
+          <p className="text-3xl font-black text-slate-900 mt-1">
             {products.filter((p) => p.status === "DRAFT").length}
           </p>
         </div>
@@ -164,7 +164,7 @@ export default function ProductMaster() {
         <button
           onClick={() => setFilterStatus("ALL")}
           className={`px-6 py-2 rounded-[10px] text-xs font-bold transition-all whitespace-nowrap ${filterStatus === "ALL"
-            ? "bg-white border border-slate-200 text-[#1E293B] shadow-sm"
+            ? "bg-white border border-slate-200 text-slate-900 shadow-sm"
             : "bg-slate-50 border border-transparent text-slate-500 hover:bg-white hover:border-slate-200"
             }`}
         >
@@ -219,16 +219,16 @@ export default function ProductMaster() {
                     <img
                       src={product.images?.[0]}
                       alt={product.name}
-                      className="w-full h-full object-cover rounded-[10px]"
+                      className="w-full h-full object-contain rounded-[10px]"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start gap-2">
-                      <h4 className="text-sm font-bold text-[#1E293B] truncate">
+                      <h4 className="text-sm font-bold text-slate-900 truncate">
                         {product.name}
                       </h4>
                       <span
-                        className={`inline-flex px-2 py-0.5 rounded-[10px] text-[8px] font-black uppercase tracking-widest shrink-0 ${product.status === "APPROVED"
+                        className={`inline-flex px-2 py-0.5 rounded-[10px] text-xs font-black uppercase tracking-widest shrink-0 ${product.status === "APPROVED"
                           ? "bg-emerald-50 text-emerald-600"
                           : product.status === "PENDING"
                             ? "bg-amber-50 text-amber-600"
@@ -238,7 +238,7 @@ export default function ProductMaster() {
                         {product.status}
                       </span>
                     </div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">
+                    <p className="text-sm font-bold text-slate-400 uppercase mt-1">
                       {product.category}
                     </p>
                     <p className="text-sm font-black text-primary mt-2">
@@ -247,19 +247,19 @@ export default function ProductMaster() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-slate-50">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  <span className="text-sm font-bold text-slate-400 uppercase">
                     Product ID: {product.id.substring(0, 8)}...
                   </span>
                   <div className="flex items-center gap-1">
                     <Link
                       href={`/manufacturer/products/edit/${product.id}`}
-                      className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-[10px] text-[10px] font-bold hover:bg-slate-100 transition-all flex items-center gap-1.5"
+                      className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-[10px] text-sm font-bold hover:bg-slate-100 transition-all flex items-center gap-1.5"
                     >
                       <FaEdit className="w-3 h-3" /> Edit
                     </Link>
                     <button
                       onClick={() => handleDelete(product.id)}
-                      className="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-[10px] text-[10px] font-bold hover:bg-rose-100 transition-all flex items-center gap-1.5"
+                      className="px-3 py-1.5 bg-rose-50 text-rose-500 rounded-[10px] text-sm font-bold hover:bg-rose-100 transition-all flex items-center gap-1.5"
                     >
                       <FaTrash className="w-3 h-3" /> Delete
                     </button>
@@ -275,16 +275,16 @@ export default function ProductMaster() {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <th className="px-6 py-4 text-sm font-bold text-slate-400 uppercase tracking-widest">
                   Model
                 </th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <th className="px-6 py-4 text-sm font-bold text-slate-400 uppercase tracking-widest">
                   Pricing
                 </th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <th className="px-6 py-4 text-sm font-bold text-slate-400 uppercase tracking-widest">
                   Status
                 </th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">
+                <th className="px-6 py-4 text-sm font-bold text-slate-400 uppercase tracking-widest text-right">
                   Actions
                 </th>
               </tr>
@@ -321,32 +321,32 @@ export default function ProductMaster() {
                             <img
                               src={product.images?.[0]}
                               alt={product.name}
-                              className="w-full h-full object-cover rounded-[10px]"
+                              className="w-full h-full object-contain rounded-[10px]"
                             />
                           </div>
                         ) : (
-                          <div className="w-12 h-12 rounded-[10px] bg-blue-50 text-[#10367D] flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
+                          <div className="w-12 h-12 rounded-[10px] bg-blue-50 text-[#067FF9] flex items-center justify-center border border-blue-100 group-hover:scale-110 transition-transform">
                             <MdOutlineProductionQuantityLimits className="w-6 h-6" />
                           </div>
                         )}
                         <div>
-                          <h4 className="text-xs font-bold text-[#1E293B]">
+                          <h4 className="text-xs font-bold text-slate-900">
                             {product.name}
                           </h4>
-                          <p className="text-[9px] font-medium text-slate-400 uppercase mt-0.5">
+                          <p className="text-xs font-medium text-slate-400 uppercase mt-0.5">
                             {product.category}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs font-bold text-[#1E293B]">
+                      <span className="text-xs font-bold text-slate-900">
                         ₹{Number(product.basePrice).toLocaleString()}
                       </span>
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex px-2 py-0.5 rounded-[10px] text-[9px] font-bold uppercase tracking-widest ${product.status === "APPROVED"
+                        className={`inline-flex px-2 py-0.5 rounded-[10px] text-xs font-bold uppercase tracking-widest ${product.status === "APPROVED"
                           ? "bg-emerald-50 text-emerald-600"
                           : product.status === "PENDING"
                             ? "bg-amber-50 text-amber-600"

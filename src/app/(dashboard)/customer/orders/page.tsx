@@ -228,7 +228,7 @@ export default function MyOrders() {
                                 <button
                                     onClick={submitDispute}
                                     disabled={isSubmittingDispute}
-                                    className="w-full py-5 bg-black text-white rounded-[10px] text-sm font-black shadow-xl shadow-black/10 hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
+                                    className="w-full py-5 bg-black text-white rounded-[10px] text-sm font-black shadow-xl shadow-black/10 hover:bg-[#067FF9] active:scale-95 transition-all disabled:opacity-50"
                                 >
                                     {isSubmittingDispute ? 'Submitting...' : 'Submit Return Request'}
                                 </button>
@@ -492,7 +492,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                                             <button
                                                 key={star}
                                                 onClick={() => setRatings({ ...ratings, [i]: { ...ratings[i], rating: star } })}
-                                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${ratings[i]?.rating >= star ? 'bg-amber-400 text-white shadow-md' : 'bg-white text-slate-200'}`}
+                                                className={`w-8 h-8 rounded-[10px] flex items-center justify-center transition-all ${ratings[i]?.rating >= star ? 'bg-amber-400 text-white shadow-md' : 'bg-white text-slate-200'}`}
                                             >
                                                 <FaStar className="w-3 h-3" />
                                             </button>
@@ -569,7 +569,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                 <button
                     onClick={step === 1 ? () => setStep(2) : handleSubmit}
                     disabled={isSubmitting}
-                    className="flex-1 py-4 bg-black text-white rounded-[10px] text-sm font-black shadow-xl hover:bg-[#0F6CBD] active:scale-95 transition-all disabled:opacity-50"
+                    className="flex-1 py-4 bg-black text-white rounded-[10px] text-sm font-black shadow-xl hover:bg-[#067FF9] active:scale-95 transition-all disabled:opacity-50"
                 >
                     {isSubmitting ? 'Submitting...' : step === 1 ? 'Next: Rate Seller' : 'Submit Review'}
                 </button>

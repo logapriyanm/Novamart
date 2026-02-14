@@ -130,7 +130,11 @@ export default function RootLayout({
                           }),
                         }}
                       />
-                      {/* Clean white background — no ambient glows */}
+                      {/* Ambient Background Glows */}
+                      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#067FF9]/10 blur-[150px] rounded-full" />
+                        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#067FF9]/5 blur-[150px] rounded-full" />
+                      </div>
 
                       <main className="relative z-10">{children}</main>
                       <InstructionButton />

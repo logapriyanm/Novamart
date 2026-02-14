@@ -321,7 +321,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                                             type="text"
                                             placeholder="0 0 0 0 0 0"
                                             maxLength={6}
-                                            className="w-full bg-white border border-gray-200 focus:border-primary focus:ring-primary rounded-lg px-4 py-3 text-center text-lg font-bold tracking-[0.5em] transition-all focus:ring-1 focus:outline-none mt-2"
+                                            className="w-full bg-white border border-gray-200 focus:border-primary focus:ring-primary rounded-[10px] px-4 py-3 text-center text-lg font-bold tracking-[0.5em] transition-all focus:ring-1 focus:outline-none mt-2"
                                             value={formData.otp}
                                             onChange={e => {
                                                 const value = e.target.value.replace(/\D/g, '').slice(0, 6);
@@ -486,7 +486,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                     </p>
 
                     {/* Testimonial / Social Proof */}
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 mb-12 shadow-2xl">
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[10px] p-6 mb-12 shadow-2xl">
                         <p className="text-gray-100 italic mb-4 drop-shadow">"NovaMart transformed how we source materials. The verification process gives us 100% confidence in our partners."</p>
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-emerald-400 shadow-lg"></div>
@@ -545,7 +545,7 @@ export default function Register({ searchParams, initialRole: propRole }: { sear
                                                         }`}>
                                                         {isCompleted ? <FaCheck className="w-3 h-3" /> : stepNum}
                                                     </div>
-                                                    <span className={`text-[10px] font-bold tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'
+                                                    <span className={`text-sm font-bold tracking-wider ${isActive ? 'text-primary' : 'text-gray-400'
                                                         }`}>
                                                         {label}
                                                     </span>

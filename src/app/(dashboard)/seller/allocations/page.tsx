@@ -83,20 +83,20 @@ export default function DealerAllocationView() {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
+        <div className="space-y-8 animate-fade-in pb-12 text-slate-900">
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight italic">Allocated <span className="text-[#10367D]">Supply</span></h1>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Sourced Assets & Manufacturer Allocations</p>
+                    <h1 className="text-3xl font-black tracking-tight italic">Allocated <span className="text-[#067FF9]">Supply</span></h1>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1">Sourced Assets & Manufacturer Allocations</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="px-6 py-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <div className="px-6 py-4 bg-emerald-50 border border-emerald-100 rounded-[10px] flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-[10px] bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <FaCheck className="w-4 h-4" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Available Slots</p>
+                            <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Available Slots</p>
                             <p className="text-lg font-black text-emerald-600 italic">{allocations.filter(a => !a.isListed).length}</p>
                         </div>
                     </div>
@@ -122,7 +122,7 @@ export default function DealerAllocationView() {
                         className={`bg-white rounded-[3rem] border ${item.isListed ? 'border-emerald-100 shadow-emerald-100/50' : 'border-slate-100'} shadow-xl overflow-hidden group relative transition-all`}
                     >
                         {item.isListed && (
-                            <div className="absolute top-6 right-6 px-4 py-2 bg-emerald-500 text-white rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 z-10 flex items-center gap-2">
+                            <div className="absolute top-6 right-6 px-4 py-2 bg-emerald-500 text-white rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 z-10 flex items-center gap-2">
                                 <FaRocket className="w-2.5 h-2.5 animate-pulse" />
                                 Active Listing
                             </div>
@@ -130,7 +130,7 @@ export default function DealerAllocationView() {
 
                         <div className="aspect-[4/3] bg-slate-50 relative overflow-hidden">
                             {item.product?.images?.[0] ? (
-                                <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-200">
                                     <MdOutlineProductionQuantityLimits className="w-16 h-16" />
@@ -139,44 +139,44 @@ export default function DealerAllocationView() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                             <div className="absolute bottom-6 left-6 right-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                <p className="text-[9px] font-black text-white/70 uppercase tracking-[0.15em] mb-1">Manufacturer</p>
+                                <p className="text-xs font-black text-white/70 uppercase tracking-[0.15em] mb-1">Manufacturer</p>
                                 <h4 className="text-white text-lg font-black italic truncate">{item.product?.manufacturer?.companyName}</h4>
                             </div>
                         </div>
 
                         <div className="p-8 space-y-6">
                             <div>
-                                <h4 className="text-xl font-black italic text-[#1E293B] group-hover:text-[#10367D] transition-colors">{item.product?.name}</h4>
+                                <h4 className="text-xl font-black italic text-slate-900 group-hover:text-[#067FF9] transition-colors">{item.product?.name}</h4>
                                 <div className="flex items-center gap-2 mt-2">
                                     <FaIndustry className="text-slate-300 w-2.5 h-2.5" />
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.region} Distribution</span>
+                                    <span className="text-sm font-black text-slate-400 uppercase tracking-widest">{item.region} Distribution</span>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Stock Cap</p>
-                                    <p className="text-lg font-black text-[#10367D] italic">{item.allocatedStock} <span className="text-[10px] font-bold text-slate-300 uppercase ml-1">Units</span></p>
+                                <div className="p-4 bg-slate-50 rounded-[10px] border border-slate-100">
+                                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Stock Cap</p>
+                                    <p className="text-lg font-black text-[#067FF9] italic">{item.allocatedStock} <span className="text-sm font-bold text-slate-300 uppercase ml-1">Units</span></p>
                                 </div>
-                                <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
-                                    <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Wholesale</p>
+                                <div className="p-4 bg-blue-50/50 rounded-[10px] border border-blue-100/50">
+                                    <p className="text-xs font-black text-blue-400 uppercase tracking-widest mb-1">Wholesale</p>
                                     <p className="text-lg font-black text-blue-600 italic">₹{Number(item.dealerBasePrice).toLocaleString()}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between text-[10px] font-bold">
+                                <div className="flex items-center justify-between text-sm font-bold">
                                     <span className="text-slate-400 uppercase">Min Order Qty</span>
                                     <span className="text-amber-600 font-black">{item.dealerMoq || 1} Units</span>
                                 </div>
-                                <div className="flex items-center justify-between text-[10px] font-bold">
+                                <div className="flex items-center justify-between text-sm font-bold">
                                     <span className="text-slate-400 uppercase text-xs">Margin Cap</span>
                                     <span className="text-blue-500 font-black text-xs">{Number(item.maxMargin)}%</span>
                                 </div>
                             </div>
 
                             {item.isListed ? (
-                                <button className="w-full py-4 bg-white border-2 border-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3">
+                                <button className="w-full py-4 bg-white border-2 border-slate-100 text-slate-400 rounded-[10px] font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3">
                                     Manage Marketplace Listing
                                     <FaArrowRight className="w-3 h-3" />
                                 </button>
@@ -187,7 +187,7 @@ export default function DealerAllocationView() {
                                         setFormData({ ...formData, retailPrice: Number(item.dealerBasePrice).toString() });
                                         setShowListingModal(true);
                                     }}
-                                    className="w-full py-4 bg-[#10367D] text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                                    className="w-full py-4 bg-[#067FF9] text-white rounded-[10px] font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-[#067FF9]/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                                 >
                                     Activate & List Product
                                     <FaPlus className="w-3 h-3" />
@@ -207,7 +207,7 @@ export default function DealerAllocationView() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setShowListingModal(false)}
-                            className="absolute inset-0 bg-[#1E293B]/60 backdrop-blur-sm"
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
                         />
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -217,30 +217,30 @@ export default function DealerAllocationView() {
                         >
                             <div className="flex justify-between items-center mb-10">
                                 <div>
-                                    <h2 className="text-2xl font-black tracking-tight italic text-[#10367D]">Market <span className="text-[#1E293B]">Activation</span></h2>
-                                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Sourcing Asset & Setting Retail Value</p>
+                                    <h2 className="text-2xl font-black tracking-tight italic text-[#067FF9]">Market <span className="text-slate-900">Activation</span></h2>
+                                    <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1">Sourcing Asset & Setting Retail Value</p>
                                 </div>
-                                <button onClick={() => setShowListingModal(false)} className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#10367D] transition-colors">
+                                <button onClick={() => setShowListingModal(false)} className="w-12 h-12 rounded-[10px] bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#067FF9] transition-colors">
                                     <FaTimes />
                                 </button>
                             </div>
 
                             <form onSubmit={handleSourceAndList} className="space-y-8">
                                 <div className="p-6 bg-blue-50 border border-blue-100 rounded-[2rem] flex items-center gap-6">
-                                    <div className="w-16 h-16 rounded-2xl border-4 border-white shadow-xl overflow-hidden shrink-0">
-                                        <img src={selAlloc?.product?.images?.[0]} className="w-full h-full object-cover" />
+                                    <div className="w-16 h-16 rounded-[10px] border-4 border-white shadow-xl overflow-hidden shrink-0">
+                                        <img src={selAlloc?.product?.images?.[0]} className="w-full h-full object-contain" />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="text-sm font-black italic text-[#1E293B]">{selAlloc?.product?.name}</h4>
-                                        <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-1">Wholesale Basis: ₹{Number(selAlloc?.dealerBasePrice).toLocaleString()}</p>
+                                        <h4 className="text-sm font-black italic text-slate-900">{selAlloc?.product?.name}</h4>
+                                        <p className="text-sm font-bold text-blue-500 uppercase tracking-widest mt-1">Wholesale Basis: ₹{Number(selAlloc?.dealerBasePrice).toLocaleString()}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-6">
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between ml-1">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sourcing Quantity</label>
-                                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-tighter italic">Cap: {selAlloc?.allocatedStock} Units</span>
+                                            <label className="text-sm font-black text-slate-400 uppercase tracking-widest">Sourcing Quantity</label>
+                                            <span className="text-sm font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-tighter italic">Cap: {selAlloc?.allocatedStock} Units</span>
                                         </div>
                                         <div className="relative">
                                             <MdOutlineProductionQuantityLimits className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
@@ -252,15 +252,15 @@ export default function DealerAllocationView() {
                                                 placeholder={`Min: ${selAlloc?.dealerMoq || 1} Units`}
                                                 value={formData.quantity}
                                                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#067FF9]/30"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <div className="flex items-center justify-between ml-1">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Market Retail Price (₹)</label>
-                                            <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-tighter italic">Max Margin: {Number(selAlloc?.maxMargin)}%</span>
+                                            <label className="text-sm font-black text-slate-400 uppercase tracking-widest">Market Retail Price (₹)</label>
+                                            <span className="text-sm font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full uppercase tracking-tighter italic">Max Margin: {Number(selAlloc?.maxMargin)}%</span>
                                         </div>
                                         <div className="relative">
                                             <FaDollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 w-3 h-3" />
@@ -269,13 +269,13 @@ export default function DealerAllocationView() {
                                                 type="number"
                                                 value={formData.retailPrice}
                                                 onChange={(e) => setFormData({ ...formData, retailPrice: e.target.value })}
-                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#10367D]/30"
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-[10px] py-4 pl-14 pr-6 text-xs font-black uppercase focus:outline-none focus:border-[#067FF9]/30"
                                             />
                                         </div>
                                         {formData.retailPrice && selAlloc && (
                                             <div className="flex items-center justify-between px-2 pt-2">
-                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Projected Margin</p>
-                                                <p className={`text-[11px] font-black ${((Number(formData.retailPrice) / Number(selAlloc.dealerBasePrice)) - 1) * 100 > Number(selAlloc.maxMargin)
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Projected Margin</p>
+                                                <p className={`text-sm font-black ${((Number(formData.retailPrice) / Number(selAlloc.dealerBasePrice)) - 1) * 100 > Number(selAlloc.maxMargin)
                                                     ? 'text-rose-500' : 'text-emerald-600'
                                                     }`}>
                                                     {(((Number(formData.retailPrice) / Number(selAlloc.dealerBasePrice)) - 1) * 100).toFixed(1)}%
@@ -286,9 +286,9 @@ export default function DealerAllocationView() {
                                 </div>
 
                                 {((Number(formData.retailPrice) / Number(selAlloc?.dealerBasePrice)) - 1) * 100 > Number(selAlloc?.maxMargin) && (
-                                    <div className="p-4 bg-rose-50 rounded-2xl flex items-center gap-4 text-rose-600">
+                                    <div className="p-4 bg-rose-50 rounded-[10px] flex items-center gap-4 text-rose-600">
                                         <FaExclamationTriangle className="shrink-0 w-4 h-4" />
-                                        <p className="text-[10px] font-black uppercase leading-tight tracking-widest">
+                                        <p className="text-sm font-black uppercase leading-tight tracking-widest">
                                             Retail price exceeds manufacturer's margin limit. Please adjust value.
                                         </p>
                                     </div>
@@ -297,7 +297,7 @@ export default function DealerAllocationView() {
                                 <button
                                     disabled={isSubmitting || ((Number(formData.retailPrice) / Number(selAlloc?.dealerBasePrice)) - 1) * 100 > Number(selAlloc?.maxMargin)}
                                     type="submit"
-                                    className="w-full py-6 bg-[#10367D] text-white rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-[#10367D]/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-30 disabled:grayscale"
+                                    className="w-full py-6 bg-[#067FF9] text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-[#067FF9]/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-30 disabled:grayscale"
                                 >
                                     {isSubmitting ? 'Syncing with Marketplace...' : 'Authorize Listing & Acquire Stock'}
                                     <FaRocket className="w-3 h-3" />

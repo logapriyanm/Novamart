@@ -186,7 +186,7 @@ export default function PaymentPage() {
                 <div className="bg-white rounded-[10px] border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02] overflow-hidden p-8 lg:p-12">
                     {/* Order Summary */}
                     <div className="mb-10 text-center">
-                        <p className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.2em] mb-2">Total Amount Due</p>
+                        <p className="text-sm font-black text-foreground/30 uppercase tracking-[0.2em] mb-2">Total Amount Due</p>
                         <p className="text-5xl font-black text-black tracking-tighter italic">
                             ₹{Number(order?.totalAmount || 0).toLocaleString('en-IN')}
                         </p>
@@ -198,8 +198,8 @@ export default function PaymentPage() {
                             <HiOutlineShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-widest mb-1 italic">Escrow Protection Active</h4>
-                            <p className="text-[10px] font-bold text-emerald-900/60 leading-relaxed uppercase tracking-widest">
+                            <h4 className="text-sm font-black text-emerald-600 uppercase tracking-widest mb-1 italic">Escrow Protection Active</h4>
+                            <p className="text-sm font-bold text-emerald-900/60 leading-relaxed uppercase tracking-widest">
                                 Your payment will be held securely in escrow. The seller will not receive funds until you confirm delivery of your order.
                             </p>
                         </div>
@@ -208,7 +208,7 @@ export default function PaymentPage() {
                     {/* Payment Form */}
                     <div className="space-y-6">
                         <div className="flex flex-col gap-2">
-                            <label className="text-[10px] font-black text-foreground/50 uppercase tracking-widest">Razorpay Secure Checkout</label>
+                            <label className="text-sm font-black text-foreground/50 uppercase tracking-widest">Razorpay Secure Checkout</label>
                             <div className="grid grid-cols-1 gap-4">
                                 <div className="border-2 border-black/20 bg-black/5 text-foreground rounded-[10px] p-4 flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest">
                                     <HiOutlineCreditCard className="w-4 h-4 text-black" />
@@ -226,13 +226,13 @@ export default function PaymentPage() {
                             {isProcessing ? 'Processing...' : 'Pay Securely with Razorpay'}
                         </button>
 
-                        <p className="text-center text-[9px] text-foreground/30 uppercase tracking-widest">
+                        <p className="text-center text-xs text-foreground/30 uppercase tracking-widest">
                             Powered by Razorpay • PCI DSS Compliant
                         </p>
                     </div>
                 </div>
 
-                <div className="mt-8 text-center text-[9px] font-bold text-foreground/20 uppercase tracking-widest">
+                <div className="mt-8 text-center text-xs font-bold text-foreground/20 uppercase tracking-widest">
                     Powered by NovaMart Secure Escrow • 256-Bit SSL Encryption
                 </div>
             </div>

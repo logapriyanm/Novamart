@@ -79,7 +79,6 @@ export default function WishlistPage() {
 
   const displayItems = activeTab === "wishlist" ? items : []; // Only show wishlist items for now
 
-  // Show loading state while checking auth
   if (authLoading) {
     return (
       <div className="min-h-screen pt-40 flex items-center justify-center">
@@ -91,8 +90,19 @@ export default function WishlistPage() {
   // Show login prompt if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen pt-32 pb-20">
+      <div className="min-h-screen  pt-32 pb-20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-black text-foreground tracking-tight mb-2 italic uppercase">
+              My Collections
+            </h1>
+            <p className="text-muted-foreground/60 text-sm font-bold uppercase tracking-[0.2em]">
+              Organize your procurement lists and manage saved items for future
+              orders.
+            </p>
+          </div>
+
           <div className="py-20 text-center">
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <FaHeart className="text-slate-300 text-3xl" />

@@ -68,12 +68,12 @@ export default function PaymentsPage() {
     }
 
     return (
-        <div className="p-6 max-w-[1600px] mx-auto space-y-8 animate-fade-in text-[#1E293B]">
+        <div className="p-6 max-w-[1600px] mx-auto space-y-8 animate-fade-in text-slate-900">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight italic">Payments & <span className="text-[#10367D]">Earnings</span></h1>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">
+                    <h1 className="text-3xl font-black tracking-tight italic">Payments & <span className="text-[#067FF9]">Earnings</span></h1>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1">
                         Manage your wallet, payouts and transaction history
                     </p>
                 </div>
@@ -86,7 +86,7 @@ export default function PaymentsPage() {
                         <FaHistory className="w-4 h-4" />
                     </button>
                     <div className="px-4 py-2 bg-slate-100 rounded-[10px] border border-slate-200">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
+                        <span className="text-sm font-bold text-slate-500 uppercase flex items-center gap-2">
                             <FaUniversity className="w-3 h-3" /> Default Bank: HDFC **** 4582
                         </span>
                     </div>
@@ -103,11 +103,11 @@ export default function PaymentsPage() {
                     className="bg-white p-6 rounded-[10px] shadow-lg shadow-slate-200/50 border border-slate-100 relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <FaWallet className="w-24 h-24 text-[#10367D]" />
+                        <FaWallet className="w-24 h-24 text-[#067FF9]" />
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Revenue</p>
-                    <h2 className="text-3xl font-black text-[#1E293B] tracking-tight">{formatCurrency(stats?.totalRevenue || 0)}</h2>
-                    <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-[4px]">
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-2">Total Revenue</p>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">{formatCurrency(stats?.totalRevenue || 0)}</h2>
+                    <div className="mt-4 flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded-[4px]">
                         <FaArrowUp className="w-2.5 h-2.5" />
                         <span>+12.5% this month</span>
                     </div>
@@ -120,8 +120,8 @@ export default function PaymentsPage() {
                     transition={{ delay: 0.2 }}
                     className="bg-white p-6 rounded-[10px] shadow-lg shadow-slate-200/50 border border-slate-100"
                 >
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">This Month</p>
-                    <h2 className="text-3xl font-black text-[#10367D] tracking-tight">{formatCurrency(stats?.monthlyRevenue || 0)}</h2>
+                    <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-2">This Month</p>
+                    <h2 className="text-3xl font-black text-[#067FF9] tracking-tight">{formatCurrency(stats?.monthlyRevenue || 0)}</h2>
                     <p className="text-xs text-slate-400 mt-2 font-medium">Pending settlement: {formatCurrency((stats?.monthlyRevenue || 0) * 0.15)}</p>
                 </motion.div>
 
@@ -130,19 +130,19 @@ export default function PaymentsPage() {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.3 }}
-                    className="bg-[#10367D] p-6 rounded-[10px] shadow-xl shadow-blue-900/20 text-white relative overflow-hidden"
+                    className="bg-[#067FF9] p-6 rounded-[10px] shadow-xl shadow-blue-900/20 text-white relative overflow-hidden"
                 >
                     <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                    <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-2">Escrow Holding</p>
+                    <p className="text-sm font-black text-white/60 uppercase tracking-widest mb-2">Escrow Holding</p>
                     <h2 className="text-3xl font-black text-white tracking-tight">{formatCurrency(stats?.escrowHeld || 0)}</h2>
 
                     <button
                         onClick={handleRequestPayout}
                         disabled={!stats?.escrowHeld || stats.escrowHeld <= 0 || payoutStatus !== 'IDLE'}
-                        className="mt-6 w-full py-3 bg-white text-[#10367D] rounded-[8px] font-black text-xs uppercase tracking-wider hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                        className="mt-6 w-full py-3 bg-white text-[#067FF9] rounded-[8px] font-black text-xs uppercase tracking-wider hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                     >
                         {payoutStatus === 'PROCESSING' ? (
-                            <Loader size="sm" className="border-slate-900/20 border-t-[#10367D]" />
+                            <Loader size="sm" className="border-slate-900/20 border-t-[#067FF9]" />
                         ) : payoutStatus === 'SUCCESS' ? (
                             <>
                                 <FaCheckCircle /> Request Sent
@@ -160,11 +160,11 @@ export default function PaymentsPage() {
             <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                     <h3 className="font-bold text-slate-800 text-lg">Recent Transactions</h3>
-                    <button className="text-xs font-bold text-[#10367D] uppercase tracking-wide hover:underline">View All</button>
+                    <button className="text-xs font-bold text-[#067FF9] uppercase tracking-wide hover:underline">View All</button>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-wider">
+                        <thead className="bg-slate-50 text-sm uppercase font-black text-slate-400 tracking-wider">
                             <tr>
                                 <th className="px-6 py-4">Transaction ID</th>
                                 <th className="px-6 py-4">Date</th>
@@ -184,7 +184,7 @@ export default function PaymentsPage() {
                                     </td>
                                     <td className="px-6 py-4">Order Settlement</td>
                                     <td className="px-6 py-4">
-                                        <span className="px-2 py-1 rounded-[4px] bg-emerald-50 text-emerald-600 text-[10px] font-bold border border-emerald-100 uppercase">
+                                        <span className="px-2 py-1 rounded-[4px] bg-emerald-50 text-emerald-600 text-sm font-bold border border-emerald-100 uppercase">
                                             Completed
                                         </span>
                                     </td>
@@ -201,7 +201,7 @@ export default function PaymentsPage() {
                                 </td>
                                 <td className="px-6 py-4">Weekly Payout</td>
                                 <td className="px-6 py-4">
-                                    <span className="px-2 py-1 rounded-[4px] bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100 uppercase">
+                                    <span className="px-2 py-1 rounded-[4px] bg-blue-50 text-blue-600 text-sm font-bold border border-blue-100 uppercase">
                                         Processed
                                     </span>
                                 </td>

@@ -20,7 +20,7 @@ export default function CMSImageUpload({
 }: CMSImageUploadProps) {
     return (
         <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-wider text-foreground/40">{label}</label>
+            <label className="text-sm font-black uppercase tracking-wider text-foreground/40">{label}</label>
 
             {value ? (
                 <div className="relative group w-full h-32 bg-surface rounded-[12px] border border-foreground/10 overflow-hidden">
@@ -54,16 +54,16 @@ export default function CMSImageUpload({
                         styles: {
                             palette: {
                                 window: '#FFFFFF',
-                                windowBorder: '#10367D10',
-                                tabIcon: '#10367D',
-                                menuIcons: '#10367D',
+                                windowBorder: '#067FF910',
+                                tabIcon: '#067FF9',
+                                menuIcons: '#067FF9',
                                 textDark: '#1E293B',
                                 textLight: '#FFFFFF',
-                                link: '#10367D',
-                                action: '#10367D',
-                                inactiveTabIcon: '#10367D40',
+                                link: '#067FF9',
+                                action: '#067FF9',
+                                inactiveTabIcon: '#067FF940',
                                 error: '#F43F5E',
-                                inProgress: '#10367D',
+                                inProgress: '#067FF9',
                                 complete: '#10B981',
                                 sourceBg: '#F8FAFC'
                             }
@@ -91,7 +91,7 @@ export default function CMSImageUpload({
                                 <div className="p-2 bg-surface rounded-full group-hover:scale-110 transition-transform">
                                     <FaCloudUploadAlt className="w-6 h-6" />
                                 </div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider">Upload {label}</span>
+                                <span className="text-sm font-bold uppercase tracking-wider">Upload {label}</span>
                             </button>
                         );
                     }}

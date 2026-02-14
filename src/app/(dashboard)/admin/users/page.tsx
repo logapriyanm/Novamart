@@ -123,9 +123,9 @@ export default function UserManagementPortal() {
                     <button
                         key={role}
                         onClick={() => setSelectedRole(role)}
-                        className={`px-6 py-3 rounded-[10px] text-sm font-bold transition-all ${selectedRole === role
-                            ? 'bg-primary text-white shadow-md'
-                            : 'bg-white text-foreground/40 border border-foreground/10 hover:border-primary/50'
+                        className={`px-6 py-2.5 rounded-lg text-sm font-bold transition-all border ${selectedRole === role
+                            ? 'bg-black text-white border-black shadow-md'
+                            : 'bg-white text-black border-slate-200 hover:border-black'
                             }`}
                     >
                         {role === 'SELLER' || role === 'MANUFACTURER' || role === 'CUSTOMER' || role === 'ADMIN' ? role + 'S' : role}
@@ -155,13 +155,13 @@ export default function UserManagementPortal() {
                     </div>
 
                     {/* Desktop Table View */}
-                    <div className="hidden md:block bg-white rounded-[10px] border border-foreground/10 shadow-sm overflow-hidden">
-                        <div className="p-8 border-b border-foreground/10 bg-background/50 flex items-center justify-between">
-                            <h2 className="text-sm font-black text-black flex items-center gap-3">
-                                <FaUsers className="text-black" />
+                    <div className="hidden md:block bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="p-6 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                            <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                <FaUsers className="text-slate-500" />
                                 Active Identity Ledger
                             </h2>
-                            <p className="text-sm font-bold text-foreground/40">
+                            <p className="text-xs font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200">
                                 {displayedList.length} Entities Found
                             </p>
                         </div>
@@ -169,73 +169,68 @@ export default function UserManagementPortal() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead>
-                                    <tr className="border-b border-foreground/10">
-                                        <th className="px-10 py-5 text-sm font-bold text-foreground/40">User Entity</th>
-                                        <th className="px-10 py-5 text-sm font-bold text-foreground/40">Privilege Level</th>
-                                        <th className="px-10 py-5 text-sm font-bold text-foreground/40 text-center">Protocol Status</th>
-                                        <th className="px-10 py-5 text-sm font-bold text-foreground/40 text-right">Actions</th>
+                                    <tr className="border-b border-slate-200 bg-slate-50/50">
+                                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 tracking-wider">User Entity</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 tracking-wider">Privilege Level</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 tracking-wider text-center">Status</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-slate-500 tracking-wider text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-50">
+                                <tbody className="divide-y divide-slate-100">
                                     {displayedList.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="p-10 text-center text-sm font-bold text-slate-400">
+                                            <td colSpan={4} className="p-10 text-center text-sm text-slate-500">
                                                 No entities found in this registry.
                                             </td>
                                         </tr>
                                     ) : displayedList.map((user) => (
-                                        <tr key={user._id || user.id} className="hover:bg-slate-50 group transition-colors">
-                                            <td className="px-10 py-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-[10px] bg-black flex items-center justify-center text-white text-sm font-black group-hover:scale-110 transition-transform">
+                                        <tr key={user._id || user.id} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 text-xs font-bold">
                                                         {(user.name || user.email || 'U').substring(0, 2).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-black text-black leading-none">{user.name || 'Unknown User'}</p>
-                                                        <p className="text-sm font-bold text-foreground/40 mt-1.5">{user.email || 'No Email'}</p>
+                                                        <p className="text-sm font-medium text-slate-900 leading-none">{user.name || 'Unknown User'}</p>
+                                                        <p className="text-xs text-slate-500 mt-1">{user.email || 'No Email'}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-10 py-6">
+                                            <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
                                                     {user.role === 'ADMIN' ? (
-                                                        <Tooltip content="Administrator - Full Access">
-                                                            <FaUserShield className="text-black w-3 h-3 cursor-help" />
-                                                        </Tooltip>
+                                                        <FaUserShield className="text-slate-400 w-3 h-3" />
                                                     ) : user.role === 'SELLER' ? (
-                                                        <Tooltip content="Authorized Seller">
-                                                            <FaStore className="text-black w-3 h-3 cursor-help" />
-                                                        </Tooltip>
+                                                        <FaStore className="text-slate-400 w-3 h-3" />
                                                     ) : user.role === 'MANUFACTURER' ? (
-                                                        <Tooltip content="Verified Manufacturer">
-                                                            <FaIndustry className="text-black w-3 h-3 cursor-help" />
-                                                        </Tooltip>
+                                                        <FaIndustry className="text-slate-400 w-3 h-3" />
                                                     ) : (
-                                                        <Tooltip content="Standard Customer">
-                                                            <FaUserTie className="text-black w-3 h-3 cursor-help" />
-                                                        </Tooltip>
+                                                        <FaUserTie className="text-slate-400 w-3 h-3" />
                                                     )}
-                                                    <span className="text-sm font-bold text-black">{user.role}</span>
+                                                    <span className="text-sm text-slate-700 capitalize">{user.role?.toLowerCase()}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-10 py-6 text-center">
-                                                <span className={`inline-flex items-center px-4 py-1.5 rounded-[10px] text-sm font-bold ${(user.status === 'Active' || user.isVerified) ? 'bg-emerald-100 text-emerald-700' :
-                                                    (user.status === 'Banned' || user.isVerified === false) ? 'bg-rose-100 text-rose-700' :
-                                                        'bg-amber-100 text-amber-700'
+                                            <td className="px-6 py-4 text-center">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${(user.status === 'Active' || user.isVerified) ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                                                    (user.status === 'Banned' || user.isVerified === false) ? 'bg-rose-50 text-rose-700 border border-rose-100' :
+                                                        'bg-amber-50 text-amber-700 border border-amber-100'
                                                     }`}>
                                                     {user.status || (user.isVerified ? 'Active' : 'Pending')}
                                                 </span>
                                             </td>
-                                            <td className="px-10 py-6 text-right">
+                                            <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     {(selectedRole === 'MANUFACTURER' || selectedRole === 'SELLER') && !user.isVerified && (
                                                         <button
                                                             onClick={() => handleVerifyClick(user, selectedRole as any)}
-                                                            className="btn-primary"
+                                                            className="px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-md hover:bg-slate-800 transition-colors"
                                                         >
                                                             Verify
                                                         </button>
                                                     )}
+                                                    <button className="text-slate-400 hover:text-slate-600 transition-colors">
+                                                        <FaEllipsisV className="w-3 h-3" />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>

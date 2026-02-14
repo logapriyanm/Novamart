@@ -227,7 +227,7 @@ export default function ManufacturerProfilePage() {
 
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                         <div className="flex items-start gap-6">
-                            <div className="h-24 w-24 bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden flex-shrink-0">
+                            <div className="h-24 w-24 bg-gray-100 rounded-[10px] border border-gray-200 overflow-hidden flex-shrink-0">
                                 {manufacturer.logo ? (
                                     <img src={manufacturer.logo} alt={manufacturer.companyName} className="h-full w-full object-cover" />
                                 ) : (
@@ -256,7 +256,7 @@ export default function ManufacturerProfilePage() {
                                                 document.getElementById('product-catalog')?.scrollIntoView({ behavior: 'smooth' });
                                                 toast.info('Please select a product to negotiate');
                                             }}
-                                            className="mt-3 px-6 py-2 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all flex items-center shadow-lg shadow-black/10"
+                                            className="mt-3 px-6 py-2 bg-black text-white rounded-[10px] font-medium hover:bg-gray-800 transition-all flex items-center shadow-lg shadow-black/10"
                                         >
                                             Start Negotiation
                                             <ChevronRight className="h-4 w-4 ml-1" />
@@ -266,7 +266,7 @@ export default function ManufacturerProfilePage() {
                             ) : (
                                 <button
                                     onClick={() => setShowRequestModal(true)}
-                                    className="px-6 py-2.5 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all flex items-center shadow-lg shadow-black/10"
+                                    className="px-6 py-2.5 bg-black text-white rounded-[10px] font-medium hover:bg-gray-800 transition-all flex items-center shadow-lg shadow-black/10"
                                 >
                                     <Send className="h-4 w-4 mr-2" />
                                     Request Access
@@ -290,7 +290,7 @@ export default function ManufacturerProfilePage() {
                             key={product._id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all group"
+                            className="bg-white rounded-[10px] border border-gray-100 overflow-hidden hover:shadow-lg transition-all group"
                         >
                             {/* Product Image */}
                             <div
@@ -304,14 +304,14 @@ export default function ManufacturerProfilePage() {
                                         <ImageIcon className="h-12 w-12" />
                                     </div>
                                 )}
-                                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm">
+                                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-[10px] text-xs font-medium shadow-sm">
                                     MOQ: {product.moq}
                                 </div>
                             </div>
 
                             {/* Product Info */}
                             <div className="p-4">
-                                <p className="text-[10px] text-amber-600 font-black mb-2 uppercase tracking-widest truncate">{product.category}</p>
+                                <p className="text-sm text-amber-600 font-black mb-2 uppercase tracking-widest truncate">{product.category}</p>
                                 <h3 className="font-bold text-gray-900 mb-1 line-clamp-1">{product.name}</h3>
                                 {product.description && (
                                     <p className="text-xs text-gray-500 line-clamp-2 mb-3 h-8">{product.description}</p>
@@ -325,7 +325,7 @@ export default function ManufacturerProfilePage() {
                                 <div className="flex gap-3">
                                     <button
                                         onClick={() => openProductDetail(product)}
-                                        className="flex-1 h-10 text-xs font-bold text-gray-600 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 border border-transparent hover:border-gray-200"
+                                        className="flex-1 h-10 text-xs font-bold text-gray-600 bg-gray-50 rounded-[10px] hover:bg-gray-100 transition-colors flex items-center justify-center gap-2 border border-transparent hover:border-gray-200"
                                     >
                                         <Eye className="h-3.5 w-3.5" />
                                         Details
@@ -337,7 +337,7 @@ export default function ManufacturerProfilePage() {
                                                 openSourceModal(product);
                                             }}
                                             disabled={product.allocation?.status === 'PENDING'}
-                                            className={`flex-1 h-10 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md ${product.allocation?.status === 'PENDING'
+                                            className={`flex-1 h-10 text-xs font-bold rounded-[10px] transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md ${product.allocation?.status === 'PENDING'
                                                 ? 'bg-amber-100 text-amber-700 cursor-not-allowed shadow-none'
                                                 : product.allocation?.status === 'APPROVED'
                                                     ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
@@ -366,7 +366,7 @@ export default function ManufacturerProfilePage() {
                                     {isPartner && !product.allocation && (
                                         <button
                                             onClick={() => openNegotiateModal(product)}
-                                            className="h-10 w-10 text-xs font-bold text-gray-600 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors flex items-center justify-center border border-transparent hover:border-gray-200"
+                                            className="h-10 w-10 text-xs font-bold text-gray-600 bg-gray-50 rounded-[10px] hover:bg-gray-100 transition-colors flex items-center justify-center border border-transparent hover:border-gray-200"
                                             title="Negotiate Price"
                                         >
                                             <IndianRupee className="h-3.5 w-3.5" />
@@ -379,7 +379,7 @@ export default function ManufacturerProfilePage() {
                 </div>
 
                 {manufacturer.products.length === 0 && (
-                    <div className="py-20 text-center bg-white rounded-xl border border-dashed border-gray-200">
+                    <div className="py-20 text-center bg-white rounded-[10px] border border-dashed border-gray-200">
                         <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                         <h3 className="text-gray-900 font-medium">No Products Available</h3>
                         <p className="text-gray-500 text-sm mt-1">This manufacturer hasn&apos;t listed any products yet.</p>
@@ -396,13 +396,13 @@ export default function ManufacturerProfilePage() {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="bg-white rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                            className="bg-white rounded-[10px] w-full max-w-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                             onClick={e => e.stopPropagation()}
                         >
                             {/* Modal Header */}
                             <div className="flex items-center justify-between p-5 border-b border-gray-100">
                                 <h3 className="text-lg font-bold text-gray-900">Product Details</h3>
-                                <button onClick={() => setSelectedProduct(null)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                                <button onClick={() => setSelectedProduct(null)} className="p-1 hover:bg-gray-100 rounded-[10px] transition-colors">
                                     <X className="h-5 w-5 text-gray-500" />
                                 </button>
                             </div>
@@ -412,7 +412,7 @@ export default function ManufacturerProfilePage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* Image Gallery */}
                                     <div>
-                                        <div className="h-64 bg-gray-100 rounded-xl overflow-hidden mb-3">
+                                        <div className="h-64 bg-gray-100 rounded-[10px] overflow-hidden mb-3">
                                             {selectedProduct.images?.[activeImageIndex] ? (
                                                 <img
                                                     src={selectedProduct.images[activeImageIndex]}
@@ -431,9 +431,9 @@ export default function ManufacturerProfilePage() {
                                                     <button
                                                         key={idx}
                                                         onClick={() => setActiveImageIndex(idx)}
-                                                        className={`h-16 w-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${activeImageIndex === idx ? 'border-black shadow-md' : 'border-gray-200 opacity-60 hover:opacity-100'}`}
+                                                        className={`h-16 w-16 rounded-[10px] overflow-hidden flex-shrink-0 border-2 transition-all ${activeImageIndex === idx ? 'border-black shadow-md' : 'border-gray-200 opacity-60 hover:opacity-100'}`}
                                                     >
-                                                        <img src={img} alt="" className="h-full w-full object-cover" />
+                                                        <img src={img} alt="" className="h-full w-full object-contain" />
                                                     </button>
                                                 ))}
                                             </div>
@@ -449,13 +449,13 @@ export default function ManufacturerProfilePage() {
 
                                         {/* Price & MOQ Badges */}
                                         <div className="flex gap-3">
-                                            <div className="bg-gray-50 rounded-xl px-4 py-3 flex-1 border border-gray-100">
+                                            <div className="bg-gray-50 rounded-[10px] px-4 py-3 flex-1 border border-gray-100">
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
                                                     <IndianRupee className="h-3 w-3" /> Base Price
                                                 </div>
                                                 <p className="text-xl font-bold text-gray-900">₹{selectedProduct.basePrice?.toLocaleString()}</p>
                                             </div>
-                                            <div className="bg-gray-50 rounded-xl px-4 py-3 flex-1 border border-gray-100">
+                                            <div className="bg-gray-50 rounded-[10px] px-4 py-3 flex-1 border border-gray-100">
                                                 <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
                                                     <Layers className="h-3 w-3" /> Min Order Qty
                                                 </div>
@@ -479,7 +479,7 @@ export default function ManufacturerProfilePage() {
                                                 <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
                                                     <Tag className="h-4 w-4" /> Specifications
                                                 </h4>
-                                                <div className="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-100">
+                                                <div className="bg-gray-50 rounded-[10px] border border-gray-100 overflow-hidden divide-y divide-gray-100">
                                                     {Object.entries(selectedProduct.specifications).map(([key, value]) => (
                                                         <div key={key} className="flex justify-between px-4 py-2.5 text-sm">
                                                             <span className="text-gray-500 capitalize">{key.replace(/_/g, ' ')}</span>
@@ -491,7 +491,7 @@ export default function ManufacturerProfilePage() {
                                         )}
 
                                         {/* Manufacturer info */}
-                                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                        <div className="bg-gray-50 rounded-[10px] p-4 border border-gray-100">
                                             <p className="text-xs text-gray-500 mb-1">Manufactured by</p>
                                             <p className="font-semibold text-gray-900">{manufacturer.companyName}</p>
                                             <p className="text-xs text-gray-500 mt-0.5">{manufacturer.factoryAddress}</p>
@@ -504,14 +504,14 @@ export default function ManufacturerProfilePage() {
                             <div className="p-5 border-t border-gray-100 bg-gray-50/50 flex gap-3">
                                 <button
                                     onClick={() => setSelectedProduct(null)}
-                                    className="flex-1 py-3 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                                    className="flex-1 py-3 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-[10px] hover:bg-gray-50 transition-colors"
                                 >
                                     Close
                                 </button>
                                 {isPartner ? (
                                     <button
                                         onClick={() => { setSelectedProduct(null); openSourceModal(selectedProduct); }}
-                                        className="flex-1 py-3 text-sm font-medium text-white bg-black rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-black/10"
+                                        className="flex-1 py-3 text-sm font-medium text-white bg-black rounded-[10px] hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-black/10"
                                     >
                                         <ShoppingCart className="h-4 w-4" />
                                         Source This Product
@@ -519,7 +519,7 @@ export default function ManufacturerProfilePage() {
                                 ) : !manufacturer.requestStatus ? (
                                     <button
                                         onClick={() => { setSelectedProduct(null); setShowRequestModal(true); }}
-                                        className="flex-1 py-3 text-sm font-medium text-white bg-black rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-black/10"
+                                        className="flex-1 py-3 text-sm font-medium text-white bg-black rounded-[10px] hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-black/10"
                                     >
                                         <Send className="h-4 w-4" />
                                         Request Partnership
@@ -528,7 +528,7 @@ export default function ManufacturerProfilePage() {
                                 {isPartner && !selectedProduct?.allocation && (
                                     <button
                                         onClick={() => { setSelectedProduct(null); openNegotiateModal(selectedProduct); }}
-                                        className="flex-1 py-3 text-sm font-medium text-gray-900 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                                        className="flex-1 py-3 text-sm font-medium text-gray-900 bg-gray-100 rounded-[10px] hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
                                     >
                                         <IndianRupee className="h-4 w-4" />
                                         Negotiate Price
@@ -548,7 +548,7 @@ export default function ManufacturerProfilePage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+                            className="bg-white rounded-[10px] w-full max-w-md shadow-2xl overflow-hidden"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="p-6 border-b border-gray-100">
@@ -557,16 +557,16 @@ export default function ManufacturerProfilePage() {
                                         <h3 className="text-lg font-bold text-gray-900">Source Product</h3>
                                         <p className="text-sm text-gray-500 mt-0.5">{sourceProduct.name}</p>
                                     </div>
-                                    <button onClick={() => setShowSourceModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                                    <button onClick={() => setShowSourceModal(false)} className="p-1 hover:bg-gray-100 rounded-[10px]">
                                         <X className="h-5 w-5 text-gray-500" />
                                     </button>
                                 </div>
 
                                 {/* Product preview */}
-                                <div className="mt-4 flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
-                                    <div className="h-14 w-14 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                                <div className="mt-4 flex items-center gap-3 bg-gray-50 rounded-[10px] p-3 border border-gray-100">
+                                    <div className="h-14 w-14 rounded-[10px] overflow-hidden bg-gray-200 flex-shrink-0">
                                         {sourceProduct.images?.[0] ? (
-                                            <img src={sourceProduct.images[0]} alt="" className="h-full w-full object-cover" />
+                                            <img src={sourceProduct.images[0]} alt="" className="h-full w-full object-contain" />
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center text-gray-400"><ImageIcon className="h-6 w-6" /></div>
                                         )}
@@ -584,7 +584,7 @@ export default function ManufacturerProfilePage() {
                                     <input
                                         type="text"
                                         required
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+                                        className="w-full px-4 py-2.5 rounded-[10px] border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
                                         placeholder="e.g. Mumbai, Delhi NCR"
                                         value={sourceForm.region}
                                         onChange={e => setSourceForm({ ...sourceForm, region: e.target.value })}
@@ -597,7 +597,7 @@ export default function ManufacturerProfilePage() {
                                             type="number"
                                             required
                                             min={sourceProduct.moq}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+                                            className="w-full px-4 py-2.5 rounded-[10px] border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
                                             placeholder={`Min: ${sourceProduct.moq}`}
                                             value={sourceForm.stock}
                                             onChange={e => setSourceForm({ ...sourceForm, stock: e.target.value })}
@@ -609,7 +609,7 @@ export default function ManufacturerProfilePage() {
                                         <input
                                             type="number"
                                             required
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+                                            className="w-full px-4 py-2.5 rounded-[10px] border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
                                             placeholder={`Base: ₹${sourceProduct.basePrice}`}
                                             value={sourceForm.price}
                                             onChange={e => setSourceForm({ ...sourceForm, price: e.target.value })}
@@ -621,7 +621,7 @@ export default function ManufacturerProfilePage() {
                                 <button
                                     type="submit"
                                     disabled={sourcing}
-                                    className="w-full py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg shadow-black/10"
+                                    className="w-full py-3 bg-black text-white rounded-[10px] font-medium hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg shadow-black/10"
                                 >
                                     {sourcing ? (
                                         <>
@@ -649,12 +649,12 @@ export default function ManufacturerProfilePage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
+                            className="bg-white rounded-[10px] w-full max-w-lg shadow-2xl overflow-hidden"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                                 <h3 className="text-lg font-bold text-gray-900">Request Partnership</h3>
-                                <button onClick={() => setShowRequestModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                                <button onClick={() => setShowRequestModal(false)} className="p-1 hover:bg-gray-100 rounded-[10px]">
                                     <X className="h-5 w-5 text-gray-500" />
                                 </button>
                             </div>
@@ -665,7 +665,7 @@ export default function ManufacturerProfilePage() {
                                     <textarea
                                         required
                                         rows={3}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
+                                        className="w-full px-4 py-2 rounded-[10px] border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
                                         placeholder="Introduce your business and why you want to partner..."
                                         value={requestForm.message}
                                         onChange={e => setRequestForm({ ...requestForm, message: e.target.value })}
@@ -677,7 +677,7 @@ export default function ManufacturerProfilePage() {
                                         <input
                                             type="number"
                                             required
-                                            className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
+                                            className="w-full px-4 py-2 rounded-[10px] border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
                                             placeholder="e.g. 500"
                                             value={requestForm.expectedQuantity}
                                             onChange={e => setRequestForm({ ...requestForm, expectedQuantity: e.target.value })}
@@ -688,7 +688,7 @@ export default function ManufacturerProfilePage() {
                                         <input
                                             type="text"
                                             required
-                                            className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
+                                            className="w-full px-4 py-2 rounded-[10px] border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5"
                                             placeholder="e.g. Mumbai"
                                             value={requestForm.region}
                                             onChange={e => setRequestForm({ ...requestForm, region: e.target.value })}
@@ -699,7 +699,7 @@ export default function ManufacturerProfilePage() {
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="w-full py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                                    className="w-full py-3 bg-black text-white rounded-[10px] font-medium hover:bg-gray-800 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                                 >
                                     {submitting ? 'Sending Request...' : 'Send Request'}
                                 </button>
@@ -717,7 +717,7 @@ export default function ManufacturerProfilePage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+                            className="bg-white rounded-[10px] w-full max-w-md shadow-2xl overflow-hidden"
                             onClick={e => e.stopPropagation()}
                         >
                             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
@@ -725,7 +725,7 @@ export default function ManufacturerProfilePage() {
                                     <h3 className="text-lg font-bold text-gray-900">Start Negotiation</h3>
                                     <p className="text-sm text-gray-500 mt-0.5">{negotiateProduct.name}</p>
                                 </div>
-                                <button onClick={() => setShowNegotiateModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+                                <button onClick={() => setShowNegotiateModal(false)} className="p-1 hover:bg-gray-100 rounded-[10px]">
                                     <X className="h-5 w-5 text-gray-500" />
                                 </button>
                             </div>
@@ -738,7 +738,7 @@ export default function ManufacturerProfilePage() {
                                             type="number"
                                             required
                                             min={negotiateProduct.moq}
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+                                            className="w-full px-4 py-2.5 rounded-[10px] border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
                                             placeholder={`Min: ${negotiateProduct.moq}`}
                                             value={negotiateForm.quantity}
                                             onChange={e => setNegotiateForm({ ...negotiateForm, quantity: e.target.value })}
@@ -750,7 +750,7 @@ export default function ManufacturerProfilePage() {
                                         <input
                                             type="number"
                                             required
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+                                            className="w-full px-4 py-2.5 rounded-[10px] border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
                                             placeholder="Offer Price"
                                             value={negotiateForm.initialOffer}
                                             onChange={e => setNegotiateForm({ ...negotiateForm, initialOffer: e.target.value })}
@@ -762,7 +762,7 @@ export default function ManufacturerProfilePage() {
                                 <button
                                     type="submit"
                                     disabled={creatingNegotiation}
-                                    className="w-full py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-lg shadow-black/10"
+                                    className="w-full py-3 bg-black text-white rounded-[10px] font-medium hover:bg-gray-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-lg shadow-black/10"
                                 >
                                     {creatingNegotiation ? 'Starting Chat...' : 'Start Negotiation'}
                                     {!creatingNegotiation && <ChevronRight className="h-4 w-4" />}

@@ -54,19 +54,19 @@ export default function PlatformSettingsPortal() {
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#10367D] hover:translate-x-[-4px] transition-transform">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#067FF9] hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight UPPERCASE ITALIC">Terminal <span className="text-[#10367D]">Configuration</span></h1>
-                        <p className="text-slate-400 font-bold text-sm mt-1">High-Level Platform Parameter Control</p>
+                        <h1 className="text-2xl font-bold text-[#1E293B] tracking-tight uppercase italic">Terminal <span className="text-[#067FF9]">Configuration</span></h1>
+                        <p className="text-slate-400 font-medium text-sm mt-1">System Parameters & Global Settings</p>
                     </div>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="px-8 py-3 bg-[#10367D] text-white text-sm font-black rounded-[10px] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-3"
+                        className="px-8 py-3 bg-[#067FF9] text-white text-sm font-black rounded-[10px] shadow-xl shadow-[#067FF9]/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-3"
                     >
                         {isSaving ? 'Deploying Changes...' : 'Save System Parameters'}
                     </button>
@@ -78,7 +78,7 @@ export default function PlatformSettingsPortal() {
                 <div className="lg:col-span-8 space-y-8">
                     <div className="bg-white rounded-[10px] p-10 lg:p-12 border border-slate-100 shadow-sm">
                         <h2 className="text-sm font-black text-[#1E293B] tracking-[0.2em] mb-10 flex items-center gap-4 italic">
-                            <FaMicrochip className="text-[#10367D]" />
+                            <FaMicrochip className="text-[#067FF9]" />
                             Operational Overrides
                         </h2>
 
@@ -90,7 +90,7 @@ export default function PlatformSettingsPortal() {
                             >
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-black text-[#1E293B]">Maintenance Mode</h3>
-                                    <div className={`w-10 h-5 rounded-full p-1 flex transition-all ${profile.maintenanceMode ? 'bg-[#10367D] justify-end' : 'bg-slate-300 justify-start'}`}>
+                                    <div className={`w-10 h-5 rounded-full p-1 flex transition-all ${profile.maintenanceMode ? 'bg-[#067FF9] justify-end' : 'bg-slate-300 justify-start'}`}>
                                         <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
                                     </div>
                                 </div>
@@ -118,7 +118,7 @@ export default function PlatformSettingsPortal() {
                             >
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-black text-[#1E293B]">Escrow Hold-All</h3>
-                                    <div className={`w-10 h-5 rounded-full p-1 flex transition-all ${profile.escrowHold ? 'bg-[#10367D] justify-end' : 'bg-slate-300 justify-start'}`}>
+                                    <div className={`w-10 h-5 rounded-full p-1 flex transition-all ${profile.escrowHold ? 'bg-[#067FF9] justify-end' : 'bg-slate-300 justify-start'}`}>
                                         <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
                                     </div>
                                 </div>
@@ -132,7 +132,7 @@ export default function PlatformSettingsPortal() {
                             >
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-black text-[#1E293B]">Debug Logging</h3>
-                                    <div className={`w-10 h-5 rounded-full p-1 flex transition-all ${profile.debugLogging ? 'bg-[#10367D] justify-end' : 'bg-slate-300 justify-start'}`}>
+                                    <div className={`w-10 h-5 rounded-full p-1 flex transition-all ${profile.debugLogging ? 'bg-[#067FF9] justify-end' : 'bg-slate-300 justify-start'}`}>
                                         <div className="w-3 h-3 bg-white rounded-full shadow-sm" />
                                     </div>
                                 </div>
@@ -159,9 +159,9 @@ export default function PlatformSettingsPortal() {
                 {/* API & Cloud Settings */}
                 <div className="lg:col-span-4 space-y-8">
                     <div className="bg-[#1E293B] rounded-[10px] p-10 text-white shadow-2xl overflow-hidden relative group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#10367D]/10 blur-2xl rounded-full" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#067FF9]/10 blur-2xl rounded-full" />
                         <h3 className="text-sm font-black tracking-[0.2em] mb-10 opacity-60 flex items-center gap-3 italic">
-                            <FaNetworkWired className="w-4 h-4 text-[#10367D]" />
+                            <FaNetworkWired className="w-4 h-4 text-[#067FF9]" />
                             Cloud Handshake
                         </h3>
 
@@ -175,13 +175,13 @@ export default function PlatformSettingsPortal() {
                             <div className="space-y-3">
                                 <label className="text-xs font-black text-slate-500 tracking-[0.2em]">Auth Salt Level</label>
                                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-[10px] border border-white/10">
-                                    <span className="text-xs font-bold text-[#10367D]">RATING: PARANOID</span>
+                                    <span className="text-xs font-bold text-[#067FF9]">RATING: PARANOID</span>
                                     <FaShieldAlt className="w-4 h-4 text-emerald-500" />
                                 </div>
                             </div>
                             <div className="space-y-3">
                                 <label className="text-xs font-black text-slate-500 tracking-[0.2em]">System Version</label>
-                                <div className="p-4 bg-white/5 rounded-[10px] border border-white/10 text-xs font-black text-[#10367D]">
+                                <div className="p-4 bg-white/5 rounded-[10px] border border-white/10 text-xs font-black text-[#067FF9]">
                                     NovaMart Engine v4.8.2-Stable
                                 </div>
                             </div>

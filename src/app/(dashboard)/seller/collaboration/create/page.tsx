@@ -68,15 +68,15 @@ export default function CreateCollaborationPage() {
         <div className="max-w-4xl mx-auto pb-20">
             <button
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-slate-600 hover:text-[#10367D] font-bold mb-6 transition-colors"
+                className="flex items-center gap-2 text-slate-600 hover:text-[#067FF9] font-bold mb-6 transition-colors"
             >
                 <FaArrowLeft className="w-4 h-4" />
                 Back to Groups
             </button>
 
             <div className="bg-white rounded-[25px] p-10 border border-slate-100 shadow-xl">
-                <h1 className="text-3xl font-black text-[#1E293B] mb-2 italic uppercase">
-                    Create <span className="text-[#10367D]">Collaboration Group</span>
+                <h1 className="text-3xl font-black text-slate-900 mb-2 italic uppercase">
+                    Create <span className="text-[#067FF9]">Collaboration Group</span>
                 </h1>
                 <p className="text-sm font-bold text-slate-500 mb-8">
                     Pool demand with other ENTERPRISE dealers for bulk custom manufacturing
@@ -93,7 +93,7 @@ export default function CreateCollaborationPage() {
                             required
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#10367D] focus:ring-2 focus:ring-[#10367D]/20 outline-none transition-all font-bold"
+                            className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#067FF9] focus:ring-2 focus:ring-[#067FF9]/20 outline-none transition-all font-bold"
                             placeholder="e.g., Bulk Refrigerator Order Q2 2026"
                         />
                     </div>
@@ -107,7 +107,7 @@ export default function CreateCollaborationPage() {
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows={4}
-                            className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#10367D] focus:ring-2 focus:ring-[#10367D]/20 outline-none transition-all font-bold resize-none"
+                            className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#067FF9] focus:ring-2 focus:ring-[#067FF9]/20 outline-none transition-all font-bold resize-none"
                             placeholder="Describe the collaboration goal and product requirements..."
                         />
                     </div>
@@ -122,7 +122,7 @@ export default function CreateCollaborationPage() {
                                 required
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#10367D] focus:ring-2 focus:ring-[#10367D]/20 outline-none transition-all font-bold"
+                                className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#067FF9] focus:ring-2 focus:ring-[#067FF9]/20 outline-none transition-all font-bold"
                             >
                                 <option value="">Select Category</option>
                                 <option value="Appliances">Appliances</option>
@@ -143,7 +143,7 @@ export default function CreateCollaborationPage() {
                                 min="1"
                                 value={formData.targetQuantity}
                                 onChange={(e) => setFormData({ ...formData, targetQuantity: e.target.value })}
-                                className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#10367D] focus:ring-2 focus:ring-[#10367D]/20 outline-none transition-all font-bold"
+                                className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#067FF9] focus:ring-2 focus:ring-[#067FF9]/20 outline-none transition-all font-bold"
                                 placeholder="e.g., 100"
                             />
                         </div>
@@ -160,7 +160,7 @@ export default function CreateCollaborationPage() {
                             value={formData.requiredDeliveryDate}
                             onChange={(e) => setFormData({ ...formData, requiredDeliveryDate: e.target.value })}
                             min={new Date().toISOString().split('T')[0]}
-                            className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#10367D] focus:ring-2 focus:ring-[#10367D]/20 outline-none transition-all font-bold"
+                            className="w-full px-6 py-4 rounded-[15px] border border-slate-200 focus:border-[#067FF9] focus:ring-2 focus:ring-[#067FF9]/20 outline-none transition-all font-bold"
                         />
                     </div>
 
@@ -187,7 +187,7 @@ export default function CreateCollaborationPage() {
                                             type="checkbox"
                                             checked={formData.invitedDealerIds.includes(dealer._id)}
                                             onChange={() => toggleDealer(dealer._id)}
-                                            className="w-5 h-5 rounded border-slate-300 text-[#10367D] focus:ring-[#10367D]"
+                                            className="w-5 h-5 rounded border-slate-300 text-[#067FF9] focus:ring-[#067FF9]"
                                         />
                                         <div className="flex-1">
                                             <p className="font-black text-slate-800 text-sm">
@@ -202,7 +202,7 @@ export default function CreateCollaborationPage() {
                             )}
                         </div>
                         {formData.invitedDealerIds.length > 0 && (
-                            <p className="text-xs text-[#10367D] font-black mt-2">
+                            <p className="text-xs text-[#067FF9] font-black mt-2">
                                 {formData.invitedDealerIds.length} dealer(s) selected
                             </p>
                         )}
@@ -213,7 +213,7 @@ export default function CreateCollaborationPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 py-5 bg-[#10367D] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 py-5 bg-[#067FF9] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Creating...' : 'Create Collaboration Group'}
                         </button>

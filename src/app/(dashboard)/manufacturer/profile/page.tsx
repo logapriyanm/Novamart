@@ -103,7 +103,7 @@ export default function ManufacturerProfilePage() {
                                 </div>
                                 <div className="text-left">
                                     <h4 className="text-sm font-bold tracking-wide">{s.name}</h4>
-                                    <p className={`text-[10px] font-medium mt-0.5 ${activeSection === s.id ? 'text-white/70' : 'text-slate-400'}`}>{s.desc}</p>
+                                    <p className={`text-sm font-medium mt-0.5 ${activeSection === s.id ? 'text-white/70' : 'text-slate-400'}`}>{s.desc}</p>
                                 </div>
                                 <FaChevronRight className={`ml-auto w-3 h-3 transition-transform ${activeSection === s.id ? 'translate-x-1' : 'opacity-0'}`} />
                             </button>
@@ -113,7 +113,7 @@ export default function ManufacturerProfilePage() {
                     {/* Verification Sidebar Card */}
                     <div className="bg-slate-900 rounded-[10px] p-6 text-white relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-800/50 blur-2xl rounded-full" />
-                        <h3 className="text-[10px] font-bold tracking-wider mb-6 opacity-70 flex items-center gap-2">
+                        <h3 className="text-sm font-bold tracking-wider mb-6 opacity-70 flex items-center gap-2">
                             <FaShieldAlt className="w-3.5 h-3.5 text-emerald-400" />
                             Entity Governance
                         </h3>
@@ -130,7 +130,7 @@ export default function ManufacturerProfilePage() {
                                     <FaCheckCircle className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-400 tracking-wider">Verification Status</p>
+                                    <p className="text-sm font-bold text-slate-400 tracking-wider">Verification Status</p>
                                     <p className="text-xs font-bold">
                                         {profile.isVerified
                                             ? 'VERIFIED ENTITY'
@@ -148,7 +148,7 @@ export default function ManufacturerProfilePage() {
                                 <>
                                     <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-[8px] flex items-center gap-3">
                                         <FaLock className="text-amber-500 w-3.5 h-3.5" />
-                                        <p className="text-[10px] font-medium text-amber-200 tracking-wide leading-relaxed">Product publishing restricted until verified</p>
+                                        <p className="text-sm font-medium text-amber-200 tracking-wide leading-relaxed">Product publishing restricted until verified</p>
                                     </div>
                                     <button
                                         onClick={() => setKycModalOpen(true)}
@@ -164,8 +164,8 @@ export default function ManufacturerProfilePage() {
                             {profile.verificationStatus === 'PENDING' && (
                                 <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-[8px] text-center">
                                     <FaClock className="w-5 h-5 text-blue-400 mx-auto mb-2" />
-                                    <p className="text-[10px] font-bold text-blue-200 tracking-wide">Documents Under Admin Review</p>
-                                    <p className="text-[9px] text-blue-300 mt-1">Expected response: 24-48 hours</p>
+                                    <p className="text-sm font-bold text-blue-200 tracking-wide">Documents Under Admin Review</p>
+                                    <p className="text-xs text-blue-300 mt-1">Expected response: 24-48 hours</p>
                                 </div>
                             )}
 
@@ -175,15 +175,15 @@ export default function ManufacturerProfilePage() {
                                     <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-[8px]">
                                         <div className="flex items-center gap-2 mb-2">
                                             <FaExclamationTriangle className="text-rose-400 w-3.5 h-3.5" />
-                                            <p className="text-[10px] font-bold text-rose-200 tracking-wide">Verification Rejected</p>
+                                            <p className="text-sm font-bold text-rose-200 tracking-wide">Verification Rejected</p>
                                         </div>
                                         {profile.rejectionReason && (
-                                            <p className="text-[9px] text-rose-300 leading-relaxed">{profile.rejectionReason}</p>
+                                            <p className="text-xs text-rose-300 leading-relaxed">{profile.rejectionReason}</p>
                                         )}
                                     </div>
                                     <button
                                         onClick={() => setKycModalOpen(true)}
-                                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[8px] font-bold text-[10px] tracking-wide transition-all flex items-center justify-center gap-2"
+                                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[8px] font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2"
                                     >
                                         <FaSync className="w-3 h-3" />
                                         Resubmit Documents
@@ -196,9 +196,9 @@ export default function ManufacturerProfilePage() {
                                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-[8px] flex items-center gap-3">
                                     <FaCheckCircle className="text-emerald-400 w-5 h-5" />
                                     <div>
-                                        <p className="text-[10px] font-bold text-emerald-200 tracking-wide">Fully Verified Entity</p>
+                                        <p className="text-sm font-bold text-emerald-200 tracking-wide">Fully Verified Entity</p>
                                         {profile.verifiedAt && (
-                                            <p className="text-[9px] text-emerald-300 mt-0.5">Verified on {new Date(profile.verifiedAt).toLocaleDateString()}</p>
+                                            <p className="text-xs text-emerald-300 mt-0.5">Verified on {new Date(profile.verifiedAt).toLocaleDateString()}</p>
                                         )}
                                     </div>
                                 </div>
@@ -321,7 +321,7 @@ function AccountSection({ profile, user, onSave, isSaving }: any) {
                             {profile.isVerified && (
                                 <div className="shrink-0 group relative">
                                     <img src="/verify.png" className="w-6 h-6 object-contain" alt="Verified" />
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[8px] font-black tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-xs font-black tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                                         Verified Manufacturer
                                     </div>
                                 </div>
@@ -354,7 +354,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
     return (
         <div className="mb-8">
             <h2 className="text-xl font-bold text-slate-800">{title}</h2>
-            <p className="text-slate-500 font-medium tracking-wide text-[10px] mt-1">{subtitle}</p>
+            <p className="text-slate-500 font-medium tracking-wide text-sm mt-1">{subtitle}</p>
         </div>
     );
 }
@@ -473,10 +473,10 @@ function CertificationCard({ title, status }: any) {
         <div className="p-6 bg-white border border-slate-200 rounded-[10px] shadow-sm hover:border-slate-300 transition-all group">
             <div className="flex items-center justify-between mb-3">
                 <FaCertificate className="text-slate-600 w-5 h-5" />
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-[4px] tracking-wide">{status}</span>
+                <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-[4px] tracking-wide">{status}</span>
             </div>
             <h4 className="text-sm font-bold text-slate-900 tracking-wide">{title}</h4>
-            <p className="text-[10px] font-medium text-slate-400 mt-1 tracking-wide">Validated via Gov portal</p>
+            <p className="text-sm font-medium text-slate-400 mt-1 tracking-wide">Validated via Gov portal</p>
         </div>
     );
 }
@@ -522,7 +522,7 @@ function BrandAssetsSection({ profile, onSave, isSaving }: any) {
                         ) : (
                             <>
                                 <FaCamera className="w-8 h-8 group-hover:scale-110 transition-transform" />
-                                <span className="text-[10px] font-bold tracking-wide">Upload Master SVG/PNG</span>
+                                <span className="text-sm font-bold tracking-wide">Upload Master SVG/PNG</span>
                             </>
                         )}
                     </div>
@@ -561,7 +561,7 @@ function DealersSection({ profile }: any) {
                                 </div>
                                 <div>
                                     <h4 className="text-sm font-bold text-slate-800 tracking-wide">{dlr.businessName}</h4>
-                                    <p className="text-[10px] font-medium text-slate-400 mt-0.5">{dlr.city}, {dlr.state}</p>
+                                    <p className="text-sm font-medium text-slate-400 mt-0.5">{dlr.city}, {dlr.state}</p>
                                 </div>
                             </div>
                             <FaChevronRight className="w-3 h-3 text-slate-300 group-hover:text-slate-900" />
@@ -592,7 +592,7 @@ function SecuritySection({ profile }: any) {
                         </div>
                         <div>
                             <h4 className="text-sm font-bold text-slate-900 tracking-wide">Master 2FA Protocol</h4>
-                            <p className="text-[10px] font-medium text-slate-400 mt-0.5">Identity validated via hardware biometric token</p>
+                            <p className="text-sm font-medium text-slate-400 mt-0.5">Identity validated via hardware biometric token</p>
                         </div>
                     </div>
                     <div className="w-10 h-5 bg-emerald-500 rounded-full p-1">
@@ -603,9 +603,9 @@ function SecuritySection({ profile }: any) {
                 <div className="p-6 bg-slate-50 border border-slate-200 rounded-[10px] flex items-center justify-between">
                     <div>
                         <h4 className="text-sm font-bold text-slate-900 tracking-wide">Supply Channel Access</h4>
-                        <p className="text-[10px] font-medium text-slate-400 mt-0.5 text-rose-500">Warning: Deactivation stops all active dealer sourcing</p>
+                        <p className="text-sm font-medium text-slate-400 mt-0.5 text-rose-500">Warning: Deactivation stops all active dealer sourcing</p>
                     </div>
-                    <button className="px-6 py-2.5 bg-rose-500 text-white text-[9px] font-bold tracking-wide rounded-[8px] hover:bg-rose-600 transition-all">Deactivate</button>
+                    <button className="px-6 py-2.5 bg-rose-500 text-white text-xs font-bold tracking-wide rounded-[8px] hover:bg-rose-600 transition-all">Deactivate</button>
                 </div>
             </div>
         </div>

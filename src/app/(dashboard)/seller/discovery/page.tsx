@@ -75,7 +75,7 @@ export default function ManufacturerDiscoveryPage() {
                     <input
                         type="text"
                         placeholder="Search by company name or location..."
-                        className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+                        className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -86,7 +86,7 @@ export default function ManufacturerDiscoveryPage() {
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3, 4, 5, 6].map(i => (
-                        <div key={i} className="h-64 bg-white rounded-xl border border-gray-100 animate-pulse" />
+                        <div key={i} className="h-64 bg-white rounded-[10px] border border-gray-100 animate-pulse" />
                     ))}
                 </div>
             ) : (
@@ -97,12 +97,12 @@ export default function ManufacturerDiscoveryPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.05 }}
-                            className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-black/5 transition-all duration-300 cursor-pointer"
+                            className="group bg-white rounded-[10px] border border-gray-100 overflow-hidden hover:shadow-lg hover:border-black/5 transition-all duration-300 cursor-pointer"
                             onClick={() => router.push(`/seller/discovery/${m.id}`)}
                         >
                             {/* Card Header / Cover */}
                             <div className="h-24 bg-gradient-to-r from-gray-900 to-gray-800 relative p-4">
-                                <div className="absolute -bottom-6 left-6 w-16 h-16 bg-white rounded-xl border-2 border-white shadow-sm flex items-center justify-center overflow-hidden">
+                                <div className="absolute -bottom-6 left-6 w-16 h-16 bg-white rounded-[10px] border-2 border-white shadow-sm flex items-center justify-center overflow-hidden">
                                     {m.logo ? (
                                         <img src={m.logo} alt={m.companyName} className="w-full h-full object-cover" />
                                     ) : (
@@ -132,7 +132,7 @@ export default function ManufacturerDiscoveryPage() {
                                 </div>
 
                                 {/* Product Preview Strip */}
-                                <div className="bg-gray-50 rounded-lg p-3 mb-6">
+                                <div className="bg-gray-50 rounded-[10px] p-3 mb-6">
                                     <p className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">Top Products</p>
                                     <div className="flex gap-2">
                                         {m.products?.slice(0, 3).map((p, i) => (
@@ -153,7 +153,7 @@ export default function ManufacturerDiscoveryPage() {
                                 </div>
 
                                 <button
-                                    className="w-full py-2.5 rounded-lg border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors flex items-center justify-center gap-2 group-hover:border-black group-hover:bg-black group-hover:text-white"
+                                    className="w-full py-2.5 rounded-[10px] border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors flex items-center justify-center gap-2 group-hover:border-black group-hover:bg-black group-hover:text-white"
                                 >
                                     View Profile
                                     <ArrowRight className="h-4 w-4" />

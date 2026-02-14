@@ -8,9 +8,9 @@
   :root {
     --primary: #067FF9;
     /* Blue Accent */
-    --secondary: #171717;
+    --secondary: #067FF9;
     /* Black */
-    --accent: #067FF9;
+    --accent: #000000;
     --background: #FFFFFF;
     /* White */
     --foreground: #000000;

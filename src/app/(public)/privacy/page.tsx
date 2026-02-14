@@ -30,7 +30,7 @@ export default function PrivacyPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-[10px] font-black tracking-widest text-black mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-black/10 border border-black/20 text-sm font-black tracking-widest text-black mb-6"
                     >
                         <Shield className="w-3 h-3" />
                         Privacy Safeguards
@@ -53,8 +53,8 @@ export default function PrivacyPage() {
                             <div className="w-12 h-12 rounded-[5px] bg-black/5 text-black flex items-center justify-center mb-6 group-hover:bg-black group-hover:text-white transition-all">
                                 <pillar.icon className="w-6 h-6" />
                             </div>
-                            <h3 className="text-[10px] font-black text-foreground/40 tracking-widest mb-2 italic">{pillar.title}</h3>
-                            <p className="text-[11px] text-foreground/60 font-bold leading-relaxed italic">"{pillar.description}"</p>
+                            <h3 className="text-sm font-black text-foreground/40 tracking-widest mb-2 italic">{pillar.title}</h3>
+                            <p className="text-sm text-foreground/60 font-bold leading-relaxed italic">"{pillar.description}"</p>
                         </motion.div>
                     ))}
                 </div>

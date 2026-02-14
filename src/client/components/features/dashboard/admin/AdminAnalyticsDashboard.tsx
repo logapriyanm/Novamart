@@ -10,7 +10,7 @@ import ChartCard from '@/client/components/ui/charts/ChartCard';
 import Loader from '@/client/components/ui/Loader';
 import { toast } from 'sonner';
 
-const COLORS = ['#2772A0', '#94a3b8', '#cbd5e1', '#e2e8f0'];
+const COLORS = ['#067FF9', '#3b82f6', '#60a5fa', '#93c5fd'];
 
 export default function AdminAnalyticsDashboard() {
     const [data, setData] = useState<any>(null);
@@ -54,7 +54,7 @@ export default function AdminAnalyticsDashboard() {
                             <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
                             <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                            <Line type="monotone" dataKey="revenue" stroke="#2772A0" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
+                            <Line type="monotone" dataKey="revenue" stroke="#067FF9" strokeWidth={3} dot={false} activeDot={{ r: 6 }} />
                         </LineChart>
                     </ResponsiveContainer>
                 </ChartCard>
@@ -72,7 +72,7 @@ export default function AdminAnalyticsDashboard() {
                             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
                             <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                             <Area type="monotone" dataKey="gmv" stackId="1" stroke="#cbd5e1" fill="#cbd5e1" fillOpacity={0.5} />
-                            <Area type="monotone" dataKey="commission" stackId="1" stroke="#2772A0" fill="#2772A0" />
+                            <Area type="monotone" dataKey="commission" stackId="1" stroke="#067FF9" fill="#067FF9" />
                             <Legend iconType="circle" />
                         </AreaChart>
                     </ResponsiveContainer>
@@ -90,7 +90,7 @@ export default function AdminAnalyticsDashboard() {
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
                                 <Tooltip cursor={{ fill: '#F1F5F9' }} contentStyle={{ borderRadius: '8px' }} />
                                 <Legend />
-                                <Bar dataKey="customers" stackId="a" fill="#2772A0" radius={[0, 0, 4, 4]} />
+                                <Bar dataKey="customers" stackId="a" fill="#067FF9" radius={[0, 0, 4, 4]} />
                                 <Bar dataKey="sellers" stackId="a" fill="#94a3b8" />
                                 <Bar dataKey="manufacturers" stackId="a" fill="#cbd5e1" radius={[4, 4, 0, 0]} />
                             </BarChart>

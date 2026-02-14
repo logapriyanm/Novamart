@@ -178,8 +178,7 @@ const sellerMenuGroups: MenuGroup[] = [
         label: 'Retail Operations',
         icon: FaStore,
         items: [
-            { name: 'Retail Products', icon: ProductsIcon, path: '/seller/products' },
-            { name: 'Inventory', icon: FaWarehouse, path: '/seller/inventory' },
+            { name: 'Inventory', icon: FaWarehouse, path: '/seller/products' },
             { name: 'Customer Orders', icon: LogisticsIcon, path: '/seller/orders' },
         ],
     },

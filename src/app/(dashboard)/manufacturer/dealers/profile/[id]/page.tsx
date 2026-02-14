@@ -55,7 +55,7 @@ export default function ManufacturerDealerProfilePage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="w-8 h-8 border-4 border-[#0F6CBD] border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-4 border-[#067FF9] border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
@@ -67,7 +67,7 @@ export default function ManufacturerDealerProfilePage() {
                 <h3 className="text-lg font-black text-slate-700">Dealer Not Found</h3>
                 <button
                     onClick={() => router.back()}
-                    className="mt-4 px-6 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-bold hover:bg-slate-200 transition-colors"
+                    className="mt-4 px-6 py-2 bg-slate-100 text-slate-600 rounded-[10px] text-sm font-bold hover:bg-slate-200 transition-colors"
                 >
                     Go Back
                 </button>
@@ -80,7 +80,7 @@ export default function ManufacturerDealerProfilePage() {
             {/* Header / Nav */}
             <button
                 onClick={() => router.back()}
-                className="flex items-center gap-2 text-slate-500 hover:text-[#0F6CBD] transition-colors text-sm font-bold uppercase tracking-wider"
+                className="flex items-center gap-2 text-slate-500 hover:text-[#067FF9] transition-colors text-sm font-bold uppercase tracking-wider"
             >
                 <FaArrowLeft /> Back to Requests
             </button>
@@ -91,14 +91,14 @@ export default function ManufacturerDealerProfilePage() {
 
                 <div className="flex flex-col md:flex-row gap-8 relative z-10">
                     {/* Icon/Logo */}
-                    <div className="w-24 h-24 bg-slate-50 rounded-2xl flex items-center justify-center text-[#0F6CBD] text-4xl shadow-inner border border-slate-100">
+                    <div className="w-24 h-24 bg-slate-50 rounded-[10px] flex items-center justify-center text-[#067FF9] text-4xl shadow-inner border border-slate-100">
                         <FaStore />
                     </div>
 
                     <div className="flex-1">
                         <div className="flex items-start justify-between">
                             <div>
-                                <h1 className="text-3xl font-black text-[#1E293B] mb-2">{dealer.businessName}</h1>
+                                <h1 className="text-3xl font-black text-slate-900 mb-2">{dealer.businessName}</h1>
 
                                 <div className="flex flex-wrap gap-4 text-sm font-medium text-slate-500">
                                     <div className="flex items-center gap-1.5">
@@ -120,22 +120,22 @@ export default function ManufacturerDealerProfilePage() {
 
                         {/* Stats Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Products</p>
+                            <div className="bg-slate-50 rounded-[10px] p-4 border border-slate-100">
+                                <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Products</p>
                                 <div className="flex items-center gap-2">
-                                    <FaBoxOpen className="text-[#0F6CBD]" />
+                                    <FaBoxOpen className="text-[#067FF9]" />
                                     <span className="text-xl font-black text-slate-800">{dealer.stats?.totalProducts || 0}</span>
                                 </div>
                             </div>
-                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Rating</p>
+                            <div className="bg-slate-50 rounded-[10px] p-4 border border-slate-100">
+                                <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Rating</p>
                                 <div className="flex items-center gap-2">
                                     <FaStar className="text-amber-400" />
                                     <span className="text-xl font-black text-slate-800">{dealer.stats?.averageRating ? dealer.stats.averageRating.toFixed(1) : 'N/A'}</span>
                                 </div>
                             </div>
-                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Reviews</p>
+                            <div className="bg-slate-50 rounded-[10px] p-4 border border-slate-100">
+                                <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Reviews</p>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xl font-black text-slate-800">{dealer.stats?.reviewCount || 0}</span>
                                 </div>
@@ -146,7 +146,7 @@ export default function ManufacturerDealerProfilePage() {
             </div>
 
             {/* Additional Sections (Placeholder for future expansion) */}
-            <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center text-slate-400">
+            <div className="bg-white rounded-[10px] border border-slate-100 p-8 text-center text-slate-400">
                 <p className="text-sm font-bold uppercase tracking-widest">More detailed analytics and order history coming soon.</p>
             </div>
         </div>

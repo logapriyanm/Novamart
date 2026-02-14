@@ -136,7 +136,7 @@ export default function CustomerReviewPortal() {
                     </p>
                     <button
                         onClick={() => router.push(`/orders/${order.id}`)}
-                        className="w-full py-4 bg-[#10367D] text-white rounded-xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#0d2a61] transition-all shadow-lg shadow-blue-900/20 italic"
+                        className="w-full py-4 bg-[#067FF9] text-white rounded-[10px] font-black text-sm uppercase tracking-[0.2em] hover:bg-[#0d2a61] transition-all shadow-lg shadow-blue-900/20 italic"
                     >
                         Return to Order Details
                     </button>
@@ -154,8 +154,8 @@ export default function CustomerReviewPortal() {
             <div className="max-w-[800px] mx-auto px-6">
 
                 {/* Breadcrumbs */}
-                <div className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-10">
-                    <Link href="/orders" className="hover:text-[#10367D] transition-colors">Orders</Link>
+                <div className="flex items-center gap-3 text-sm font-black text-slate-400 uppercase tracking-[0.15em] mb-10">
+                    <Link href="/orders" className="hover:text-[#067FF9] transition-colors">Orders</Link>
                     <FaChevronRight className="w-2 h-2 opacity-30" />
                     <span>{reviewItem.product?.category || 'Category'}</span>
                     <FaChevronRight className="w-2 h-2 opacity-30" />
@@ -164,7 +164,7 @@ export default function CustomerReviewPortal() {
 
                 {/* Product Info Header */}
                 <div className="bg-white rounded-[20px] p-8 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] mb-10 flex gap-8 items-center">
-                    <div className="w-24 h-24 bg-slate-50 rounded-xl overflow-hidden shrink-0 border border-slate-100 p-3 flex items-center justify-center">
+                    <div className="w-24 h-24 bg-slate-50 rounded-[10px] overflow-hidden shrink-0 border border-slate-100 p-3 flex items-center justify-center">
                         {reviewItem.product?.images?.[0] ? (
                             <img
                                 src={reviewItem.product.images[0]}
@@ -178,12 +178,12 @@ export default function CustomerReviewPortal() {
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                             <FaCheckCircle className="text-blue-500 w-3.5 h-3.5" />
-                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em] italic">Verified Purchase</span>
+                            <span className="text-sm font-black text-blue-500 uppercase tracking-[0.2em] italic">Verified Purchase</span>
                         </div>
                         <h1 className="text-xl font-black text-slate-900 leading-tight mb-2 uppercase italic tracking-tighter truncate">
                             {reviewItem.product?.name}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-5 text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                        <div className="flex flex-wrap items-center gap-5 text-sm text-slate-400 font-black uppercase tracking-widest">
                             <span className="flex items-center gap-1.5">Seller: <span className="text-slate-900">{order.dealer?.businessName || 'Authorized Dealer'}</span></span>
                             <span className="w-1 h-1 bg-slate-200 rounded-full" />
                             <span>Ordered on: <span className="text-slate-900">{new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span></span>
@@ -216,7 +216,7 @@ export default function CustomerReviewPortal() {
                                 <motion.span
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    className="text-[11px] font-black text-slate-400 uppercase tracking-widest"
+                                    className="text-sm font-black text-slate-400 uppercase tracking-widest"
                                 >
                                     {ratingLabels[rating]}
                                 </motion.span>
@@ -227,18 +227,18 @@ export default function CustomerReviewPortal() {
                     {/* Inputs */}
                     <div className="space-y-10">
                         <div className="space-y-3">
-                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Review Headline</label>
+                            <label className="block text-sm font-black text-slate-500 uppercase tracking-[0.2em] italic">Review Headline</label>
                             <input
                                 type="text"
                                 value={headline}
                                 onChange={(e) => setHeadline(e.target.value)}
-                                className="w-full bg-white border border-slate-100 rounded-xl px-6 py-4 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/5 focus:border-blue-500 transition-all placeholder:text-slate-300 placeholder:uppercase placeholder:font-black placeholder:text-[9px] placeholder:tracking-widest"
+                                className="w-full bg-white border border-slate-100 rounded-[10px] px-6 py-4 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/5 focus:border-blue-500 transition-all placeholder:text-slate-300 placeholder:uppercase placeholder:font-black placeholder:text-xs placeholder:tracking-widest"
                                 placeholder="e.g. Robust performance for industrial use"
                             />
                         </div>
 
                         <div className="space-y-3">
-                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Write Your Review</label>
+                            <label className="block text-sm font-black text-slate-500 uppercase tracking-[0.2em] italic">Write Your Review</label>
                             <div className="relative">
                                 <textarea
                                     rows={6}
@@ -247,7 +247,7 @@ export default function CustomerReviewPortal() {
                                     className="w-full bg-white border border-slate-100 rounded-[20px] px-6 py-5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/5 focus:border-blue-500 transition-all placeholder:text-slate-300 resize-none leading-relaxed"
                                     placeholder="Share your experience with this product's performance, build quality, and value..."
                                 />
-                                <div className="absolute bottom-4 right-6 text-[9px] text-slate-300 font-black uppercase tracking-widest">
+                                <div className="absolute bottom-4 right-6 text-xs text-slate-300 font-black uppercase tracking-widest">
                                     Minimum 20 characters
                                 </div>
                             </div>
@@ -256,17 +256,17 @@ export default function CustomerReviewPortal() {
 
                     {/* Media Upload */}
                     <div className="space-y-6">
-                        <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Add Photos or Video</h3>
+                        <h3 className="text-sm font-black text-slate-500 uppercase tracking-[0.2em] italic">Add Photos or Video</h3>
 
                         {media.length > 0 && (
                             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
                                 {media.map((url, i) => (
-                                    <div key={url} className="w-24 h-24 rounded-2xl overflow-hidden relative group shrink-0 border border-slate-100 bg-white">
+                                    <div key={url} className="w-24 h-24 rounded-[10px] overflow-hidden relative group shrink-0 border border-slate-100 bg-white">
                                         <OptimizedImage src={url} alt="Review" width={100} height={100} className="w-full h-full object-cover" />
                                         <button
                                             type="button"
                                             onClick={() => setMedia(m => m.filter((_, idx) => idx !== i))}
-                                            className="absolute top-2 right-2 w-6 h-6 bg-slate-900/80 backdrop-blur-md text-white rounded-full flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-600"
+                                            className="absolute top-2 right-2 w-6 h-6 bg-slate-900/80 backdrop-blur-md text-white rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-600"
                                         >
                                             ×
                                         </button>
@@ -284,7 +284,7 @@ export default function CustomerReviewPortal() {
                             </div>
                             <div className="text-center">
                                 <p className="text-xs font-black text-slate-900 uppercase tracking-widest">Drag and drop or click to upload</p>
-                                <p className="text-[9px] text-slate-400 font-bold mt-2 uppercase tracking-tight">Up to 5 photos and 1 video (Max 20MB)</p>
+                                <p className="text-xs text-slate-400 font-bold mt-2 uppercase tracking-tight">Up to 5 photos and 1 video (Max 20MB)</p>
                             </div>
                         </div>
                     </div>
@@ -297,7 +297,7 @@ export default function CustomerReviewPortal() {
                             <div className="flex items-center justify-between group">
                                 <div className="space-y-1.5">
                                     <p className="font-black text-slate-900 text-xs uppercase tracking-tight italic">Dealer Rating</p>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Responsiveness and technical support</p>
+                                    <p className="text-sm text-slate-400 font-bold uppercase tracking-tight">Responsiveness and technical support</p>
                                 </div>
                                 <div className="flex gap-1.5">
                                     {[1, 2, 3, 4, 5].map((s) => (
@@ -318,7 +318,7 @@ export default function CustomerReviewPortal() {
                             <div className="flex items-center justify-between group">
                                 <div className="space-y-1.5">
                                     <p className="font-black text-slate-900 text-xs uppercase tracking-tight italic">Delivery Experience</p>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Speed and condition of packaging</p>
+                                    <p className="text-sm text-slate-400 font-bold uppercase tracking-tight">Speed and condition of packaging</p>
                                 </div>
                                 <div className="flex gap-1.5">
                                     {[1, 2, 3, 4, 5].map((s) => (
@@ -339,19 +339,19 @@ export default function CustomerReviewPortal() {
                     {/* Actions */}
                     <div className="flex items-center justify-between pt-6">
                         <label className="flex items-center gap-3 cursor-pointer group">
-                            <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${isAnonymous ? 'bg-blue-600 border-blue-600 text-white scale-110' : 'border-slate-200 bg-white group-hover:border-blue-600'
+                            <div className={`w-6 h-6 rounded-[10px] border-2 flex items-center justify-center transition-all ${isAnonymous ? 'bg-blue-600 border-blue-600 text-white scale-110' : 'border-slate-200 bg-white group-hover:border-blue-600'
                                 }`}>
                                 {isAnonymous && <FaCheckCircle className="w-3.5 h-3.5" />}
                                 <input type="checkbox" checked={isAnonymous} onChange={e => setIsAnonymous(e.target.checked)} className="hidden" />
                             </div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-900 transition-colors">Post review anonymously</span>
+                            <span className="text-sm font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-900 transition-colors">Post review anonymously</span>
                         </label>
 
                         <div className="flex items-center gap-6">
                             <button
                                 type="button"
                                 onClick={() => router.back()}
-                                className="text-[11px] font-black text-muted-foreground hover:text-foreground uppercase tracking-widest transition-colors"
+                                className="text-sm font-black text-muted-foreground hover:text-foreground uppercase tracking-widest transition-colors"
                             >
                                 Cancel
                             </button>

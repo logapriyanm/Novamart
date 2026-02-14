@@ -194,9 +194,9 @@ export default function CartPage() {
                                 <p className="text-center text-xs font-medium text-foreground/30 mb-6">Guaranteed safe & secure checkout</p>
                                 <div className="flex justify-center gap-6 opacity-30 grayscale hover:grayscale-0 transition-all cursor-default">
                                     <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center"><HiOutlineShieldCheck className="w-6 h-6" /></div>
-                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">SSL</div>
-                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">PCI</div>
-                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-[8px]">AES</div>
+                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-xs">SSL</div>
+                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-xs">PCI</div>
+                                    <div className="w-10 h-10 bg-surface rounded-[10px] flex items-center justify-center border border-foreground/5 font-black text-xs">AES</div>
                                 </div>
                             </div>
                         </div>

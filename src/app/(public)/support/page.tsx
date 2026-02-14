@@ -65,7 +65,7 @@ export default function SupportPage() {
                         </div>
                         <input
                             type="text"
-                            className="block w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-200 rounded-2xl text-lg font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm hover:shadow-md"
+                            className="block w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-200 rounded-[10px] text-lg font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm hover:shadow-md"
                             placeholder="Search for articles, guides, and more..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -93,7 +93,7 @@ export default function SupportPage() {
                         whileHover={{ y: -5 }}
                         className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/5 group cursor-pointer"
                     >
-                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
                             <FaShoppingCart />
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-3">I am a Buyer</h3>
@@ -118,7 +118,7 @@ export default function SupportPage() {
 
                     {/* Seller Card */}
                     <Link href="/seller/support" className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/5 group cursor-pointer">
-                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
                             <FaStore /> {/* Using FaStore as 'Store' was not imported */}
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-3">I am a Seller</h3>
@@ -146,7 +146,7 @@ export default function SupportPage() {
                         whileHover={{ y: -5 }}
                         className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/5 group cursor-pointer"
                     >
-                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
                             <FaIndustry />
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-3">I am a Manufacturer</h3>
@@ -179,7 +179,7 @@ export default function SupportPage() {
 
                 <div className="space-y-4">
                     {faqs.map((faq, index) => (
-                        <div key={index} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div key={index} className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                             <button
                                 onClick={() => toggleFaq(index)}
                                 className="w-full flex items-center justify-between p-6 text-left hover:bg-slate-50 transition-colors"
@@ -232,13 +232,13 @@ export default function SupportPage() {
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <button
                                 onClick={() => {/* Open Chat Logic */ }}
-                                className="px-8 py-4 bg-white text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-50 transition-all flex items-center gap-3"
+                                className="px-8 py-4 bg-white text-blue-600 rounded-[10px] text-xs font-black uppercase tracking-widest shadow-xl hover:bg-blue-50 transition-all flex items-center gap-3"
                             >
                                 <FaComments className="text-lg" /> Live Chat
                             </button>
                             <Link
                                 href="/contact"
-                                className="px-8 py-4 bg-blue-700/50 text-white border border-blue-400/30 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-3 backdrop-blur-md"
+                                className="px-8 py-4 bg-blue-700/50 text-white border border-blue-400/30 rounded-[10px] text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-3 backdrop-blur-md"
                             >
                                 <FaTicketAlt className="text-lg" /> Submit Ticket
                             </Link>

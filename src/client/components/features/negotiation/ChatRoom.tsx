@@ -170,9 +170,8 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
 
   const sendMessage = async (offerDetails?: any) => {
     if (!message.trim() && !offerDetails) return;
+    if (loading || !negotiation) return;
 
-    if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader size="lg" variant="primary" /></div>;
-    if (!negotiation) return <div className="text-center py-20 bg-white rounded-[10px]"><p className="text-slate-400 font-bold">Negotiation not found or access denied.</p></div>;
 
     setSending(true);
     try {
@@ -211,7 +210,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
     }
   };
 
-  const handleStatusUpdate = async (status: "ACCEPTED" | "REJECTED") => {
+  const handleStatusUpdate = async (status: "ACCEPTED" | "REJECTED" | "DEAL_CLOSED") => {
     setSending(true);
     try {
       await apiClient.put(`/negotiation/${negotiationId}`, { status });
@@ -246,7 +245,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] max-w-[1600px] mx-auto overflow-hidden animate-fade-in text-[#1E293B]">
+    <div className="flex flex-col h-[calc(100vh-120px)] max-w-[1600px] mx-auto overflow-hidden animate-fade-in text-slate-900">
       {/* 3-Panel Grid - Responsive Fix: Stack and order on mobile */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-px bg-slate-100 overflow-y-auto lg:overflow-hidden rounded-[10px] border border-slate-200 shadow-xl">
         {/* LEFT: DEAL CONTEXT (Col 1-3) - Responsive Fix: Order 2 on mobile */}
@@ -254,11 +253,11 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
           <div className="p-6 border-b border-slate-50">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors mb-6"
+              className="flex items-center gap-2 text-sm font-bold text-black uppercase tracking-wider hover:text-primary transition-colors mb-6"
             >
               <FaArrowLeft /> Back
             </button>
-            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4">
+            <h2 className="text-sm font-bold text-black uppercase tracking-wider mb-4">
               Deal Context
             </h2>
             <div className="flex lg:flex-col gap-4 items-center sm:items-start">
@@ -277,7 +276,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                 <h3 className="text-sm lg:text-lg font-black tracking-tight leading-tight">
                   {negotiation.productId?.name}
                 </h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                <p className="text-sm font-bold text-black uppercase tracking-wider mt-1">
                   Category • {negotiation.productId?.category}
                 </p>
               </div>
@@ -296,7 +295,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
               value={`${negotiation.productId?.moq || 0} units`}
             />
             <div className="pt-4 border-t border-slate-50">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+              <h4 className="text-sm font-bold text-black uppercase tracking-wider mb-3">
                 {isSeller ? "Manufacturer" : "Seller Account"}
               </h4>
               <div className="flex items-center gap-3">
@@ -310,7 +309,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                     </p>
                     <FaShieldAlt className="text-emerald-500 w-3 h-3" />
                   </div>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase">
+                  <p className="text-xs font-bold text-black uppercase">
                     {partner?.city}, {partner?.state}
                   </p>
                 </div>
@@ -324,23 +323,42 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
           <div className="p-4 bg-white border-b border-slate-100 flex items-center justify-between z-10 shadow-sm">
             <div className="flex items-center gap-3">
               <StatusBadge status={negotiation.status} />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest hidden xs:inline">
+              <span className="text-sm font-bold text-black uppercase tracking-wider hidden xs:inline">
                 Active Negotiation
               </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+              <span className="text-xs font-bold text-black uppercase tracking-wider">
                 Secured Channel
               </span>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6 lg:space-y-8 custom-scrollbar">
-            {messages.length === 0 && (
+            {messages.length === 0 && negotiation.status === 'REQUESTED' && (
+              <MessageBubble
+                msg={{
+                  messageType: 'OFFER',
+                  senderRole: 'SELLER',
+                  createdAt: negotiation.createdAt || new Date().toISOString(),
+                  message: `Initial Request: ${negotiation.quantity} units at ₹${negotiation.currentOffer}`,
+                  metadata: {
+                    price: negotiation.currentOffer,
+                    quantity: negotiation.quantity,
+                    timeline: 'Immediate'
+                  }
+                }}
+                isMe={isSeller}
+                onAccept={() => handleStatusUpdate("ACCEPTED")}
+                onReject={() => handleStatusUpdate("REJECTED")}
+                showActions={!isSeller && !isLocked}
+              />
+            )}
+            {messages.length === 0 && negotiation.status !== 'REQUESTED' && (
               <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-60">
                 <FaCommentAlt className="w-12 h-12 mb-4" />
-                <p className="text-[10px] font-black uppercase tracking-widest">
+                <p className="text-sm font-bold text-black uppercase tracking-wider">
                   No messages in this thread
                 </p>
               </div>
@@ -371,7 +389,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
           <div className="p-4 lg:p-6 bg-white border-t border-slate-100">
             {isLocked ? (
               <div className="bg-slate-50 p-4 rounded-[10px] border border-dashed border-slate-200 text-center">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-loose">
+                <p className="text-sm font-black text-slate-400 uppercase tracking-widest leading-loose">
                   Negotiation concluded with status:{" "}
                   <span className="text-primary">{negotiation.status}</span>
                   <br />
@@ -392,14 +410,14 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 sm:gap-2">
                     <button
                       onClick={() => setShowOfferModal(true)}
-                      className="px-2 sm:px-4 py-2 bg-white border border-slate-100 rounded-[10px] text-[8px] sm:text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all text-primary"
+                      className="px-2 sm:px-4 py-2 bg-white border border-slate-100 rounded-[10px] text-sm font-bold uppercase tracking-wider hover:bg-slate-50 transition-all text-primary"
                     >
                       Offer
                     </button>
                     <button
                       onClick={() => sendMessage()}
                       disabled={sending || !message.trim()}
-                      className="p-2.5 bg-primary text-black rounded-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+                      className="p-2.5 bg-primary text-white rounded-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
                     >
                       <FaPaperPlane className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
@@ -407,7 +425,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                 </div>
                 <div className="flex items-center gap-2 px-2 hidden sm:flex">
                   <FaInfoCircle className="text-slate-300 w-3 h-3" />
-                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+                  <p className="text-xs font-bold text-black uppercase tracking-wider">
                     Once an offer is accepted, the deal terms move to contract
                     allocation.
                   </p>
@@ -420,7 +438,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
         {/* RIGHT: SUMMARY (Col 10-12) - Responsive Fix: Order 3 on mobile */}
         <aside className="order-3 lg:col-span-3 bg-white flex flex-col max-h-[400px] lg:max-h-full overflow-y-auto border-t lg:border-t-0 border-slate-100">
           <div className="p-6 border-b border-slate-50 bg-slate-50/30">
-            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">
+            <h2 className="text-sm font-bold text-black uppercase tracking-wider mb-6">
               Negotiation Summary
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4">
@@ -444,7 +462,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
           </div>
 
           <div className="flex-1 p-6 overflow-y-auto hidden lg:block">
-            <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-bold text-black uppercase tracking-wider mb-4 flex items-center gap-2">
               <FaHistory /> Audit Timeline
             </h3>
             <div className="space-y-4 relative before:absolute before:left-2 before:top-2 before:bottom-0 before:w-px before:bg-slate-100">
@@ -459,10 +477,10 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                     <div className="absolute left-0 top-1 w-4 h-4 rounded-full bg-white border-2 border-slate-100 flex items-center justify-center">
                       <div className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                     </div>
-                    <p className="text-[10px] font-bold text-slate-700 leading-tight">
+                    <p className="text-sm font-bold text-black leading-tight">
                       {m.message}
                     </p>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">
+                    <p className="text-xs font-bold text-black uppercase mt-0.5">
                       {new Date(m.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -478,19 +496,29 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                     isSeller ? "/seller/orders" : "/manufacturer/orders",
                   )
                 }
-                className="w-full py-4 bg-emerald-600 text-white rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-500/20 hover:scale-[1.02] transition-all"
+                className="w-full py-4 bg-emerald-600 text-white rounded-[10px] font-bold text-sm uppercase tracking-wider shadow-xl shadow-emerald-500/20 hover:scale-[1.02] transition-all"
               >
                 {isSeller ? "View Orders" : "View Allocations"}
               </button>
             ) : negotiation.status === "ACCEPTED" ? (
-              <div className="p-4 bg-emerald-50/50 rounded-[10px] border border-emerald-100 text-center">
-                <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-relaxed">
-                  Terms accepted. Awaiting deal closure by manufacturer.
-                </p>
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-50/50 rounded-[10px] border border-emerald-100 text-center">
+                  <p className="text-xs font-black text-emerald-600 uppercase tracking-widest leading-relaxed">
+                    {!isSeller ? "Terms accepted. Finalize to allocate stock." : "Terms accepted. Awaiting deal closure by manufacturer."}
+                  </p>
+                </div>
+                {!isSeller && (
+                  <button
+                    onClick={() => handleStatusUpdate("DEAL_CLOSED")}
+                    className="w-full py-4 bg-[#067FF9] text-white rounded-[10px] font-bold text-sm uppercase tracking-wider shadow-xl shadow-blue-500/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                  >
+                    <FaCheckCircle className="w-3.5 h-3.5" /> Finalize & Allocate
+                  </button>
+                )}
               </div>
             ) : (
               <div className="p-4 bg-blue-50/50 rounded-[10px] border border-blue-100 text-center">
-                <p className="text-[9px] font-black text-primary uppercase tracking-widest leading-relaxed">
+                <p className="text-xs font-black text-primary uppercase tracking-widest leading-relaxed">
                   Negotiation remains open until both parties reach consensus.
                 </p>
               </div>
@@ -523,7 +551,7 @@ function ContextItem({ icon: Icon, label, value }: any) {
         <Icon className="w-3.5 h-3.5" />
       </div>
       <div>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
           {label}
         </p>
         <p className="text-sm font-black text-slate-800 tracking-tight">
@@ -537,19 +565,19 @@ function ContextItem({ icon: Icon, label, value }: any) {
 function SummaryCard({ label, value, icon: Icon, highlighted }: any) {
   return (
     <div
-      className={`p-4 rounded-[10px] border ${highlighted ? "bg-primary text-black border-primary shadow-lg shadow-primary/20" : "bg-white text-slate-800 border-slate-100 shadow-sm"}`}
+      className={`p-4 rounded-[10px] border ${highlighted ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-white text-slate-800 border-slate-100 shadow-sm"}`}
     >
       <div className="flex justify-between items-start mb-1">
         <p
-          className={`text-[8px] font-black uppercase tracking-[0.2em] ${highlighted ? "text-black/60" : "text-slate-400"}`}
+          className={`text-xs font-black uppercase tracking-[0.2em] ${highlighted ? "text-black" : "text-slate-400"}`}
         >
           {label}
         </p>
         <Icon
-          className={`w-3 h-3 ${highlighted ? "text-white/40" : "text-slate-200"}`}
+          className={`w-6 h-6 ${highlighted ? "text-black" : "text-black"}`}
         />
       </div>
-      <p className="text-xl font-black tracking-tighter">{value}</p>
+      <p className="text-xl text-black font-black tracking-tighter">{value}</p>
     </div>
   );
 }
@@ -568,7 +596,7 @@ function StatusBadge({ status }: { status: string }) {
       <div
         className={`w-1.5 h-1.5 rounded-full ${colors[status] || "bg-slate-400"}`}
       />
-      <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest">
+      <span className="text-sm font-bold text-black uppercase tracking-wider">
         {status.replace("_", " ")}
       </span>
     </div>
@@ -580,8 +608,8 @@ function MessageBubble({ msg, isMe, onAccept, onReject, showActions }: any) {
     return (
       <div className="flex justify-center">
         <div className="bg-white border border-slate-100 px-4 py-1.5 rounded-[10px] shadow-sm">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <FaHandshake className="text-primary w-2.5 h-2.5" />
+          <p className="text-sm font-bold text-black uppercase tracking-wider flex items-center gap-2">
+            <FaHandshake className="text-primary w-4 h-4" />
             {msg.message}
           </p>
         </div>
@@ -598,11 +626,11 @@ function MessageBubble({ msg, isMe, onAccept, onReject, showActions }: any) {
           <div className="bg-primary p-4 text-white flex justify-between items-center">
             <div className="flex items-center gap-2">
               <FaCoins className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-black uppercase tracking-widest">
+              <span className="text-sm font-bold uppercase tracking-wider text-white">
                 Business Offer
               </span>
             </div>
-            <span className="text-[9px] font-bold opacity-70 italic">
+            <span className="text-xs font-bold text-white opacity-90 italic">
               {new Date(msg.createdAt).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -612,30 +640,30 @@ function MessageBubble({ msg, isMe, onAccept, onReject, showActions }: any) {
           <div className="p-5 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-slate-50 p-3 rounded-[10px] border border-slate-100">
-                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">
+                <p className="text-xs font-bold text-black uppercase mb-1">
                   Proposed Price
                 </p>
-                <p className="text-lg font-black text-slate-800">
+                <p className="text-lg font-black text-black">
                   ₹{msg.metadata?.price}
                 </p>
               </div>
               <div className="bg-slate-50 p-3 rounded-[10px] border border-slate-100">
-                <p className="text-[8px] font-black text-slate-400 uppercase mb-1">
+                <p className="text-xs font-bold text-black uppercase mb-1">
                   Target Quantity
                 </p>
-                <p className="text-lg font-black text-slate-800">
+                <p className="text-lg font-black text-black">
                   {msg.metadata?.quantity} units
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-slate-500">
               <FaCalendarAlt className="w-3 h-3" />
-              <p className="text-[9px] font-bold uppercase tracking-widest">
+              <p className="text-sm font-bold text-black uppercase tracking-wider">
                 Timeline: {msg.metadata?.timeline}
               </p>
             </div>
             {msg.message && (
-              <p className="text-xs font-medium text-slate-600 bg-slate-50 p-3 rounded-[10px] italic">
+              <p className="text-sm font-medium text-black bg-slate-50 p-3 rounded-[10px] italic">
                 "{msg.message}"
               </p>
             )}
@@ -644,13 +672,13 @@ function MessageBubble({ msg, isMe, onAccept, onReject, showActions }: any) {
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={onReject}
-                  className="flex-1 py-3 bg-white border border-rose-100 text-rose-500 rounded-[10px] text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all"
+                  className="flex-1 py-3 bg-white border border-rose-100 text-rose-500 rounded-[10px] text-sm font-bold uppercase tracking-wider hover:bg-rose-50 transition-all"
                 >
                   Reject
                 </button>
                 <button
                   onClick={onAccept}
-                  className="flex-1 py-3 bg-primary text-white rounded-[10px] text-[9px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
+                  className="flex-1 py-3 bg-primary text-white rounded-[10px] text-sm font-bold uppercase tracking-wider shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
                 >
                   Accept Offer
                 </button>
@@ -658,7 +686,7 @@ function MessageBubble({ msg, isMe, onAccept, onReject, showActions }: any) {
             )}
             {!showActions && isMe && (
               <div className="text-center pt-2">
-                <span className="text-[9px] font-black text-primary/60 uppercase tracking-widest italic">
+                <span className="text-xs font-bold text-primary/60 uppercase tracking-wider italic">
                   Awaiting Response
                 </span>
               </div>
@@ -675,16 +703,16 @@ function MessageBubble({ msg, isMe, onAccept, onReject, showActions }: any) {
         className={`max-w-[70%] group flex flex-col ${isMe ? "items-end" : "items-start"}`}
       >
         <div
-          className={`px-5 py-3.5 rounded-[10px] shadow-sm ${isMe ? "bg-slate-900 text-white rounded-tr-none" : "bg-white text-slate-800 rounded-tl-none border border-slate-100"}`}
+          className={`px-5 py-3.5 rounded-[10px] shadow-sm ${isMe ? "bg-slate-900 text-white rounded-tr-none" : "bg-white text-black rounded-tl-none border border-slate-100"}`}
         >
           <p
-            className={`text-[8px] font-black uppercase tracking-widest mb-1 opacity-40`}
+            className={`text-xs font-bold uppercase tracking-wider mb-1 opacity-60`}
           >
             {isMe ? "Internal" : msg.senderRole}
           </p>
           <p className="text-sm font-medium leading-relaxed">{msg.message}</p>
         </div>
-        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-xs font-bold text-black uppercase tracking-wider mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {new Date(msg.createdAt).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -726,14 +754,14 @@ function OfferModal({
           <h3 className="text-xl font-black tracking-tight">
             Formal Business Offer
           </h3>
-          <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">
+          <p className="text-sm font-bold text-white/60 uppercase tracking-wider mt-1">
             Structured Negotiation Proposal
           </p>
         </div>
         <div className="p-8 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+              <label className="text-sm font-bold text-black uppercase tracking-wider ml-1">
                 Proposed Unit Price (₹)
               </label>
               <input
@@ -744,7 +772,7 @@ function OfferModal({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+              <label className="text-sm font-bold text-black uppercase tracking-wider ml-1">
                 Target Quantity
               </label>
               <input
@@ -756,7 +784,7 @@ function OfferModal({
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+            <label className="text-sm font-black text-slate-400 uppercase tracking-widest ml-1">
               Expected Delivery Timeline
             </label>
             <select
@@ -771,7 +799,7 @@ function OfferModal({
             </select>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+            <label className="text-sm font-black text-slate-400 uppercase tracking-widest ml-1">
               Optional Note
             </label>
             <textarea
@@ -785,14 +813,14 @@ function OfferModal({
           <div className="flex gap-4 pt-2">
             <button
               onClick={onClose}
-              className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
+              className="flex-1 py-4 text-sm font-bold uppercase tracking-wider text-black hover:text-slate-700 transition-colors"
             >
               Cancel
             </button>
             <button
               disabled={sending}
               onClick={() => onSubmit({ price, quantity, timeline, note })}
-              className="flex-[2] py-4 bg-primary text-black rounded-[10px] font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+              className="flex-[2] py-4 bg-primary text-black rounded-[10px] font-bold text-sm uppercase tracking-wider shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
             >
               {sending ? (
                 <FaSpinner className="animate-spin" />

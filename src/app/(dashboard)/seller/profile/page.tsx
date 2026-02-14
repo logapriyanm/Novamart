@@ -126,7 +126,7 @@ export default function SellerProfilePage() {
                                 </div>
                                 <div className="text-left">
                                     <h4 className="text-sm font-bold tracking-wide">{s.name}</h4>
-                                    <p className={`text-[10px] font-medium mt-0.5 ${activeSection === s.id ? 'text-white/70' : 'text-slate-400'}`}>{s.desc}</p>
+                                    <p className={`text-sm font-medium mt-0.5 ${activeSection === s.id ? 'text-white/70' : 'text-slate-400'}`}>{s.desc}</p>
                                 </div>
                                 <FaChevronRight className={`ml-auto w-3 h-3 transition-transform ${activeSection === s.id ? 'translate-x-1' : 'opacity-0'}`} />
                             </button>
@@ -136,7 +136,7 @@ export default function SellerProfilePage() {
                     {/* Verification Sidebar Card */}
                     <div className="bg-slate-900 rounded-[10px] p-6 text-white relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-800/50 blur-2xl rounded-full" />
-                        <h3 className="text-[10px] font-bold tracking-wider mb-6 opacity-70 flex items-center gap-2">
+                        <h3 className="text-sm font-bold tracking-wider mb-6 opacity-70 flex items-center gap-2">
                             <FaShieldAlt className="w-3.5 h-3.5 text-emerald-400" />
                             Entity Governance
                         </h3>
@@ -153,7 +153,7 @@ export default function SellerProfilePage() {
                                     <FaCheckCircle className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-400 tracking-wider">Verification Status</p>
+                                    <p className="text-sm font-bold text-slate-400 tracking-wider">Verification Status</p>
                                     <p className="text-xs font-bold">
                                         {profile.isVerified
                                             ? 'VERIFIED SELLER'
@@ -171,7 +171,7 @@ export default function SellerProfilePage() {
                                 <>
                                     <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-[8px] flex items-center gap-3">
                                         <FaLock className="text-amber-500 w-3.5 h-3.5" />
-                                        <p className="text-[10px] font-medium text-amber-200 tracking-wide leading-relaxed">Limited marketplace visibility until verified</p>
+                                        <p className="text-sm font-medium text-amber-200 tracking-wide leading-relaxed">Limited marketplace visibility until verified</p>
                                     </div>
                                     <button
                                         onClick={() => setKycModalOpen(true)}
@@ -187,8 +187,8 @@ export default function SellerProfilePage() {
                             {profile.verificationStatus === 'PENDING' && (
                                 <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-[8px] text-center">
                                     <FaClock className="w-5 h-5 text-blue-400 mx-auto mb-2" />
-                                    <p className="text-[10px] font-bold text-blue-200 tracking-wide">Documents Under Admin Review</p>
-                                    <p className="text-[9px] text-blue-300 mt-1">Expected response: 24-48 hours</p>
+                                    <p className="text-sm font-bold text-blue-200 tracking-wide">Documents Under Admin Review</p>
+                                    <p className="text-xs text-blue-300 mt-1">Expected response: 24-48 hours</p>
                                 </div>
                             )}
 
@@ -198,15 +198,15 @@ export default function SellerProfilePage() {
                                     <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-[8px]">
                                         <div className="flex items-center gap-2 mb-2">
                                             <FaExclamationTriangle className="text-rose-400 w-3.5 h-3.5" />
-                                            <p className="text-[10px] font-bold text-rose-200 tracking-wide">Verification Rejected</p>
+                                            <p className="text-sm font-bold text-rose-200 tracking-wide">Verification Rejected</p>
                                         </div>
                                         {profile.rejectionReason && (
-                                            <p className="text-[9px] text-rose-300 leading-relaxed">{profile.rejectionReason}</p>
+                                            <p className="text-xs text-rose-300 leading-relaxed">{profile.rejectionReason}</p>
                                         )}
                                     </div>
                                     <button
                                         onClick={() => setKycModalOpen(true)}
-                                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[8px] font-bold text-[10px] tracking-wide transition-all flex items-center justify-center gap-2"
+                                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[8px] font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2"
                                     >
                                         <FaSync className="w-3 h-3" />
                                         Resubmit Documents
@@ -219,9 +219,9 @@ export default function SellerProfilePage() {
                                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-[8px] flex items-center gap-3">
                                     <FaCheckCircle className="text-emerald-400 w-5 h-5" />
                                     <div>
-                                        <p className="text-[10px] font-bold text-emerald-200 tracking-wide">Fully Verified Seller</p>
+                                        <p className="text-sm font-bold text-emerald-200 tracking-wide">Fully Verified Seller</p>
                                         {profile.verifiedAt && (
-                                            <p className="text-[9px] text-emerald-300 mt-0.5">Verified on {new Date(profile.verifiedAt).toLocaleDateString()}</p>
+                                            <p className="text-xs text-emerald-300 mt-0.5">Verified on {new Date(profile.verifiedAt).toLocaleDateString()}</p>
                                         )}
                                     </div>
                                 </div>
@@ -231,7 +231,7 @@ export default function SellerProfilePage() {
                             {profile.payoutBlocked && (
                                 <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-[8px] flex items-center gap-3 mt-4">
                                     <FaLock className="text-rose-500 w-3.5 h-3.5" />
-                                    <p className="text-[10px] font-medium text-rose-200 tracking-wide leading-relaxed">Payouts Paused: Bank verification pending</p>
+                                    <p className="text-sm font-medium text-rose-200 tracking-wide leading-relaxed">Payouts Paused: Bank verification pending</p>
                                 </div>
                             )}
                         </div>
@@ -348,7 +348,7 @@ function AccountSection({ profile, user, onSave, isSaving }: any) {
                             {profile.user?.status === 'ACTIVE' && (
                                 <div className="shrink-0 group relative">
                                     <img src="/verify.png" className="w-6 h-6 object-contain" alt="Verified" />
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[8px] font-black tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-xs font-black tracking-widest rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                                         Verified Seller
                                     </div>
                                 </div>
@@ -381,7 +381,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
     return (
         <div className="mb-8">
             <h2 className="text-xl font-bold text-slate-800">{title}</h2>
-            <p className="text-slate-500 font-medium tracking-wide text-[10px] mt-1">{subtitle}</p>
+            <p className="text-slate-500 font-medium tracking-wide text-sm mt-1">{subtitle}</p>
         </div>
     );
 }
@@ -511,14 +511,14 @@ function DocUploadCard({ label, sub, value, onUpload }: any) {
         <div className="p-6 bg-slate-50 border border-slate-200 rounded-[10px] flex flex-col justify-between h-40 group hover:bg-white hover:border-slate-300 transition-all">
             <div>
                 <p className="text-xs font-semibold text-slate-500 tracking-wide">{label}</p>
-                <p className="text-[10px] font-bold text-slate-700 tracking-wide mt-1">{sub}</p>
+                <p className="text-sm font-bold text-slate-700 tracking-wide mt-1">{sub}</p>
             </div>
             {value ? (
-                <div className="flex items-center gap-2 text-emerald-600 font-bold text-[10px] tracking-wide bg-emerald-50 p-2.5 rounded-[8px] border border-emerald-100">
+                <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm tracking-wide bg-emerald-50 p-2.5 rounded-[8px] border border-emerald-100">
                     <FaCheckCircle className="w-3.5 h-3.5" /> Uploaded Successfully
                 </div>
             ) : (
-                <button className="w-full py-2.5 bg-white border border-slate-200 rounded-[8px] text-[10px] font-bold tracking-wide text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                <button className="w-full py-2.5 bg-white border border-slate-200 rounded-[8px] text-sm font-bold tracking-wide text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
                     Upload Document
                 </button>
             )}
@@ -740,11 +740,11 @@ function SecurityToggle({ label, desc, active, action }: any) {
                 </div>
                 <div>
                     <h4 className="text-sm font-bold text-slate-900 tracking-wide">{label}</h4>
-                    <p className="text-[10px] font-medium text-slate-400 mt-0.5">{desc}</p>
+                    <p className="text-sm font-medium text-slate-400 mt-0.5">{desc}</p>
                 </div>
             </div>
             {action ? (
-                <button className="px-4 py-2 bg-rose-50 text-rose-600 text-[9px] font-bold tracking-wide rounded-[6px] border border-rose-100 hover:bg-rose-100 transition-all">
+                <button className="px-4 py-2 bg-rose-50 text-rose-600 text-xs font-bold tracking-wide rounded-[6px] border border-rose-100 hover:bg-rose-100 transition-all">
                     {action}
                 </button>
             ) : (

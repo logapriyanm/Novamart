@@ -18,13 +18,13 @@ export default function RefundPolicyPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-rose-500/10 border border-rose-500/20 text-[10px] font-black uppercase tracking-widest text-rose-600 mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-rose-500/10 border border-rose-500/20 text-sm font-black uppercase tracking-widest text-rose-600 mb-6"
                     >
                         <RefreshCcw className="w-3 h-3" />
                         Post-Trade Policies
                     </motion.div>
                     <h1 className="text-5xl lg:text-6xl font-black text-foreground mb-6 tracking-tight italic uppercase">Refund & <span className="text-rose-500">Return</span></h1>
-                    <p className="text-foreground/40 text-[10px] font-black uppercase tracking-[0.2em] max-w-2xl mx-auto italic">
+                    <p className="text-foreground/40 text-sm font-black uppercase tracking-[0.2em] max-w-2xl mx-auto italic">
                         Ensuring transactional justice through fair and auditable return mechanisms.
                     </p>
                 </div>
@@ -43,7 +43,7 @@ export default function RefundPolicyPage() {
                                     <div className="w-10 h-10 rounded-[5px] bg-emerald-500/10 flex items-center justify-center text-emerald-600">
                                         <CornerUpLeft className="w-5 h-5" />
                                     </div>
-                                    <h3 className="text-[10px] font-black text-foreground/40 uppercase tracking-widest italic">Eligible Returns</h3>
+                                    <h3 className="text-sm font-black text-foreground/40 uppercase tracking-widest italic">Eligible Returns</h3>
                                 </div>
                                 <ul className="space-y-4 text-sm text-foreground/60 font-bold ml-14 italic">
                                     <li className="flex items-center gap-3">
@@ -66,7 +66,7 @@ export default function RefundPolicyPage() {
                                     <div className="w-10 h-10 rounded-[5px] bg-orange-500/10 flex items-center justify-center text-orange-600">
                                         <AlertTriangle className="w-5 h-5" />
                                     </div>
-                                    <h3 className="text-[10px] font-black text-foreground/40 uppercase tracking-widest italic">Policy Exceptions</h3>
+                                    <h3 className="text-sm font-black text-foreground/40 uppercase tracking-widest italic">Policy Exceptions</h3>
                                 </div>
                                 <ul className="space-y-4 text-sm text-foreground/40 font-black uppercase tracking-widest ml-14 italic">
                                     <li className="flex items-center gap-3">

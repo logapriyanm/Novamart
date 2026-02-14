@@ -24,7 +24,7 @@ export default function BlogListingPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {blogPosts.map((post) => (
                         <Link href={`/blog/${post.slug}`} key={post.slug} className="group">
-                            <article className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                            <article className="bg-white rounded-[10px] overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
                                 <div className="aspect-video bg-slate-200 relative overflow-hidden">
                                     {/* Placeholder for real image */}
                                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/20 group-hover:scale-105 transition-transform duration-500" />

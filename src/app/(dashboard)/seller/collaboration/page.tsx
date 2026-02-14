@@ -85,7 +85,7 @@ export default function CollaborationPage() {
                     <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-[20px] flex items-center justify-center mx-auto mb-6">
                         <FaUsers className="w-10 h-10 text-white" />
                     </div>
-                    <h1 className="text-3xl font-black text-[#1E293B] mb-4 italic uppercase">
+                    <h1 className="text-3xl font-black text-slate-900 mb-4 italic uppercase">
                         Enterprise Feature
                     </h1>
                     <p className="text-slate-600 font-bold mb-8">
@@ -108,8 +108,8 @@ export default function CollaborationPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black text-[#1E293B] tracking-tight mb-2 italic uppercase">
-                        Collaboration <span className="text-[#10367D]">Groups</span>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2 italic uppercase">
+                        Collaboration <span className="text-[#067FF9]">Groups</span>
                     </h1>
                     <p className="text-sm font-bold text-slate-500">
                         Pool demand with other sellers for bulk custom manufacturing
@@ -117,7 +117,7 @@ export default function CollaborationPage() {
                 </div>
                 <button
                     onClick={() => router.push('/seller/collaboration/create')}
-                    className="flex items-center gap-3 px-6 py-4 bg-[#10367D] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
+                    className="flex items-center gap-3 px-6 py-4 bg-[#067FF9] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
                 >
                     <FaPlus className="w-4 h-4" />
                     Create Group
@@ -128,7 +128,7 @@ export default function CollaborationPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white rounded-[20px] p-6 border border-slate-100">
                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Total Groups</p>
-                    <p className="text-3xl font-black text-[#10367D]">{groups.length}</p>
+                    <p className="text-3xl font-black text-[#067FF9]">{groups.length}</p>
                 </div>
                 <div className="bg-white rounded-[20px] p-6 border border-slate-100">
                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Active</p>
@@ -153,7 +153,7 @@ export default function CollaborationPage() {
             {/* Groups List */}
             {loading ? (
                 <div className="text-center py-20">
-                    <div className="animate-spin w-12 h-12 border-4 border-[#10367D] border-t-transparent rounded-full mx-auto"></div>
+                    <div className="animate-spin w-12 h-12 border-4 border-[#067FF9] border-t-transparent rounded-full mx-auto"></div>
                 </div>
             ) : groups.length === 0 ? (
                 <div className="bg-white rounded-[30px] p-16 text-center border border-slate-100">
@@ -164,7 +164,7 @@ export default function CollaborationPage() {
                     </p>
                     <button
                         onClick={() => router.push('/seller/collaboration/create')}
-                        className="px-8 py-4 bg-[#10367D] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
+                        className="px-8 py-4 bg-[#067FF9] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
                     >
                         Create First Group
                     </button>
@@ -182,7 +182,7 @@ export default function CollaborationPage() {
                         >
                             <div className="flex items-start justify-between mb-6">
                                 <div className="flex-1">
-                                    <h3 className="text-xl font-black text-[#1E293B] mb-2 group-hover:text-[#10367D] transition-colors">
+                                    <h3 className="text-xl font-black text-slate-900 mb-2 group-hover:text-[#067FF9] transition-colors">
                                         {group.name}
                                     </h3>
                                     <p className="text-sm font-bold text-slate-500 line-clamp-2">
@@ -210,13 +210,13 @@ export default function CollaborationPage() {
                             <div className="mb-4">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Progress</span>
-                                    <span className="text-xs font-black text-[#10367D]">
+                                    <span className="text-xs font-black text-[#067FF9]">
                                         {group.currentQuantity} / {group.targetQuantity} units
                                     </span>
                                 </div>
                                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-gradient-to-r from-[#10367D] to-blue-500 transition-all duration-500"
+                                        className="h-full bg-gradient-to-r from-[#067FF9] to-blue-500 transition-all duration-500"
                                         style={{ width: `${Math.min((group.currentQuantity / group.targetQuantity) * 100, 100)}%` }}
                                     />
                                 </div>

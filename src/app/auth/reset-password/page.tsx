@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
                 </div>
                 <h2 className="text-3xl font-black text-black italic uppercase mb-2">System Updated</h2>
                 <p className="text-slate-500 font-medium mb-8 italic">Your new password is now active. Redirecting to portal...</p>
-                <Link href="/auth/login" className="text-[10px] font-black text-black uppercase tracking-widest underline underline-offset-4">
+                <Link href="/auth/login" className="text-sm font-black text-black uppercase tracking-widest underline underline-offset-4">
                     Taking too long? Click here to Login
                 </Link>
             </div>
@@ -100,12 +100,12 @@ export default function ResetPasswordPage() {
                 >
                     <div className="text-center mb-8">
                         <h1 className="text-2xl font-black text-black italic uppercase mb-2">Set New Password</h1>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Secure your NovaMart account</p>
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Secure your NovaMart account</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">New Password</label>
+                            <label className="text-sm font-black text-black/50 uppercase tracking-widest ml-1">New Password</label>
                             <div className="relative">
                                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
                                     <Lock className="w-5 h-5" />
@@ -128,7 +128,7 @@ export default function ResetPasswordPage() {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">Confirm Password</label>
+                            <label className="text-sm font-black text-black/50 uppercase tracking-widest ml-1">Confirm Password</label>
                             <div className="relative">
                                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
                                     <Lock className="w-5 h-5" />
@@ -143,12 +143,12 @@ export default function ResetPasswordPage() {
                             </div>
                         </div>
 
-                        {error && <p className="text-rose-500 text-[10px] font-black uppercase text-center">{error}</p>}
+                        {error && <p className="text-rose-500 text-sm font-black uppercase text-center">{error}</p>}
 
                         <button
                             type="submit"
                             disabled={isLoading || !token}
-                            className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-[10px]"
+                            className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-sm"
                         >
                             {isLoading ? <Loader size="sm" variant="white" /> : 'Update Password'}
                             {!isLoading && <ArrowRight className="w-5 h-5" />}

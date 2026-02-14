@@ -41,7 +41,7 @@ export default function ManufacturerOrderControl() {
                 <div className="xl:col-span-7 bg-white rounded-[10px] border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                     <div className="p-6 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <span className="p-2 bg-white text-indigo-600 rounded-[10px] shadow-sm border border-slate-200">
+                            <span className="p-2 bg-white text-primary rounded-[10px] shadow-sm border border-slate-200">
                                 <FaIndustry className="w-4 h-4" />
                             </span>
                             <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wide">Distribution Ledger</h2>
@@ -53,10 +53,10 @@ export default function ManufacturerOrderControl() {
                             <div
                                 key={order.id}
                                 onClick={() => setSelectedOrder(order)}
-                                className={`p-6 hover:bg-slate-50 transition-all cursor-pointer flex items-center justify-between group ${selectedOrder?.id === order.id ? 'bg-indigo-50/50' : ''}`}
+                                className={`p-6 hover:bg-slate-50 transition-all cursor-pointer flex items-center justify-between group ${selectedOrder?.id === order.id ? 'bg-primary/5/50' : ''}`}
                             >
                                 <div className="flex items-center gap-6">
-                                    <div className="w-12 h-12 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                    <div className="w-12 h-12 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
                                         <FaBox className="w-5 h-5" />
                                     </div>
                                     <div>
@@ -98,12 +98,12 @@ export default function ManufacturerOrderControl() {
                                     </button>
 
                                     <div>
-                                        <p className="text-xs font-medium text-indigo-300 uppercase tracking-wider mb-1">Finance Audit Mode</p>
+                                        <p className="text-xs font-medium text-primary/50 uppercase tracking-wider mb-1">Finance Audit Mode</p>
                                         <h3 className="text-2xl font-bold tracking-tight">{selectedOrder.id}</h3>
                                     </div>
                                     <div className="p-4 bg-white/10 border border-white/10 rounded-[10px] flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <FaFileInvoiceDollar className="text-indigo-300 w-5 h-5" />
+                                            <FaFileInvoiceDollar className="text-primary/50 w-5 h-5" />
                                             <div>
                                                 <p className="text-xs font-medium text-slate-300 uppercase">Gross Wholesale Value</p>
                                                 <p className="text-lg font-bold text-white">{selectedOrder.total}</p>
@@ -118,7 +118,7 @@ export default function ManufacturerOrderControl() {
                                 <div className="flex-1 p-8 space-y-8 overflow-y-auto custom-scrollbar bg-white">
                                     <div className="space-y-4">
                                         <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                                            <FaFileInvoiceDollar className="text-indigo-600" /> B2B Payment Proof
+                                            <FaFileInvoiceDollar className="text-primary" /> B2B Payment Proof
                                         </h4>
                                         <div className="p-6 bg-slate-50 border border-slate-200 rounded-[10px] flex flex-col items-center justify-center text-center space-y-3">
                                             <div className="w-12 h-12 bg-white rounded-[10px] flex items-center justify-center text-emerald-500 shadow-sm border border-slate-100">
@@ -128,20 +128,20 @@ export default function ManufacturerOrderControl() {
                                                 <p className="text-sm font-semibold text-slate-900">Remittance_Advice_4401.pdf</p>
                                                 <p className="text-xs text-slate-500 mt-0.5">Uploaded Feb 06, 14:24</p>
                                             </div>
-                                            <button className="px-4 py-2 bg-white border border-slate-200 text-xs font-semibold text-indigo-600 uppercase tracking-wide rounded-[10px] shadow-sm hover:bg-slate-50 transition-all">View Full Scan</button>
+                                            <button className="px-4 py-2 bg-white border border-slate-200 text-xs font-semibold text-primary uppercase tracking-wide rounded-[10px] shadow-sm hover:bg-slate-50 transition-all">View Full Scan</button>
                                         </div>
                                     </div>
 
-                                    <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-[10px] flex items-start gap-4">
-                                        <FaRegClock className="text-indigo-600 w-5 h-5 mt-0.5" />
+                                    <div className="p-4 bg-primary/5/50 border border-primary/10 rounded-[10px] flex items-start gap-4">
+                                        <FaRegClock className="text-primary w-5 h-5 mt-0.5" />
                                         <p className="text-xs font-medium text-slate-700 leading-relaxed">
-                                            Verify against bank statement before confirming. Once confirmed, stock is <span className="text-indigo-700 font-bold">legally transferred</span> to dealer.
+                                            Verify against bank statement before confirming. Once confirmed, stock is <span className="text-primary font-bold">legally transferred</span> to seller.
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="p-6 border-t border-slate-100 flex items-center gap-4 bg-slate-50/50">
-                                    <button className="flex-1 py-3 bg-indigo-600 text-white rounded-[10px] font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-3">
+                                    <button className="flex-1 py-3 bg-primary text-white rounded-[10px] font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-3">
                                         <FaCheckCircle className="w-4 h-4" />
                                         Confirm Receipt
                                     </button>

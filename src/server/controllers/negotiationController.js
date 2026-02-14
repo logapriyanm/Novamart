@@ -182,21 +182,26 @@ export const updateNegotiation = async (req, res) => {
         if (status) {
             const currentStatus = negotiation.status;
             const validTransitions = {
-                'REQUESTED': ['NEGOTIATING', 'REJECTED', 'ACCEPTED'], // Fixed: Allow direct acceptance of initial request
-                'NEGOTIATING': ['OFFER_MADE', 'REJECTED'],
+                'REQUESTED': ['NEGOTIATING', 'OFFER_MADE', 'REJECTED', 'ACCEPTED'],
+                'NEGOTIATING': ['OFFER_MADE', 'ACCEPTED', 'REJECTED'],
                 'OFFER_MADE': ['ACCEPTED', 'NEGOTIATING', 'REJECTED'],
                 'ACCEPTED': ['DEAL_CLOSED', 'REJECTED'],
-                'DEAL_CLOSED': [], // Terminal state - allocation created
+                'DEAL_CLOSED': [], // Terminal state
                 'REJECTED': [] // Terminal state
             };
 
-            // Allow 'OPEN' -> 'NEGOTIATING' via offer update implicit logic if status not explicitly sent? 
-            // Here status IS explicitly sent.
+            // Allow implicit Offer -> Negotiating transition
+            // If offer is made, we can assume it's part of negotiation
             if (!validTransitions[currentStatus]?.includes(status)) {
-                return res.status(400).json({
-                    error: 'INVALID_STATE_TRANSITION',
-                    message: `Cannot move from ${currentStatus} to ${status}`
-                });
+                // Extended check: If we are simply updating terms (new offer) but explicitly sending status 'NEGOTIATING', allow it from REQUESTED/OFFER_MADE
+                if (status === 'NEGOTIATING' && ['REQUESTED', 'OFFER_MADE'].includes(currentStatus)) {
+                    // Allow
+                } else {
+                    return res.status(400).json({
+                        error: 'INVALID_STATE_TRANSITION',
+                        message: `Cannot move from ${currentStatus} to ${status}`
+                    });
+                }
             }
         }
 
@@ -306,19 +311,35 @@ export const updateNegotiation = async (req, res) => {
             }
         }
 
-        const recipientUserId = role === 'SELLER' ? negotiation.manufacturerId.userId : negotiation.sellerId.userId;
-        const senderName = role === 'SELLER' ? negotiation.sellerId.businessName : negotiation.manufacturerId.companyName;
+        const recipientUserId = role === 'SELLER'
+            ? negotiation?.manufacturerId?.userId
+            : negotiation?.sellerId?.userId;
+
+        const senderName = role === 'SELLER'
+            ? negotiation?.sellerId?.businessName
+            : negotiation?.manufacturerId?.companyName;
 
         try {
+            // Ensure IDs are strings for reliable lookup
+            const sellerUserId = negotiation.sellerId?.userId?._id?.toString() || negotiation.sellerId?.userId?.toString();
+            const mfrUserId = negotiation.manufacturerId?.userId?._id?.toString() || negotiation.manufacturerId?.userId?.toString();
+
+            if (!sellerUserId || !mfrUserId) {
+                logger.error('Missing participant User IDs in negotiation', { negotiationId });
+                // Continue without chat sync if IDs broken, or throw? 
+                // Better to log and continue to avoid blocking the status update itself if possible, 
+                // but chat is critical.
+            }
+
             let chat = await Chat.findOne({ type: 'NEGOTIATION', contextId: negotiationId });
 
-            if (!chat) {
+            if (!chat && sellerUserId && mfrUserId) {
                 chat = await Chat.create({
                     type: 'NEGOTIATION',
                     contextId: negotiationId,
                     participants: [
-                        { userId: negotiation.sellerId.userId, role: 'SELLER' },
-                        { userId: negotiation.manufacturerId.userId, role: 'MANUFACTURER' }
+                        { userId: sellerUserId, role: 'SELLER' },
+                        { userId: mfrUserId, role: 'MANUFACTURER' }
                     ]
                 });
             }

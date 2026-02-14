@@ -18,6 +18,10 @@ export const sellerService = {
         return apiClient.get<any[]>(ENDPOINTS.SELLER.INVENTORY);
     },
 
+    async getInventoryItem(id: string): Promise<any> {
+        return apiClient.get(`/seller/inventory/${id}`);
+    },
+
     async updateStock(inventoryId: string, stock: number): Promise<any> {
         return apiClient.patch(`/seller/inventory/${inventoryId}/stock`, { stock });
     },
@@ -36,6 +40,14 @@ export const sellerService = {
 
     async getPublicProfile(id: string): Promise<any> {
         return apiClient.get(`/seller/public/${id}`);
+    },
+
+    async sourceProduct(productId: string, region: string, stock: number, price: number): Promise<any> {
+        return apiClient.post('/seller/source', { productId, region, stock, price });
+    },
+
+    async toggleListing(inventoryId: string, isListed: boolean): Promise<any> {
+        return apiClient.put('/seller/inventory/toggle-listing', { inventoryId, isListed });
     }
 };
 

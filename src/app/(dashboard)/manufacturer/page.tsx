@@ -16,14 +16,6 @@ import Loader from '@/client/components/ui/Loader';
 import DashboardSkeleton from '@/client/components/ui/DashboardSkeleton';
 import ManufacturerAnalyticsDashboard from '@/client/components/features/dashboard/manufacturer/ManufacturerAnalyticsDashboard';
 
-const mockChartData = [
-    { name: 'Jan', value: 4000 },
-    { name: 'Feb', value: 3000 },
-    { name: 'Mar', value: 5000 },
-    { name: 'Apr', value: 4500 },
-    { name: 'May', value: 6000 },
-    { name: 'Jun', value: 5500 },
-];
 
 export default function ManufacturerDashboard() {
     const [profile, setProfile] = useState<any>(null);
@@ -61,7 +53,7 @@ export default function ManufacturerDashboard() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Production <span className="text-indigo-600">Monitor</span></h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Production <span className="text-primary">Monitor</span></h1>
                     <p className="text-sm font-medium text-slate-400 mt-2">Global Operations & Manufacturer Analytics</p>
                 </div>
             </div>
@@ -86,7 +78,7 @@ export default function ManufacturerDashboard() {
                 />
                 <StatsCard
                     icon={FaUsers}
-                    label="Dealer Network"
+                    label="Seller Network"
                     value={profile?.dealersApproved?.length?.toString() || '0'}
                     trend="Growing"
                     color="text-primary"
@@ -150,17 +142,17 @@ export default function ManufacturerDashboard() {
 
                 {/* Side Status Column */}
                 <div className="space-y-8">
-                    {/* Dealer Requests */}
+                    {/* Seller Requests */}
                     <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm p-8">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-sm font-bold text-slate-800">Dealer Requests</h3>
+                            <h3 className="text-sm font-bold text-slate-800">Seller Requests</h3>
                         </div>
 
                         {!stats?.pendingDealerRequests || stats.pendingDealerRequests === 0 ? (
                             <EmptyState
                                 icon={FaUsers}
                                 title="No New Requests"
-                                description="Your dealer network is up to date."
+                                description="Your seller network is up to date."
                                 actionLabel="Grow Network"
                                 actionPath="/manufacturer/dealers"
                             />

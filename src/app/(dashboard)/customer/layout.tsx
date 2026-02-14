@@ -30,7 +30,7 @@ export default function CustomerLayout({
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setIsSidebarOpen(true)}
-                                    className="p-2 bg-white rounded-xl border border-foreground/10 text-foreground shadow-sm active:scale-95 transition-all touch-target"
+                                    className="p-2 bg-white rounded-[10px] border border-foreground/10 text-foreground shadow-sm active:scale-95 transition-all touch-target"
                                 >
                                     <Menu className="w-4 h-4" />
                                 </button>

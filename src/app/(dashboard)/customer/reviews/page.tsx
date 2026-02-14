@@ -60,7 +60,7 @@ export default function MyReviewsPage() {
 
     const displayReviews = filteredReviews;
 
-    if (isLoading) return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10367D]"></div></div>;
+    if (isLoading) return <div className="min-h-screen pt-32 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#067FF9]"></div></div>;
 
     return (
         <div className="min-h-screen pb-20 pt-10 px-6">
@@ -73,10 +73,10 @@ export default function MyReviewsPage() {
                         <p className="text-slate-400 font-medium mt-1">Manage your feedback and review your community contributions.</p>
                     </div>
                     <div className="flex gap-3">
-                        <button className="flex items-center gap-2 px-5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
+                        <button className="flex items-center gap-2 px-5 py-2 bg-white border border-slate-200 rounded-[10px] text-sm font-bold text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
                             <FaFilter className="text-slate-400" /> Filter
                         </button>
-                        <button className="flex items-center gap-2 px-5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
+                        <button className="flex items-center gap-2 px-5 py-2 bg-white border border-slate-200 rounded-[10px] text-sm font-bold text-slate-600 hover:border-slate-300 transition-colors shadow-sm">
                             <FaSortAmountDown className="text-slate-400" /> Sort: Most Recent
                         </button>
                     </div>
@@ -110,12 +110,12 @@ export default function MyReviewsPage() {
                                 key={review.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+                                className="bg-white rounded-[10px] p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
                             >
                                 {/* Top Row: Product & Actions */}
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex gap-4">
-                                        <div className="w-12 h-12 bg-slate-50 rounded-lg overflow-hidden border border-slate-100 shrink-0">
+                                        <div className="w-12 h-12 bg-slate-50 rounded-[10px] overflow-hidden border border-slate-100 shrink-0">
                                             {review.product?.images?.[0] ? (
                                                 <OptimizedImage
                                                     src={review.product.images[0]}
@@ -148,12 +148,12 @@ export default function MyReviewsPage() {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-500 rounded-lg text-sm font-bold hover:bg-slate-100 transition-colors">
+                                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-500 rounded-[10px] text-sm font-bold hover:bg-slate-100 transition-colors">
                                             <FaEdit className="w-3 h-3" /> Edit
                                         </button>
                                         <button
                                             onClick={() => handleDelete(review.id)}
-                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-500 rounded-lg text-sm font-bold hover:bg-rose-100 transition-colors"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-500 rounded-[10px] text-sm font-bold hover:bg-rose-100 transition-colors"
                                         >
                                             <FaTrashAlt className="w-3 h-3" /> Delete
                                         </button>
@@ -171,7 +171,7 @@ export default function MyReviewsPage() {
                                 {review.images && review.images.length > 0 && (
                                     <div className="flex gap-2 mb-4">
                                         {review.images.map((img: string, idx: number) => (
-                                            <div key={idx} className="w-12 h-12 rounded-lg overflow-hidden border border-slate-100 cursor-pointer hover:opacity-90 transition-opacity">
+                                            <div key={idx} className="w-12 h-12 rounded-[10px] overflow-hidden border border-slate-100 cursor-pointer hover:opacity-90 transition-opacity">
                                                 <OptimizedImage src={img} alt="Review attachment" width={48} height={48} className="w-full h-full object-cover" />
                                             </div>
                                         ))}
@@ -201,7 +201,7 @@ export default function MyReviewsPage() {
                 </div>
 
                 {/* Pagination */}
-                <button className="w-full py-4 bg-white text-slate-500 rounded-xl border border-slate-200 text-sm font-bold hover:bg-slate-50 hover:text-slate-800 transition-all shadow-sm">
+                <button className="w-full py-4 bg-white text-slate-500 rounded-[10px] border border-slate-200 text-sm font-bold hover:bg-slate-50 hover:text-slate-800 transition-all shadow-sm">
                     Load More Reviews
                 </button>
             </div>

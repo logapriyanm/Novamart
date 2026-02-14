@@ -116,7 +116,7 @@ function ProfileContent() {
                             <div className="flex-1 text-center md:text-left">
                                 <div className="flex items-center justify-center md:justify-between mb-4">
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight">Personal Information</h3>
-                                    <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-[10px] text-[10px] font-black tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+                                    <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-[10px] text-sm font-black tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
                                         <FaEdit className="w-3 h-3" /> Edit Profile
                                     </button>
                                 </div>
@@ -131,7 +131,7 @@ function ProfileContent() {
                                 { label: 'Primary Address', value: user?.address || '123 Enterprise Way, Tech City, 560001', icon: FaMapMarkerAlt },
                             ].map((field, idx) => (
                                 <div key={idx} className="space-y-2 p-6 bg-slate-50/50 rounded-[10px] border border-slate-100">
-                                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 tracking-widest">
+                                    <div className="flex items-center gap-2 text-sm font-black text-slate-400 tracking-widest">
                                         <field.icon className="w-3 h-3 text-blue-600" />
                                         {field.label}
                                     </div>
@@ -155,14 +155,14 @@ function ProfileContent() {
                                         <FaBox className="w-8 h-8 text-slate-300" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-[10px] font-black text-slate-400 tracking-widest leading-none mb-1">{order.id ? `NM-${order.id.slice(0, 5).toUpperCase()}` : 'ORDER'}</p>
+                                        <p className="text-sm font-black text-slate-400 tracking-widest leading-none mb-1">{order.id ? `NM-${order.id.slice(0, 5).toUpperCase()}` : 'ORDER'}</p>
                                         <h4 className="font-black text-slate-800 mb-2">{order.items?.[0]?.linkedProduct?.name || `Order #${order.id.slice(0, 5)}`} {order.items?.length > 1 && `+ ${order.items.length - 1} more`}</h4>
-                                        <span className={`px-3 py-1 rounded-[10px] text-[9px] font-black tracking-widest ${order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+                                        <span className={`px-3 py-1 rounded-[10px] text-xs font-black tracking-widest ${order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
                                             {order.status}
                                         </span>
                                     </div>
                                     <div className="text-right pr-4">
-                                        <p className="text-[10px] font-black text-slate-400 tracking-widest mb-1">Total</p>
+                                        <p className="text-sm font-black text-slate-400 tracking-widest mb-1">Total</p>
                                         <p className="text-sm font-black text-slate-800">₹{Number(order.totalAmount).toLocaleString()}</p>
                                     </div>
                                 </Card>
@@ -254,7 +254,7 @@ function ProfileContent() {
                             }}>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-400 tracking-widest pl-1 mb-1 block">Primary Address</label>
+                                        <label className="text-sm font-black text-slate-400 tracking-widest pl-1 mb-1 block">Primary Address</label>
                                         <textarea
                                             name="address"
                                             defaultValue={user?.address}
@@ -266,7 +266,7 @@ function ProfileContent() {
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="px-8 py-3 bg-slate-900 text-white rounded-[10px] text-[10px] font-black tracking-widest shadow-lg hover:bg-black transition-all disabled:opacity-50"
+                                            className="px-8 py-3 bg-slate-900 text-white rounded-[10px] text-sm font-black tracking-widest shadow-lg hover:bg-black transition-all disabled:opacity-50"
                                         >
                                             {loading ? 'Saving...' : 'Update Address'}
                                         </button>
@@ -334,7 +334,7 @@ function ProfileContent() {
 export default function ProfilePage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 font-black text-[#10367D] tracking-[0.3em] animate-pulse">
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 font-black text-[#067FF9] tracking-[0.3em] animate-pulse">
                 Decrypting Profile Data...
             </div>
         }>

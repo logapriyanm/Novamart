@@ -11,6 +11,7 @@ import {
     FaHistory
 } from 'react-icons/fa';
 import Link from 'next/link';
+import { adminService } from '@/lib/api/services/admin.service';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 
@@ -27,7 +28,7 @@ export default function FinanceDashboard() {
 
     const fetchOrders = async () => {
         try {
-            const data = await apiClient.get<any[]>('/orders');
+            const data = await adminService.getAllOrders();
             // Filter only PAID (Escrow Held) orders
             setOrders(data.filter((o: any) => o.status === 'PAID') || []);
         } catch (error) {
@@ -61,21 +62,21 @@ export default function FinanceDashboard() {
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-[#10367D] hover:translate-x-[-4px] transition-transform">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-[#067FF9] hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight uppercase italic">Financial <span className="text-[#10367D]">Governance</span></h1>
-                        <p className="text-slate-400 font-bold text-sm mt-1">Escrow Vault & Settlement Core</p>
+                        <h1 className="text-2xl font-bold text-[#1E293B] tracking-tight uppercase italic">Financial <span className="text-[#067FF9]">Governance</span></h1>
+                        <p className="text-slate-400 font-medium text-sm mt-1">Escrow Vault & Settlement Core</p>
                     </div>
                 </div>
             </div>
 
             {/* Escrow Vault */}
             <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="p-10 border-b border-slate-50 bg-[#10367D] text-white flex items-center justify-between">
+                <div className="p-10 border-b border-slate-50 bg-[#067FF9] text-white flex items-center justify-between">
                     <div>
                         <h2 className="text-sm font-black flex items-center gap-3">
                             <FaLock className="text-emerald-400" />

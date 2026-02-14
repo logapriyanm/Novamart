@@ -342,7 +342,7 @@ function CustomerOffersEditor({ content, setContent }: { content: any; setConten
     const addOffer = () => {
         setContent({
             ...content,
-            offers: [...offers, { id: Date.now(), icon: 'FaGift', title: '', subtitle: '', badge: '', lightColor: 'bg-indigo-50', color: 'bg-indigo-600', details: [], purpose: [] }]
+            offers: [...offers, { id: Date.now(), icon: 'FaGift', title: '', subtitle: '', badge: '', lightColor: 'bg-indigo-50', color: 'bg-primary', details: [], purpose: [] }]
         });
     };
 
@@ -367,7 +367,7 @@ function CustomerOffersEditor({ content, setContent }: { content: any; setConten
                     <div className="grid grid-cols-3 gap-3">
                         <div><EditorLabel>Badge</EditorLabel><EditorInput value={offer.badge} onChange={v => updateOffer(idx, 'badge', v)} placeholder="e.g. New, Hot" /></div>
                         <div><EditorLabel>Light Color</EditorLabel><EditorInput value={offer.lightColor} onChange={v => updateOffer(idx, 'lightColor', v)} placeholder="bg-indigo-50" /></div>
-                        <div><EditorLabel>Color</EditorLabel><EditorInput value={offer.color} onChange={v => updateOffer(idx, 'color', v)} placeholder="bg-indigo-600" /></div>
+                        <div><EditorLabel>Color</EditorLabel><EditorInput value={offer.color} onChange={v => updateOffer(idx, 'color', v)} placeholder="bg-primary" /></div>
                     </div>
                     <div>
                         <EditorLabel>Details (one per line)</EditorLabel>
@@ -770,7 +770,7 @@ export default function AdminCMSPage() {
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-foreground tracking-tight UPPERCASE ITALIC">Home Page CMS</h1>
+                    <h1 className="text-2xl font-bold text-foreground tracking-tight uppercase italic">Home Page CMS</h1>
                     <p className="text-foreground/60 mt-1">Manage sections, content, visibility, and role-based layout dynamically.</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -824,7 +824,7 @@ export default function AdminCMSPage() {
                                         <div className="flex items-start justify-between gap-4 mb-6">
                                             {/* Icon & Title */}
                                             <div className="flex items-center gap-4">
-                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-inner ${section.isActive ? 'bg-background text-primary' : 'bg-red-50 text-red-400'}`}>
+                                                <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center text-lg shadow-inner ${section.isActive ? 'bg-background text-primary' : 'bg-red-50 text-red-400'}`}>
                                                     <ComponentIcon />
                                                 </div>
                                                 <div>
@@ -834,7 +834,7 @@ export default function AdminCMSPage() {
                                                             {section.componentName}
                                                         </span>
                                                         {DATA_DRIVEN_COMPONENTS.includes(section.componentName) && (
-                                                            <span className="flex items-center gap-1 text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                                                            <span className="flex items-center gap-1 text-sm font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
                                                                 <FaInfoCircle className="w-2.5 h-2.5" /> Auto
                                                             </span>
                                                         )}
@@ -844,7 +844,7 @@ export default function AdminCMSPage() {
 
                                             {/* Order Badge */}
                                             <div className="flex flex-col items-end">
-                                                <span className="text-[10px] font-bold text-foreground/20">Order</span>
+                                                <span className="text-sm font-bold text-foreground/20">Order</span>
                                                 <span className="text-xl font-black text-foreground/10 tabular-nums leading-none">{String(section.order).padStart(2, '0')}</span>
                                             </div>
                                         </div>
@@ -853,7 +853,7 @@ export default function AdminCMSPage() {
                                         <div className="flex items-end justify-between mt-auto pt-6 border-t border-dashed border-foreground/5">
                                             <div className="flex flex-wrap gap-1.5 max-w-[60%]">
                                                 {section.visibleFor.map(role => (
-                                                    <span key={role} className="text-[10px] font-bold bg-foreground/5 text-foreground/60 px-2 py-1 rounded-md tracking-wider">
+                                                    <span key={role} className="text-sm font-bold bg-foreground/5 text-foreground/60 px-2 py-1 rounded-md tracking-wider">
                                                         {role === 'MANUFACTURER' ? 'MFR' : role}
                                                     </span>
                                                 ))}
@@ -866,7 +866,7 @@ export default function AdminCMSPage() {
                                                     <button
                                                         onClick={() => handleMove(index, 'up')}
                                                         disabled={index === 0}
-                                                        className="p-2 rounded-lg hover:bg-foreground/5 disabled:opacity-30 transition-colors text-foreground/60"
+                                                        className="p-2 rounded-[10px] hover:bg-foreground/5 disabled:opacity-30 transition-colors text-foreground/60"
                                                         title="Move Earlier"
                                                     >
                                                         <FaArrowUp className="w-3 h-3" />
@@ -874,7 +874,7 @@ export default function AdminCMSPage() {
                                                     <button
                                                         onClick={() => handleMove(index, 'down')}
                                                         disabled={index === sections.length - 1}
-                                                        className="p-2 rounded-lg hover:bg-foreground/5 disabled:opacity-30 transition-colors text-foreground/60"
+                                                        className="p-2 rounded-[10px] hover:bg-foreground/5 disabled:opacity-30 transition-colors text-foreground/60"
                                                         title="Move Later"
                                                     >
                                                         <FaArrowDown className="w-3 h-3" />
@@ -975,7 +975,7 @@ export default function AdminCMSPage() {
                                                             : [...current, role];
                                                         setEditingSection({ ...editingSection, visibleFor: fresh });
                                                     }}
-                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${editingSection.visibleFor.includes(role) ? 'bg-primary text-black' : 'bg-background border border-foreground/10 text-foreground/40'}`}
+                                                    className={`px-3 py-1.5 rounded-[10px] text-xs font-bold transition-all ${editingSection.visibleFor.includes(role) ? 'bg-primary text-black' : 'bg-background border border-foreground/10 text-foreground/40'}`}
                                                 >
                                                     {role}
                                                 </button>

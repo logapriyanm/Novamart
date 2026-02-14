@@ -22,7 +22,7 @@ export const getAdminOverview = async (req, res) => {
         const revenueData = await Order.aggregate([
             {
                 $match: {
-                    status: { $in: ['PAID', 'DELIVERED', 'SHIPPED', 'CONFIRMED'] },
+                    status: { $in: ['PAID', 'DELIVERED', 'SHIPPED', 'CONFIRMED', 'CREATED', 'PENDING', 'PROCESSING', 'OUT_FOR_DELIVERY'] },
                     createdAt: { $gte: start, $lte: end }
                 }
             },

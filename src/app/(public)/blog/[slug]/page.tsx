@@ -103,10 +103,10 @@ export default async function BlogPostPage({ params }: Props) {
                 </div>
 
                 <div className="mt-16 pt-8 border-t border-slate-100">
-                    <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 text-center">
+                    <div className="bg-slate-50 p-8 rounded-[10px] border border-slate-100 text-center">
                         <h3 className="text-xl font-bold text-slate-900 mb-2">Ready to start trading?</h3>
                         <p className="text-slate-600 mb-6">Join thousands of verified businesses on NovaMart today.</p>
-                        <Link href="/register" className="inline-block bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-dark transition-colors">
+                        <Link href="/register" className="inline-block bg-primary text-white px-8 py-3 rounded-[10px] font-bold hover:bg-primary-dark transition-colors">
                             Create Free Account
                         </Link>
                     </div>

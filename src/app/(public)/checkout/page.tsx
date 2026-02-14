@@ -171,7 +171,7 @@ export default function CheckoutPage() {
                     <div className="lg:col-span-8 space-y-10">
                         <header>
                             <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground tracking-tight mb-4 italic uppercase leading-tight">Secure <span className="text-black">Escrow Checkout</span></h1>
-                            <p className="text-foreground/40 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Review your shipping details and proceed to secure escrow payment.</p>
+                            <p className="text-foreground/40 font-bold uppercase tracking-widest text-sm sm:text-xs">Review your shipping details and proceed to secure escrow payment.</p>
                         </header>
 
                         {/* Buyer Protection Banner */}
@@ -216,25 +216,25 @@ export default function CheckoutPage() {
                                                     <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${selectedAddressId === addr.id ? 'bg-black text-white' : 'bg-surface text-foreground/20'}`}>
                                                         {addr.type === 'office' ? <HiOutlineOfficeBuilding className="w-6 h-6" /> : <HiOutlineHome className="w-6 h-6" />}
                                                     </div>
-                                                    <span className="text-[11px] font-black text-foreground uppercase tracking-tight">{addr.label}</span>
+                                                    <span className="text-sm font-black text-foreground uppercase tracking-tight">{addr.label}</span>
                                                 </div>
                                                 {selectedAddressId === addr.id && <HiOutlineCheckCircle className="text-black w-6 h-6" />}
                                             </div>
                                             <div className="space-y-1.5 opacity-60">
                                                 <p className="text-xs font-black text-foreground">{addr.name}</p>
-                                                <p className="text-[10px] font-bold text-foreground uppercase tracking-widest leading-relaxed">
+                                                <p className="text-sm font-bold text-foreground uppercase tracking-widest leading-relaxed">
                                                     {addr.line1}<br />
                                                     {addr.city}, {addr.state} {addr.zip}
                                                 </p>
                                             </div>
                                             <div className="mt-8 flex gap-4">
-                                                <button className="text-[9px] font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-black transition-colors">Edit</button>
+                                                <button className="text-xs font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-black transition-colors">Edit</button>
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         setAddresses(addresses.filter(a => a.id !== addr.id));
                                                     }}
-                                                    className="text-[9px] font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-red-500 transition-colors"
+                                                    className="text-xs font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-red-500 transition-colors"
                                                 >Delete</button>
                                             </div>
                                         </div>

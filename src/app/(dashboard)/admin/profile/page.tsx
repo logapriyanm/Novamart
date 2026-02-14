@@ -8,8 +8,8 @@ export default function AdminProfilePage() {
     const { user } = useAuth();
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12">
-            <h1 className="text-3xl font-purple-500 text-slate-900 tracking-tight uppercase italic">Admin <span className="text-slate-600">Profile</span></h1>
+        <div className="p-6 md:p-10 space-y-8 max-w-6xl mx-auto">
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase italic">Admin <span className="text-slate-600">Profile</span></h1>
 
             <div className="bg-white rounded-[10px] p-8 border border-slate-100 shadow-sm max-w-2xl">
                 <div className="flex items-center gap-6 mb-8">

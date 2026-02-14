@@ -37,7 +37,7 @@ export default function NegotiationList() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-black text-[#1E293B] flex items-center gap-3">
+      <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
         <FaHandshake className="text-primary" /> Negotiations
       </h2>
 
@@ -52,10 +52,10 @@ export default function NegotiationList() {
                 <img
                   src={neg.product?.images?.[0] || neg.product?.image}
                   alt={neg.product?.name || "Product"}
-                  className="w-16 h-16 rounded-xl object-cover bg-slate-100"
+                  className="w-16 h-16 rounded-[10px] object-cover bg-slate-100"
                 />
                 <div>
-                  <h3 className="font-bold text-[#1E293B]">
+                  <h3 className="font-bold text-slate-900">
                     {neg.product?.name}
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -66,13 +66,13 @@ export default function NegotiationList() {
                     </span>
                   </p>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-bold">
+                    <span className="bg-slate-100 px-2 py-0.5 rounded text-sm font-bold">
                       Qty: {neg.quantity}
                     </span>
-                    <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                    <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-sm font-bold">
                       Offer: ₹{neg.currentOffer}
                     </span>
-                    <span className="text-[10px] text-slate-400 italic">
+                    <span className="text-sm text-slate-400 italic">
                       Last Update:{" "}
                       {new Date(neg.updatedAt).toLocaleDateString()}
                     </span>
@@ -82,7 +82,7 @@ export default function NegotiationList() {
 
               <div className="flex items-center gap-4">
                 <div
-                  className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${neg.status === "ACCEPTED" ||
+                  className={`px-3 py-1 rounded-full text-sm font-black uppercase tracking-widest ${neg.status === "ACCEPTED" ||
                     neg.status === "DEAL_CLOSED"
                     ? "bg-emerald-100 text-emerald-600"
                     : neg.status === "REJECTED"
@@ -100,14 +100,14 @@ export default function NegotiationList() {
                     <>
                       <button
                         onClick={() => handleUpdate(neg.id, "REJECTED")}
-                        className="p-3 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-100 transition-colors"
+                        className="p-3 bg-rose-50 text-rose-500 rounded-[10px] hover:bg-rose-100 transition-colors"
                         title="Reject Offer"
                       >
                         <FaTimes />
                       </button>
                       <button
                         onClick={() => handleUpdate(neg.id, "ACCEPTED")}
-                        className="p-3 bg-emerald-50 text-emerald-500 rounded-xl hover:bg-emerald-100 transition-colors"
+                        className="p-3 bg-emerald-50 text-emerald-500 rounded-[10px] hover:bg-emerald-100 transition-colors"
                         title="Accept Offer"
                       >
                         <FaCheck />
@@ -117,7 +117,7 @@ export default function NegotiationList() {
                   {neg.status === "ACCEPTED" && neg.manufacturer && (
                     <button
                       onClick={() => handleUpdate(neg.id, "DEAL_CLOSED")}
-                      className="px-4 py-2 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10"
+                      className="px-4 py-2 bg-primary text-white text-sm font-black uppercase tracking-widest rounded-[10px] hover:bg-primary/90 transition-all shadow-lg shadow-primary/10"
                     >
                       Fulfill Deal
                     </button>
@@ -128,7 +128,7 @@ export default function NegotiationList() {
 
             {/* Activity Log Preview */}
             {neg.chatLog && neg.chatLog.length > 0 && (
-              <div className="mt-4 p-4 bg-slate-50/50 rounded-2xl text-[11px] text-slate-600 border border-slate-100/50">
+              <div className="mt-4 p-4 bg-slate-50/50 rounded-[10px] text-sm text-slate-600 border border-slate-100/50">
                 <p className="font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <FaComments className="text-primary/40" /> Timeline
                 </p>
@@ -138,7 +138,7 @@ export default function NegotiationList() {
                     .map((msg: any, i: number) => (
                       <div key={i} className="flex items-start gap-2">
                         <span
-                          className={`font-black text-[9px] px-1.5 py-0.5 rounded uppercase ${msg.sender === "SYSTEM"
+                          className={`font-black text-xs px-1.5 py-0.5 rounded uppercase ${msg.sender === "SYSTEM"
                             ? "bg-primary/10 text-primary"
                             : "bg-slate-200 text-slate-600"
                             }`}
@@ -146,7 +146,7 @@ export default function NegotiationList() {
                           {msg.sender}
                         </span>
                         <p className="flex-1 leading-relaxed">{msg.message}</p>
-                        <span className="text-[9px] text-slate-300">
+                        <span className="text-xs text-slate-300">
                           {new Date(msg.time).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -168,7 +168,7 @@ export default function NegotiationList() {
             <p className="font-black uppercase tracking-widest italic text-sm text-slate-300">
               No active deal zones
             </p>
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-2">
+            <p className="text-sm font-bold uppercase tracking-widest mt-2">
               Initialize a negotiation from the sourcing terminal
             </p>
           </div>

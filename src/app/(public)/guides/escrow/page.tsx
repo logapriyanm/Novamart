@@ -59,7 +59,7 @@ export default function EscrowLedgerPage() {
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-emerald-600/10 border border-emerald-600/20 text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-6"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-[10px] bg-emerald-600/10 border border-emerald-600/20 text-sm font-black uppercase tracking-widest text-emerald-600 mb-6"
                     >
                         <FaShieldAlt className="w-2.5 h-2.5" />
                         Financial Integrity

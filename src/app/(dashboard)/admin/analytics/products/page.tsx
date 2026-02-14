@@ -42,9 +42,9 @@ export default function AdminPerformanceMonitor() {
         : '100%';
 
     const stats = [
-        { l: 'Avg Return Rate', v: avgReturn, c: 'text-[#10367D]', b: 'bg-blue-50' },
+        { l: 'Avg Return Rate', v: avgReturn, c: 'text-[#067FF9]', b: 'bg-blue-50' },
         { l: 'Quality Compliance', v: compliance, c: 'text-emerald-600', b: 'bg-emerald-50' },
-        { l: 'Resolution Speed', v: '4.2h', c: 'text-indigo-600', b: 'bg-indigo-50' }, // Mock for now
+        { l: 'Resolution Speed', v: '4.2h', c: 'text-[#067FF9]', b: 'bg-indigo-50' }, // Mock for now
     ];
 
     return (
@@ -52,8 +52,8 @@ export default function AdminPerformanceMonitor() {
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight uppercase italic">Ecosystem <span className="text-[#10367D]">Intel</span></h1>
-                    <p className="text-slate-400 font-bold text-sm mt-1">Platform Performance Oversight & Governance Audits</p>
+                    <h1 className="text-2xl font-bold tracking-tight uppercase italic">Ecosystem <span className="text-[#067FF9]">Intel</span></h1>
+                    <p className="text-slate-400 font-medium text-sm mt-1">Platform Performance Oversight & Governance Audits</p>
                 </div>
                 <div className="flex items-center gap-4 bg-white border border-slate-100 p-2 rounded-[10px]">
                     <div className="px-4 py-2 bg-rose-50 border border-rose-100 rounded-[10px]">
@@ -85,7 +85,7 @@ export default function AdminPerformanceMonitor() {
                         <h2 className="text-sm font-bold text-[#1E293B] flex items-center gap-3">
                             <FaExclamationTriangle className="text-amber-500" /> Quality Audit Queue
                         </h2>
-                        <button className="p-3 bg-slate-50 text-slate-400 rounded-[10px] hover:text-[#10367D] transition-colors">
+                        <button className="p-3 bg-slate-50 text-slate-400 rounded-[10px] hover:text-[#067FF9] transition-colors">
                             <FaFilter className="w-4 h-4" />
                         </button>
                     </div>
@@ -143,22 +143,22 @@ export default function AdminPerformanceMonitor() {
                             <FaGavel className="text-rose-500" /> Governance Controls
                         </h3>
                         <div className="space-y-6">
-                            <div className="p-6 bg-white/5 border border-white/10 rounded-[10px] group-hover:border-rose-500/30 transition-all">
+                            <div className="p-6 bg-white/5 border border-white/10 rounded-lg group-hover:border-rose-500/30 transition-all">
                                 <p className="text-sm font-bold text-slate-500 mb-1">Delist Product</p>
-                                <p className="text-sm text-slate-500 leading-relaxed">Instantly remove asset from marketplace. Notifies all dealers holding stock.</p>
-                                <button className="mt-4 px-6 py-3 bg-rose-500 text-white text-sm font-bold rounded-[10px] hover:scale-105 transition-all w-full">Execute Delisting</button>
+                                <p className="text-sm text-slate-500 leading-relaxed">Instantly remove asset from marketplace.</p>
+                                <button className="mt-4 px-4 py-2 bg-rose-500 text-white text-sm font-bold rounded-lg hover:brightness-110 transition-all w-full">Execute Delisting</button>
                             </div>
-                            <div className="p-6 bg-white/5 border border-white/10 rounded-[10px] group-hover:border-amber-500/30 transition-all">
+                            <div className="p-6 bg-white/5 border border-white/10 rounded-lg group-hover:border-amber-500/30 transition-all">
                                 <p className="text-sm font-bold text-slate-500 mb-1">Issue Correction</p>
-                                <p className="text-sm text-slate-500 leading-relaxed">Force specs update for all retail listings. Manufacturer re-audit required.</p>
-                                <button className="mt-4 px-6 py-3 bg-amber-500 text-[#1E293B] text-sm font-bold rounded-[10px] hover:scale-105 transition-all w-full">Request Correction</button>
+                                <p className="text-sm text-slate-500 leading-relaxed">Force specs update for listings.</p>
+                                <button className="mt-4 px-4 py-2 bg-amber-500 text-slate-900 text-sm font-bold rounded-lg hover:brightness-110 transition-all w-full">Request Correction</button>
                             </div>
                         </div>
                     </div>
 
                     <div className="p-10 bg-slate-50 border border-slate-100 rounded-[10px] space-y-6">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-[10px] bg-white border border-slate-200 flex items-center justify-center text-[#10367D] shadow-sm">
+                            <div className="w-12 h-12 rounded-[10px] bg-white border border-slate-200 flex items-center justify-center text-[#067FF9] shadow-sm">
                                 <FaInfoCircle className="w-6 h-6" />
                             </div>
                             <h4 className="text-sm font-bold text-[#1E293B]">Auto-Delist Triggers</h4>

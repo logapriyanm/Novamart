@@ -41,10 +41,10 @@ export default function ManufacturerNegotiations() {
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-black tracking-tight text-[#1E293B]">
-                    Seller <span className="text-[#0F6CBD]">Negotiations</span>
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">
+                    Seller <span className="text-[#067FF9]">Negotiations</span>
                 </h1>
-                <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1">
                     Manage price negotiations with your seller network
                 </p>
             </div>
@@ -55,14 +55,14 @@ export default function ManufacturerNegotiations() {
                     <button
                         key={status}
                         onClick={() => setFilterStatus(status)}
-                        className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${filterStatus === status ? 'text-[#0F6CBD]' : 'text-slate-400 hover:text-slate-600'
+                        className={`pb-4 text-xs font-black uppercase tracking-widest relative transition-colors ${filterStatus === status ? 'text-[#067FF9]' : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         {status}
                         {filterStatus === status && (
                             <motion.div
                                 layoutId="manufacturer-negotiation-tab"
-                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0F6CBD]"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#067FF9]"
                             />
                         )}
                     </button>
@@ -93,7 +93,7 @@ export default function ManufacturerNegotiations() {
                             <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
                                 <div className="flex items-start gap-4 flex-1">
                                     <div className="w-16 h-16 bg-gradient-to-br from-blue-50 to-blue-100 rounded-[10px] flex items-center justify-center">
-                                        <FaStore className="text-[#0F6CBD] text-2xl" />
+                                        <FaStore className="text-[#067FF9] text-2xl" />
                                     </div>
 
                                     <div className="flex-1">
@@ -107,7 +107,7 @@ export default function ManufacturerNegotiations() {
 
                                         <div className="flex items-center gap-4 mt-3 text-xs font-bold text-slate-600">
                                             <span>{negotiation.quantity} units requested</span>
-                                            <span className="text-[#0F6CBD]">₹{negotiation.currentOffer}/unit</span>
+                                            <span className="text-[#067FF9]">₹{negotiation.currentOffer}/unit</span>
                                             <span className="flex items-center gap-1 text-slate-400">
                                                 <FaClock className="w-3 h-3" />
                                                 {negotiation.updatedAt ? new Date(negotiation.updatedAt).toLocaleDateString() : 'N/A'}
@@ -133,7 +133,7 @@ export default function ManufacturerNegotiations() {
                                     </span>
 
                                     <Link href={`/manufacturer/negotiations/${negotiation._id}`}>
-                                        <button className="px-6 py-3 bg-[#0F6CBD] text-white rounded-[10px] font-black text-sm hover:bg-[#0F6CBD]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                                        <button className="px-6 py-3 bg-[#067FF9] text-white rounded-[10px] font-black text-sm hover:bg-[#067FF9]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
                                             {negotiation.status === 'REQUESTED' || negotiation.status === 'NEGOTIATING' || negotiation.status === 'OFFER_MADE' ? 'Negotiate' : 'View Details'}
                                             <FaArrowRight className="w-3 h-3" />
                                         </button>

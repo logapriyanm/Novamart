@@ -34,11 +34,11 @@ export default function OnboardingPage() {
         <div className="min-h-screen bg-slate-50 py-12 px-4">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
-                    <div className="w-16 h-16 bg-[#10367D] text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[#10367D]/20 transform rotate-3">
+                    <div className="w-16 h-16 bg-[#067FF9] text-white rounded-[10px] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-[#067FF9]/20 transform rotate-3">
                         <FaShieldAlt className="w-8 h-8" />
                     </div>
                     <h1 className="text-3xl lg:text-4xl font-black text-[#1E293B] tracking-tight mb-4">
-                        Verify your <span className="text-[#10367D]">Identity</span>
+                        Verify your <span className="text-[#067FF9]">Identity</span>
                     </h1>
                     <p className="text-slate-500 font-medium max-w-xl mx-auto">
                         To ensure a safe and trusted marketplace, we require all Manufacturers and Dealers to verify their business details.
@@ -46,7 +46,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="bg-white rounded-[2.5rem] p-8 lg:p-12 shadow-xl shadow-slate-200/50 border border-slate-100">
-                    <div className="flex items-center gap-2 mb-8 p-4 bg-blue-50 text-blue-700 rounded-xl border border-blue-100">
+                    <div className="flex items-center gap-2 mb-8 p-4 bg-blue-50 text-blue-700 rounded-[10px] border border-blue-100">
                         <FaLock className="w-4 h-4" />
                         <span className="text-xs font-bold">Your documents are encrypted and stored securely. Only admins can view them.</span>
                     </div>

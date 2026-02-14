@@ -122,13 +122,13 @@ export default function OrderOversightPanel() {
         <div className="space-y-8 animate-fade-in pb-12 font-sans text-slate-800 bg-slate-50/50 min-h-screen p-6">
             {/* Header */}
             <div className="flex flex-col gap-2 border-b border-slate-200 pb-6">
-                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors mb-2">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-[#067FF9] hover:text-indigo-800 transition-colors mb-2">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900 UPPERCASE ITALIC">Supply Chain Oversight</h1>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900 uppercase italic">Supply Chain <span className="text-[#067FF9]">Oversight</span></h1>
                         <p className="text-sm text-slate-500 font-bold mt-1">Ecosystem-Wide Order Monitoring & Audit</p>
                     </div>
                 </div>
@@ -169,7 +169,7 @@ export default function OrderOversightPanel() {
                         </div>
                         <button
                             onClick={() => setIsFilterOpen(true)}
-                            className="px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-[10px] hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
+                            className="px-4 py-2 bg-black text-white text-sm font-bold rounded-[10px] hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
                         >
                             <FaFilter className="w-3 h-3" />
                             Filter {(filters.status.length > 0 || filters.dateRange !== 'ALL' || filters.minValue) && <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>}
@@ -213,7 +213,7 @@ export default function OrderOversightPanel() {
                                     <td className="px-6 py-4 text-sm font-bold text-slate-700">
                                         {order.customerId?.name || order.customer?.name || 'Guest'}
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-bold text-indigo-600">
+                                    <td className="px-6 py-4 text-sm font-bold text-[#067FF9]">
                                         {order.sellerId?.businessName || order.seller?.businessName || 'Verified Seller'}
                                     </td>
                                     <td className="px-6 py-4 text-center">

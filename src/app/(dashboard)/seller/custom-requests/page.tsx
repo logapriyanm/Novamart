@@ -104,7 +104,7 @@ export default function CustomRequestsPage() {
                     <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-[20px] flex items-center justify-center mx-auto mb-6">
                         <FaCog className="w-10 h-10 text-white" />
                     </div>
-                    <h1 className="text-3xl font-black text-[#1E293B] mb-4 italic uppercase">
+                    <h1 className="text-3xl font-black text-slate-900 mb-4 italic uppercase">
                         PRO Feature
                     </h1>
                     <p className="text-slate-600 font-bold mb-8">
@@ -127,8 +127,8 @@ export default function CustomRequestsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black text-[#1E293B] tracking-tight mb-2 italic uppercase">
-                        Custom <span className="text-[#10367D]">Manufacturing</span>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2 italic uppercase">
+                        Custom <span className="text-[#067FF9]">Manufacturing</span>
                     </h1>
                     <p className="text-sm font-bold text-slate-500">
                         Request custom products tailored to your specifications
@@ -136,7 +136,7 @@ export default function CustomRequestsPage() {
                 </div>
                 <button
                     onClick={() => router.push('/dealer/custom-requests/create')}
-                    className="flex items-center gap-3 px-6 py-4 bg-[#10367D] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
+                    className="flex items-center gap-3 px-6 py-4 bg-[#067FF9] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
                 >
                     <FaPlus className="w-4 h-4" />
                     New Request
@@ -150,8 +150,8 @@ export default function CustomRequestsPage() {
                         key={status}
                         onClick={() => setFilter(status)}
                         className={`px-6 py-3 rounded-[10px] font-black uppercase tracking-wider text-xs whitespace-nowrap transition-all ${filter === status
-                            ? 'bg-[#10367D] text-white shadow-lg'
-                            : 'bg-white text-slate-600 border border-slate-200 hover:border-[#10367D]'
+                            ? 'bg-[#067FF9] text-white shadow-lg'
+                            : 'bg-white text-slate-600 border border-slate-200 hover:border-[#067FF9]'
                             }`}
                     >
                         {status.replace('_', ' ')}
@@ -163,7 +163,7 @@ export default function CustomRequestsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white rounded-[20px] p-6 border border-slate-100">
                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Total</p>
-                    <p className="text-3xl font-black text-[#10367D]">{requests.length}</p>
+                    <p className="text-3xl font-black text-[#067FF9]">{requests.length}</p>
                 </div>
                 <div className="bg-white rounded-[20px] p-6 border border-slate-100">
                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Pending</p>
@@ -188,7 +188,7 @@ export default function CustomRequestsPage() {
             {/* Requests List */}
             {loading ? (
                 <div className="text-center py-20">
-                    <div className="animate-spin w-12 h-12 border-4 border-[#10367D] border-t-transparent rounded-full mx-auto"></div>
+                    <div className="animate-spin w-12 h-12 border-4 border-[#067FF9] border-t-transparent rounded-full mx-auto"></div>
                 </div>
             ) : filteredRequests.length === 0 ? (
                 <div className="bg-white rounded-[30px] p-16 text-center border border-slate-100">
@@ -205,7 +205,7 @@ export default function CustomRequestsPage() {
                     {filter === 'ALL' && (
                         <button
                             onClick={() => router.push('/dealer/custom-requests/create')}
-                            className="px-8 py-4 bg-[#10367D] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
+                            className="px-8 py-4 bg-[#067FF9] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
                         >
                             Create First Request
                         </button>
@@ -224,7 +224,7 @@ export default function CustomRequestsPage() {
                         >
                             <div className="flex items-start justify-between mb-6">
                                 <div className="flex-1">
-                                    <h3 className="text-xl font-black text-[#1E293B] mb-2 group-hover:text-[#10367D] transition-colors">
+                                    <h3 className="text-xl font-black text-slate-900 mb-2 group-hover:text-[#067FF9] transition-colors">
                                         {request.productName}
                                     </h3>
                                     <p className="text-sm font-bold text-slate-500">

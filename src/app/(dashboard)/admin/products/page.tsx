@@ -73,7 +73,7 @@ export default function AdminProductManagement() {
         <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
             {/* Header */}
             <div className="flex flex-col gap-1 border-b border-foreground/5 pb-8">
-                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-primary hover:translate-x-[-4px] transition-transform mb-4">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-bold text-[#067FF9] hover:translate-x-[-4px] transition-transform mb-4">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Console
                 </Link>

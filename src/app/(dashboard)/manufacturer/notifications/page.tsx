@@ -41,16 +41,16 @@ export default function ManufacturerNotifications() {
     }
 
     return (
-        <div className="space-y-8 animate-fade-in pb-12 text-[#1E293B]">
+        <div className="space-y-8 animate-fade-in pb-12 text-slate-900">
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight italic">System <span className="text-[#10367D]">Notifications</span></h1>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Real-time alerts & updates</p>
+                    <h1 className="text-3xl font-black tracking-tight italic">System <span className="text-[#067FF9]">Notifications</span></h1>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1">Real-time alerts & updates</p>
                 </div>
                 <button
                     onClick={() => markAllAsRead()}
-                    className="px-8 py-4 bg-white border border-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest shadow-sm hover:text-[#10367D] hover:border-[#10367D]/20 transition-all flex items-center gap-3"
+                    className="px-8 py-4 bg-white border border-slate-100 text-slate-500 rounded-[10px] font-black text-xs uppercase tracking-widest shadow-sm hover:text-[#067FF9] hover:border-[#067FF9]/20 transition-all flex items-center gap-3"
                 >
                     <FaCheckDouble className="w-4 h-4" />
                     Mark All Read
@@ -62,13 +62,13 @@ export default function ManufacturerNotifications() {
                 {/* Toolbar */}
                 <div className="p-10 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-[10px] border border-slate-100 shadow-sm">
                             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Feed</span>
+                            <span className="text-sm font-black uppercase tracking-widest text-slate-500">Live Feed</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <button className="p-4 bg-white border border-slate-100 text-slate-400 rounded-xl hover:text-[#10367D] transition-colors shadow-sm">
+                        <button className="p-4 bg-white border border-slate-100 text-slate-400 rounded-[10px] hover:text-[#067FF9] transition-colors shadow-sm">
                             <FaFilter className="w-3 h-3" />
                         </button>
                     </div>
@@ -78,7 +78,7 @@ export default function ManufacturerNotifications() {
                 <div className="p-6 md:p-10">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">
-                            <div className="w-10 h-10 border-4 border-[#10367D]/10 border-t-[#10367D] rounded-full animate-spin" />
+                            <div className="w-10 h-10 border-4 border-[#067FF9]/10 border-t-[#067FF9] rounded-full animate-spin" />
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Updates...</p>
                         </div>
                     ) : notifications.length === 0 ? (
@@ -107,17 +107,17 @@ export default function ManufacturerNotifications() {
                                                 : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-md'
                                             }`}
                                     >
-                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border ${getTypeColor(notification.type)}`}>
+                                        <div className={`w-14 h-14 rounded-[10px] flex items-center justify-center shrink-0 border ${getTypeColor(notification.type)}`}>
                                             {getIcon(notification.type)}
                                         </div>
 
                                         <div className="flex-1 min-w-0 pt-1">
                                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
-                                                <h4 className={`text-base font-black ${!notification.readAt ? 'text-[#10367D]' : 'text-slate-700'}`}>
+                                                <h4 className={`text-base font-black ${!notification.readAt ? 'text-[#067FF9]' : 'text-slate-700'}`}>
                                                     {notification.title}
                                                 </h4>
                                                 <div className="flex items-center gap-3 shrink-0">
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
+                                                    <span className="text-sm font-bold text-slate-400 uppercase tracking-wider bg-slate-50 px-3 py-1 rounded-[10px] border border-slate-100">
                                                         {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                                                     </span>
                                                     {!notification.readAt && (

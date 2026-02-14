@@ -77,7 +77,7 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
 
                     <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
-                            <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#0F6CBD] to-blue-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-blue-500/20 transform hover:rotate-3 transition-transform">
+                            <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-[#067FF9] to-blue-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-blue-500/20 transform hover:rotate-3 transition-transform">
                                 <FaStore size={48} />
                             </div>
                             <div>
@@ -87,16 +87,16 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
                                     </h1>
                                     <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full border border-emerald-100 shadow-sm">
                                         <FaShieldAlt size={14} />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Verified Seller</span>
+                                        <span className="text-sm font-black uppercase tracking-widest">Verified Seller</span>
                                     </div>
                                 </div>
-                                <div className="flex flex-wrap gap-6 text-slate-400 font-bold uppercase tracking-widest text-[11px]">
+                                <div className="flex flex-wrap gap-6 text-slate-400 font-bold uppercase tracking-widest text-sm">
                                     <div className="flex items-center gap-2">
-                                        <FaMapMarkerAlt className="text-[#0F6CBD]" />
+                                        <FaMapMarkerAlt className="text-[#067FF9]" />
                                         <span>{seller.city}, {seller.state}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <FaCalendarAlt className="text-[#0F6CBD]" />
+                                        <FaCalendarAlt className="text-[#067FF9]" />
                                         <span>Serving since {new Date(seller.joinedAt).getFullYear()}</span>
                                     </div>
                                 </div>
@@ -106,22 +106,22 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
                         <div className="flex items-center gap-6 lg:pl-10 lg:border-l border-slate-100">
                             <div className="flex gap-10 mr-6">
                                 <div className="text-center group/stat">
-                                    <div className="text-4xl font-black text-[#1E293B] group-hover:text-[#0F6CBD] transition-colors">{seller.stats.totalProducts}</div>
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Catalog Size</div>
+                                    <div className="text-4xl font-black text-[#1E293B] group-hover:text-[#067FF9] transition-colors">{seller.stats.totalProducts}</div>
+                                    <div className="text-sm font-black text-slate-400 uppercase tracking-widest mt-1">Catalog Size</div>
                                 </div>
                                 <div className="text-center group/stat">
                                     <div className="text-4xl font-black text-[#1E293B] flex items-center justify-center gap-2 group-hover:text-amber-500 transition-colors">
                                         {seller.stats.averageRating.toFixed(1)}
                                         <FaStar className="text-amber-400 fill-amber-400" size={24} />
                                     </div>
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{seller.stats.reviewCount} Reviews</div>
+                                    <div className="text-sm font-black text-slate-400 uppercase tracking-widest mt-1">{seller.stats.reviewCount} Reviews</div>
                                 </div>
                             </div>
 
                             <button
                                 onClick={handleMessageSeller}
                                 disabled={isMessageLoading}
-                                className="bg-black text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-[#0F6CBD] transition-all shadow-xl shadow-black/10 active:scale-95 disabled:opacity-50"
+                                className="bg-black text-white px-8 py-4 rounded-[10px] font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-[#067FF9] transition-all shadow-xl shadow-black/10 active:scale-95 disabled:opacity-50"
                             >
                                 <FaComments size={18} />
                                 {isMessageLoading ? (
@@ -139,22 +139,22 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
                 <div className="flex items-center gap-4 mb-8 border-b border-slate-200 pb-1">
                     <button
                         onClick={() => setActiveTab('products')}
-                        className={`pb-4 px-6 font-black uppercase tracking-widest text-xs transition-all relative ${activeTab === 'products' ? 'text-[#0F6CBD]' : 'text-slate-400 hover:text-slate-600'
+                        className={`pb-4 px-6 font-black uppercase tracking-widest text-xs transition-all relative ${activeTab === 'products' ? 'text-[#067FF9]' : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         Storefront
                         {activeTab === 'products' && (
-                            <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-[#0F6CBD]" />
+                            <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-[#067FF9]" />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('reviews')}
-                        className={`pb-4 px-6 font-black uppercase tracking-widest text-xs transition-all relative ${activeTab === 'reviews' ? 'text-[#0F6CBD]' : 'text-slate-400 hover:text-slate-600'
+                        className={`pb-4 px-6 font-black uppercase tracking-widest text-xs transition-all relative ${activeTab === 'reviews' ? 'text-[#067FF9]' : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         Customer Feedback
                         {activeTab === 'reviews' && (
-                            <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-[#0F6CBD]" />
+                            <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-1 bg-[#067FF9]" />
                         )}
                     </button>
                 </div>
@@ -177,16 +177,16 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center"><MdOutlineProductionQuantityLimits size={40} className="text-slate-200" /></div>
                                             )}
-                                            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black text-black shadow-sm">
+                                            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-sm font-black text-black shadow-sm">
                                                 {item.category?.toUpperCase()}
                                             </div>
                                         </div>
                                         <div className="p-6">
-                                            <h3 className="font-black text-[#1E293B] uppercase italic tracking-tight mb-2 group-hover:text-[#0F6CBD] transition-colors">{item.name}</h3>
+                                            <h3 className="font-black text-[#1E293B] uppercase italic tracking-tight mb-2 group-hover:text-[#067FF9] transition-colors">{item.name}</h3>
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xl font-black text-black tracking-tighter">₹{parseFloat(item.price).toLocaleString()}</span>
                                                 {item.stock < 10 && (
-                                                    <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-2 py-1 rounded-md">Low Stock</span>
+                                                    <span className="text-sm font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-2 py-1 rounded-md">Low Stock</span>
                                                 )}
                                             </div>
                                         </div>
@@ -207,12 +207,12 @@ export default function SellerClient({ id, initialData }: SellerClientProps) {
                                     <div key={idx} className="bg-white p-8 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center font-black text-[#0F6CBD] uppercase">
+                                                <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center font-black text-[#067FF9] uppercase">
                                                     {review.customer?.name?.[0] || 'C'}
                                                 </div>
                                                 <div>
                                                     <div className="font-black text-[#1E293B] uppercase text-xs">{review.customer?.name}</div>
-                                                    <div className="text-[10px] text-slate-400 font-bold uppercase">{new Date(review.createdAt).toLocaleDateString()}</div>
+                                                    <div className="text-sm text-slate-400 font-bold uppercase">{new Date(review.createdAt).toLocaleDateString()}</div>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-1 text-amber-500">

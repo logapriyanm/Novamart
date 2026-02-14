@@ -62,8 +62,8 @@ export default function AdminEscalationMonitor() {
         <div className="h-[calc(100vh-180px)] flex flex-col gap-8 animate-fade-in text-[#1E293B]">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight uppercase italic">Governance <span className="text-rose-600">Escalations</span></h1>
-                    <p className="text-slate-400 font-bold text-sm mt-1">Platform-Level Dispute Mediation • Admin Oversight</p>
+                    <h1 className="text-2xl font-bold tracking-tight uppercase italic">Governance <span className="text-rose-600">Escalations</span></h1>
+                    <p className="text-slate-400 font-medium text-sm mt-1">High-Priority Intervention Queue</p>
                 </div>
                 <div className="flex items-center gap-4 py-3 px-6 bg-rose-50 border border-rose-100 rounded-[10px]">
                     <FaExclamationTriangle className="text-rose-600 w-4 h-4 animate-pulse" />
@@ -91,7 +91,7 @@ export default function AdminEscalationMonitor() {
                                 <div className="flex justify-between items-start mb-2">
                                     <span className={`text-xs font-black px-2 py-0.5 rounded-[10px] border ${esc.priority === 'HIGH' ? 'bg-rose-100 text-rose-600 border-rose-200' : 'bg-amber-100 text-amber-600 border-amber-200'
                                         }`}>{esc.priority} PRIORITY</span>
-                                    <span className="text-sm font-black text-[#10367D]">{esc.context}</span>
+                                    <span className="text-sm font-black text-[#067FF9]">{esc.context}</span>
                                 </div>
                                 <h4 className="text-sm font-black text-[#1E293B] italic leading-tight mb-1">{esc.type.replace('_', ' ')}</h4>
                                 <p className="text-sm font-bold text-slate-400 truncate">{esc.reason}</p>
@@ -142,7 +142,7 @@ export default function AdminEscalationMonitor() {
                                 <div className="flex-1 overflow-y-auto p-12 space-y-6 bg-slate-50/50">
                                     <div className="flex justify-center mb-8">
                                         <div className="px-6 py-2 bg-white rounded-[10px] border border-slate-200 flex items-center gap-3">
-                                            <FaShieldAlt className="text-[#10367D] w-3 h-3" />
+                                            <FaShieldAlt className="text-[#067FF9] w-3 h-3" />
                                             <span className="text-sm font-black text-[#1E293B] italic">Immutable Narrative Audit</span>
                                         </div>
                                     </div>
@@ -150,7 +150,7 @@ export default function AdminEscalationMonitor() {
                                         <div key={i} className={`flex ${m.senderRole === 'CUSTOMER' ? 'justify-start' : 'justify-end'}`}>
                                             <div className="max-w-[80%] p-6 bg-white border border-slate-100 rounded-[10px] shadow-sm">
                                                 <div className="flex items-center gap-3 mb-2">
-                                                    <span className="text-sm font-black text-[#10367D] uppercase">{m.senderRole}</span>
+                                                    <span className="text-sm font-black text-[#067FF9] uppercase">{m.senderRole}</span>
                                                     <span className="text-xs font-bold text-slate-300">{m.createdAt}</span>
                                                 </div>
                                                 <p className="text-sm font-medium text-[#1E293B] leading-relaxed">{m.message}</p>

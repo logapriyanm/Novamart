@@ -8,7 +8,7 @@ export default function PendingVerificationPage() {
     return (
         <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
+                <div className="bg-white py-8 px-4 shadow sm:rounded-[10px] sm:px-10 text-center">
                     <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-6">
                         <FaClock className="h-8 w-8 text-yellow-600" />
                     </div>

@@ -13,14 +13,14 @@ export default function AdminMessagesPortal() {
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#10367D] hover:translate-x-[-4px] transition-transform w-fit">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#067FF9] hover:translate-x-[-4px] transition-transform w-fit">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight UPPERCASE ITALIC">System <span className="text-[#10367D]">Intercept</span></h1>
-                        <p className="text-slate-400 font-bold text-sm mt-1">Ecosystem-wide Communication Monitoring & Governance</p>
+                        <h1 className="text-2xl font-bold text-[#1E293B] tracking-tight uppercase italic">System <span className="text-[#067FF9]">Intercept</span></h1>
+                        <p className="text-slate-400 font-medium text-sm mt-1">Ecosystem-wide Communication Monitoring & Governance</p>
                     </div>
                     <div className="px-5 py-2.5 bg-amber-50 border border-amber-100 rounded-[10px] flex items-center gap-3 shadow-sm">
                         <FaShieldAlt className="text-amber-600 w-4 h-4" />

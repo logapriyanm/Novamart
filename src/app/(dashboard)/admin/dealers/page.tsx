@@ -131,7 +131,7 @@ export default function DealerApprovalPanel() {
         <div className="min-h-screen  pb-20 overflow-x-hidden">
             {/* Top Navigation Row */}
             <div className="max-w-[1600px] mx-auto px-6 py-6">
-                <Link href="/admin" className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#10367D] transition-colors group">
+                <Link href="/admin" className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#067FF9] transition-colors group">
                     <FaArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
                     Back to Mission Control
                 </Link>
@@ -150,7 +150,7 @@ export default function DealerApprovalPanel() {
                         </div>
                     </div>
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-                        <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                        <div className="w-12 h-12 bg-emerald-50 rounded-[10px] flex items-center justify-center text-emerald-600">
                             <FaShieldAlt className="w-6 h-6" />
                         </div>
                         <div>
@@ -159,7 +159,7 @@ export default function DealerApprovalPanel() {
                         </div>
                     </div>
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-                        <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                        <div className="w-12 h-12 bg-amber-50 rounded-[10px] flex items-center justify-center text-amber-600">
                             <FaClock className="w-6 h-6" />
                         </div>
                         <div>
@@ -168,7 +168,7 @@ export default function DealerApprovalPanel() {
                         </div>
                     </div>
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-                        <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600">
+                        <div className="w-12 h-12 bg-rose-50 rounded-[10px] flex items-center justify-center text-rose-600">
                             <FaExclamationCircle className="w-6 h-6" />
                         </div>
                         <div>
@@ -185,12 +185,15 @@ export default function DealerApprovalPanel() {
                 <div className="xl:col-span-7 space-y-6">
                     {/* Filter & Search Bar */}
                     <div className="bg-white p-4 rounded-[10px] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="flex bg-slate-50 p-1.5 rounded-[10px] gap-1 overflow-x-auto">
+                        <div className="flex flex-wrap gap-2">
                             {['ALL', 'PENDING', 'VERIFIED', 'SUSPENDED'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setFilterTab(tab as any)}
-                                    className={`px-6 py-2 rounded-[10px] text-sm font-bold transition-all whitespace-nowrap ${filterTab === tab ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all border ${filterTab === tab
+                                        ? 'bg-black text-white border-black shadow-md'
+                                        : 'bg-white text-black border-slate-200 hover:border-black'
+                                        }`}
                                 >
                                     {tab}
                                 </button>
@@ -243,7 +246,7 @@ export default function DealerApprovalPanel() {
                                                             </span>
                                                         )}
                                                         {dlr.user?.status === 'SUSPENDED' && (
-                                                            <span className="text-sm font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-lg border border-rose-100 flex items-center gap-1.5">
+                                                            <span className="text-sm font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-[10px] border border-rose-100 flex items-center gap-1.5">
                                                                 <FaExclamationCircle className="w-3 h-3" /> Suspended
                                                             </span>
                                                         )}
@@ -283,7 +286,7 @@ export default function DealerApprovalPanel() {
 
                                 <div className="flex items-center justify-between mb-10 relative">
                                     <div>
-                                        <h3 className="text-2xl font-black tracking-tight italic">Retail <span className="text-blue-400">Governance</span></h3>
+                                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase italic">Dealer <span className="text-[#067FF9]">Network</span></h1>
                                         <p className="text-sm font-bold text-slate-500 mt-1">High-Trust Enrollment Protocol</p>
                                     </div>
                                     <div className="text-right">
@@ -370,7 +373,7 @@ export default function DealerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleAction(selectedRequest._id || selectedRequest.id, true)}
                                                     disabled={isVerifying}
-                                                    className="group/btn relative py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-[10px] font-black text-sm shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
+                                                    className="group/btn relative py-5 bg-[#067FF9] hover:bg-blue-600 text-white rounded-[10px] font-black text-sm shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
                                                 >
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shine" />
                                                     <div className="flex items-center justify-center gap-3">

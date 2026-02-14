@@ -86,7 +86,7 @@ export default function OrderDetailsPage() {
                     <h1 className="text-2xl font-black text-slate-800 tracking-tight">Order #{order.id.slice(-6).toUpperCase()}</h1>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{new Date(order.createdAt).toLocaleString()}</p>
                 </div>
-                <div className={`ml-auto px-4 py-2 rounded-[10px] border text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${getStatusColor(order.status)}`}>
+                <div className={`ml-auto px-4 py-2 rounded-[10px] border text-sm font-black uppercase tracking-widest flex items-center gap-2 ${getStatusColor(order.status)}`}>
                     <FaBox size={12} />
                     {order.status}
                 </div>
@@ -118,7 +118,7 @@ export default function OrderDetailsPage() {
                                                     targetId: item.product?.id,
                                                     orderItemId: item.id
                                                 })}
-                                                className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 hover:underline"
+                                                className="text-sm font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 hover:underline"
                                             >
                                                 Rate & Review
                                             </button>
@@ -175,7 +175,7 @@ export default function OrderDetailsPage() {
                                                             toast.error('Failed to confirm delivery');
                                                         }
                                                     }}
-                                                    className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-xs font-bold hover:bg-emerald-600 transition-colors"
+                                                    className="px-4 py-2 bg-emerald-500 text-white rounded-[10px] text-xs font-bold hover:bg-emerald-600 transition-colors"
                                                 >
                                                     Confirm Delivery & Release Funds
                                                 </button>
@@ -193,7 +193,7 @@ export default function OrderDetailsPage() {
                                                             .catch(() => toast.error('Failed to raise dispute'));
                                                     }
                                                 }}
-                                                className="px-4 py-2 bg-white border border-rose-200 text-rose-500 rounded-lg text-xs font-bold hover:bg-rose-50 transition-colors"
+                                                className="px-4 py-2 bg-white border border-rose-200 text-rose-500 rounded-[10px] text-xs font-bold hover:bg-rose-50 transition-colors"
                                             >
                                                 Report Issue / Request Refund
                                             </button>
@@ -217,7 +217,7 @@ export default function OrderDetailsPage() {
                                         toast.info('Tracking simulation started!');
                                         setTimeout(() => window.location.reload(), 2000);
                                     }}
-                                    className="text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white px-4 py-2 rounded-[10px] hover:bg-black transition-all"
+                                    className="text-sm font-black uppercase tracking-widest bg-slate-900 text-white px-4 py-2 rounded-[10px] hover:bg-black transition-all"
                                 >
                                     Simulate Journey
                                 </button>
@@ -234,7 +234,7 @@ export default function OrderDetailsPage() {
                                         <div>
                                             <h4 className="text-sm font-black text-slate-800 flex items-center gap-2">
                                                 {event.toState}
-                                                <span className="text-[10px] font-bold text-slate-400 ml-auto">
+                                                <span className="text-sm font-bold text-slate-400 ml-auto">
                                                     {new Date(event.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </h4>
@@ -244,7 +244,7 @@ export default function OrderDetailsPage() {
                                                     <div className="grid grid-cols-2 gap-4">
                                                         {Object.entries(event.metadata).map(([key, val]: [string, any]) => (
                                                             <div key={key}>
-                                                                <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">{key}</p>
+                                                                <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-0.5">{key}</p>
                                                                 <p className="text-xs font-bold text-slate-800">{val}</p>
                                                             </div>
                                                         ))}
@@ -274,7 +274,7 @@ export default function OrderDetailsPage() {
                                         type: 'SELLER',
                                         targetId: order.dealer?.id // Verify if dealer ID is available here, usually it is
                                     })}
-                                    className="text-[10px] font-black uppercase tracking-widest text-amber-500 hover:text-amber-600 flex items-center gap-1"
+                                    className="text-sm font-black uppercase tracking-widest text-amber-500 hover:text-amber-600 flex items-center gap-1"
                                 >
                                     <FaStar /> Rate Seller
                                 </button>

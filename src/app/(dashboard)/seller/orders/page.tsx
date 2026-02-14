@@ -47,7 +47,7 @@ export default function DealerOrderManagement() {
             }));
             setOrders(mappedOrders);
         } catch (error) {
-            console.error('Failed to fetch dealer orders:', error);
+            console.error('Failed to fetch seller orders:', error);
             toast.error('Failed to load orders');
         }
     };
@@ -101,7 +101,7 @@ export default function DealerOrderManagement() {
         <div className="space-y-6 animate-fade-in pb-12 font-sans text-slate-800 bg-slate-50/50 min-h-screen p-6">
             {/* Header */}
             <div className="flex flex-col gap-1 border-b border-slate-200 pb-6">
-                <Link href="/dealer" className="flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors mb-2">
+                <Link href="/seller" className="flex items-center gap-2 text-xs font-semibold text-primary hover:text-primary/80 transition-colors mb-2">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Command
                 </Link>
@@ -119,7 +119,7 @@ export default function DealerOrderManagement() {
                                 <button
                                     key={f}
                                     onClick={() => setFilter(f)}
-                                    className={`px-3 py-1.5 rounded-[10px] text-[10px] font-bold uppercase tracking-wide transition-all ${filter === f ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                    className={`px-3 py-1.5 rounded-[10px] text-sm font-bold uppercase tracking-wide transition-all ${filter === f ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                                 >
                                     {f}
                                 </button>
@@ -137,7 +137,7 @@ export default function DealerOrderManagement() {
                             <div
                                 key={order.id}
                                 onClick={() => setSelectedOrder(order)}
-                                className={`p-5 hover:bg-slate-50 transition-all cursor-pointer flex items-center justify-between group ${selectedOrder?.id === order.id ? 'bg-indigo-50/10 border-l-4 border-l-indigo-600' : ''}`}
+                                className={`p-5 hover:bg-slate-50 transition-all cursor-pointer flex items-center justify-between group ${selectedOrder?.id === order.id ? 'bg-primary/5/10 border-l-4 border-l-primary' : ''}`}
                             >
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:scale-105 transition-all">
@@ -146,14 +146,14 @@ export default function DealerOrderManagement() {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h4 className="text-sm font-bold text-slate-900">{order.displayId}</h4>
-                                            <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-[10px] ${order.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>{order.status}</span>
+                                            <span className={`text-sm font-bold uppercase px-1.5 py-0.5 rounded-[10px] ${order.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>{order.status}</span>
                                         </div>
                                         <p className="text-xs font-medium text-slate-500 mt-0.5">{order.customer}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-sm font-bold text-slate-900">{order.totalFormatted}</p>
-                                    <p className="text-[10px] font-medium text-slate-400 mt-0.5">{order.date}</p>
+                                    <p className="text-sm font-medium text-slate-400 mt-0.5">{order.date}</p>
                                 </div>
                             </div>
                         ))}
@@ -182,19 +182,19 @@ export default function DealerOrderManagement() {
                                     <p className="text-xs text-slate-400 font-medium mt-1">Customer Transaction</p>
 
                                     <div className="flex items-center gap-3 mt-6 p-3 bg-white/5 rounded-[10px] border border-white/10">
-                                        <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white shrink-0">
+                                        <div className="w-8 h-8 rounded-full bg-primary/50 flex items-center justify-center text-white shrink-0">
                                             <FaUserCircle className="w-4 h-4" />
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-sm font-bold truncate">{selectedOrder.customer}</p>
-                                            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Verified Client</p>
+                                            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">Verified Client</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="flex-1 p-6 space-y-6 overflow-y-auto custom-scrollbar">
                                     <div>
-                                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center justify-between">
+                                        <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center justify-between">
                                             <span>Shipping Destination</span>
                                         </h4>
                                         <div className="bg-slate-50 p-4 rounded-[10px] border border-slate-200 text-xs font-medium text-slate-700 leading-relaxed">
@@ -218,7 +218,7 @@ export default function DealerOrderManagement() {
                                     </div>
 
                                     <div>
-                                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Timeline</h4>
+                                        <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Timeline</h4>
                                         <div className="space-y-3">
                                             {[
                                                 { t: 'Payment in Escrow', d: 'Validated', icon: FaCheckCircle, c: 'text-emerald-500', bg: 'bg-emerald-50' },
@@ -230,7 +230,7 @@ export default function DealerOrderManagement() {
                                                     </div>
                                                     <div>
                                                         <p className="text-xs font-semibold text-slate-900">{log.t}</p>
-                                                        <p className="text-[10px] text-slate-500">{log.d}</p>
+                                                        <p className="text-sm text-slate-500">{log.d}</p>
                                                     </div>
                                                 </div>
                                             ))}
@@ -252,8 +252,8 @@ export default function DealerOrderManagement() {
                                     </button>
 
                                     <Link
-                                        href={`/dealer/messages?chatId=${selectedOrder.id}`}
-                                        className="w-full py-3 bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600 rounded-[10px] uppercase tracking-wide hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                                        href={`/seller/messages?chatId=${selectedOrder.id}`}
+                                        className="w-full py-3 bg-primary/5 border border-primary/10 text-xs font-bold text-primary rounded-[10px] uppercase tracking-wide hover:bg-primary/10 transition-all flex items-center justify-center gap-2"
                                     >
                                         <FaCommentAlt className="w-3 h-3" />
                                         Chat with Customer
@@ -262,7 +262,7 @@ export default function DealerOrderManagement() {
                                     {selectedOrder.rawStatus === 'SHIPPED' && (
                                         <button
                                             onClick={handleSimulateDelivery}
-                                            className="w-full py-3 bg-indigo-50 border border-indigo-100 text-xs font-bold text-indigo-600 rounded-[10px] uppercase tracking-wide hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                                            className="w-full py-3 bg-primary/5 border border-primary/10 text-xs font-bold text-primary rounded-[10px] uppercase tracking-wide hover:bg-primary/10 transition-all flex items-center justify-center gap-2"
                                         >
                                             <FaTruck className="w-3 h-3 animate-pulse" />
                                             Simulate Journey (Dev)

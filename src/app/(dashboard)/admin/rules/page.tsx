@@ -33,19 +33,19 @@ export default function PricingGovernancePanel() {
         <div className="space-y-8 animate-fade-in pb-12">
             {/* Header */}
             <div className="flex flex-col gap-2">
-                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#10367D] hover:translate-x-[-4px] transition-transform">
+                <Link href="/admin" className="flex items-center gap-2 text-sm font-black text-[#067FF9] hover:translate-x-[-4px] transition-transform">
                     <FaArrowLeft className="w-3 h-3" />
                     Back to Mission Control
                 </Link>
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-black text-[#1E293B] tracking-tight UPPERCASE ITALIC">Economic <span className="text-[#10367D]">Governance</span></h1>
-                        <p className="text-slate-400 font-bold text-sm mt-1">Global Pricing & Margin Rule Engine</p>
+                        <h1 className="text-2xl font-bold text-[#1E293B] tracking-tight uppercase italic">Economic <span className="text-[#067FF9]">Governance</span></h1>
+                        <p className="text-slate-400 font-medium text-sm mt-1">Commission Protocols & Fee Structures</p>
                     </div>
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="px-8 py-3 bg-[#10367D] text-white text-sm font-black rounded-[10px] shadow-xl shadow-[#10367D]/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-3"
+                        className="px-8 py-3 bg-[#067FF9] text-white text-sm font-black rounded-[10px] shadow-xl shadow-[#067FF9]/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-3"
                     >
                         {isSaving ? (
                             <>
@@ -66,7 +66,7 @@ export default function PricingGovernancePanel() {
                 {/* Global Overrides */}
                 <div className="lg:col-span-1 space-y-6">
                     <div className="bg-[#1E293B] rounded-[10px] p-10 text-white shadow-2xl overflow-hidden relative group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#10367D]/20 blur-2xl rounded-full" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#067FF9]/20 blur-2xl rounded-full" />
                         <h3 className="text-sm font-black tracking-[0.2em] mb-8 opacity-60 flex items-center gap-3 italic">
                             <FaShieldAlt className="w-4 h-4" />
                             Safety Limits
@@ -115,7 +115,7 @@ export default function PricingGovernancePanel() {
                             <h2 className="text-lg font-black text-[#1E293B]">Category-Specific Rules</h2>
                             <p className="text-sm font-black text-slate-400 mt-1">Granular Control by Industry Type</p>
                         </div>
-                        <button className="px-5 py-2.5 bg-white border border-[#10367D]/10 text-[#10367D] text-sm font-black rounded-[10px] hover:bg-[#10367D] hover:text-white transition-all">Add Category Rule</button>
+                        <button className="px-5 py-2.5 bg-white border border-[#067FF9]/10 text-[#067FF9] text-sm font-black rounded-[10px] hover:bg-[#067FF9] hover:text-white transition-all">Add Category Rule</button>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -139,7 +139,7 @@ export default function PricingGovernancePanel() {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6 text-center">
-                                            <span className="px-3 py-1 bg-blue-50 text-[#10367D] rounded-[10px] text-sm font-black">{rule.maxMargin}</span>
+                                            <span className="px-3 py-1 bg-blue-50 text-[#067FF9] rounded-[10px] text-sm font-black">{rule.maxMargin}</span>
                                         </td>
                                         <td className="px-10 py-6 text-center">
                                             <span className="text-sm font-bold text-[#1E293B]">{rule.minPriceFloor}</span>
@@ -160,7 +160,7 @@ export default function PricingGovernancePanel() {
 
                     <div className="p-10 border-t border-slate-50 bg-slate-50/30 flex justify-center">
                         <p className="text-xs font-bold text-slate-400 flex items-center gap-2">
-                            <FaBalanceScale className="text-[#10367D]" />
+                            <FaBalanceScale className="text-[#067FF9]" />
                             NovaMart Governance Protocol v4.0 • Compliant with GOI Tax Standards
                         </p>
                     </div>

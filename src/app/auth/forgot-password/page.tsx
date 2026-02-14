@@ -65,12 +65,12 @@ export default function ForgotPasswordPage() {
                         >
                             <div className="text-center mb-8">
                                 <h1 className="text-2xl font-black text-black italic uppercase italic mb-2">Password Recovery</h1>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Enter your email to receive a reset link</p>
+                                <p className="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Enter your email to receive a reset link</p>
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-black/50 uppercase tracking-widest ml-1">Official Email</label>
+                                    <label className="text-sm font-black text-black/50 uppercase tracking-widest ml-1">Official Email</label>
                                     <div className="relative">
                                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20">
                                             <Mail className="w-5 h-5" />
@@ -83,13 +83,13 @@ export default function ForgotPasswordPage() {
                                             onChange={e => setEmail(e.target.value)}
                                         />
                                     </div>
-                                    {error && <p className="text-rose-500 text-[10px] font-black uppercase mt-1 ml-1">{error}</p>}
+                                    {error && <p className="text-rose-500 text-sm font-black uppercase mt-1 ml-1">{error}</p>}
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-[10px]"
+                                    className="w-full bg-black text-white font-black py-5 rounded-[10px] flex items-center justify-center gap-3 shadow-xl shadow-black/20 hover:scale-[1.02] transition-all disabled:opacity-50 uppercase tracking-widest text-sm"
                                 >
                                     {isLoading ? <Loader size="sm" variant="white" /> : 'Send Recovery Link'}
                                     {!isLoading && <ArrowRight className="w-5 h-5" />}
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
                             </form>
 
                             <div className="mt-8 pt-8 border-t border-black/5 text-center">
-                                <Link href="/auth/login" className="text-[10px] font-black text-slate-400 hover:text-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                                <Link href="/auth/login" className="text-sm font-black text-slate-400 hover:text-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
                                     <ArrowLeft className="w-3 h-3" />
                                     Back to Login
                                 </Link>
@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
                                 you will receive a password reset link shortly.
                             </p>
                             <Link href="/auth/login">
-                                <button className="w-full bg-black text-white font-black py-4 rounded-[10px] uppercase tracking-widest text-[10px] shadow-xl shadow-black/20">
+                                <button className="w-full bg-black text-white font-black py-4 rounded-[10px] uppercase tracking-widest text-sm shadow-xl shadow-black/20">
                                     Return to Login
                                 </button>
                             </Link>

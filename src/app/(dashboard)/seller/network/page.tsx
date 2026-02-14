@@ -56,17 +56,17 @@ export default function SellerNetworkPage() {
             </div>
 
             {/* Tabs */}
-            <div className="flex bg-white rounded-xl p-1 border border-gray-100 w-fit">
+            <div className="flex bg-white rounded-[10px] p-1 border border-gray-100 w-fit">
                 <button
                     onClick={() => setActiveTab('PARTNERS')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'PARTNERS' ? 'bg-black text-white shadow-md' : 'text-gray-500 hover:text-gray-900'}`}
+                    className={`px-4 py-2 rounded-[10px] text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'PARTNERS' ? 'bg-black text-white shadow-md' : 'text-gray-500 hover:text-gray-900'}`}
                 >
                     <CheckCircle className="h-4 w-4" />
                     Active Partners ({activePartners.length})
                 </button>
                 <button
                     onClick={() => setActiveTab('PENDING')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'PENDING' ? 'bg-black text-white shadow-md' : 'text-gray-500 hover:text-gray-900'}`}
+                    className={`px-4 py-2 rounded-[10px] text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'PENDING' ? 'bg-black text-white shadow-md' : 'text-gray-500 hover:text-gray-900'}`}
                 >
                     <Clock className="h-4 w-4" />
                     Requests ({pendingRequests.length})
@@ -76,12 +76,12 @@ export default function SellerNetworkPage() {
             {/* Content */}
             {loading ? (
                 <div className="space-y-4">
-                    {[1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-xl border border-gray-100 animate-pulse" />)}
+                    {[1, 2, 3].map(i => <div key={i} className="h-24 bg-white rounded-[10px] border border-gray-100 animate-pulse" />)}
                 </div>
             ) : (
                 <div className="space-y-4">
                     {(activeTab === 'PARTNERS' ? activePartners : pendingRequests).length === 0 ? (
-                        <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-200">
+                        <div className="text-center py-20 bg-white rounded-[10px] border border-dashed border-gray-200">
                             <Users className="h-10 w-10 text-gray-300 mx-auto mb-3" />
                             <h3 className="text-gray-900 font-medium">No {activeTab.toLowerCase()} found</h3>
                             <p className="text-gray-500 text-sm mt-1 mb-4">You haven't connected with any manufacturers yet.</p>
@@ -98,12 +98,12 @@ export default function SellerNetworkPage() {
                                 key={req._id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
+                                className="bg-white p-5 rounded-[10px] border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4"
                             >
                                 <div className="flex items-start gap-4">
-                                    <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div className="h-12 w-12 bg-gray-100 rounded-[10px] flex items-center justify-center flex-shrink-0">
                                         {req.manufacturerId.logo ? (
-                                            <img src={req.manufacturerId.logo} alt="" className="h-full w-full object-cover rounded-lg" />
+                                            <img src={req.manufacturerId.logo} alt="" className="h-full w-full object-cover rounded-[10px]" />
                                         ) : (
                                             <Building2 className="h-6 w-6 text-gray-400" />
                                         )}
@@ -125,13 +125,13 @@ export default function SellerNetworkPage() {
                                         <>
                                             <button
                                                 onClick={() => router.push(`/seller/discovery/${req.manufacturerId._id}`)}
-                                                className="px-4 py-2 text-sm text-gray-600 font-medium hover:text-black hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-gray-200"
+                                                className="px-4 py-2 text-sm text-gray-600 font-medium hover:text-black hover:bg-gray-50 rounded-[10px] transition-colors border border-transparent hover:border-gray-200"
                                             >
                                                 View Profile
                                             </button>
                                             <button
                                                 onClick={() => router.push(`/seller/discovery/${req.manufacturerId._id}`)}
-                                                className="px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors flex items-center shadow-lg shadow-black/10"
+                                                className="px-4 py-2 bg-black text-white text-sm font-medium rounded-[10px] hover:bg-gray-800 transition-colors flex items-center shadow-lg shadow-black/10"
                                             >
                                                 <ArrowRight className="h-4 w-4 mr-2" />
                                                 Browse Catalog

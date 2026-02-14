@@ -24,7 +24,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                     searchPlaceholder="Search mission control..."
                     title={
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-black text-slate-900 uppercase tracking-tighter italic">Mission <span className="text-primary tracking-normal">Control</span></span>
+                            <span className="text-sm font-bold text-slate-900 italic tracking-tight">Mission <span className="text-[#067FF9]">Control</span></span>
                         </div>
                     }
                 />
