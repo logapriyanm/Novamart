@@ -1,76 +1,71 @@
-import React from 'react';
-import { FaEnvelope } from 'react-icons/fa';
-import { IoIosArrowDropdown as ChevronRight } from 'react-icons/io';
-import { categorySubcategories } from '../../data/categoryData';
-import { ProductFilterSidebar, FilterState } from '../features/products/ProductFilterSidebar';
+import React from "react";
+import { categorySubcategories } from "../../data/categoryData";
+import {
+  ProductFilterSidebar,
+  FilterState,
+} from "../features/products/ProductFilterSidebar";
 
 interface CategorySidebarLeftProps {
-    categorySlug?: string;
-    filters?: FilterState;
-    onFilterChange?: (key: keyof FilterState, value: any) => void;
+  categorySlug?: string;
+  filters?: FilterState;
+  onFilterChange?: (key: keyof FilterState, value: any) => void;
 }
 
-export default function CategorySidebarLeft({ categorySlug, filters, onFilterChange }: CategorySidebarLeftProps) {
-    const subCategories = categorySlug ? categorySubcategories[categorySlug] : [];
+export default function CategorySidebarLeft({
+  categorySlug,
+  filters,
+  onFilterChange,
+}: CategorySidebarLeftProps) {
+  const subCategories = categorySlug ? categorySubcategories[categorySlug] : [];
 
-    return (
-        <div className="space-y-8">
-            {/* Categories Navigation (Kept as per context, but enhanced or kept simple) */}
-            <div className="bg-surface rounded-3xl p-6 border border-foreground/5">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-primary">Sub-Categories</h3>
-                <ul className="space-y-1">
-                    {subCategories && (
-                        <li>
-                            <button
-                                onClick={() => onFilterChange?.('subCategory', null)}
-                                className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-background text-sm font-bold transition-all group ${!filters?.subCategory ? 'bg-background text-foreground' : 'text-foreground/70 hover:text-foreground'}`}
-                            >
-                                All Products
-                                <ChevronRight className={`w-2.5 h-2.5 transition-all ${!filters?.subCategory ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
-                            </button>
-                        </li>
-                    )}
-                    {(subCategories || []).map((item) => (
-                        <li key={item}>
-                            <button
-                                onClick={() => onFilterChange?.('subCategory', item)}
-                                className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-background text-sm font-bold transition-all group ${filters?.subCategory === item ? 'bg-background text-foreground' : 'text-foreground/70 hover:text-foreground'}`}
-                            >
-                                {item}
-                                <ChevronRight className={`w-2.5 h-2.5 transition-all ${filters?.subCategory === item ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
-                            </button>
-                        </li>
-                    ))}
-                    {!subCategories && <p className="text-xs text-foreground/40 italic pl-3">No categories found.</p>}
-                </ul>
-            </div>
-
-            {/* PRODUCT FILTERS (New Integration) */}
-            {filters && onFilterChange && (
-                <ProductFilterSidebar
-                    filters={filters}
-                    onFilterChange={onFilterChange}
-                />
-            )}
-
-            {/* Newsletter (Optional: Kept below filters if needed or removed) */}
-            <div className="bg-primary rounded-[2.5rem] p-8 text-background">
-                <div className="w-12 h-12 bg-background/20 rounded-2xl flex items-center justify-center mb-6">
-                    <FaEnvelope className="w-5 h-5" />
-                </div>
-                <h3 className="text-xl font-black uppercase tracking-tighter mb-2 leading-none">Newsletter</h3>
-                <p className="text-xs font-bold opacity-60 mb-6 tracking-wide">Get latest updates about our latest shop and special offers.</p>
-                <div className="space-y-3">
-                    <input
-                        type="email"
-                        placeholder="Your Email"
-                        className="w-full bg-background/10 border border-background/20 rounded-xl px-4 py-3 text-xs font-bold placeholder:text-background/40 focus:outline-none focus:bg-background/20 transition-all"
-                    />
-                    <button className="w-full py-4 bg-background text-primary text-[10px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all">
-                        Subscribe
-                    </button>
-                </div>
-            </div>
+  return (
+    <div className="space-y-8">
+      {/* Sub-Categories — styled to match Advanced Filters */}
+      <div className="bg-white border border-slate-200 rounded-[10px] shadow-sm flex flex-col divide-y divide-slate-100 overflow-hidden">
+        {/* Header */}
+        <div className="p-4 xs:p-5 flex items-center justify-between bg-slate-50/50">
+          <h3 className="text-sm font-bold text-slate-900">Sub-Categories</h3>
         </div>
-    );
+
+        {/* List */}
+        <div className="p-4 xs:p-5">
+          <ul className="space-y-1 max-h-72 overflow-y-auto pr-1">
+            {subCategories && (
+              <li>
+                <button
+                  onClick={() => onFilterChange?.("subCategory", null)}
+                  className={`w-full flex items-center justify-between py-2.5 px-3 rounded-[8px] transition-all text-left text-sm font-semibold ${!filters?.subCategory ? "bg-black text-white" : "hover:bg-slate-50 text-slate-600"}`}
+                >
+                  All Products
+                </button>
+              </li>
+            )}
+            {(subCategories || []).map((item) => (
+              <li key={item}>
+                <button
+                  onClick={() => onFilterChange?.("subCategory", item)}
+                  className={`w-full flex items-center justify-between py-2.5 px-3 rounded-[8px] transition-all text-left text-sm font-semibold ${filters?.subCategory === item ? "bg-black text-white" : "hover:bg-slate-50 text-slate-600"}`}
+                >
+                  {item}
+                </button>
+              </li>
+            ))}
+            {(!subCategories || subCategories.length === 0) && (
+              <p className="text-sm text-slate-400 py-2 pl-3 italic">
+                No sub-categories found.
+              </p>
+            )}
+          </ul>
+        </div>
+      </div>
+
+      {/* PRODUCT FILTERS */}
+      {filters && onFilterChange && (
+        <ProductFilterSidebar
+          filters={filters}
+          onFilterChange={onFilterChange}
+        />
+      )}
+    </div>
+  );
 }

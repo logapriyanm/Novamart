@@ -85,11 +85,9 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-background text-foreground border-t border-gray-100 pt-12 md:pt-20 pb-10 overflow-hidden relative">
-      {/* Ambient Background Accents */}
-      {/* <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-primary to-primary" /> */}
-      <div className="absolute top-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-primary/5 blur-[80px] md:blur-[120px] rounded-full -mr-32 -mt-32 md:-mr-48 md:-mt-48" />
-      <div className="absolute bottom-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-primary/5 blur-[80px] md:blur-[120px] rounded-full -ml-32 -mb-32 md:-ml-48 md:-mb-48" />
+    <footer className="relative bg-white text-foreground border-t border-slate-100 pt-12 md:pt-20 pb-10 overflow-hidden">
+      {/* Glass Card Background Effect */}
+      <div className="absolute inset-4 md:inset-8 rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-100/60 shadow-[0_0_80px_rgba(0,0,0,0.03)] z-0" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 md:gap-12 lg:gap-8 mb-12 md:mb-10">
@@ -265,7 +263,10 @@ export default function Footer() {
         {/* Copyright Bar */}
         <div className="pt-8 pb-0 border-t border-foreground/5 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col md:flex-row items-center gap-4 text-sm font-medium text-foreground/60 text-center md:text-left">
-            <span>© 2026 <span className="text-primary italic">NovaMart</span> B2B2C Connection Platform.</span>
+            <span>
+              © 2026 <span className="text-primary italic">NovaMart</span> B2B2C
+              Connection Platform.
+            </span>
           </div>
         </div>
       </div>
