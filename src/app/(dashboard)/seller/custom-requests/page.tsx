@@ -112,7 +112,7 @@ export default function CustomRequestsPage() {
                         Upgrade your subscription to request custom products from manufacturers.
                     </p>
                     <button
-                        onClick={() => router.push('/dealer/subscription')}
+                        onClick={() => router.push('/seller/subscription')}
                         className="px-8 py-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
                     >
                         Upgrade to PRO
@@ -135,7 +135,7 @@ export default function CustomRequestsPage() {
                     </p>
                 </div>
                 <button
-                    onClick={() => router.push('/dealer/custom-requests/create')}
+                    onClick={() => router.push('/seller/custom-requests/create')}
                     className="flex items-center gap-3 px-6 py-4 bg-[#067FF9] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
                 >
                     <FaPlus className="w-4 h-4" />
@@ -204,7 +204,7 @@ export default function CustomRequestsPage() {
                     </p>
                     {filter === 'ALL' && (
                         <button
-                            onClick={() => router.push('/dealer/custom-requests/create')}
+                            onClick={() => router.push('/seller/custom-requests/create')}
                             className="px-8 py-4 bg-[#067FF9] text-white rounded-[15px] font-black uppercase tracking-wider hover:shadow-2xl transition-all"
                         >
                             Create First Request
@@ -219,7 +219,7 @@ export default function CustomRequestsPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.05 }}
-                            onClick={() => router.push(`/dealer/custom-requests/${request._id}`)}
+                            onClick={() => router.push(`/seller/custom-requests/${request._id}`)}
                             className="bg-white rounded-[25px] p-8 border border-slate-100 hover:shadow-2xl transition-all cursor-pointer group"
                         >
                             <div className="flex items-start justify-between mb-6">

@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import {
     FaPercentage,
     FaBalanceScale,
@@ -11,18 +10,35 @@ import {
     FaArrowUp,
     FaArrowDown,
     FaSave,
-    FaSync
+    FaSync,
+    FaSpinner
 } from 'react-icons/fa';
 import Link from 'next/link';
 
-const currentRules = [
-    { id: 'RLE-001', category: 'Appliances', maxMargin: '15%', minPriceFloor: '₹4,999', taxSlab: '18%', status: 'Active' },
-    { id: 'RLE-002', category: 'Kitchenware', maxMargin: '25%', minPriceFloor: '₹499', taxSlab: '12%', status: 'Active' },
-    { id: 'RLE-003', category: 'Accessories', maxMargin: '40%', minPriceFloor: '₹99', taxSlab: '18%', status: 'Active' },
-];
-
 export default function PricingGovernancePanel() {
     const [isSaving, setIsSaving] = useState(false);
+    const [rules, setRules] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchRules = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/admin/margin-rules', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setRules(data.data || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch margin rules');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchRules();
+    }, []);
 
     const handleSave = () => {
         setIsSaving(true);
@@ -130,30 +146,40 @@ export default function PricingGovernancePanel() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
-                                {currentRules.map((rule) => (
-                                    <tr key={rule.id} className="hover:bg-slate-50 group transition-colors">
-                                        <td className="px-10 py-6">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-black text-[#1E293B]">{rule.category}</span>
-                                                <span className="text-xs font-bold text-slate-400 mt-1">{rule.id}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-10 py-6 text-center">
-                                            <span className="px-3 py-1 bg-blue-50 text-[#067FF9] rounded-[10px] text-sm font-black">{rule.maxMargin}</span>
-                                        </td>
-                                        <td className="px-10 py-6 text-center">
-                                            <span className="text-sm font-bold text-[#1E293B]">{rule.minPriceFloor}</span>
-                                        </td>
-                                        <td className="px-10 py-6 text-center">
-                                            <span className="text-sm font-black text-slate-400">{rule.taxSlab}</span>
-                                        </td>
-                                        <td className="px-10 py-6 text-right">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-700 tracking-wider">
-                                                {rule.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {loading ? (
+                                    <tr><td colSpan={5} className="px-10 py-12 text-center">
+                                        <FaSpinner className="w-5 h-5 animate-spin text-slate-300 mx-auto" />
+                                    </td></tr>
+                                ) : rules.length === 0 ? (
+                                    <tr><td colSpan={5} className="px-10 py-12 text-center text-sm font-bold text-slate-300">
+                                        No margin rules configured yet
+                                    </td></tr>
+                                ) : (
+                                    rules.map((rule) => (
+                                        <tr key={rule._id || rule.id} className="hover:bg-slate-50 group transition-colors">
+                                            <td className="px-10 py-6">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-black text-[#1E293B]">{rule.category}</span>
+                                                    <span className="text-xs font-bold text-slate-400 mt-1">{rule._id?.slice(-6) || ''}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-10 py-6 text-center">
+                                                <span className="px-3 py-1 bg-blue-50 text-[#067FF9] rounded-[10px] text-sm font-black">{rule.maxCap || rule.maxMargin}%</span>
+                                            </td>
+                                            <td className="px-10 py-6 text-center">
+                                                <span className="text-sm font-bold text-[#1E293B]">₹{rule.minPriceFloor || '—'}</span>
+                                            </td>
+                                            <td className="px-10 py-6 text-center">
+                                                <span className="text-sm font-black text-slate-400">{rule.taxSlab || '—'}</span>
+                                            </td>
+                                            <td className="px-10 py-6 text-right">
+                                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black tracking-wider ${rule.isActive !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                    {rule.isActive !== false ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>

@@ -46,7 +46,7 @@ export default function UserManagementPortal() {
             const [usersData, mfgData, sellersData] = await Promise.all([
                 adminService.getUsers(),
                 adminService.getManufacturers(),
-                adminService.getDealers() // Service still uses getDealers
+                adminService.getSellers()
             ]);
             setUsers(usersData || []);
             setManufacturers(mfgData || []);
@@ -69,13 +69,27 @@ export default function UserManagementPortal() {
             if (entityType === 'MANUFACTURER') {
                 await adminService.verifyManufacturer(selectedEntity._id || selectedEntity.id, isVerified);
             } else {
-                await adminService.verifyDealer(selectedEntity._id || selectedEntity.id, isVerified); // Service uses verifyDealer
+                await adminService.verifySeller(selectedEntity._id || selectedEntity.id, isVerified);
             }
             toast.success(`${entityType} ${isVerified ? 'Verified' : 'Rejected'} Successfully`);
             fetchAllData(); // Refresh list
         } catch (error) {
             toast.error('Action Failed');
             throw error;
+        }
+    };
+
+    const handleStatusUpdate = async (userId: string, newStatus: string) => {
+        try {
+            toast.loading('Updating status...');
+            await adminService.updateUserStatus(userId, newStatus);
+            toast.dismiss();
+            toast.success(`User ${newStatus === 'Banned' ? 'Suspended' : 'Activated'}`);
+            fetchAllData();
+        } catch (error) {
+            toast.dismiss();
+            toast.error('Failed to update status');
+            console.error(error);
         }
     };
 
@@ -222,15 +236,40 @@ export default function UserManagementPortal() {
                                                 <div className="flex items-center justify-end gap-2">
                                                     {(selectedRole === 'MANUFACTURER' || selectedRole === 'SELLER') && !user.isVerified && (
                                                         <button
-                                                            onClick={() => handleVerifyClick(user, selectedRole as any)}
-                                                            className="px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-md hover:bg-slate-800 transition-colors"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleVerifyClick(user, selectedRole as any);
+                                                            }}
+                                                            className="px-3 py-1.5 bg-slate-900 text-white text-xs font-medium rounded-md hover:bg-slate-800 transition-colors shadow-sm"
                                                         >
                                                             Verify
                                                         </button>
                                                     )}
-                                                    <button className="text-slate-400 hover:text-slate-600 transition-colors">
-                                                        <FaEllipsisV className="w-3 h-3" />
-                                                    </button>
+
+                                                    {/* Action Menu Trigger */}
+                                                    <div className="relative group/menu">
+                                                        <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all">
+                                                            <FaEllipsisV className="w-3 h-3" />
+                                                        </button>
+
+                                                        {/* Dropdown Menu */}
+                                                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-xl border border-slate-100 py-1 z-50 hidden group-hover/menu:block">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleStatusUpdate(user._id || user.id, user.status === 'Banned' ? 'Active' : 'Banned');
+                                                                }}
+                                                                className={`w-full text-left px-4 py-2.5 text-xs font-bold flex items-center gap-2 hover:bg-slate-50 ${user.status === 'Banned' ? 'text-emerald-600' : 'text-rose-600'}`}
+                                                            >
+                                                                {user.status === 'Banned' ? <FaCheckCircle /> : <FaBan />}
+                                                                {user.status === 'Banned' ? 'Re-activate Account' : 'Suspend Account'}
+                                                            </button>
+                                                            <div className="border-t border-slate-50 my-1"></div>
+                                                            <button className="w-full text-left px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 flex items-center gap-2">
+                                                                <FaKey className="w-3 h-3" /> Reset Password
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -240,7 +279,8 @@ export default function UserManagementPortal() {
                         </div>
                     </div>
                 </>
-            )}
+            )
+            }
 
             <UserVerificationModal
                 isOpen={verifyModalOpen}
@@ -249,6 +289,6 @@ export default function UserManagementPortal() {
                 user={selectedEntity}
                 type={entityType}
             />
-        </div>
+        </div >
     );
 }

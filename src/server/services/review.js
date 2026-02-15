@@ -36,12 +36,12 @@ class ReviewService {
     /**
      * Submit a seller review.
      */
-    async submitSellerReview({ orderId, dealerId, customerId, rating, delivery, packaging, communication, comment }) {
+    async submitSellerReview({ orderId, sellerId, customerId, rating, delivery, packaging, communication, comment }) {
         try {
             const review = await Review.create({
                 type: 'SELLER',
                 orderId,
-                dealerId,
+                sellerId,
                 customerId,
                 rating,
                 deliveryRating: delivery,
@@ -51,8 +51,8 @@ class ReviewService {
                 status: 'PENDING'
             });
 
-            // Update dealer stats (async)
-            this.updateDealerRating(dealerId);
+            // Update seller stats (async)
+            this.updateSellerRating(sellerId);
 
             return review;
         } catch (error) {
@@ -85,14 +85,14 @@ class ReviewService {
     }
 
     /**
-     * Recalculate and update dealer rating.
+     * Recalculate and update seller rating.
      */
-    async updateDealerRating(dealerId) {
+    async updateSellerRating(sellerId) {
         const stats = await Review.aggregate([
-            { $match: { dealerId: dealerId, type: 'SELLER', status: 'APPROVED' } },
+            { $match: { sellerId: sellerId, type: 'SELLER', status: 'APPROVED' } },
             {
                 $group: {
-                    _id: '$dealerId',
+                    _id: '$sellerId',
                     avgRating: { $avg: '$rating' },
                     count: { $sum: 1 }
                 }
@@ -100,7 +100,7 @@ class ReviewService {
         ]);
 
         if (stats.length > 0) {
-            await Seller.findByIdAndUpdate(dealerId, {
+            await Seller.findByIdAndUpdate(sellerId, {
                 averageRating: stats[0].avgRating,
                 reviewCount: stats[0].count
             });
@@ -118,7 +118,7 @@ class ReviewService {
             if (review.type === 'PRODUCT') {
                 await this.updateProductRating(review.productId);
             } else {
-                await this.updateDealerRating(review.dealerId);
+                await this.updateSellerRating(review.sellerId);
             }
             return review;
         } catch (error) {
@@ -136,7 +136,7 @@ class ReviewService {
                 .populate('productId')
                 .populate('customerId');
             const sellerReviews = await Review.find({ type: 'SELLER', status: 'PENDING' })
-                .populate('dealerId')
+                .populate('sellerId')
                 .populate('customerId');
             return { productReviews, sellerReviews };
         } catch (error) {

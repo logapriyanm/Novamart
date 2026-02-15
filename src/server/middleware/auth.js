@@ -20,23 +20,23 @@ const authenticate = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, getJwtSecret());
-        console.log('AUTH_DEBUG: Token decoded successfully', decoded);
+        logger.debug('Token decoded for user ID: %s', decoded.id);
 
         // 1. Verify User exists and is not suspended
-        const user = await User.findById(decoded.id)
-            .populate('customer')
-            .populate('seller')
-            .populate('manufacturer');
+        const user = await User.findById(decoded.id);
 
         if (!user) {
-            console.warn('AUTH_DEBUG: User not found for ID:', decoded.id);
             logger.warn('User not found for ID: %s', decoded.id);
             return res.status(401).json({ error: 'USER_NOT_FOUND' });
         }
-        console.log('AUTH_DEBUG: User found:', user.email, user.role, user.status);
+
+        // Only populate the user's actual role profile (performance optimization)
+        if (user.role === 'CUSTOMER') await user.populate('customer');
+        else if (user.role === 'SELLER') await user.populate('seller');
+        else if (user.role === 'MANUFACTURER') await user.populate('manufacturer');
+        logger.debug('User authenticated: role=%s status=%s', user.role, user.status);
 
         if (user.status === 'SUSPENDED') {
-            console.warn('AUTH_DEBUG: User suspended');
             return res.status(403).json({ error: 'ACCOUNT_SUSPENDED' });
         }
 
@@ -44,15 +44,11 @@ const authenticate = async (req, res, next) => {
         const session = await Session.findOne({ token });
 
         if (!session) {
-            console.log('AUTH_DEBUG: Session NOT found in DB');
-            logger.info('DEBUG: Session not found in DB for token starting with: %s', token.substring(0, 10));
-        } else {
-            console.log('AUTH_DEBUG: Session found, expiresAt:', session.expiresAt);
+            logger.debug('Session not found in DB for user: %s', decoded.id);
         }
 
         if (session && session.expiresAt < new Date()) {
-            console.log('AUTH_DEBUG: Session expired');
-            logger.info('DEBUG: Session expired. Expires at: %s, Current time: %s', session.expiresAt, new Date());
+            logger.debug('Session expired for user: %s', decoded.id);
         }
 
         if (!session || session.expiresAt < new Date()) {
@@ -63,8 +59,7 @@ const authenticate = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        console.error('AUTH_DEBUG: Catch Error:', error.message);
-        logger.error('❌ Auth Middleware Error:', { message: error.message, stack: error.stack });
+        logger.error('Auth Middleware Error: %s', error.message);
         return res.status(401).json({ error: 'INVALID_TOKEN', message: error.message });
     }
 };
@@ -86,7 +81,7 @@ export const authenticateOptional = async (req, res, next) => {
         const decoded = jwt.verify(token, getJwtSecret());
         const user = await User.findById(decoded.id)
             .populate('customer')
-            .populate('dealer')
+            .populate('seller')
             .populate('manufacturer');
 
         if (user && user.status !== 'SUSPENDED') {
@@ -102,7 +97,7 @@ export const authenticateUser = authenticate;
 
 export const authorizeRoles = (...roles) => {
     return (req, res, next) => {
-        logger.info('DEBUG: Role Check - User Role: %s, Allowed Roles: %s', req.user?.role, roles);
+        logger.debug('Role Check - User Role: %s, Allowed Roles: %s', req.user?.role, roles);
         if (!req.user || !roles.includes(req.user.role)) {
             return res.status(403).json({ error: 'FORBIDDEN', message: 'Access denied' });
         }
@@ -111,4 +106,3 @@ export const authorizeRoles = (...roles) => {
 };
 
 export default authenticate;
-

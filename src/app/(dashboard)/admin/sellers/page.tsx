@@ -24,8 +24,8 @@ import { adminService } from '@/lib/api/services/admin.service';
 import { toast } from 'sonner';
 import Loader from '@/client/components/ui/Loader';
 
-export default function DealerApprovalPanel() {
-    const [dealers, setDealers] = useState<any[]>([]);
+export default function SellerApprovalPanel() {
+    const [sellers, setSellers] = useState<any[]>([]);
     const [manufacturers, setManufacturers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedRequest, setSelectedRequest] = useState<any>(null);
@@ -35,18 +35,18 @@ export default function DealerApprovalPanel() {
     // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
-        fetchDealers();
+        fetchSellers();
         fetchManufacturers();
     }, []);
 
-    const fetchDealers = async () => {
+    const fetchSellers = async () => {
         setIsLoading(true);
         try {
-            const result = await adminService.getDealers();
+            const result = await adminService.getSellers();
             // Filter out nulls or invalid objects to prevent crashes
-            setDealers((result || []).filter(d => d && (d._id || d.id)));
+            setSellers((result || []).filter(s => s && (s._id || s.id)));
         } catch (error) {
-            console.error('Failed to fetch dealers', error);
+            console.error('Failed to fetch sellers', error);
         } finally {
             setIsLoading(false);
         }
@@ -61,15 +61,15 @@ export default function DealerApprovalPanel() {
         }
     };
 
-    const handleAction = async (dealerId: string, verify: boolean) => {
+    const handleAction = async (sellerId: string, verify: boolean) => {
         setIsVerifying(true);
         try {
-            await adminService.verifyDealer(dealerId, verify);
-            setDealers(prev => prev.map(d => (d._id === dealerId || d.id === dealerId) ? { ...d, isVerified: verify } : d));
-            if ((selectedRequest?._id === dealerId || selectedRequest?.id === dealerId)) {
+            await adminService.verifySeller(sellerId, verify);
+            setSellers(prev => prev.map(s => (s._id === sellerId || s.id === sellerId) ? { ...s, isVerified: verify } : s));
+            if ((selectedRequest?._id === sellerId || selectedRequest?.id === sellerId)) {
                 setSelectedRequest({ ...selectedRequest, isVerified: verify });
             }
-            toast.success(`Dealer ${verify ? 'Verified' : 'Verification Revoked'}`);
+            toast.success(`Seller ${verify ? 'Verified' : 'Verification Revoked'}`);
         } catch (error) {
             toast.error('Action failed');
         } finally {
@@ -81,7 +81,7 @@ export default function DealerApprovalPanel() {
         setIsVerifying(true);
         try {
             await adminService.updateUserStatus(userId, status);
-            setDealers(prev => prev.map(d => d.userId === userId ? { ...d, user: { ...d.user, status } } : d));
+            setSellers(prev => prev.map(s => s.userId === userId ? { ...s, user: { ...s.user, status } } : s));
             if (selectedRequest?.userId === userId) {
                 setSelectedRequest({ ...selectedRequest, user: { ...selectedRequest.user, status } });
             }
@@ -97,10 +97,10 @@ export default function DealerApprovalPanel() {
         if (!selectedRequest) return;
         setIsVerifying(true);
         try {
-            await adminService.updateDealerManufacturers(selectedRequest._id || selectedRequest.id, manufacturerId);
-            const updatedDealer = { ...selectedRequest, approvedBy: manufacturers.find(m => (m._id === manufacturerId || m.id === manufacturerId)) };
-            setDealers(prev => prev.map(d => (d._id === (selectedRequest._id || selectedRequest.id) || d.id === (selectedRequest._id || selectedRequest.id)) ? updatedDealer : d));
-            setSelectedRequest(updatedDealer);
+            await adminService.updateSellerManufacturers(selectedRequest._id || selectedRequest.id, manufacturerId);
+            const updatedSeller = { ...selectedRequest, approvedBy: manufacturers.find(m => (m._id === manufacturerId || m.id === manufacturerId)) };
+            setSellers(prev => prev.map(s => (s._id === (selectedRequest._id || selectedRequest.id) || s.id === (selectedRequest._id || selectedRequest.id)) ? updatedSeller : s));
+            setSelectedRequest(updatedSeller);
             toast.success('Manufacturer linked successfully');
         } catch (error) {
             toast.error('Linking failed');
@@ -110,20 +110,20 @@ export default function DealerApprovalPanel() {
     };
 
     const stats = {
-        total: dealers.length,
-        verified: dealers.filter(d => d.isVerified).length,
-        pending: dealers.filter(d => !d.isVerified).length,
-        suspended: dealers.filter(d => d.user?.status === 'SUSPENDED').length
+        total: sellers.length,
+        verified: sellers.filter(s => s.isVerified).length,
+        pending: sellers.filter(s => !s.isVerified).length,
+        suspended: sellers.filter(s => s.user?.status === 'SUSPENDED').length
     };
 
-    const filteredDealers = dealers.filter(d => {
-        const matchesSearch = d.businessName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            d.gstNumber?.toLowerCase().includes(searchQuery.toLowerCase());
+    const filteredSellers = sellers.filter(s => {
+        const matchesSearch = s.businessName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.gstNumber?.toLowerCase().includes(searchQuery.toLowerCase());
 
         if (filterTab === 'ALL') return matchesSearch;
-        if (filterTab === 'VERIFIED') return matchesSearch && d.isVerified;
-        if (filterTab === 'PENDING') return matchesSearch && !d.isVerified;
-        if (filterTab === 'SUSPENDED') return matchesSearch && d.user?.status === 'SUSPENDED';
+        if (filterTab === 'VERIFIED') return matchesSearch && s.isVerified;
+        if (filterTab === 'PENDING') return matchesSearch && !s.isVerified;
+        if (filterTab === 'SUSPENDED') return matchesSearch && s.user?.status === 'SUSPENDED';
         return matchesSearch;
     });
 
@@ -154,7 +154,7 @@ export default function DealerApprovalPanel() {
                             <FaShieldAlt className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm font-bold text-slate-400">Verified Dealers</p>
+                            <p className="text-sm font-bold text-slate-400">Verified Sellers</p>
                             <h3 className="text-2xl font-black text-slate-900 leading-tight">{stats.verified}</h3>
                         </div>
                     </div>
@@ -217,35 +217,35 @@ export default function DealerApprovalPanel() {
                             <div className="bg-white p-20 rounded-[10px] text-center border border-slate-100 shadow-sm flex justify-center">
                                 <Loader size="lg" variant="primary" />
                             </div>
-                        ) : filteredDealers.length === 0 ? (
+                        ) : filteredSellers.length === 0 ? (
                             <div className="bg-white p-20 rounded-[3rem] text-center border border-slate-100 shadow-sm">
                                 <FaStore className="w-12 h-12 text-slate-100 mx-auto mb-4" />
                                 <p className="text-sm font-bold text-slate-300 uppercase tracking-[0.2em]">No Outlets Found</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
-                                {filteredDealers.map((dlr) => (
+                                {filteredSellers.map((slr) => (
                                     <motion.div
                                         layout
-                                        key={dlr._id || dlr.id}
-                                        onClick={() => setSelectedRequest(dlr)}
-                                        className={`group relative bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer ${(selectedRequest?._id === dlr._id || selectedRequest?.id === dlr.id) ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''}`}
+                                        key={slr._id || slr.id}
+                                        onClick={() => setSelectedRequest(slr)}
+                                        className={`group relative bg-white p-6 rounded-[10px] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer ${(selectedRequest?._id === slr._id || selectedRequest?.id === slr.id) ? 'ring-2 ring-blue-500 bg-blue-50/20' : ''}`}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-6">
-                                                <div className={`w-16 h-16 rounded-[10px] flex items-center justify-center transition-all group-hover:scale-110 ${dlr.user?.status === 'SUSPENDED' ? 'bg-rose-50 text-rose-600' : dlr.isVerified ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                                                <div className={`w-16 h-16 rounded-[10px] flex items-center justify-center transition-all group-hover:scale-110 ${slr.user?.status === 'SUSPENDED' ? 'bg-rose-50 text-rose-600' : slr.isVerified ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
                                                     <FaStore className="w-8 h-8" />
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-lg font-black text-slate-900 leading-tight mb-1">{dlr.businessName || 'Unnamed Entity'}</h4>
+                                                    <h4 className="text-lg font-black text-slate-900 leading-tight mb-1">{slr.businessName || 'Unnamed Entity'}</h4>
                                                     <div className="flex flex-wrap items-center gap-2">
-                                                        <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-[10px] border border-blue-100">GST: {dlr.gstNumber || 'N/A'}</span>
-                                                        {dlr.isVerified && (
+                                                        <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-[10px] border border-blue-100">GST: {slr.gstNumber || 'N/A'}</span>
+                                                        {slr.isVerified && (
                                                             <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-[10px] border border-emerald-100 flex items-center gap-1.5">
                                                                 <FaShieldAlt className="w-3 h-3" /> Verified
                                                             </span>
                                                         )}
-                                                        {dlr.user?.status === 'SUSPENDED' && (
+                                                        {slr.user?.status === 'SUSPENDED' && (
                                                             <span className="text-sm font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded-[10px] border border-rose-100 flex items-center gap-1.5">
                                                                 <FaExclamationCircle className="w-3 h-3" /> Suspended
                                                             </span>
@@ -256,7 +256,7 @@ export default function DealerApprovalPanel() {
                                             <div className="flex items-center gap-4">
                                                 <div className="hidden md:block text-right">
                                                     <p className="text-sm font-bold text-slate-400 mb-0.5">Location</p>
-                                                    <p className="text-sm font-bold text-slate-600 truncate max-w-[120px]">{dlr.city || 'Unknown'}</p>
+                                                    <p className="text-sm font-bold text-slate-600 truncate max-w-[120px]">{slr.city || 'Unknown'}</p>
                                                 </div>
                                                 <button className="w-10 h-10 rounded-[10px] bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
                                                     <FaArrowRight className="w-3 h-3" />
@@ -286,7 +286,7 @@ export default function DealerApprovalPanel() {
 
                                 <div className="flex items-center justify-between mb-10 relative">
                                     <div>
-                                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase italic">Dealer <span className="text-[#067FF9]">Network</span></h1>
+                                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight uppercase italic">Seller <span className="text-[#067FF9]">Network</span></h1>
                                         <p className="text-sm font-bold text-slate-500 mt-1">High-Trust Enrollment Protocol</p>
                                     </div>
                                     <div className="text-right">

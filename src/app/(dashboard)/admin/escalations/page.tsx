@@ -20,16 +20,32 @@ import { toast } from 'sonner';
 
 const SOCKET_URL = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002/api').replace('/api', '') : 'http://localhost:5002';
 
-const mockEscalations = [
-    { id: 'esc_1', chatId: 'chat_123', type: 'REFUND_DISPUTE', reason: 'Seller not responding to warranty claim', priority: 'HIGH', status: 'OPEN', context: 'ORD-8821' },
-    { id: 'esc_2', chatId: 'chat_456', type: 'QUALITY_ISSUE', reason: 'Bulk order batch mismatch', priority: 'MEDIUM', status: 'OPEN', context: 'SRC-2022' },
-];
-
 export default function AdminEscalationMonitor() {
     const [selectedEscalation, setSelectedEscalation] = useState<any>(null);
+    const [escalations, setEscalations] = useState<any[]>([]);
     const [chatHistory, setChatHistory] = useState<any[]>([]);
     const [isFrozen, setIsFrozen] = useState(false);
-    // const { showSnackbar } = useSnackbar();
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchEscalations = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch('/api/admin/disputes?status=OPEN', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setEscalations(data.data || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch escalations');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchEscalations();
+    }, []);
 
     useEffect(() => {
         if (selectedEscalation) {
@@ -67,7 +83,7 @@ export default function AdminEscalationMonitor() {
                 </div>
                 <div className="flex items-center gap-4 py-3 px-6 bg-rose-50 border border-rose-100 rounded-[10px]">
                     <FaExclamationTriangle className="text-rose-600 w-4 h-4 animate-pulse" />
-                    <span className="text-sm font-black text-rose-900">Active Disputes: <span className="text-rose-600">08 Critical</span></span>
+                    <span className="text-sm font-black text-rose-900">Active Disputes: <span className="text-rose-600">{escalations.length} Open</span></span>
                 </div>
             </div>
 
@@ -82,21 +98,32 @@ export default function AdminEscalationMonitor() {
                     </div>
 
                     <div className="flex-1 overflow-y-auto divide-y divide-slate-50 custom-scrollbar">
-                        {mockEscalations.map((esc) => (
-                            <div
-                                key={esc.id}
-                                onClick={() => setSelectedEscalation(esc)}
-                                className={`p-8 hover:bg-slate-50 transition-all cursor-pointer relative group ${selectedEscalation?.id === esc.id ? 'bg-rose-50/30' : ''}`}
-                            >
-                                <div className="flex justify-between items-start mb-2">
-                                    <span className={`text-xs font-black px-2 py-0.5 rounded-[10px] border ${esc.priority === 'HIGH' ? 'bg-rose-100 text-rose-600 border-rose-200' : 'bg-amber-100 text-amber-600 border-amber-200'
-                                        }`}>{esc.priority} PRIORITY</span>
-                                    <span className="text-sm font-black text-[#067FF9]">{esc.context}</span>
-                                </div>
-                                <h4 className="text-sm font-black text-[#1E293B] italic leading-tight mb-1">{esc.type.replace('_', ' ')}</h4>
-                                <p className="text-sm font-bold text-slate-400 truncate">{esc.reason}</p>
+                        {loading ? (
+                            <div className="p-12 flex items-center justify-center">
+                                <FaSearch className="w-5 h-5 animate-pulse text-slate-300" />
                             </div>
-                        ))}
+                        ) : escalations.length === 0 ? (
+                            <div className="p-12 flex flex-col items-center justify-center text-center">
+                                <FaCheckCircle className="w-12 h-12 text-emerald-100 mb-4" />
+                                <p className="text-sm font-bold text-slate-300">No active escalations</p>
+                            </div>
+                        ) : (
+                            escalations.map((esc) => (
+                                <div
+                                    key={esc._id || esc.id}
+                                    onClick={() => setSelectedEscalation(esc)}
+                                    className={`p-8 hover:bg-slate-50 transition-all cursor-pointer relative group ${selectedEscalation?.id === esc._id ? 'bg-rose-50/30' : ''}`}
+                                >
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className={`text-xs font-black px-2 py-0.5 rounded-[10px] border ${esc.priority === 'HIGH' ? 'bg-rose-100 text-rose-600 border-rose-200' : 'bg-amber-100 text-amber-600 border-amber-200'
+                                            }`}>{esc.priority || 'MEDIUM'} PRIORITY</span>
+                                        <span className="text-sm font-black text-[#067FF9]">{esc.orderId || esc.context || ''}</span>
+                                    </div>
+                                    <h4 className="text-sm font-black text-[#1E293B] italic leading-tight mb-1">{(esc.type || esc.reason || 'Dispute').replace('_', ' ')}</h4>
+                                    <p className="text-sm font-bold text-slate-400 truncate">{esc.description || esc.reason || ''}</p>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 

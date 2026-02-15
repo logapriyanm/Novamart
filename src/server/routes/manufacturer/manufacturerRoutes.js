@@ -18,13 +18,14 @@ router.use(authorize(['MANUFACTURER'], [], ['ACTIVE', 'UNDER_VERIFICATION']));
 /**
  * Dealer Network Management
  */
-router.get('/network', manufacturerController.getMyDealers);
-router.get('/dealers/requests', manufacturerController.getDealerRequests);
-router.post('/network/handle', manufacturerController.handleDealerNetwork);
-router.post('/dealers/handle', manufacturerController.handleDealerNetwork); // Alias
+router.get('/network', manufacturerController.getMySellers);
+router.get('/sellers/requests', manufacturerController.getSellerRequests);
+router.post('/network/handle', manufacturerController.handleSellerNetwork);
+router.post('/sellers/handle', manufacturerController.handleSellerNetwork); // Alias
 router.get('/products', productController.getMyProducts);
 router.get('/products/requests', manufacturerController.getPendingProductRequests); // NEW
 router.post('/products/requests/approve', manufacturerController.approveProductRequest); // NEW
+router.post('/products/requests/reject', manufacturerController.rejectProductRequest); // NEW
 router.get('/orders', manufacturerController.getOrders);
 
 /**

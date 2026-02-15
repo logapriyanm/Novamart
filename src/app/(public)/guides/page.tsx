@@ -15,8 +15,8 @@ const steps = [
         text: "text-white"
     },
     {
-        title: "Dealer Sourcing",
-        description: "Regional dealers browse catalogs and place bulk orders or request custom allocations.",
+        title: "Seller Sourcing",
+        description: "Regional sellers browse catalogs and place bulk orders or request custom allocations.",
         icon: FaBriefcase,
         color: "bg-primary",
         text: "text-primary-foreground"
@@ -30,14 +30,14 @@ const steps = [
     },
     {
         title: "Distribution",
-        description: "Verified logistics partners move goods from factory to dealer showrooms.",
+        description: "Verified logistics partners move goods from factory to seller showrooms.",
         icon: FaTruck,
         color: "bg-amber-600",
         text: "text-white"
     },
     {
         title: "Customer Sale",
-        description: "Retail customers purchase from localized dealers with manufacturer-backed direct warranties.",
+        description: "Retail customers purchase from localized sellers with manufacturer-backed direct warranties.",
         icon: FaShoppingCart,
         color: "bg-foreground",
         text: "text-secondary"
@@ -50,7 +50,7 @@ const sidebarSections = [
         description: "Common questions about the connection cycle.",
         icon: FaQuestionCircle,
         items: [
-            { title: "Who can join?", description: "Registered manufacturers and GST-compliant dealers." },
+            { title: "Who can join?", description: "Registered manufacturers and GST-compliant sellers." },
             { title: "Escrow duration?", description: "Funds released T+3 days after delivery confirmation." },
             { title: "Logistics?", description: "Managed via NovaMart's fragile-optimized network." }
         ]
@@ -61,7 +61,7 @@ const sidebarSections = [
         icon: FaUserCheck,
         items: [
             { title: "Manufacturers", description: "Direct supply-chain dashboard." },
-            { title: "Dealers", description: "Inventory and retail management tools." },
+            { title: "Sellers", description: "Inventory and retail management tools." },
             { title: "Customers", description: "Verified retail marketplace." }
         ]
     }

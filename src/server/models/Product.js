@@ -15,6 +15,7 @@ const ProductSchema = new mongoose.Schema({
     lowStockThreshold: { type: Number, default: 10 },
     moq: { type: Number, default: 1 },
     category: { type: String, required: true, index: true },
+    subcategory: { type: String, index: true },
     colors: [String],
     sizes: [String],
     images: [String],

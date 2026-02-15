@@ -31,6 +31,7 @@ router.get('/allocations', sellerController.getMyAllocations);
 router.post('/source', sellerController.sourceProduct);
 router.put('/inventory/price', sellerController.updatePrice);
 router.put('/inventory/stock', sellerController.updateStock);
+router.put('/inventory/details', sellerController.updateDetails); // Custom Details
 router.put('/inventory/toggle-listing', sellerController.toggleListing);
 
 

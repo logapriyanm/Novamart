@@ -42,8 +42,8 @@ export default function UserDropdown() {
     const getSettingsPath = () => {
         switch (user.role) {
             case 'ADMIN': return '/admin/settings';
-            case 'MANUFACTURER': return '/manufacturer/settings'; // Assuming standard path
-            case 'SELLER': return '/seller/settings';
+            case 'MANUFACTURER': return '/manufacturer/settings';
+            // case 'SELLER': return '/seller/settings'; // Removed
             default: return '/customer/settings';
         }
     };

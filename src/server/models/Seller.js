@@ -25,6 +25,7 @@ const SellerSchema = new mongoose.Schema({
         communication: { type: Number, default: 0 }
     },
     isVerified: { type: Boolean, default: false },
+    profileImage: { type: String }, // Seller profile photo URL
     verificationStatus: {
         type: String,
         enum: ['NONE', 'PENDING', 'VERIFIED', 'REJECTED'],

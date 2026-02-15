@@ -50,6 +50,14 @@ const generateTokens = (user) => {
     return { accessToken, refreshToken };
 };
 
+/**
+ * Hash a refresh token before storing in DB.
+ * SECURITY: Never store plaintext refresh tokens.
+ */
+const hashToken = (token) => {
+    return crypto.createHash('sha256').update(token).digest('hex');
+};
+
 
 
 export const register = async (req, res) => {
@@ -81,7 +89,7 @@ export const register = async (req, res) => {
             status: (roleUpper === 'CUSTOMER') ? 'ACTIVE' : 'PENDING'
         }], { session });
 
-        if (roleUpper === 'SELLER' || roleUpper === 'DEALER') {
+        if (roleUpper === 'SELLER') {
             const { businessName, gstNumber, businessAddress, bankDetails } = profileData;
             await Seller.create([{
                 userId: user._id,
@@ -132,8 +140,8 @@ export const register = async (req, res) => {
 
         const { accessToken, refreshToken } = generateTokens(user);
 
-        // Save refresh token to DB
-        await User.findByIdAndUpdate(user._id, { refreshToken });
+        // Save hashed refresh token to DB (SECURITY: never store plaintext)
+        await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(refreshToken) });
 
         await Session.create({
             userId: user._id,
@@ -161,6 +169,7 @@ export const register = async (req, res) => {
     } catch (error) {
         await session.abortTransaction();
         const message = error.code === 11000 ? 'DUPLICATE_ENTRY' : 'REGISTRATION_FAILED';
+        console.error('REGISTRATION ERROR DETAILS:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
         const details = error.message;
 
 
@@ -189,8 +198,8 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await User.findOne({ email });
-        logger.debug('User found in login - Email: %s, Role: %s, ID: %s', email, user?.role, user?._id);
+        const user = await User.findOne({ email }).select('+password');
+        logger.debug('User found in login - Role: %s', user?.role);
 
         if (!user) {
             logger.warn('Login failed: User not found for email: %s', email);
@@ -206,7 +215,7 @@ export const login = async (req, res) => {
 
         const { accessToken, refreshToken } = generateTokens(user);
 
-        await User.findByIdAndUpdate(user._id, { refreshToken });
+        await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(refreshToken) });
 
         // Clear existing sessions
         await Session.deleteMany({ userId: user._id });
@@ -240,7 +249,7 @@ export const login = async (req, res) => {
         });
     } catch (error) {
         logger.error('❌ Login Error:', error);
-        res.status(500).json({ success: false, error: 'LOGIN_FAILED', details: error.message });
+        res.status(500).json({ success: false, error: 'LOGIN_FAILED' });
     }
 };
 
@@ -263,7 +272,7 @@ export const loginWithPhone = async (req, res) => {
 
         const { accessToken, refreshToken } = generateTokens(user);
 
-        await User.findByIdAndUpdate(user._id, { refreshToken });
+        await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(refreshToken) });
 
         await Session.deleteMany({ userId: user._id });
 
@@ -335,7 +344,7 @@ export const googleLogin = async (req, res) => {
 
         const { accessToken, refreshToken } = generateTokens(user);
 
-        await User.findByIdAndUpdate(user._id, { refreshToken });
+        await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(refreshToken) });
 
         await Session.deleteMany({ userId: user._id });
 
@@ -367,10 +376,12 @@ export const googleLogin = async (req, res) => {
             }
         });
     } catch (error) {
-        logger.error('❌ Google Auth Error:', {
+        logger.error('❌ Google Auth Error Details:', {
+            name: error.name,
             message: error.message,
             stack: error.stack,
-            clientId: process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing'
+            clientId_env: process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing',
+            clientId_val: process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID.substring(0, 10) + '...' : 'N/A'
         });
         res.status(400).json({ success: false, error: 'GOOGLE_AUTH_FAILED', details: error.message });
     }
@@ -386,7 +397,7 @@ export const getCurrentUser = async (req, res) => {
             success: true,
             data: {
                 id: user.id,
-                name: user.customer?.name || user.dealer?.businessName || user.manufacturer?.companyName || user.email.split('@')[0],
+                name: user.customer?.name || user.seller?.businessName || user.manufacturer?.companyName || user.email.split('@')[0],
                 email: user.email,
                 role: user.role,
                 status: user.status,
@@ -413,14 +424,18 @@ export const refresh = async (req, res) => {
         const payload = jwt.verify(refreshToken, getRefreshSecret());
         const user = await User.findById(payload.id);
 
-        if (!user || user.refreshToken !== refreshToken) {
+        // Compare hashed tokens (SECURITY: stored token is hashed)
+        if (!user || user.refreshToken !== hashToken(refreshToken)) {
             return res.status(401).json({ error: 'INVALID_REFRESH_TOKEN' });
         }
 
         const tokens = generateTokens(user);
 
-        // Update User's refresh token
-        await User.findByIdAndUpdate(user._id, { refreshToken: tokens.refreshToken });
+        // Update User's hashed refresh token
+        await User.findByIdAndUpdate(user._id, { refreshToken: hashToken(tokens.refreshToken) });
+
+        // Clear old sessions to prevent accumulation
+        await Session.deleteMany({ userId: user._id });
 
         // Create new session for the new access token
         const newSession = await Session.create({

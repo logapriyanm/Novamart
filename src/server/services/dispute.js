@@ -13,7 +13,7 @@ class DisputeService {
      * Raise a dispute for an order.
      * Supports multi-party triggers: CUSTOMER_TO_DEALER, DEALER_TO_MANUFACTURER, ADMIN_INTERNAL.
      */
-    async raiseDispute(orderId, raisedByUserId, { reason, triggerType = 'CUSTOMER_TO_DEALER' }) {
+    async raiseDispute(orderId, raisedByUserId, { reason, triggerType = 'CUSTOMER_TO_SELLER' }) {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {

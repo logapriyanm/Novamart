@@ -14,7 +14,7 @@ import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 import Loader from '@/client/components/ui/Loader';
 
-export default function DealerRequests() {
+export default function SellerRequests() {
     const [activeTab, setActiveTab] = useState('PENDING');
     const [requests, setRequests] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +27,7 @@ export default function DealerRequests() {
     const fetchRequests = async () => {
         setIsLoading(true);
         try {
-            const response = await apiClient.get<any>(`/manufacturer/dealers/requests?status=${activeTab}`);
+            const response = await apiClient.get<any>(`/manufacturer/sellers/requests?status=${activeTab}`);
             setRequests(response || []);
         } catch (error: any) {
             toast.error(error.message || 'Failed to fetch requests');
@@ -36,9 +36,9 @@ export default function DealerRequests() {
         }
     };
 
-    const handleAction = async (dealerId: string, status: 'APPROVED' | 'REJECTED') => {
+    const handleAction = async (sellerId: string, status: 'APPROVED' | 'REJECTED') => {
         try {
-            await apiClient.post('/manufacturer/dealers/handle', { dealerId, status });
+            await apiClient.post('/manufacturer/sellers/handle', { sellerId, status });
             toast.success(`Seller ${status.toLowerCase()} successfully`);
             fetchRequests();
         } catch (error: any) {
@@ -97,10 +97,10 @@ export default function DealerRequests() {
                     </div>
                 ) : (
                     requests.map((request) => {
-                        const dealer = request.dealer || request.seller;
+                        const seller = request.seller || request.dealer;
 
-                        if (!dealer) {
-                            console.warn('Skipping request with missing dealer data:', request);
+                        if (!seller) {
+                            console.warn('Skipping request with missing seller data:', request);
                             return null;
                         }
 
@@ -116,12 +116,12 @@ export default function DealerRequests() {
                                 <div className="flex-1">
                                     <div className="flex items-start gap-4">
                                         <div className="w-16 h-16 rounded-[10px] bg-[#067FF9]/5 flex items-center justify-center text-[#067FF9] shadow-sm font-black text-xl">
-                                            {dealer.businessName?.charAt(0) || 'D'}
+                                            {seller.businessName?.charAt(0) || 'S'}
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <h3 className="text-lg font-black text-slate-900">{dealer.businessName}</h3>
-                                                {dealer.isVerified && (
+                                                <h3 className="text-lg font-black text-slate-900">{seller.businessName}</h3>
+                                                {seller.isVerified && (
                                                     <span className="bg-blue-50 text-[#067FF9] text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1 border border-blue-100">
                                                         <FaCheck className="w-2 h-2" /> NovaMart Verified
                                                     </span>
@@ -131,11 +131,11 @@ export default function DealerRequests() {
                                             <div className="flex items-center gap-4 mt-2 text-xs font-bold text-slate-500">
                                                 <div className="flex items-center gap-1.5">
                                                     <FaMapMarkerAlt className="w-3 h-3 text-slate-400" />
-                                                    {dealer.city}, {dealer.state}
+                                                    {seller.city}, {seller.state}
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
                                                     <MdOutlineProductionQuantityLimits className="w-3 h-3 text-slate-400" />
-                                                    {dealer.businessType || 'Retailer'}
+                                                    {seller.businessType || 'Retailer'}
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
                                                     <FaClock className="w-3 h-3 text-slate-400" />
@@ -146,7 +146,7 @@ export default function DealerRequests() {
                                     </div>
 
                                     <div className="mt-8">
-                                        <Link href={`/manufacturer/dealers/profile/${dealer._id || dealer.id}`} className="text-sm font-black uppercase tracking-widest text-[#067FF9] hover:underline flex items-center gap-1">
+                                        <Link href={`/manufacturer/sellers/profile/${seller._id || seller.id}`} className="text-sm font-black uppercase tracking-widest text-[#067FF9] hover:underline flex items-center gap-1">
                                             View Seller Profile <FaExternalLinkAlt className="w-2 h-2" />
                                         </Link>
                                     </div>
@@ -160,8 +160,8 @@ export default function DealerRequests() {
                                     </p>
                                     <div className="mt-4 flex flex-col gap-1">
                                         <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Contact Info</p>
-                                        <p className="text-sm font-bold text-slate-500">{dealer.user?.email || 'No Email'}</p>
-                                        <p className="text-sm font-bold text-slate-500">{dealer.user?.phone || 'No Phone'}</p>
+                                        <p className="text-sm font-bold text-slate-500">{seller.user?.email || 'No Email'}</p>
+                                        <p className="text-sm font-bold text-slate-500">{seller.user?.phone || 'No Phone'}</p>
                                     </div>
                                 </div>
 
@@ -171,13 +171,13 @@ export default function DealerRequests() {
                                         <div></div>
                                         <div className="flex items-center gap-3 w-full">
                                             <button
-                                                onClick={() => handleAction(dealer._id || dealer.id, 'REJECTED')}
+                                                onClick={() => handleAction(seller._id || seller.id, 'REJECTED')}
                                                 className="flex-1 py-3 px-4 border border-rose-100 text-rose-600 rounded-[10px] text-xs font-black uppercase tracking-widest hover:bg-rose-50 transition-all"
                                             >
                                                 Reject
                                             </button>
                                             <button
-                                                onClick={() => handleAction(dealer._id || dealer.id, 'APPROVED')}
+                                                onClick={() => handleAction(seller._id || seller.id, 'APPROVED')}
                                                 className="flex-1 py-3 px-4 bg-[#067FF9] text-white rounded-[10px] text-xs font-black uppercase tracking-widest hover:bg-[#067FF9]/90 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
                                             >
                                                 Approve <FaCheck className="w-3 h-3" />
@@ -189,7 +189,7 @@ export default function DealerRequests() {
                                 {request.status === 'APPROVED' && (
                                     <div className="flex flex-col justify-end items-end border-l border-slate-100 pl-8 md:pl-8 min-w-[200px]">
                                         <Link
-                                            href={`/manufacturer/messages?id=${dealer.userId}`}
+                                            href={`/manufacturer/messages?id=${seller.userId}`}
                                             className="w-full py-3 px-4 bg-white border border-[#067FF9] text-[#067FF9] rounded-[10px] text-sm font-black uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
                                         >
                                             <FaCommentDots className="w-3 h-3" />

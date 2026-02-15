@@ -27,7 +27,7 @@ export default function DashboardHeader({
         <header className="h-20 border-b border-border/50 bg-white sticky top-0 z-30 flex items-center justify-between px-4 lg:px-8 shadow-sm">
             <div className="flex items-center gap-4 flex-1">
                 {/* Mobile Menu & Logo */}
-                <div className="md:hidden flex items-center gap-3 mr-4">
+                <div className="lg:hidden flex items-center gap-3 mr-4">
                     <button
                         onClick={onMenuClick}
                         className={`p-2 rounded-[10px] bg-slate-50 touch-target transition-all ${role === 'MANUFACTURER' || role === 'SELLER' ? 'text-indigo-600' : 'text-slate-600'

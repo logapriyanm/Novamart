@@ -26,6 +26,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { mediaService } from '@/lib/api/services/media.service';
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
+import { customerService } from '@/lib/api/services/customer.service';
 
 function ProfileContent() {
     const { user, logout, isAuthenticated, checkAuth } = useAuth();
@@ -37,8 +38,38 @@ function ProfileContent() {
 
     const [orders, setOrders] = useState<any[]>([]);
     const [reviews, setReviews] = useState<any[]>([]);
+    const [addresses, setAddresses] = useState<any[]>([]);
+    const [showAddressForm, setShowAddressForm] = useState(false);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+
+    const handleAddressSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setUploading(true);
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
+        const data = {
+            label: formData.get('label'),
+            name: formData.get('name'),
+            line1: formData.get('line1'),
+            city: formData.get('city'),
+            state: formData.get('state'),
+            zip: formData.get('zip'),
+            phone: formData.get('phone'),
+            isDefault: formData.get('isDefault') === 'on'
+        };
+
+        try {
+            await customerService.addAddress(data);
+            const profile = await customerService.getProfile();
+            setAddresses(profile.addresses || []);
+            toast.success('Address saved');
+            setShowAddressForm(false);
+        } catch (error) {
+            toast.error('Failed to save address');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     useEffect(() => {
         if (!isAuthenticated) return;
@@ -52,6 +83,9 @@ function ProfileContent() {
                 } else if (activeTab === 'reviews') {
                     const data = await apiClient.get<any[]>('/reviews/my-reviews');
                     if (data) setReviews(data);
+                } else if (activeTab === 'addresses') {
+                    const profile = await customerService.getProfile();
+                    if (profile) setAddresses(profile.addresses || []);
                 }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
@@ -222,58 +256,110 @@ function ProfileContent() {
                         <p className="text-slate-400 text-sm font-bold">We are building a personalized wishlist experience for you. Stay tuned!</p>
                     </Card>
                 );
-            case 'billing':
+            case 'addresses':
                 return (
                     <div className="space-y-6">
                         <Card className="p-8 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px]">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-[10px] flex items-center justify-center">
-                                    <FaMapMarkerAlt className="w-5 h-5" />
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-[10px] flex items-center justify-center">
+                                        <FaMapMarkerAlt className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-800 tracking-tight">Saved Addresses</h3>
+                                        <p className="text-xs font-bold text-slate-400 tracking-widest">Manage your delivery locations</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-xl font-black text-slate-800 tracking-tight">Shipping Address</h3>
-                                    <p className="text-xs font-bold text-slate-400 tracking-widest">Manage your delivery location</p>
-                                </div>
+                                <button
+                                    onClick={() => setShowAddressForm(true)}
+                                    className="px-4 py-2 bg-slate-900 text-white rounded-[8px] text-xs font-bold tracking-wider hover:bg-black transition-all"
+                                >
+                                    + ADD NEW
+                                </button>
                             </div>
 
-                            <form onSubmit={async (e) => {
-                                e.preventDefault();
-                                setLoading(true);
-                                const formData = new FormData(e.currentTarget);
-                                const address = formData.get('address') as string;
-                                try {
-                                    await apiClient.put('/customer/profile', { section: 'account', data: { address } });
-                                    toast.success('Address updated successfully');
-                                    // Optionally refresh user context here
-                                    window.location.reload();
-                                } catch (err) {
-                                    toast.error('Failed to update address');
-                                } finally {
-                                    setLoading(false);
-                                }
-                            }}>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="text-sm font-black text-slate-400 tracking-widest pl-1 mb-1 block">Primary Address</label>
-                                        <textarea
-                                            name="address"
-                                            defaultValue={user?.address}
-                                            className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 min-h-[100px]"
-                                            placeholder="Enter your full shipping address..."
-                                        />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {addresses.map((addr: any) => (
+                                    <div key={addr._id} className="relative p-6 border-2 border-slate-100 rounded-[10px] hover:border-slate-300 transition-all group">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded">{addr.label}</span>
+                                                {addr.isDefault && <span className="px-2 py-1 bg-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded">Default</span>}
+                                            </div>
+                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {/* <button className="text-slate-400 hover:text-blue-600"><FaEdit /></button> */}
+                                                <button
+                                                    onClick={async () => {
+                                                        if (confirm('Delete this address?')) {
+                                                            try {
+                                                                await customerService.removeAddress(addr._id);
+                                                                const profile = await customerService.getProfile();
+                                                                setAddresses(profile.addresses || []);
+                                                                toast.success('Address deleted');
+                                                            } catch (e) {
+                                                                toast.error('Failed to delete address');
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="text-slate-400 hover:text-red-500"
+                                                ><FaSignOutAlt className="rotate-180" /></button>
+                                            </div>
+                                        </div>
+                                        <p className="font-bold text-slate-800 text-sm mb-1">{addr.name}</p>
+                                        <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                                            {addr.line1}<br />
+                                            {addr.city}, {addr.state} - {addr.zip}<br />
+                                            Phone: {addr.phone || 'N/A'}
+                                        </p>
                                     </div>
-                                    <div className="flex justify-end">
-                                        <button
-                                            type="submit"
-                                            disabled={loading}
-                                            className="px-8 py-3 bg-slate-900 text-white rounded-[10px] text-sm font-black tracking-widest shadow-lg hover:bg-black transition-all disabled:opacity-50"
-                                        >
-                                            {loading ? 'Saving...' : 'Update Address'}
-                                        </button>
+                                ))}
+                                {addresses.length === 0 && (
+                                    <div className="col-span-full p-8 text-center border-2 border-dashed border-slate-200 rounded-[10px] text-slate-400 text-sm font-bold">
+                                        No addresses saved yet. Add one to speed up checkout.
                                     </div>
-                                </div>
-                            </form>
+                                )}
+                            </div>
                         </Card>
+
+                        {/* Address Modal (Simplified) */}
+                        <AnimatePresence>
+                            {showAddressForm && (
+                                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        className="bg-white p-8 rounded-[15px] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                                    >
+                                        <h3 className="text-xl font-black text-slate-800 mb-6">Add New Address</h3>
+                                        <form onSubmit={handleAddressSubmit} className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <input name="label" placeholder="Label (Home/Office)" className="input-field" required />
+                                                <input name="name" placeholder="Contact Name" className="input-field" required />
+                                            </div>
+                                            <input name="line1" placeholder="Street Address" className="input-field" required />
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <input name="city" placeholder="City" className="input-field" required />
+                                                <input name="state" placeholder="State" className="input-field" required />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <input name="zip" placeholder="ZIP Code" className="input-field" required />
+                                                <input name="phone" placeholder="Phone Number" className="input-field" />
+                                            </div>
+                                            <label className="flex items-center gap-2 text-sm font-bold text-slate-600">
+                                                <input type="checkbox" name="isDefault" /> Set as Default
+                                            </label>
+                                            <div className="flex gap-4 pt-4">
+                                                <button type="button" onClick={() => setShowAddressForm(false)} className="flex-1 py-3 rounded-[8px] font-bold text-slate-500 hover:bg-slate-50">Cancel</button>
+                                                <button type="submit" disabled={uploading} className="flex-1 py-3 bg-black text-white rounded-[8px] font-bold hover:bg-slate-800">
+                                                    {uploading ? 'Saving...' : 'Save Address'}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </motion.div>
+                                </div>
+                            )}
+                        </AnimatePresence>
 
                         <Card className="p-8 border-none shadow-xl shadow-blue-600/5 bg-white rounded-[10px] opacity-60">
                             <div className="flex items-center gap-4 mb-4">

@@ -15,6 +15,10 @@ export const paymentService = {
 
     async verifyPayment(data: PaymentVerifyData): Promise<ApiResponse<any>> {
         return apiClient.post<ApiResponse<any>>('/payments/verify', data);
+    },
+
+    async getRazorpayOrderDetails(razorpayOrderId: string): Promise<ApiResponse<any>> {
+        return apiClient.get<ApiResponse<any>>(`/payments/razorpay/${razorpayOrderId}`);
     }
 };
 

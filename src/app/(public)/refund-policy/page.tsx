@@ -7,7 +7,7 @@ import { FaSyncAlt as RefreshCcw, FaTruck as Truck, FaUndo as CornerUpLeft, FaCl
 export default function RefundPolicyPage() {
     const steps = [
         { icon: AlertTriangle, text: "Report issue within 24h of unboxing" },
-        { icon: Truck, text: "Wait for Manufacturer/Dealer inspection" },
+        { icon: Truck, text: "Wait for Manufacturer/Seller inspection" },
         { icon: Clock, text: "Escrow release or refund within 72h" }
     ];
 

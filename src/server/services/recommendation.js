@@ -134,18 +134,18 @@ class RecommendationService {
                     specialDay = { type: 'WELCOME', discount: 10 };
                 }
 
-                if (user.role === 'DEALER') {
+                if (user.role === 'SELLER') {
                     const seller = await Seller.findOne({ userId });
                     if (seller) {
                         const [openNegs, newAllocations] = await Promise.all([
-                            Negotiation.countDocuments({ dealerId: seller._id, status: 'OPEN' }),
-                            Inventory.countDocuments({ dealerId: seller._id, isAllocated: true, stock: 0 })
+                            Negotiation.countDocuments({ sellerId: seller._id, status: 'OPEN' }),
+                            Inventory.countDocuments({ sellerId: seller._id, isAllocated: true, stock: 0 })
                         ]);
                         b2bMetrics = {
-                            role: 'DEALER',
+                            role: 'SELLER',
                             actions: [
-                                { label: 'Active Negotiations', count: openNegs, link: '/dealer/negotiation', icon: 'Negotiate' },
-                                { label: 'New Allocations', count: newAllocations, link: '/dealer/inventory', icon: 'Package' }
+                                { label: 'Active Negotiations', count: openNegs, link: '/seller/negotiations', icon: 'Negotiate' },
+                                { label: 'New Allocations', count: newAllocations, link: '/seller/inventory', icon: 'Package' }
                             ]
                         };
                     }
@@ -159,8 +159,8 @@ class RecommendationService {
                         b2bMetrics = {
                             role: 'MANUFACTURER',
                             actions: [
-                                { label: 'Dealer Requests', count: pendingRequests, link: '/manufacturer/dealers/requests', icon: 'UserPlus' },
-                                { label: 'Active Negotiations', count: activeNegs, link: '/manufacturer/products', icon: 'Negotiate' }
+                                { label: 'Partner Requests', count: pendingRequests, link: '/manufacturer/sellers', icon: 'UserPlus' },
+                                { label: 'Active Negotiations', count: activeNegs, link: '/manufacturer/negotiations', icon: 'Negotiate' }
                             ]
                         };
                     }

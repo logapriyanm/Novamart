@@ -8,7 +8,7 @@ import FooterPageLayout from '@/client/components/layout/FooterPageLayout';
 const values = [
     {
         title: "Trust First",
-        description: "Zero-trust verification for every manufacturer and dealer in our network.",
+        description: "Zero-trust verification for every manufacturer and seller in our network.",
         icon: Shield,
         color: "text-emerald-500",
         bg: "bg-emerald-500/10"
@@ -43,7 +43,7 @@ const sidebarSections = [
         icon: FaRocket,
         items: [
             { title: "250+ Verified Manufacturers", description: "Direct supply chain relationships." },
-            { title: "5000+ Active Dealers", description: "Across 14 regional hubs." },
+            { title: "5000+ Active Sellers", description: "Across 14 regional hubs." },
             { title: "₹100Cr+ Escrow Secured", description: "Guaranteed transaction safety." }
         ]
     },
@@ -53,7 +53,7 @@ const sidebarSections = [
         icon: FaHistory,
         items: [
             { title: "Zero-Trust Protocol", description: "No transaction without verification." },
-            { title: "Direct-to-Dealer", description: "Reducing friction in asset allocation." },
+            { title: "Direct-to-Seller", description: "Reducing friction in asset allocation." },
             { title: "Compliance First", description: "Fully GST and BIS integrated ecosystem." }
         ]
     },
@@ -63,7 +63,7 @@ const sidebarSections = [
         icon: FaHandshake,
         items: [
             { title: "Manufacturer Onboarding", description: "Get your factory verified today." },
-            { title: "Dealer Expansion", description: "Access exclusive regional inventory." }
+            { title: "Seller Expansion", description: "Access exclusive regional inventory." }
         ]
     }
 ];

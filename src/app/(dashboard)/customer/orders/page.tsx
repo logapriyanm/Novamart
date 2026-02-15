@@ -48,8 +48,8 @@ export default function MyOrders() {
             const mappedOrders = ordersList.map((order: any) => ({
                 id: order.id,
                 displayId: `NM-${order.id.slice(0, 5).toUpperCase()}`,
-                dealer: order.dealer?.businessName || 'Unknown Dealer',
-                dealerId: order.dealerId,
+                seller: order.seller?.businessName || 'Unknown Seller',
+                sellerId: order.sellerId,
                 total: Number(order.totalAmount),
                 status: order.status,
                 currentStep: getStepFromStatus(order.status),
@@ -310,7 +310,7 @@ export default function MyOrders() {
                                     <div>
                                         <h3 className="text-lg font-black text-slate-800 tracking-tight">Order #{order.displayId}</h3>
                                         <p className="text-sm font-bold text-slate-400 mt-1">
-                                            Dealer: <span className="text-blue-600 font-black">{order.dealer}</span>
+                                            Seller: <span className="text-blue-600 font-black">{order.seller}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -442,7 +442,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
             // 2. Submit Seller Review
             const sellerReviewPromise = apiClient.post('/reviews/seller', {
                 orderId: order.id,
-                dealerId: order.dealerId,
+                sellerId: order.sellerId,
                 rating: sellerRating.rating,
                 delivery: sellerRating.delivery,
                 packaging: sellerRating.packaging,
@@ -471,7 +471,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
             <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                 <div>
                     <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">
-                        {step === 1 ? 'Rate Products' : `Rate ${order.dealer}`}
+                        {step === 1 ? 'Rate Products' : `Rate ${order.seller}`}
                     </h3>
                     <p className="text-sm font-black text-slate-400 mt-1">Order NM-{order.id.slice(0, 5).toUpperCase()}</p>
                 </div>

@@ -137,7 +137,7 @@ export default function ContactPage() {
                                     <option>Partnership Inquiry</option>
                                     <option>Support Request</option>
                                     <option>Manufacturer Verification</option>
-                                    <option>Dealer Application</option>
+                                    <option>Seller Application</option>
                                 </select>
                             </div>
 

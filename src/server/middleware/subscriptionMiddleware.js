@@ -9,13 +9,13 @@ export const requireSubscription = (allowedTiers) => {
         try {
             const userId = req.user._id;
 
-            // Get dealer profile
-            const seller = await Seller.findOne({ userId });
+            // Get seller profile
+            const seller = await Seller.findOne({ userId: req.user.id });
             if (!seller) {
                 return res.status(403).json({
                     success: false,
-                    error: 'DEALER_PROFILE_REQUIRED',
-                    message: 'This feature requires a dealer profile'
+                    error: 'SELLER_PROFILE_REQUIRED',
+                    message: 'This feature requires a seller profile'
                 });
             }
 
@@ -26,7 +26,7 @@ export const requireSubscription = (allowedTiers) => {
                 const tiersArray = Array.isArray(allowedTiers) ? allowedTiers : [allowedTiers];
 
                 if (tiersArray.includes(seller.currentSubscriptionTier)) {
-                    req.dealer = seller;
+                    req.seller = seller;
                     req.subscriptionTier = seller.currentSubscriptionTier;
                     return next();
                 }
@@ -37,13 +37,13 @@ export const requireSubscription = (allowedTiers) => {
                     message: `This feature requires ${tiersArray.join(' or ')} subscription`,
                     currentTier: seller.currentSubscriptionTier,
                     requiredTiers: tiersArray,
-                    upgradeUrl: '/dealer/subscription'
+                    upgradeUrl: '/seller/subscription'
                 });
             }
 
             // Cache expired or not set - check database
             const activeSub = await SellerSubscription.findOne({
-                dealerId: seller._id,
+                sellerId: seller._id,
                 status: 'ACTIVE',
                 endDate: { $gt: now }
             }).populate('planId');
@@ -51,9 +51,9 @@ export const requireSubscription = (allowedTiers) => {
             if (!activeSub) {
                 return res.status(403).json({
                     success: false,
-                    error: 'NO_ACTIVE_SUBSCRIPTION',
-                    message: 'This feature requires an active subscription',
-                    upgradeUrl: '/dealer/subscription'
+                    error: 'SUBSCRIPTION_REQUIRED',
+                    message: 'Active subscription required',
+                    upgradeUrl: '/seller/subscription'
                 });
             }
 
@@ -71,11 +71,11 @@ export const requireSubscription = (allowedTiers) => {
                     message: `This feature requires ${tiersArray.join(' or ')} subscription`,
                     currentTier: activeSub.planId.name,
                     requiredTiers: tiersArray,
-                    upgradeUrl: '/dealer/subscription'
+                    upgradeUrl: '/seller/subscription'
                 });
             }
 
-            req.dealer = seller;
+            req.seller = seller;
             req.subscriptionTier = activeSub.planId.name;
             req.subscriptionPlan = activeSub.planId;
             next();
@@ -121,7 +121,7 @@ export const checkSubscriptionExpiry = async (req, res, next) => {
 
             // Mark subscription as EXPIRED
             await SellerSubscription.updateMany(
-                { dealerId: seller._id, status: 'ACTIVE', endDate: { $lt: now } },
+                { sellerId: seller._id, status: 'ACTIVE', endDate: { $lt: now } },
                 { $set: { status: 'EXPIRED' } }
             );
         }

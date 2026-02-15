@@ -97,6 +97,7 @@ export const ENDPOINTS = {
         ORDERS: '/customer/orders',
         STATS: '/customer/stats',
         PRODUCTS: '/customer/products',
+        PROFILE: '/customer/profile',
     },
     PUBLIC: {
         PRODUCTS: '/products',

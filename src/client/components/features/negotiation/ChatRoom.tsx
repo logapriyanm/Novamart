@@ -211,13 +211,25 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
   };
 
   const handleStatusUpdate = async (status: "ACCEPTED" | "REJECTED" | "DEAL_CLOSED") => {
+    if (negotiation?.status === status) return; // Prevent redundant transition
+    if (negotiation?.status === "DEAL_CLOSED" || negotiation?.status === "REJECTED") {
+      toast.error("Deal is already finalized");
+      return;
+    }
     setSending(true);
     try {
       await apiClient.put(`/negotiation/${negotiationId}`, { status });
       await fetchNegotiation();
       toast.success(`Deal ${status.toLowerCase()}`);
     } catch (error: any) {
-      toast.error("Failed to update deal state");
+      // Graceful handling for race conditions
+      if (error?.message?.includes("DEAL_ALREADY_CLOSED") || error?.error === "DEAL_ALREADY_CLOSED") {
+        console.warn("Deal already closed by another request, syncing state...");
+        await fetchNegotiation();
+        toast.info("Deal was already finalized");
+      } else {
+        toast.error("Failed to update deal state");
+      }
     } finally {
       setSending(false);
     }
@@ -336,7 +348,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6 lg:space-y-8 custom-scrollbar">
-            {messages.length === 0 && negotiation.status === 'REQUESTED' && (
+            {messages.length === 0 && (
               <MessageBubble
                 msg={{
                   messageType: 'OFFER',
@@ -352,15 +364,12 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                 isMe={isSeller}
                 onAccept={() => handleStatusUpdate("ACCEPTED")}
                 onReject={() => handleStatusUpdate("REJECTED")}
-                showActions={!isSeller && !isLocked}
+                showActions={!isSeller && !isLocked && negotiation.status === 'REQUESTED'}
               />
             )}
             {messages.length === 0 && negotiation.status !== 'REQUESTED' && (
-              <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-60">
-                <FaCommentAlt className="w-12 h-12 mb-4" />
-                <p className="text-sm font-bold text-black uppercase tracking-wider">
-                  No messages in this thread
-                </p>
+              <div className="flex justify-center my-4">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Discussion Started</span>
               </div>
             )}
             {messages.map((m, i) => (
@@ -375,6 +384,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                 onReject={() => handleStatusUpdate("REJECTED")}
                 showActions={
                   !isLocked &&
+                  negotiation.status !== 'ACCEPTED' &&
                   !(
                     (isSeller && m.senderRole === "SELLER") ||
                     (!isSeller && m.senderRole === "MANUFACTURER")
@@ -417,7 +427,7 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                     <button
                       onClick={() => sendMessage()}
                       disabled={sending || !message.trim()}
-                      className="p-2.5 bg-primary text-white rounded-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+                      className="p-2.5 bg-primary text-black rounded-[10px] hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
                     >
                       <FaPaperPlane className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </button>
@@ -510,9 +520,11 @@ export default function ChatRoom({ negotiationId, userRole }: ChatRoomProps) {
                 {!isSeller && (
                   <button
                     onClick={() => handleStatusUpdate("DEAL_CLOSED")}
-                    className="w-full py-4 bg-[#067FF9] text-white rounded-[10px] font-bold text-sm uppercase tracking-wider shadow-xl shadow-blue-500/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                    disabled={sending}
+                    className={`w-full py-4 bg-[#067FF9] text-white rounded-[10px] font-bold text-sm uppercase tracking-wider shadow-xl shadow-blue-500/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 ${sending ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    <FaCheckCircle className="w-3.5 h-3.5" /> Finalize & Allocate
+                    {sending ? <FaSpinner className="animate-spin" /> : <FaCheckCircle className="w-3.5 h-3.5" />}
+                    {sending ? 'Processing...' : 'Finalize & Allocate'}
                   </button>
                 )}
               </div>
@@ -678,7 +690,7 @@ function MessageBubble({ msg, isMe, onAccept, onReject, showActions }: any) {
                 </button>
                 <button
                   onClick={onAccept}
-                  className="flex-1 py-3 bg-primary text-white rounded-[10px] text-sm font-bold uppercase tracking-wider shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
+                  className="flex-1 py-3 bg-primary text-black rounded-[10px] text-sm font-bold uppercase tracking-wider shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
                 >
                   Accept Offer
                 </button>

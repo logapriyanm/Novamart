@@ -25,7 +25,7 @@ export const getUsers = async (req, res) => {
                 ...user.toObject(),
                 name: customer?.name || manufacturer?.companyName || seller?.businessName || 'User',
                 manufacturer,
-                dealer: seller,
+                seller: seller,
                 customer,
                 documents: kyc ? kyc.documents : []
             };
@@ -147,8 +147,8 @@ export const verifyManufacturer = async (req, res) => {
 };
 
 export const verifySeller = async (req, res) => {
-    const { sellerId, dealerId } = req.params;
-    const id = sellerId || dealerId; // Handle both sellerId and dealerId
+    const { sellerId } = req.params;
+    const id = sellerId;
     const { isVerified } = req.body;
     const adminId = req.user._id;
 
@@ -193,8 +193,8 @@ export const verifySeller = async (req, res) => {
 };
 
 export const updateSellerManufacturers = async (req, res) => {
-    const { sellerId, dealerId } = req.params;
-    const id = sellerId || dealerId; // Handle both sellerId and dealerId
+    const { sellerId } = req.params;
+    const id = sellerId;
     const { manufacturerId } = req.body;
     const adminId = req.user._id;
 

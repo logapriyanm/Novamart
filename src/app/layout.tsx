@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s | NovaMart",
   },
   description:
-    "NovaMart is a secure B2B2C marketplace connecting manufacturers, dealers, and buyers with escrow-protected payments and wholesale pricing.",
+    "NovaMart is a secure B2B2C marketplace connecting manufacturers, sellers, and buyers with escrow-protected payments and wholesale pricing.",
   keywords: [
     "wholesale marketplace",
     "B2B ecommerce",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     url: "https://novamart.com",
     title: "NovaMart – Wholesale & B2B E-Commerce Marketplace",
     description:
-      "Secure B2B2C marketplace connecting manufacturers, dealers, and buyers with verified sellers and escrow protection.",
+      "Secure B2B2C marketplace connecting manufacturers, sellers, and buyers with verified sellers and escrow protection.",
     siteName: "NovaMart",
     images: [
       {

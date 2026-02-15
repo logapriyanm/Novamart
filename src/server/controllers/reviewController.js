@@ -52,12 +52,54 @@ const updateSellerStats = async (sellerId) => {
     }
 };
 
+// --- Validation & Moderation Helpers ---
+
+const PROFANITY_LIST = ['badword', 'abuse', 'spam', 'fake', 'inappropriate']; // Placeholder list
+
+const checkProfanity = (text) => {
+    if (!text) return false;
+    const lowerText = text.toLowerCase();
+    return PROFANITY_LIST.some(word => lowerText.includes(word));
+};
+
+const validateReviewInput = ({ rating, title, comment, pros, cons }) => {
+    const errors = [];
+
+    if (!rating || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+        errors.push('Rating must be an integer between 1 and 5.');
+    }
+
+    if (title && title.length > 100) {
+        errors.push('Title must be 100 characters or less.');
+    }
+
+    if (comment && comment.length > 1000) {
+        errors.push('Comment must be 1000 characters or less.');
+    }
+
+    if (pros && !Array.isArray(pros)) {
+        errors.push('Pros must be an array of strings.');
+    }
+
+    if (cons && !Array.isArray(cons)) {
+        errors.push('Cons must be an array of strings.');
+    }
+
+    return errors;
+};
+
 // --- Controllers ---
 
 export const submitProductReview = async (req, res) => {
     try {
         const { orderItemId, productId, rating, title, comment, pros, cons, images } = req.body;
         const userId = req.user._id;
+
+        // 0. Input Validation
+        const validationErrors = validateReviewInput({ rating, title, comment, pros, cons });
+        if (validationErrors.length > 0) {
+            return res.status(400).json({ success: false, error: validationErrors.join(' ') });
+        }
 
         const customer = await Customer.findOne({ userId });
         if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
@@ -79,7 +121,15 @@ export const submitProductReview = async (req, res) => {
             return res.status(409).json({ success: false, error: 'You have already reviewed this product for this order.' });
         }
 
-        // 3. Create Review
+        // 3. Content Moderation
+        let status = 'APPROVED';
+        let moderationNote = '';
+        if (checkProfanity(title) || checkProfanity(comment) || (pros && pros.some(checkProfanity)) || (cons && cons.some(checkProfanity))) {
+            status = 'FLAGGED';
+            moderationNote = 'Auto-flagged for potential incompatible content.';
+        }
+
+        // 4. Create Review
         const review = await Review.create({
             type: 'PRODUCT',
             orderId: order._id,
@@ -92,13 +142,16 @@ export const submitProductReview = async (req, res) => {
             cons,
             images,
             verifiedPurchase: true,
-            status: 'APPROVED' // Auto-approve for now, can change to PENDING based on spam filter
+            status,
+            moderationReason: moderationNote
         });
 
-        // 4. Update Aggregates
-        await updateProductStats(productId);
+        // 5. Update Aggregates (Only if approved)
+        if (status === 'APPROVED') {
+            await updateProductStats(productId);
+        }
 
-        // 5. Emit Event
+        // 6. Emit Event
         systemEvents.emit(EVENTS.REVIEW.CREATED, { review });
 
         res.status(201).json({ success: true, data: review });
@@ -109,9 +162,15 @@ export const submitProductReview = async (req, res) => {
 
 export const submitSellerReview = async (req, res) => {
     try {
-        const { orderId, sellerId, dealerId, rating, delivery, packaging, communication, title, comment } = req.body;
-        const targetSellerId = sellerId || dealerId;
+        const { orderId, sellerId, rating, delivery, packaging, communication, title, comment } = req.body;
+        const targetSellerId = sellerId;
         const userId = req.user._id;
+
+        // 0. Input Validation
+        const validationErrors = validateReviewInput({ rating, title, comment });
+        if (validationErrors.length > 0) {
+            return res.status(400).json({ success: false, error: validationErrors.join(' ') });
+        }
 
         const customer = await Customer.findOne({ userId });
         if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
@@ -130,6 +189,14 @@ export const submitSellerReview = async (req, res) => {
             return res.status(409).json({ success: false, error: 'You have already reviewed this seller for this order.' });
         }
 
+        // 3. Content Moderation
+        let status = 'APPROVED';
+        let moderationNote = '';
+        if (checkProfanity(title) || checkProfanity(comment)) {
+            status = 'FLAGGED';
+            moderationNote = 'Auto-flagged for potential incompatible content.';
+        }
+
         const review = await Review.create({
             type: 'SELLER',
             orderId: order._id,
@@ -142,10 +209,13 @@ export const submitSellerReview = async (req, res) => {
             title,
             comment,
             verifiedPurchase: true,
-            status: 'APPROVED'
+            status,
+            moderationReason: moderationNote
         });
 
-        await updateSellerStats(targetSellerId);
+        if (status === 'APPROVED') {
+            await updateSellerStats(targetSellerId);
+        }
 
         // Emit Event
         systemEvents.emit(EVENTS.REVIEW.CREATED, { review });
@@ -157,6 +227,31 @@ export const submitSellerReview = async (req, res) => {
 };
 
 // ... existing getProductReviews code ...
+
+export const getMySellerReviews = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const seller = await Seller.findOne({ userId });
+        if (!seller) return res.status(403).json({ success: false, error: 'Seller profile required' });
+
+        const { page = 1, limit = 10, status } = req.query;
+
+        const query = { sellerId: seller._id };
+        if (status) query.status = status;
+
+        const reviews = await Review.find(query)
+            .populate('customerId', 'name')
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
+        const total = await Review.countDocuments(query);
+
+        res.json({ success: true, data: reviews, pagination: { total, pages: Math.ceil(total / limit) } });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
 
 export const getSellerReviews = async (req, res) => {
     try {
@@ -386,11 +481,7 @@ export const replyToReview = async (req, res) => {
 
         // If product review and sellerId missing (legacy), fetch product
         if (!review.sellerId && review.productId) {
-            // Logic updated to assume modern schema mostly, but if fallback needed:
-            // const product = await Product.findById(review.productId);
-            // This part was fragile in legacy code (referencing inventory.dealerId).
-            // Proceeding with reply if we can confirm ownership or just saving it.
-            // Safer to block legacy reply if we can't verify.
+            // Legacy support removed.
         }
 
         review.sellerReply = {

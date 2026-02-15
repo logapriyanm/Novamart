@@ -19,11 +19,11 @@ export const validateRegistration = (req, res, next) => {
     if (!ALLOWED_ROLES.includes(roleUpper)) errors.role = 'INVALID_ROLE';
 
     if (roleUpper === 'CUSTOMER' && !name) errors.name = 'NAME_REQUIRED';
-    if (roleUpper === 'DEALER' && !businessName) errors.businessName = 'BUSINESS_NAME_REQUIRED';
+    if (roleUpper === 'SELLER' && !businessName) errors.businessName = 'BUSINESS_NAME_REQUIRED';
     if (roleUpper === 'MANUFACTURER' && !companyName) errors.companyName = 'COMPANY_NAME_REQUIRED';
 
     // GST validation if provided or required for B2B
-    if ((roleUpper === 'DEALER' || roleUpper === 'MANUFACTURER') && !gstNumber) {
+    if ((roleUpper === 'SELLER' || roleUpper === 'MANUFACTURER') && !gstNumber) {
         errors.gstNumber = 'GST_REQUIRED';
     }
 

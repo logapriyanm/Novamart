@@ -18,8 +18,8 @@ export const adminService = {
         return apiClient.get<any[]>('/admin/manufacturers');
     },
 
-    async getDealers(): Promise<any[]> {
-        return apiClient.get<any[]>('/admin/dealers');
+    async getSellers(): Promise<any[]> {
+        return apiClient.get<any[]>('/admin/sellers');
     },
 
     async getPendingProducts(): Promise<any[]> {
@@ -34,8 +34,9 @@ export const adminService = {
         return apiClient.put(`/admin/products/${productId}/approve`, { isApproved, rejectionReason, status });
     },
 
-    async getAllOrders(): Promise<any[]> {
-        return apiClient.get<any[]>('/admin/orders');
+    async getAllOrders(status?: string): Promise<any[]> {
+        const query = status ? `?status=${status}` : '';
+        return apiClient.get<any[]>(`/admin/orders${query}`);
     },
 
     async updateOrderStatus(orderId: string, action: string, details: any): Promise<any> {
@@ -50,12 +51,12 @@ export const adminService = {
         return apiClient.put(`/admin/manufacturers/${id}/verify`, { isVerified });
     },
 
-    async verifyDealer(id: string, isVerified: boolean): Promise<any> {
-        return apiClient.put(`/admin/dealers/${id}/verify`, { isVerified });
+    async verifySeller(id: string, isVerified: boolean): Promise<any> {
+        return apiClient.put(`/admin/sellers/${id}/verify`, { isVerified });
     },
 
-    async updateDealerManufacturers(dealerId: string, manufacturerId: string): Promise<any> {
-        return apiClient.put(`/admin/dealers/${dealerId}/manufacturers`, { manufacturerId });
+    async updateSellerManufacturers(sellerId: string, manufacturerId: string): Promise<any> {
+        return apiClient.put(`/admin/sellers/${sellerId}/manufacturers`, { manufacturerId });
     },
 
     async getPendingReviews(): Promise<any[]> {

@@ -5,8 +5,8 @@ export const cartService = {
         return apiClient.get('/cart');
     },
 
-    async addToCart(inventoryId: string, quantity: number): Promise<any> {
-        return apiClient.post('/cart/add', { inventoryId, quantity });
+    async addToCart(inventoryId: string, quantity: number, color?: string, size?: string): Promise<any> {
+        return apiClient.post('/cart/add', { inventoryId, quantity, color, size });
     },
 
     async updateQuantity(cartItemId: string, quantity: number): Promise<any> {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FaBox,
@@ -15,14 +15,45 @@ import {
     FaRegClock
 } from 'react-icons/fa';
 import Link from 'next/link';
-
-const b2bOrders = [
-    { id: 'B2B-ORD-8801', dealer: 'North-Zone Distributors', total: '₹4,07,100', date: 'Feb 06, 14:22', status: 'Payment Pending', item: 'Ultra-Quiet AC 2.0', qty: 10 },
-    { id: 'B2B-ORD-8800', dealer: 'Metro Retail Group', total: '₹8,14,200', date: 'Feb 06, 11:10', status: 'Processing', item: 'EcoCool Refrigerator', qty: 25 },
-];
+import { manufacturerService } from '@/lib/api/services/manufacturer.service';
+import Loader from '@/client/components/ui/Loader';
+import { toast } from 'sonner';
 
 export default function ManufacturerOrderControl() {
+    const [orders, setOrders] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    const fetchOrders = async () => {
+        try {
+            const data = await manufacturerService.getOrders();
+            setOrders(data || []);
+        } catch (error) {
+            console.error('Failed to fetch manufacturer orders:', error);
+            toast.error('Failed to load distribution ledger.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleConfirmReceipt = async (orderId: string) => {
+        if (!confirm('Confirm payment receipt for this order? This will mark the order as PAID.')) return;
+
+        try {
+            await manufacturerService.confirmOrderPayment(orderId);
+            toast.success('Payment confirmed successfully');
+            fetchOrders();
+            setSelectedOrder(null);
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to confirm payment');
+        }
+    };
+
+    if (loading) return <Loader />;
 
     return (
         <div className="space-y-6 animate-fade-in pb-12 font-sans text-slate-800 bg-slate-50/50 min-h-screen p-6">
@@ -30,8 +61,8 @@ export default function ManufacturerOrderControl() {
             <div className="flex flex-col gap-2 border-b border-slate-200 pb-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Production Outbox</h1>
-                        <p className="text-sm text-slate-500 mt-1">B2B Distribution Management & Finance Control</p>
+                        <h1 className="text-2xl font-bold italic uppercase tracking-tight text-slate-900">Orders</h1>
+                        <p className="text-sm font-medium text-slate-500 mt-1">Manage Distribution & Requests</p>
                     </div>
                 </div>
             </div>
@@ -44,16 +75,20 @@ export default function ManufacturerOrderControl() {
                             <span className="p-2 bg-white text-primary rounded-[10px] shadow-sm border border-slate-200">
                                 <FaIndustry className="w-4 h-4" />
                             </span>
-                            <h2 className="text-sm font-semibold text-slate-800 uppercase tracking-wide">Distribution Ledger</h2>
+                            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Distribution Ledger</h2>
                         </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto divide-y divide-slate-100 custom-scrollbar">
-                        {b2bOrders.map((order) => (
+                        {orders.length === 0 ? (
+                            <div className="p-12 text-center">
+                                <p className="text-sm font-medium text-slate-400">No active distribution orders found.</p>
+                            </div>
+                        ) : orders.map((order) => (
                             <div
-                                key={order.id}
+                                key={order._id || order.id}
                                 onClick={() => setSelectedOrder(order)}
-                                className={`p-6 hover:bg-slate-50 transition-all cursor-pointer flex items-center justify-between group ${selectedOrder?.id === order.id ? 'bg-primary/5/50' : ''}`}
+                                className={`p-6 hover:bg-slate-50 transition-all cursor-pointer flex items-center justify-between group ${selectedOrder?._id === order._id ? 'bg-primary/5' : ''}`}
                             >
                                 <div className="flex items-center gap-6">
                                     <div className="w-12 h-12 rounded-[10px] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
@@ -61,16 +96,19 @@ export default function ManufacturerOrderControl() {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-3">
-                                            <h4 className="text-base font-bold text-slate-900">{order.id}</h4>
-                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-[10px] ${order.status === 'Payment Pending' ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+                                            <h4 className="text-base font-bold text-slate-900">ORD-{(order._id || order.id).slice(-8).toUpperCase()}</h4>
+                                            <span className={`text-xs font-bold px-2 py-0.5 rounded-[6px] uppercase tracking-wide ${order.status === 'PAYMENT_PENDING' ? 'bg-amber-50 text-amber-700' :
+                                                order.status === 'PAID' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
                                                 }`}>{order.status}</span>
                                         </div>
-                                        <p className="text-xs font-medium text-slate-500 mt-1">{order.dealer} • {order.qty} Units</p>
+                                        <p className="text-sm font-medium text-slate-500 mt-1">
+                                            {order.seller?.businessName || 'Seller'} • {order.items?.length || 0} Items
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-base font-bold text-slate-900">{order.total}</p>
-                                    <p className="text-xs font-medium text-slate-400 mt-0.5">{order.date}</p>
+                                    <p className="text-base font-bold text-slate-900">₹{Number(order.totalAmount).toLocaleString()}</p>
+                                    <p className="text-sm font-medium text-slate-400 mt-0.5">{new Date(order.createdAt).toLocaleDateString()}</p>
                                 </div>
                             </div>
                         ))}
@@ -82,7 +120,7 @@ export default function ManufacturerOrderControl() {
                     <AnimatePresence mode="wait">
                         {selectedOrder ? (
                             <motion.div
-                                key={selectedOrder.id}
+                                key={selectedOrder._id || selectedOrder.id}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
@@ -98,15 +136,15 @@ export default function ManufacturerOrderControl() {
                                     </button>
 
                                     <div>
-                                        <p className="text-xs font-medium text-primary/50 uppercase tracking-wider mb-1">Finance Audit Mode</p>
-                                        <h3 className="text-2xl font-bold tracking-tight">{selectedOrder.id}</h3>
+                                        <p className="text-xs font-bold text-primary/50 uppercase tracking-wilder mb-1">Finance Audit Mode</p>
+                                        <h3 className="text-2xl font-bold tracking-tight">{(selectedOrder._id || selectedOrder.id).slice(-8).toUpperCase()}</h3>
                                     </div>
                                     <div className="p-4 bg-white/10 border border-white/10 rounded-[10px] flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <FaFileInvoiceDollar className="text-primary/50 w-5 h-5" />
                                             <div>
-                                                <p className="text-xs font-medium text-slate-300 uppercase">Gross Wholesale Value</p>
-                                                <p className="text-lg font-bold text-white">{selectedOrder.total}</p>
+                                                <p className="text-xs font-bold text-slate-300 uppercase tracking-wide">Gross Wholesale Value</p>
+                                                <p className="text-lg font-bold text-white">₹{Number(selectedOrder.totalAmount).toLocaleString()}</p>
                                             </div>
                                         </div>
                                         <div className="w-8 h-8 rounded-[10px] bg-white/10 flex items-center justify-center">
@@ -118,35 +156,34 @@ export default function ManufacturerOrderControl() {
                                 <div className="flex-1 p-8 space-y-8 overflow-y-auto custom-scrollbar bg-white">
                                     <div className="space-y-4">
                                         <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                                            <FaFileInvoiceDollar className="text-primary" /> B2B Payment Proof
+                                            <FaFileInvoiceDollar className="text-primary" /> B2B Payment Status
                                         </h4>
                                         <div className="p-6 bg-slate-50 border border-slate-200 rounded-[10px] flex flex-col items-center justify-center text-center space-y-3">
-                                            <div className="w-12 h-12 bg-white rounded-[10px] flex items-center justify-center text-emerald-500 shadow-sm border border-slate-100">
+                                            <div className={`w-12 h-12 bg-white rounded-[10px] flex items-center justify-center shadow-sm border border-slate-100 ${selectedOrder.status === 'PAID' ? 'text-emerald-500' : 'text-amber-500'}`}>
                                                 <FaCheckCircle className="w-6 h-6" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-slate-900">Remittance_Advice_4401.pdf</p>
-                                                <p className="text-xs text-slate-500 mt-0.5">Uploaded Feb 06, 14:24</p>
+                                                <p className="text-sm font-bold text-slate-900">{selectedOrder.status === 'PAID' ? 'Payment Confirmed' : 'Payment Pending'}</p>
+                                                <p className="text-sm text-slate-500 mt-0.5">Updated {new Date(selectedOrder.updatedAt).toLocaleTimeString()}</p>
                                             </div>
-                                            <button className="px-4 py-2 bg-white border border-slate-200 text-xs font-semibold text-primary uppercase tracking-wide rounded-[10px] shadow-sm hover:bg-slate-50 transition-all">View Full Scan</button>
                                         </div>
                                     </div>
 
-                                    <div className="p-4 bg-primary/5/50 border border-primary/10 rounded-[10px] flex items-start gap-4">
+                                    <div className="p-4 bg-primary/5 border border-primary/10 rounded-[10px] flex items-start gap-4">
                                         <FaRegClock className="text-primary w-5 h-5 mt-0.5" />
-                                        <p className="text-xs font-medium text-slate-700 leading-relaxed">
+                                        <p className="text-sm font-medium text-slate-700 leading-relaxed">
                                             Verify against bank statement before confirming. Once confirmed, stock is <span className="text-primary font-bold">legally transferred</span> to seller.
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="p-6 border-t border-slate-100 flex items-center gap-4 bg-slate-50/50">
-                                    <button className="flex-1 py-3 bg-primary text-white rounded-[10px] font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-3">
+                                    <button
+                                        onClick={() => handleConfirmReceipt(selectedOrder._id || selectedOrder.id)}
+                                        disabled={selectedOrder.status === 'PAID'}
+                                        className={`flex-1 py-3 bg-primary text-white rounded-[10px] font-bold text-sm uppercase tracking-widest shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-3 ${selectedOrder.status === 'PAID' ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                         <FaCheckCircle className="w-4 h-4" />
-                                        Confirm Receipt
-                                    </button>
-                                    <button className="p-3 bg-white border border-slate-200 text-rose-500 rounded-[10px] hover:bg-rose-50 transition-all shadow-sm">
-                                        <FaTimesCircle className="w-5 h-5" />
+                                        {selectedOrder.status === 'PAID' ? 'Receipt Confirmed' : 'Confirm Receipt'}
                                     </button>
                                 </div>
                             </motion.div>
@@ -156,7 +193,7 @@ export default function ManufacturerOrderControl() {
                                     <FaArrowRight className="w-8 h-8 -rotate-45" />
                                 </div>
                                 <h3 className="text-base font-bold text-slate-900 uppercase tracking-wide">Select Order</h3>
-                                <p className="text-xs font-medium text-slate-500 mt-2 max-w-[200px]">Validate payment proofs and initialize distribution.</p>
+                                <p className="text-sm font-medium text-slate-500 mt-2 max-w-[200px]">Validate payment proofs and initialize distribution.</p>
                             </div>
                         )}
                     </AnimatePresence>

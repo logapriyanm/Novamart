@@ -54,7 +54,7 @@ export default function ReviewForm({ type, orderId, targetId, orderItemId, onSuc
                 images
             } : {
                 orderId,
-                dealerId: targetId,
+                sellerId: targetId,
                 rating,
                 delivery: deliveryRating,
                 packaging: packagingRating,

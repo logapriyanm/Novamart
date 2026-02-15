@@ -18,7 +18,7 @@ class ManufacturerService {
     /**
      * Approve or Reject a Seller's request to join the network.
      */
-    async handleDealerRequest(mfgId, sellerId, status) {
+    async handleSellerRequest(mfgId, sellerId, status) {
         const MAX_RETRIES = 3;
         let attempt = 0;
 
@@ -94,7 +94,14 @@ class ManufacturerService {
     /**
      * Get pending or processed seller requests for a manufacturer.
      */
-    async getDealerRequests(mfgId, statusFilter = 'PENDING') {
+    async getSellerRequests(userId, statusFilter = 'PENDING') {
+        // Resolve Manufacturer Profile
+        const manufacturer = await Manufacturer.findOne({ userId });
+        if (!manufacturer) {
+            throw new Error('MANUFACTURER_PROFILE_NOT_FOUND');
+        }
+        const mfgId = manufacturer._id;
+
         const requests = await SellerRequest.find({
             manufacturerId: mfgId,
             status: statusFilter
@@ -106,22 +113,22 @@ class ManufacturerService {
             .sort({ createdAt: -1 })
             .lean();
 
-        // Format to match old output (dealer instead of dealerId)
-        const formattedRequests = requests.map(r => ({
-            ...r,
-            id: r._id,
-            dealer: {
-                ...r.sellerId,
-                id: r.sellerId?._id
-            },
-            seller: {
-                ...r.sellerId,
-                id: r.sellerId?._id
-            }
-        }));
+        // Safe map with filter for valid sellers
+        const formattedRequests = requests
+            .filter(r => r.sellerId) // Ensure seller exists
+            .map(r => ({
+                ...r,
+                id: r._id,
+                seller: {
+                    ...r.sellerId,
+                    id: r.sellerId._id
+                }
+            }));
 
         if (statusFilter === 'PENDING') {
-            const explicitSellerIds = requests.map(r => r.sellerId?._id);
+            const explicitSellerIds = formattedRequests
+                .map(r => r.seller.id)
+                .filter(id => id); // Filter out any undefined IDs
 
             const implicitSellers = await Seller.find({
                 isVerified: false,
@@ -132,17 +139,11 @@ class ManufacturerService {
 
             const implicitRequests = implicitSellers.map(seller => ({
                 id: `temp-${seller._id}`,
-                dealerId: seller._id, // Deprecated key for compatibility
                 sellerId: seller._id,
                 manufacturerId: mfgId,
                 status: 'PENDING',
                 message: 'New Registration (Pending Verification)',
                 createdAt: seller.userId?.createdAt || new Date(),
-                dealer: { // Deprecated key for compatibility
-                    ...seller,
-                    id: seller._id,
-                    user: seller.userId
-                },
                 seller: {
                     ...seller,
                     id: seller._id,
@@ -251,11 +252,16 @@ class ManufacturerService {
      * Get Pending Product Requests (Inventory Approvals)
      */
     async getPendingProductRequests(mfgId) {
-        console.log('getPendingProductRequests called for mfgId:', mfgId);
-        // Find inventory items for this manufacturer that are pending
+        console.log('[DEBUG] getPendingProductRequests - mfgId:', mfgId);
         const products = await Product.find({ manufacturerId: mfgId }).select('_id');
-        console.log('Found products count:', products.length);
         const productIds = products.map(p => p._id);
+        console.log('[DEBUG] Found', products.length, 'products for this manufacturer, productIds:', productIds);
+
+        // Also check ALL inventory records for these products (regardless of status)
+        const allInventory = await Inventory.find({
+            productId: { $in: productIds }
+        }).select('productId sellerId allocationStatus createdAt').lean();
+        console.log('[DEBUG] ALL inventory records for these products:', JSON.stringify(allInventory, null, 2));
 
         const requests = await Inventory.find({
             productId: { $in: productIds },
@@ -266,7 +272,7 @@ class ManufacturerService {
             .sort({ createdAt: -1 })
             .lean();
 
-        console.log('Found pending requests:', requests.length);
+        console.log('[DEBUG] PENDING requests found:', requests.length);
         return requests;
     }
 
@@ -335,6 +341,33 @@ class ManufacturerService {
         } finally {
             session.endSession();
         }
+    }
+
+    /**
+     * Reject Product Request (Inventory)
+     */
+    async rejectProductRequest(mfgId, inventoryId, reason) {
+        const inventory = await Inventory.findById(inventoryId).populate('productId');
+        if (!inventory) throw new Error('REQUEST_NOT_FOUND');
+        if (inventory.productId.manufacturerId.toString() !== mfgId.toString()) throw new Error('UNAUTHORIZED');
+
+        // Delete the pending inventory record
+        await Inventory.findByIdAndDelete(inventoryId);
+
+        // Notify the seller
+        const { Notification, Seller } = await import('../models/index.js');
+        const seller = await Seller.findById(inventory.sellerId).populate('userId');
+        if (seller?.userId) {
+            await Notification.create([{
+                userId: seller.userId._id,
+                type: 'PRODUCT_REJECTED',
+                title: 'Product Request Rejected',
+                message: `Your request for ${inventory.productId.name} was rejected.${reason ? ` Reason: ${reason}` : ''}`,
+                link: '/seller/discovery'
+            }]);
+        }
+
+        return { success: true };
     }
 }
 

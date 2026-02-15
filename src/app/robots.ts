@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
                     '/account/',
                     '/admin/',
                     '/manufacturer/',
-                    '/dealer/',
+                    '/seller/',
                     '/checkout/',
                     '/cart/',
                     '/search',

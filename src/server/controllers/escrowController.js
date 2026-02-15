@@ -2,6 +2,7 @@ import { Escrow, Order, Customer, Dispute, User, AuditLog } from '../models/inde
 import escrowService from '../services/escrow.js';
 import disputeService from '../services/dispute.js';
 import mongoose from 'mongoose';
+import logger from '../lib/logger.js';
 
 // Get Escrow Details
 export const getEscrow = async (req, res) => {
@@ -13,7 +14,7 @@ export const getEscrow = async (req, res) => {
                 path: 'orderId',
                 populate: [
                     { path: 'customerId', populate: { path: 'userId', select: 'name email companyName' } },
-                    { path: 'dealerId', populate: { path: 'userId', select: 'name email companyName' } },
+                    { path: 'sellerId', populate: { path: 'userId', select: 'name email companyName' } },
                     { path: 'items.productId' }
                 ]
             });
@@ -67,24 +68,27 @@ export const confirmDelivery = async (req, res) => {
             });
         }
 
-        // Release escrow - bypassing T+7 since customer confirmed manually
-        // We'll use a direct transaction here as EscrowService.releaseFunds has SLA checks
+        // SECURITY: Do NOT bypass T+7 settlement window.
+        // Mark delivery confirmed and set settlement window, but keep escrow in HOLD.
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const updatedEscrow = await Escrow.findByIdAndUpdate(escrow._id, {
-                status: 'RELEASED',
-                releasedAt: new Date()
-            }, { session, new: true });
+            const settlementWindowEndsAt = new Date();
+            settlementWindowEndsAt.setDate(settlementWindowEndsAt.getDate() + 7); // T+7 from delivery confirmation
 
-            await Order.findByIdAndUpdate(orderId, { status: 'SETTLED' }, { session });
+            await Escrow.findByIdAndUpdate(escrow._id, {
+                settlementWindowEndsAt,
+                releaseCondition: 'DELIVERY_CONFIRMED'
+            }, { session });
+
+            await Order.findByIdAndUpdate(orderId, { status: 'DELIVERY_CONFIRMED' }, { session });
 
             await session.commitTransaction();
 
             res.json({
                 success: true,
-                data: updatedEscrow,
-                message: 'Delivery confirmed. Funds released to seller.'
+                data: { settlementWindowEndsAt },
+                message: 'Delivery confirmed. Funds will be released after 7-day settlement window.'
             });
         } catch (error) {
             await session.abortTransaction();
@@ -132,7 +136,7 @@ export const requestRefund = async (req, res) => {
         // Use DisputeService to raise dispute + freeze escrow
         const dispute = await disputeService.raiseDispute(orderId, userId, {
             reason: reason || 'Refund requested',
-            triggerType: 'CUSTOMER_TO_DEALER'
+            triggerType: 'CUSTOMER_TO_SELLER'
         });
 
         res.json({
@@ -274,7 +278,7 @@ export const adminProcessRefund = async (req, res) => {
         }
 
     } catch (error) {
-        console.error('Admin Process Refund Error:', error);
+        logger.error('Admin Process Refund Error:', error);
         res.status(500).json({ success: false, error: error.message || 'Failed to process refund' });
     }
 };
@@ -294,7 +298,7 @@ export const adminGetAllEscrows = async (req, res) => {
                 path: 'orderId',
                 populate: [
                     { path: 'customerId', populate: { path: 'userId', select: 'name email' } },
-                    { path: 'dealerId', populate: { path: 'userId', select: 'name email' } }
+                    { path: 'sellerId', populate: { path: 'userId', select: 'name email' } }
                 ]
             })
             .sort({ createdAt: -1 })
@@ -318,48 +322,58 @@ export const adminGetAllEscrows = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Admin Get All Escrows Error:', error);
+        logger.error('Admin Get All Escrows Error:', error);
         res.status(500).json({ success: false, error: error.message || 'Failed to fetch escrows' });
     }
 };
 
-// Auto-release escrow after delivery timeout (called by cron job)
+// Auto-release escrow after settlement window expires (called by cron job)
 export const autoReleaseEscrow = async (req, res) => {
     try {
-        // Find orders delivered > 48 hours ago with escrow still on HOLD
-        const cutoffDate = new Date(Date.now() - 48 * 60 * 60 * 1000); // 48 hours ago
+        // SECURITY: Release only escrows whose T+7 settlement window has passed
+        const now = new Date();
 
-        const ordersToRelease = await Order.find({
-            status: 'DELIVERED',
-            updatedAt: { $lt: cutoffDate }
-        }).populate('escrow');
+        const escrowsToRelease = await Escrow.find({
+            status: 'HOLD',
+            settlementWindowEndsAt: { $lte: now },
+            releaseCondition: 'DELIVERY_CONFIRMED'
+        });
 
         const results = [];
 
-        for (const order of ordersToRelease) {
-            if (order.escrow && order.escrow.status === 'HOLD') {
-                try {
-                    const session = await mongoose.startSession();
-                    session.startTransaction();
-                    try {
-                        await Escrow.findByIdAndUpdate(order.escrow._id, {
-                            status: 'RELEASED',
-                            releasedAt: new Date()
-                        }, { session });
+        for (const escrow of escrowsToRelease) {
+            try {
+                // Check for active disputes before releasing
+                const activeDispute = await Dispute.findOne({
+                    orderId: escrow.orderId,
+                    status: { $in: ['OPEN', 'UNDER_REVIEW', 'EVIDENCE_COLLECTION', 'IN_PROGRESS'] }
+                });
 
-                        await Order.findByIdAndUpdate(order._id, { status: 'SETTLED' }, { session });
-
-                        await session.commitTransaction();
-                        results.push({ orderId: order._id, status: 'released' });
-                    } catch (err) {
-                        await session.abortTransaction();
-                        results.push({ orderId: order._id, status: 'failed', error: err.message });
-                    } finally {
-                        session.endSession();
-                    }
-                } catch (err) {
-                    results.push({ orderId: order._id, status: 'failed', error: err.message });
+                if (activeDispute) {
+                    results.push({ orderId: escrow.orderId, status: 'skipped', reason: 'Active dispute exists' });
+                    continue;
                 }
+
+                const session = await mongoose.startSession();
+                session.startTransaction();
+                try {
+                    await Escrow.findByIdAndUpdate(escrow._id, {
+                        status: 'RELEASED',
+                        releasedAt: new Date()
+                    }, { session });
+
+                    await Order.findByIdAndUpdate(escrow.orderId, { status: 'SETTLED' }, { session });
+
+                    await session.commitTransaction();
+                    results.push({ orderId: escrow.orderId, status: 'released' });
+                } catch (err) {
+                    await session.abortTransaction();
+                    results.push({ orderId: escrow.orderId, status: 'failed', error: err.message });
+                } finally {
+                    session.endSession();
+                }
+            } catch (err) {
+                results.push({ orderId: escrow.orderId, status: 'failed', error: err.message });
             }
         }
 

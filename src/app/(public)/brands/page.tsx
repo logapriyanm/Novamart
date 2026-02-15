@@ -25,7 +25,7 @@ const sidebarSections = [
         ]
     },
     {
-        title: "Dealer Benefits",
+        title: "Seller Benefits",
         description: "Why source from verified brands?",
         icon: FaAward,
         items: [

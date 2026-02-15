@@ -20,13 +20,14 @@ const OrderSchema = new mongoose.Schema({
     sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true, index: true },
     status: {
         type: String,
-        enum: ['CREATED', 'PAID', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'SETTLED', 'CANCELLED', 'DISPUTED', 'OUT_FOR_DELIVERY'],
+        enum: ['CREATED', 'PAYMENT_PENDING', 'PAID', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'DELIVERY_CONFIRMED', 'SETTLED', 'CANCELLED', 'DISPUTED', 'REFUNDED'],
         default: 'CREATED',
         index: true
     },
     totalAmount: { type: Number, required: true },
     taxAmount: { type: Number, required: true },
     commissionAmount: { type: Number, required: true, immutable: true },
+    sellerPayout: { type: Number }, // Net amount seller receives after settlement
     shippingAddress: { type: String, required: true },
     billingAddress: { type: String },
     items: [OrderItemSchema],
@@ -40,5 +41,9 @@ const OrderSchema = new mongoose.Schema({
     },
     idempotencyKey: { type: String, index: true, sparse: true } // For preventing duplicate orders
 }, { timestamps: true });
+
+// Compound indexes for common queries
+OrderSchema.index({ status: 1, customerId: 1 });
+OrderSchema.index({ status: 1, sellerId: 1 });
 
 export default mongoose.models.Order || mongoose.model('Order', OrderSchema);

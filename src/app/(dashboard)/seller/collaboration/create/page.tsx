@@ -16,21 +16,21 @@ export default function CreateCollaborationPage() {
         category: '',
         targetQuantity: '',
         requiredDeliveryDate: '',
-        invitedDealerIds: [] as string[]
+        invitedSellerIds: [] as string[]
     });
 
     useEffect(() => {
-        fetchDealers();
+        fetchSellers();
     }, []);
 
-    const fetchDealers = async () => {
+    const fetchSellers = async () => {
         try {
-            const res = await apiClient.get<any>('/dealers');
+            const res = await apiClient.get<any>('/collaboration/potential-partners'); // Updated to correct endpoint
             if (res.success) {
                 setDealers(res.data);
             }
         } catch (error) {
-            console.error('Failed to fetch dealers');
+            console.error('Failed to fetch sellers');
         }
     };
 
@@ -46,7 +46,7 @@ export default function CreateCollaborationPage() {
 
             if (res.success) {
                 toast.success('Collaboration group created successfully!');
-                router.push(`/dealer/collaboration/${res.data._id}`);
+                router.push(`/seller/collaboration/${res.data._id}`);
             }
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'Failed to create group');
@@ -55,12 +55,12 @@ export default function CreateCollaborationPage() {
         }
     };
 
-    const toggleDealer = (dealerId: string) => {
+    const toggleSeller = (sellerId: string) => {
         setFormData(prev => ({
             ...prev,
-            invitedDealerIds: prev.invitedDealerIds.includes(dealerId)
-                ? prev.invitedDealerIds.filter(id => id !== dealerId)
-                : [...prev.invitedDealerIds, dealerId]
+            invitedSellerIds: prev.invitedSellerIds.includes(sellerId)
+                ? prev.invitedSellerIds.filter(id => id !== sellerId)
+                : [...prev.invitedSellerIds, sellerId]
         }));
     };
 
@@ -167,10 +167,10 @@ export default function CreateCollaborationPage() {
                     {/* Invite Dealers */}
                     <div>
                         <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
-                            Invite Dealers (Optional)
+                            Invite Sellers (Optional)
                         </label>
                         <p className="text-xs text-slate-500 font-bold mb-4">
-                            Select ENTERPRISE dealers to invite to this collaboration
+                            Select ENTERPRISE sellers to invite to this collaboration
                         </p>
                         <div className="max-h-64 overflow-y-auto space-y-2 border border-slate-200 rounded-[15px] p-4">
                             {dealers.length === 0 ? (
@@ -185,8 +185,8 @@ export default function CreateCollaborationPage() {
                                     >
                                         <input
                                             type="checkbox"
-                                            checked={formData.invitedDealerIds.includes(dealer._id)}
-                                            onChange={() => toggleDealer(dealer._id)}
+                                            checked={formData.invitedSellerIds.includes(dealer._id)}
+                                            onChange={() => toggleSeller(dealer._id)}
                                             className="w-5 h-5 rounded border-slate-300 text-[#067FF9] focus:ring-[#067FF9]"
                                         />
                                         <div className="flex-1">
@@ -201,9 +201,9 @@ export default function CreateCollaborationPage() {
                                 ))
                             )}
                         </div>
-                        {formData.invitedDealerIds.length > 0 && (
+                        {formData.invitedSellerIds.length > 0 && (
                             <p className="text-xs text-[#067FF9] font-black mt-2">
-                                {formData.invitedDealerIds.length} dealer(s) selected
+                                {formData.invitedSellerIds.length} seller(s) selected
                             </p>
                         )}
                     </div>

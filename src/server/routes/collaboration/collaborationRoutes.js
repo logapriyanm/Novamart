@@ -6,11 +6,12 @@ import {
     createGroup,
     getMyGroups,
     getGroupDetails,
-    inviteDealer,
+    inviteSeller,
     joinGroup,
     leaveGroup,
     lockGroup,
-    cancelGroup
+    cancelGroup,
+    getPotentialPartners
 } from '../../controllers/collaborationController.js';
 
 const router = express.Router();
@@ -25,10 +26,11 @@ router.use(requireActiveSubscription);  // Must have active subscription
 router.post('/groups', createGroup);
 router.get('/groups', getMyGroups);
 router.get('/groups/:id', getGroupDetails);
-router.post('/groups/:id/invite', inviteDealer);
+router.post('/groups/:id/invite', inviteSeller);
 router.post('/groups/:id/join', joinGroup);
 router.delete('/groups/:id/leave', leaveGroup);
 router.post('/groups/:id/lock', lockGroup);
+router.get('/potential-partners', getPotentialPartners);
 router.delete('/groups/:id', cancelGroup);
 
 export default router;

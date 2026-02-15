@@ -103,8 +103,8 @@ export default function ProductsClient({ forcedCategory }: ProductsClientProps) 
                 rating: p.averageRating || 0,
                 reviewsCount: p.reviewCount || 0,
                 seller: {
-                    id: p.inventory?.[0]?.dealerId?._id,
-                    name: p.inventory?.[0]?.dealerId?.businessName || p.manufacturer?.companyName || 'Verified Seller',
+                    id: p.inventory?.[0]?.sellerId?._id,
+                    name: p.inventory?.[0]?.sellerId?.businessName || p.manufacturer?.companyName || 'Verified Seller',
                     isVerified: p.manufacturer?.isVerified || false
                 },
                 inStock: (p.inventory?.[0]?.stock || 0) > 0,

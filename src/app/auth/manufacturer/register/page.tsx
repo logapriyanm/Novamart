@@ -79,7 +79,7 @@ export default function ManufacturerRegistration() {
                     </Link>
                     <h1 className="text-4xl font-black tracking-tight mb-6">Supply-Side <br /><span className="text-[#067FF9]">Authority</span></h1>
                     <p className="text-slate-400 font-medium leading-relaxed">
-                        Join the ecosystem as a verified bulk producer. Maintain quality, supply dealers, and scale your production.
+                        Join the ecosystem as a verified bulk producer. Maintain quality, supply sellers, and scale your production.
                     </p>
                 </div>
 

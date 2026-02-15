@@ -1,5 +1,6 @@
 import { Negotiation, Seller, Manufacturer, Product, Notification, Chat, Message, SellerRequest } from '../models/index.js';
 import logger from '../lib/logger.js';
+import { isValidMachineTransition } from '../lib/stateMachine.js';
 import stockAllocationService from '../services/stockAllocationService.js';
 import mongoose from 'mongoose';
 
@@ -178,30 +179,14 @@ export const updateNegotiation = async (req, res) => {
             $push: { chatLog: chatEntry }
         };
 
-        // Strict State Transition Validation
+        // Strict State Transition Validation using centralized state machine
         if (status) {
             const currentStatus = negotiation.status;
-            const validTransitions = {
-                'REQUESTED': ['NEGOTIATING', 'OFFER_MADE', 'REJECTED', 'ACCEPTED'],
-                'NEGOTIATING': ['OFFER_MADE', 'ACCEPTED', 'REJECTED'],
-                'OFFER_MADE': ['ACCEPTED', 'NEGOTIATING', 'REJECTED'],
-                'ACCEPTED': ['DEAL_CLOSED', 'REJECTED'],
-                'DEAL_CLOSED': [], // Terminal state
-                'REJECTED': [] // Terminal state
-            };
-
-            // Allow implicit Offer -> Negotiating transition
-            // If offer is made, we can assume it's part of negotiation
-            if (!validTransitions[currentStatus]?.includes(status)) {
-                // Extended check: If we are simply updating terms (new offer) but explicitly sending status 'NEGOTIATING', allow it from REQUESTED/OFFER_MADE
-                if (status === 'NEGOTIATING' && ['REQUESTED', 'OFFER_MADE'].includes(currentStatus)) {
-                    // Allow
-                } else {
-                    return res.status(400).json({
-                        error: 'INVALID_STATE_TRANSITION',
-                        message: `Cannot move from ${currentStatus} to ${status}`
-                    });
-                }
+            if (!isValidMachineTransition('NEGOTIATION', currentStatus, status)) {
+                return res.status(400).json({
+                    error: 'INVALID_STATE_TRANSITION',
+                    message: `Cannot move from ${currentStatus} to ${status}`
+                });
             }
         }
 
@@ -217,18 +202,54 @@ export const updateNegotiation = async (req, res) => {
 
         // Create allocation when deal closes (Phase 4)
         if (status === 'DEAL_CLOSED' && role === 'MANUFACTURER') {
-            // Double-execution prevention: check pre-update status
-            if (negotiation.status === 'DEAL_CLOSED') {
-                return res.status(400).json({
-                    error: 'DEAL_ALREADY_CLOSED',
-                    message: 'This negotiation has already been closed. Allocation was already created.'
-                });
-            }
-
             const dealSession = await mongoose.startSession();
             dealSession.startTransaction();
             try {
-                const { Allocation } = await import('../models/index.js');
+                // TOCTOU FIX: Atomically set status to DEAL_CLOSED only if not already closed
+                // This is the SINGLE source of truth for deal closure
+                const closedNegotiation = await Negotiation.findOneAndUpdate(
+                    { _id: negotiationId, status: { $ne: 'DEAL_CLOSED' } },
+                    { status: 'DEAL_CLOSED' },
+                    { new: true, session: dealSession }
+                );
+
+                if (!closedNegotiation) {
+                    await dealSession.abortTransaction();
+                    return res.status(400).json({
+                        error: 'DEAL_ALREADY_CLOSED',
+                        message: 'This negotiation has already been closed. Allocation was already created.'
+                    });
+                }
+
+                // 2. STRICT STOCK CHECK & ATOMIC DEDUCTION
+                // We MUST ensure manufacturer has enough stock.
+                // findOneAndUpdate with filter { stockQuantity: { $gte: quantity } } acts as a lock/validator.
+                // Import models locally to ensure they are available
+                const { Product, Inventory, Allocation } = await import('../models/index.js');
+
+                const updatedProduct = await Product.findOneAndUpdate(
+                    {
+                        _id: negotiation.productId,
+                        stockQuantity: { $gte: negotiation.quantity }
+                    },
+                    {
+                        $inc: { stockQuantity: -negotiation.quantity }
+                    },
+                    { new: true, session: dealSession }
+                );
+
+                if (!updatedProduct) {
+                    await dealSession.abortTransaction();
+                    // Determine if it was bad ID or insufficient stock
+                    const productCheck = await Product.findById(negotiation.productId);
+                    if (!productCheck) {
+                        return res.status(404).json({ error: 'PRODUCT_NOT_FOUND', message: 'Product no longer exists.' });
+                    }
+                    return res.status(400).json({
+                        error: 'INSUFFICIENT_MANUFACTURER_STOCK',
+                        message: `Manufacturer only has ${productCheck.stockQuantity} units available. Cannot allocate ${negotiation.quantity}.`
+                    });
+                }
 
                 // Create allocation record using new Allocation model
                 const [newAllocation] = await Allocation.create([{
@@ -245,14 +266,7 @@ export const updateNegotiation = async (req, res) => {
                     status: 'ACTIVE'
                 }], { session: dealSession });
 
-                // Deduct from manufacturer stock
-                const { Product, Inventory } = await import('../models/index.js');
-                await Product.findByIdAndUpdate(negotiation.productId, {
-                    $inc: { stockQuantity: -negotiation.quantity }
-                }, { session: dealSession });
-
                 // CRITICAL FIX: Upsert Inventory Record for Seller
-                // Check if inventory exists for this product/seller
                 const existingInventory = await Inventory.findOne({
                     sellerId: negotiation.sellerId._id,
                     productId: negotiation.productId
@@ -265,23 +279,21 @@ export const updateNegotiation = async (req, res) => {
                             allocatedStock: negotiation.quantity,
                             remainingQuantity: negotiation.quantity
                         },
-                        // Update price rules if new deal is better? 
-                        // For now, we prefer the latest negotiated price as base
                         sellerBasePrice: updatedNegotiation.currentOffer,
-                        allocationId: newAllocation._id, // Update link to latest allocation
-                        isListed: true
+                        allocationId: newAllocation._id,
+                        isListed: true // Auto-list on new stock
                     }, { session: dealSession });
                 } else {
                     await Inventory.create([{
                         sellerId: negotiation.sellerId._id,
                         productId: negotiation.productId,
-                        region: 'Global', // Negotiation doesn't specify region usually, default or fetch from seller profile
+                        region: 'Global',
                         stock: negotiation.quantity,
-                        price: updatedNegotiation.currentOffer * 1.2, // Default retail price (20% margin)
+                        price: updatedNegotiation.currentOffer * 1.2,
                         originalPrice: updatedNegotiation.currentOffer,
                         isAllocated: true,
                         allocationStatus: 'APPROVED',
-                        allocationId: newAllocation._id, // LINKED!
+                        allocationId: newAllocation._id,
                         isListed: true,
                         listedAt: new Date(),
                         allocatedStock: negotiation.quantity,

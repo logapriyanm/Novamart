@@ -97,7 +97,7 @@ export default function CartPage() {
                                                 </div>
                                             </div>
                                             <div className="flex flex-wrap justify-center md:justify-start gap-4">
-                                                <span className="text-xs font-bold text-foreground/20 py-1 px-3 border border-foreground/5 rounded-[10px]">Official Dealer</span>
+                                                <span className="text-xs font-bold text-foreground/20 py-1 px-3 border border-foreground/5 rounded-[10px]">Official Seller</span>
                                                 {item.quantity >= 10 && (
                                                     <span className="text-xs font-bold text-black/40 py-1 px-3 border border-black/10 rounded-[10px]">Wholesale Volume</span>
                                                 )}

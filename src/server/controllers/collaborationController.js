@@ -8,8 +8,8 @@ import notificationService from '../services/notificationService.js';
  */
 export const createGroup = async (req, res) => {
     try {
-        const { name, description, category, targetQuantity, requiredDeliveryDate, invitedDealerIds } = req.body;
-        const creatorDealer = req.dealer;
+        const { name, description, category, targetQuantity, requiredDeliveryDate, invitedSellerIds } = req.body;
+        const creatorSeller = req.seller;
 
         // Validate required fields
         if (!name || !category || !targetQuantity || !requiredDeliveryDate) {
@@ -33,7 +33,7 @@ export const createGroup = async (req, res) => {
         const group = await CollaborationGroup.create({
             name,
             description,
-            creatorId: creatorDealer._id,
+            creatorId: creatorSeller._id,
             category,
             targetQuantity,
             requiredDeliveryDate,
@@ -43,30 +43,30 @@ export const createGroup = async (req, res) => {
         // Add creator as first participant
         await GroupParticipant.create({
             groupId: group._id,
-            dealerId: creatorDealer._id,
+            sellerId: creatorSeller._id,
             userId: req.user._id,
             quantityCommitment: 0, // Creator can set later
             status: 'JOINED',
             joinedAt: new Date()
         });
 
-        // Invite other dealers if provided
-        if (invitedDealerIds && invitedDealerIds.length > 0) {
-            for (const dealerId of invitedDealerIds) {
-                const invitedDealer = await Seller.findById(dealerId);
-                if (invitedDealer && invitedDealer.currentSubscriptionTier === 'ENTERPRISE') {
+        // Invite other sellers if provided
+        if (invitedSellerIds && invitedSellerIds.length > 0) {
+            for (const sellerId of invitedSellerIds) {
+                const invitedSeller = await Seller.findById(sellerId);
+                if (invitedSeller && invitedSeller.currentSubscriptionTier === 'ENTERPRISE') {
                     await GroupParticipant.create({
                         groupId: group._id,
-                        dealerId: invitedDealer._id,
-                        userId: invitedDealer.userId,
+                        sellerId: invitedSeller._id,
+                        userId: invitedSeller.userId,
                         quantityCommitment: 0,
                         status: 'INVITED',
-                        invitedBy: creatorDealer._id
+                        invitedBy: creatorSeller._id
                     });
 
                     // Send notification
                     await notificationService.create({
-                        userId: invitedDealer.userId,
+                        userId: invitedSeller.userId,
                         type: 'COLLABORATION_INVITE',
                         title: 'Collaboration Group Invitation',
                         message: `You've been invited to join "${name}" collaboration group`,
@@ -92,15 +92,15 @@ export const createGroup = async (req, res) => {
 };
 
 /**
- * Get dealer's collaboration groups
+ * Get seller's collaboration groups
  */
 export const getMyGroups = async (req, res) => {
     try {
-        const dealerId = req.dealer._id;
+        const sellerId = req.seller._id;
 
-        // Find all groups where dealer is a participant
+        // Find all groups where seller is a participant
         const participants = await GroupParticipant.find({
-            dealerId,
+            sellerId,
             status: { $in: ['INVITED', 'JOINED'] }
         }).select('groupId');
 
@@ -145,7 +145,7 @@ export const getMyGroups = async (req, res) => {
 export const getGroupDetails = async (req, res) => {
     try {
         const { id } = req.params;
-        const dealerId = req.dealer._id;
+        const sellerId = req.seller._id;
 
         const group = await CollaborationGroup.findById(id)
             .populate('creatorId', 'businessName ownerName contactEmail')
@@ -159,10 +159,10 @@ export const getGroupDetails = async (req, res) => {
             });
         }
 
-        // Verify dealer is a participant
+        // Verify seller is a participant
         const isParticipant = await GroupParticipant.findOne({
             groupId: id,
-            dealerId,
+            sellerId,
             status: { $in: ['INVITED', 'JOINED'] }
         });
 
@@ -179,7 +179,7 @@ export const getGroupDetails = async (req, res) => {
             groupId: id,
             status: { $in: ['INVITED', 'JOINED'] }
         })
-            .populate('dealerId', 'businessName ownerName')
+            .populate('sellerId', 'businessName ownerName')
             .populate('userId', 'email')
             .sort({ joinedAt: 1 });
 
@@ -188,7 +188,7 @@ export const getGroupDetails = async (req, res) => {
             data: {
                 group,
                 participants,
-                isCreator: group.creatorId._id.toString() === dealerId.toString()
+                isCreator: group.creatorId._id.toString() === sellerId.toString()
             }
         });
     } catch (error) {
@@ -202,13 +202,13 @@ export const getGroupDetails = async (req, res) => {
 };
 
 /**
- * Invite dealer to group
+ * Invite seller to group
  */
-export const inviteDealer = async (req, res) => {
+export const inviteSeller = async (req, res) => {
     try {
         const { id } = req.params;
-        const { dealerId: invitedDealerId } = req.body;
-        const creatorDealer = req.dealer;
+        const { sellerId: invitedSellerId } = req.body;
+        const creatorSeller = req.seller;
 
         const group = await CollaborationGroup.findById(id);
         if (!group) {
@@ -220,10 +220,10 @@ export const inviteDealer = async (req, res) => {
         }
 
         // Verify user is creator or participant
-        if (group.creatorId.toString() !== creatorDealer._id.toString()) {
+        if (group.creatorId.toString() !== creatorSeller._id.toString()) {
             const isParticipant = await GroupParticipant.findOne({
                 groupId: id,
-                dealerId: creatorDealer._id,
+                sellerId: creatorSeller._id,
                 status: 'JOINED'
             });
 
@@ -231,7 +231,7 @@ export const inviteDealer = async (req, res) => {
                 return res.status(403).json({
                     success: false,
                     error: 'NOT_AUTHORIZED',
-                    message: 'Only group creator or participants can invite dealers'
+                    message: 'Only group creator or participants can invite sellers'
                 });
             }
         }
@@ -241,55 +241,55 @@ export const inviteDealer = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 error: 'GROUP_LOCKED',
-                message: 'Cannot invite dealers to a locked or completed group'
+                message: 'Cannot invite sellers to a locked or completed group'
             });
         }
 
-        // Verify invited dealer exists and has ENTERPRISE subscription
-        const invitedDealer = await Seller.findById(invitedDealerId);
-        if (!invitedDealer) {
+        // Verify invited seller exists and has ENTERPRISE subscription
+        const invitedSeller = await Seller.findById(invitedSellerId);
+        if (!invitedSeller) {
             return res.status(404).json({
                 success: false,
-                error: 'DEALER_NOT_FOUND',
-                message: 'Invited dealer not found'
+                error: 'SELLER_NOT_FOUND',
+                message: 'Invited seller not found'
             });
         }
 
-        if (invitedDealer.currentSubscriptionTier !== 'ENTERPRISE') {
+        if (invitedSeller.currentSubscriptionTier !== 'ENTERPRISE') {
             return res.status(400).json({
                 success: false,
                 error: 'SUBSCRIPTION_REQUIRED',
-                message: 'Invited dealer must have ENTERPRISE subscription'
+                message: 'Invited seller must have ENTERPRISE subscription'
             });
         }
 
         // Check if already invited or joined
         const existing = await GroupParticipant.findOne({
             groupId: id,
-            dealerId: invitedDealerId
+            sellerId: invitedSellerId
         });
 
         if (existing) {
             return res.status(400).json({
                 success: false,
                 error: 'ALREADY_INVITED',
-                message: 'Dealer is already invited or part of this group'
+                message: 'Seller is already invited or part of this group'
             });
         }
 
         // Create invitation
         await GroupParticipant.create({
             groupId: id,
-            dealerId: invitedDealerId,
-            userId: invitedDealer.userId,
+            sellerId: invitedSellerId,
+            userId: invitedSeller.userId,
             quantityCommitment: 0,
             status: 'INVITED',
-            invitedBy: creatorDealer._id
+            invitedBy: creatorSeller._id
         });
 
         // Send notification
         await notificationService.create({
-            userId: invitedDealer.userId,
+            userId: invitedSeller.userId,
             type: 'COLLABORATION_INVITE',
             title: 'Collaboration Group Invitation',
             message: `You've been invited to join "${group.name}" collaboration group`,
@@ -298,14 +298,14 @@ export const inviteDealer = async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Dealer invited successfully'
+            message: 'Seller invited successfully'
         });
     } catch (error) {
-        logger.error('Invite Dealer Error:', error);
+        logger.error('Invite Seller Error:', error);
         res.status(500).json({
             success: false,
             error: 'INVITATION_FAILED',
-            message: 'Failed to invite dealer'
+            message: 'Failed to invite seller'
         });
     }
 };
@@ -317,7 +317,7 @@ export const joinGroup = async (req, res) => {
     try {
         const { id } = req.params;
         const { quantityCommitment } = req.body;
-        const dealerId = req.dealer._id;
+        const sellerId = req.seller._id;
 
         if (!quantityCommitment || quantityCommitment <= 0) {
             return res.status(400).json({
@@ -347,7 +347,7 @@ export const joinGroup = async (req, res) => {
         // Find invitation
         const participant = await GroupParticipant.findOne({
             groupId: id,
-            dealerId,
+            sellerId,
             status: 'INVITED'
         });
 
@@ -391,7 +391,7 @@ export const joinGroup = async (req, res) => {
             userId: (await Seller.findById(group.creatorId)).userId,
             type: 'COLLABORATION_JOINED',
             title: 'New Group Member',
-            message: `A dealer has joined "${group.name}" collaboration group`,
+            message: `A seller has joined "${group.name}" collaboration group`,
             metadata: { groupId: id }
         });
 
@@ -416,7 +416,7 @@ export const joinGroup = async (req, res) => {
 export const leaveGroup = async (req, res) => {
     try {
         const { id } = req.params;
-        const dealerId = req.dealer._id;
+        const sellerId = req.seller._id;
 
         const group = await CollaborationGroup.findById(id);
         if (!group) {
@@ -437,7 +437,7 @@ export const leaveGroup = async (req, res) => {
         }
 
         // Cannot leave if you're the creator
-        if (group.creatorId.toString() === dealerId.toString()) {
+        if (group.creatorId.toString() === sellerId.toString()) {
             return res.status(400).json({
                 success: false,
                 error: 'CREATOR_CANNOT_LEAVE',
@@ -447,7 +447,7 @@ export const leaveGroup = async (req, res) => {
 
         const participant = await GroupParticipant.findOne({
             groupId: id,
-            dealerId,
+            sellerId,
             status: 'JOINED'
         });
 
@@ -488,7 +488,7 @@ export const leaveGroup = async (req, res) => {
 export const lockGroup = async (req, res) => {
     try {
         const { id } = req.params;
-        const dealerId = req.dealer._id;
+        const sellerId = req.seller._id;
 
         const group = await CollaborationGroup.findById(id);
         if (!group) {
@@ -500,7 +500,7 @@ export const lockGroup = async (req, res) => {
         }
 
         // Only creator can lock
-        if (group.creatorId.toString() !== dealerId.toString()) {
+        if (group.creatorId.toString() !== sellerId.toString()) {
             return res.status(403).json({
                 success: false,
                 error: 'NOT_AUTHORIZED',
@@ -526,7 +526,7 @@ export const lockGroup = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 error: 'INSUFFICIENT_PARTICIPANTS',
-                message: 'At least 2 dealers must join before locking the group'
+                message: 'At least 2 sellers must join before locking the group'
             });
         }
 
@@ -565,12 +565,41 @@ export const lockGroup = async (req, res) => {
 };
 
 /**
+ * Get potential partners for collaboration (Enterprise sellers)
+ */
+export const getPotentialPartners = async (req, res) => {
+    try {
+        const currentSellerId = req.seller._id;
+
+        const partners = await Seller.find({
+            _id: { $ne: currentSellerId },
+            status: 'ACTIVE',
+            currentSubscriptionTier: 'ENTERPRISE'
+        })
+            .select('businessName city state userId')
+            .lean();
+
+        res.json({
+            success: true,
+            data: partners
+        });
+    } catch (error) {
+        logger.error('Get Potential Partners Error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'FETCH_PARTNERS_FAILED',
+            message: 'Failed to fetch potential partners'
+        });
+    }
+};
+
+/**
  * Cancel collaboration group
  */
 export const cancelGroup = async (req, res) => {
     try {
         const { id } = req.params;
-        const dealerId = req.dealer._id;
+        const sellerId = req.seller._id;
 
         const group = await CollaborationGroup.findById(id);
         if (!group) {
@@ -582,7 +611,7 @@ export const cancelGroup = async (req, res) => {
         }
 
         // Only creator can cancel
-        if (group.creatorId.toString() !== dealerId.toString()) {
+        if (group.creatorId.toString() !== sellerId.toString()) {
             return res.status(403).json({
                 success: false,
                 error: 'NOT_AUTHORIZED',
@@ -719,7 +748,7 @@ export const allocateGroupDeal = async (req, res) => {
                 negotiationId: negotiationId || null,
                 type: 'GROUP',
                 groupId,
-                sellerId: participant.dealerId,
+                sellerId: participant.sellerId,
                 manufacturerId,
                 productId,
                 allocatedQuantity: share,
@@ -734,7 +763,7 @@ export const allocateGroupDeal = async (req, res) => {
 
             // Upsert Inventory for this seller
             const existingInv = await Inventory.findOne({
-                sellerId: participant.dealerId,
+                sellerId: participant.sellerId,
                 productId
             }).session(session);
 
@@ -751,7 +780,7 @@ export const allocateGroupDeal = async (req, res) => {
                 }, { session });
             } else {
                 await Inventory.create([{
-                    sellerId: participant.dealerId,
+                    sellerId: participant.sellerId,
                     productId,
                     region: 'Global',
                     stock: share,
@@ -785,7 +814,7 @@ export const allocateGroupDeal = async (req, res) => {
 
         // Notify participants
         for (const participant of participants) {
-            const alloc = createdAllocations.find(a => a.sellerId.toString() === participant.dealerId.toString());
+            const alloc = createdAllocations.find(a => a.sellerId.toString() === participant.sellerId.toString());
             await notificationService.create({
                 userId: participant.userId,
                 type: 'COLLABORATION_ALLOCATION',
@@ -825,7 +854,7 @@ export default {
     createGroup,
     getMyGroups,
     getGroupDetails,
-    inviteDealer,
+    inviteSeller,
     joinGroup,
     leaveGroup,
     lockGroup,

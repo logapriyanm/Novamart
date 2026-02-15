@@ -2,12 +2,13 @@ import express from 'express';
 import { createNegotiation, getNegotiations, updateNegotiation, getSingleNegotiation } from '../../controllers/negotiationController.js';
 import { authenticateUser } from '../../middleware/auth.js';
 import authorize from '../../middleware/rbac.js';
+import { negotiationRateLimiter } from '../../middleware/rateLimiter.js';
 
 const router = express.Router();
 
-router.post('/create', authenticateUser, authorize(['SELLER']), createNegotiation);
+router.post('/create', authenticateUser, authorize(['SELLER']), negotiationRateLimiter, createNegotiation);
 router.get('/', authenticateUser, authorize(['SELLER', 'MANUFACTURER']), getNegotiations);
 router.get('/:negotiationId', authenticateUser, authorize(['SELLER', 'MANUFACTURER']), getSingleNegotiation);
-router.put('/:negotiationId', authenticateUser, authorize(['SELLER', 'MANUFACTURER']), updateNegotiation);
+router.put('/:negotiationId', authenticateUser, authorize(['SELLER', 'MANUFACTURER']), negotiationRateLimiter, updateNegotiation);
 
 export default router;

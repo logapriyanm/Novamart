@@ -161,7 +161,7 @@ export default function DealerOrderManagement() {
                 </div>
 
                 {/* Detail View */}
-                <div className="xl:col-span-5 relative">
+                <div className={`xl:col-span-5 ${selectedOrder ? 'fixed inset-0 z-[60] xl:static xl:z-auto bg-slate-50/50 xl:bg-transparent p-4 xl:p-0' : 'hidden xl:block relative'}`}>
                     <AnimatePresence mode="wait">
                         {selectedOrder ? (
                             <motion.div
@@ -248,7 +248,7 @@ export default function DealerOrderManagement() {
                                             }`}
                                     >
                                         <FaTruck className="w-3 h-3" />
-                                        {selectedOrder.rawStatus === 'PAID' ? 'Initialize Dispatch' : 'Dispatch Active'}
+                                        {selectedOrder.rawStatus === 'PAID' ? 'Mark as Shipped' : 'Order Shipped'}
                                     </button>
 
                                     <Link
@@ -259,15 +259,7 @@ export default function DealerOrderManagement() {
                                         Chat with Customer
                                     </Link>
 
-                                    {selectedOrder.rawStatus === 'SHIPPED' && (
-                                        <button
-                                            onClick={handleSimulateDelivery}
-                                            className="w-full py-3 bg-primary/5 border border-primary/10 text-xs font-bold text-primary rounded-[10px] uppercase tracking-wide hover:bg-primary/10 transition-all flex items-center justify-center gap-2"
-                                        >
-                                            <FaTruck className="w-3 h-3 animate-pulse" />
-                                            Simulate Journey (Dev)
-                                        </button>
-                                    )}
+                                    {/* Dev Feature Removed: Simulate Journey */}
 
                                     <button
                                         onClick={handleInvoice}

@@ -17,7 +17,7 @@ class ShipmentService {
         logger.info(`Starting tracking simulation for Order ${orderId}`);
 
         const steps = [
-            { status: 'CONFIRMED', reason: 'Order confirmed by dealer', delay: 2000 },
+            { status: 'CONFIRMED', reason: 'Order confirmed by seller', delay: 2000 },
             { status: 'SHIPPED', reason: 'Order picked up by courier', metadata: { carrier: 'NovaExpress', tracking: 'NX' + Math.random().toString(36).substring(7).toUpperCase() }, delay: 5000 },
             { status: 'OUT_FOR_DELIVERY', reason: 'Delivery associate is nearby', metadata: { agent: 'Rahul K.', phone: '+91 9876543210' }, delay: 5000 },
             { status: 'DELIVERED', reason: 'Package handed over to customer', metadata: { location: 'Front Door' }, delay: 5000 }

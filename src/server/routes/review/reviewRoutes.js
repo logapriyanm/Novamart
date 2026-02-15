@@ -10,6 +10,7 @@ import {
     reportReview,
     getProductReviews,
     getSellerReviews,
+    getMySellerReviews,
     replyToReview,
     getSellerAnalytics,
     getAdminAnalytics
@@ -18,6 +19,9 @@ import authorize from '../../middleware/rbac.js';
 import authenticate from '../../middleware/auth.js';
 
 const router = express.Router();
+
+// Seller Routes (Must be before public :sellerId route)
+router.get('/seller/me', authenticate, authorize(['SELLER']), getMySellerReviews);
 
 // Public Routes
 router.get('/product/:productId', getProductReviews);

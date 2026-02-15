@@ -8,10 +8,19 @@ const EscrowSchema = new mongoose.Schema({
         default: 'HOLD',
         index: true
     },
+    // Financial fields — IMMUTABLE LEDGER
     amount: { type: Number, required: true },
+    grossAmount: { type: Number, required: true }, // Total paid by customer
+    commissionAmount: { type: Number, required: true }, // Platform fee (5%)
+    sellerAmount: { type: Number, required: true }, // Net seller payout
+    platformFee: { type: Number }, // Legacy alias for commissionAmount
+
+    // Settlement tracking
+    settlementWindowEndsAt: { type: Date }, // T+7 from delivery
     releasedAt: { type: Date },
-    sellerAmount: { type: Number },
-    platformFee: { type: Number },
+    refundedAt: { type: Date },
+
+    // Dispute linkage
     disputeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dispute' },
     releaseCondition: { type: String, default: 'DELIVERY_CONFIRMED' }
 }, { timestamps: true });

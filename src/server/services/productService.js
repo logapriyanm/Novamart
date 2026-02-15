@@ -19,6 +19,7 @@ class ProductService {
             basePrice,
             moq,
             category,
+            subcategory,
             specifications,
             colors = [],
             sizes = [],
@@ -29,7 +30,10 @@ class ProductService {
         // 1. Validate Category (Slugify)
         const normalizedCategory = category ? category.toLowerCase().replace(/\s+/g, '-') : 'general';
 
-        // 2. Create Product
+        // 2. Generate SKU explicitly
+        const generatedSku = data.sku || `NV-${normalizedCategory.substring(0, 3).toUpperCase()}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+
+        // 3. Create Product
         // If manufacturer is verified (shouldAutoApprove), defaults to APPROVED. Otherwise PENDING.
         const initialStatus = shouldAutoApprove ? 'APPROVED' : 'PENDING';
 
@@ -40,16 +44,18 @@ class ProductService {
             basePrice: parseFloat(basePrice) || 0,
             moq: parseInt(moq) || 1,
             category: normalizedCategory,
+            subcategory: subcategory ? subcategory.toLowerCase().replace(/\s+/g, '-') : undefined,
             colors,
             sizes,
             images,
             video,
             specifications: specifications || {},
             status: initialStatus,
-            isApproved: shouldAutoApprove
+            isApproved: shouldAutoApprove,
+            sku: generatedSku
         });
 
-        // 3. Emit Event
+        // 4. Emit Event
         systemEvents.emit(EVENTS.PRODUCT.CREATED, {
             productId: product._id,
             productName: product.name,
@@ -145,19 +151,31 @@ class ProductService {
 
         if (subCategory && subCategory !== 'all' && subCategory !== 'null') {
             const normalizedSubCategory = subCategory.toLowerCase().replace(/\s+/g, '-');
-            query.$or = [
-                { 'specifications.subCategory': subCategory },
-                { 'specifications.subCategory': normalizedSubCategory }
-            ];
+            // Use subcategory field OR specifications.subCategory (legacy)
+            const subCatFilter = {
+                $or: [
+                    { subcategory: subCategory },
+                    { subcategory: normalizedSubCategory },
+                    { 'specifications.subCategory': subCategory },
+                    { 'specifications.subCategory': normalizedSubCategory }
+                ]
+            };
+            // Merge into query using $and to avoid $or collision with search
+            if (!query.$and) query.$and = [];
+            query.$and.push(subCatFilter);
         }
 
-        // 3. Search Query (Text search)
+        // 3. Search Query (Text search) — uses $and to avoid $or collision
         if (q) {
-            query.$or = [
-                { name: { $regex: q, $options: 'i' } },
-                { description: { $regex: q, $options: 'i' } },
-                { category: { $regex: q, $options: 'i' } }
-            ];
+            const searchFilter = {
+                $or: [
+                    { name: { $regex: q, $options: 'i' } },
+                    { description: { $regex: q, $options: 'i' } },
+                    { category: { $regex: q, $options: 'i' } }
+                ]
+            };
+            if (!query.$and) query.$and = [];
+            query.$and.push(searchFilter);
         }
 
         // 4. Price & Rating
@@ -181,7 +199,7 @@ class ProductService {
             mfgQuery.companyName = { $in: brandList.map(b => new RegExp(`^${b}$`, 'i')) };
         }
 
-        if (Object.keys(mfgQuery).length > 0 || (networkOnly === 'true' && dealerId)) {
+        if (Object.keys(mfgQuery).length > 0 || (networkOnly === 'true' && sellerId)) {
             const manufacturers = await Manufacturer.find(mfgQuery).select('_id approvedBy');
             manufacturerIds = manufacturers
                 .filter(m => networkOnly !== 'true' || (sellerId && m.approvedBy?.includes(sellerId)))
@@ -252,25 +270,37 @@ class ProductService {
                 .lean()
         ]);
 
-        // Format to match old output (manufacturer vs manufacturerId)
-        const formattedProducts = await Promise.all(products.map(async (p) => {
-            const inventory = await Inventory.findOne({ productId: p._id, stock: { $gt: 0 } })
-                .populate('sellerId', 'businessName')
-                .lean();
+        // N+1 Fix: Batch-fetch inventory for all matched products
+        const productIds = products.map(p => p._id);
+        const inventories = await Inventory.find({ productId: { $in: productIds }, stock: { $gt: 0 } })
+            .populate('sellerId', 'businessName')
+            .lean();
 
+        // Group inventories by productId
+        const inventoryMap = {};
+        inventories.forEach(inv => {
+            const pid = inv.productId.toString();
+            if (!inventoryMap[pid]) inventoryMap[pid] = [];
+            inventoryMap[pid].push(inv);
+        });
+
+        // Format products
+        const formattedProducts = products.map(p => {
             // Security: Remove Sensitive Data for Public/Customer
             if (!['ADMIN', 'SELLER', 'MANUFACTURER'].includes(userRole)) {
                 delete p.basePrice;
                 delete p.specifications?.manufacturingCost;
             }
 
+            const productInventory = inventoryMap[p._id.toString()] || [];
+
             return {
                 ...p,
                 id: p._id,
-                manufacturer: p.manufacturerId, // Keep for brand info
-                inventory: inventory ? [inventory] : []
+                manufacturer: p.manufacturerId,
+                inventory: productInventory
             };
-        }));
+        });
 
         return {
             products: formattedProducts,
@@ -297,7 +327,7 @@ class ProductService {
 
         const [inventory, reviews] = await Promise.all([
             Inventory.find({ productId: id, stock: { $gt: 0 } })
-                .populate('sellerId', 'businessName averageRating reviewCount')
+                .populate('sellerId', 'businessName averageRating reviewCount isVerified profileImage')
                 .lean(),
             Review.find({ productId: id })
                 .sort({ createdAt: -1 })
@@ -313,7 +343,7 @@ class ProductService {
             inventory: inventory.map(inv => ({
                 ...inv,
                 id: inv._id,
-                seller: inv.sellerId
+                seller: inv.sellerId ? { ...inv.sellerId, id: inv.sellerId._id } : null
             })),
             reviews: reviews.map(rev => ({
                 ...rev,
@@ -347,29 +377,7 @@ class ProductService {
         }, { new: true });
     }
 
-    async updateProduct(id, manufacturerId, data, shouldAutoApprove = false) {
-        const product = await Product.findById(id);
-        if (!product || product.manufacturerId.toString() !== manufacturerId.toString()) {
-            throw new Error('UNAUTHORIZED_PRODUCT_ACCESS');
-        }
 
-        const { basePrice, moq, specifications, ...other } = data;
-
-        const updateData = { ...other };
-        if (specifications) {
-            updateData.specifications = { ...(product.specifications || {}), ...specifications };
-        }
-        if (basePrice) updateData.basePrice = parseFloat(basePrice);
-        if (moq) updateData.moq = parseInt(moq);
-
-        // Reset to PENDING if critical fields change AND manufacturer is NOT verified
-        if (!shouldAutoApprove && product.status === 'APPROVED' && (updateData.basePrice !== product.basePrice || updateData.name !== product.name)) {
-            updateData.status = 'PENDING';
-            updateData.isApproved = false;
-        }
-
-        return await Product.findByIdAndUpdate(id, updateData, { new: true });
-    }
 
     /**
      * Manufacturer: Delete product.

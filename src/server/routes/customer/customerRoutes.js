@@ -35,5 +35,9 @@ router.post('/orders/:orderId/dispute', customerController.raiseOrderDispute);
 router.get('/profile', customerController.getProfile);
 router.put('/profile', customerController.updateProfile);
 
+router.post('/addresses', customerController.addAddress);
+router.delete('/addresses/:id', customerController.removeAddress);
+router.put('/addresses/:id', customerController.updateAddress);
+
 export default router;
 

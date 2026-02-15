@@ -18,7 +18,7 @@ class PoolingService {
     /**
      * Join an existing pool.
      */
-    async joinPool(poolId, dealerId, quantity) {
+    async joinPool(poolId, sellerId, quantity) {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
@@ -30,7 +30,7 @@ class PoolingService {
 
             // Mongoose upsert
             const participant = await PoolParticipant.findOneAndUpdate(
-                { poolId, dealerId },
+                { poolId, sellerId },
                 { quantity },
                 { upsert: true, new: true, session }
             );
@@ -84,7 +84,7 @@ class PoolingService {
             .populate('manufacturerId')
             .populate({
                 path: 'participants',
-                populate: { path: 'dealerId' }
+                populate: { path: 'sellerId' }
             });
     }
 }

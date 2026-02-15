@@ -10,6 +10,8 @@ import User from '../models/User.js';
 import ManufacturerSellerBlock from '../models/ManufacturerSellerBlock.js';
 import mongoose from 'mongoose';
 
+import Allocation from '../models/Allocation.js';
+
 class StockAllocationService {
     /**
      * Allocate stock to a seller for a specific product.
@@ -55,14 +57,49 @@ class StockAllocationService {
             const query = { productId, sellerId, region };
             const existingInventory = await Inventory.findOne(query).session(session);
 
+            // FIX: Create Allocation Record for tracking (Direct Allocation)
+            let allocationId;
+            if (existingInventory && existingInventory.allocationId) {
+                // Update existing allocation
+                await Allocation.findByIdAndUpdate(existingInventory.allocationId, {
+                    $inc: {
+                        allocatedQuantity: quantity,
+                        remainingQuantity: quantity
+                    }
+                }, { session });
+                allocationId = existingInventory.allocationId;
+            } else {
+                // Create new DIRECT allocation
+                const [newAllocation] = await Allocation.create([{
+                    type: 'DIRECT',
+                    sellerId,
+                    manufacturerId: mfgId,
+                    productId,
+                    allocatedQuantity: quantity,
+                    soldQuantity: 0,
+                    remainingQuantity: quantity,
+                    negotiatedPrice: sellerBasePrice || product.basePrice,
+                    minRetailPrice: (sellerBasePrice || product.basePrice) * 1.05, // 5% platform standard
+                    status: 'ACTIVE'
+                }], { session });
+                allocationId = newAllocation._id;
+            }
+
             let result;
             if (existingInventory) {
                 result = await Inventory.findByIdAndUpdate(existingInventory._id, {
-                    $inc: { allocatedStock: quantity }, // Total allocated increases
+                    $inc: {
+                        allocatedStock: quantity,
+                        remainingQuantity: quantity,
+                        // Should we increment stock? Yes, if it's direct allocation, it's immediately available?
+                        // Consistent with Negotiation flow, we increment stock.
+                        stock: quantity
+                    },
                     sellerBasePrice: sellerBasePrice || product.basePrice,
                     sellerMoq: sellerMoq || 1,
                     maxMargin: maxMargin || 20,
                     isAllocated: true,
+                    allocationId: allocationId, // Ensure link
                     // If previously allocated, price logic persists unless overwritten
                     price: existingInventory.price || sellerBasePrice || product.basePrice
                 }, { new: true, session });
@@ -71,18 +108,20 @@ class StockAllocationService {
                     productId,
                     sellerId,
                     region,
-                    stock: 0, // Actual physical stock held by seller is 0 until shipment? 
-                    // Wait, if allocation = physical transfer?
-                    // Prompt says "Inventory Model: Total Stock – Allocated to sellers = Available Stock".
-                    // Usually Allocation != Shipment. Allocation is "Reserved for Seller".
-                    // Seller might "Pull" stock later. 
-                    // But here, let's track allocatedStock explicitly.
+                    // Direct allocation -> Available automatically? 
+                    // Negotiation flow sets stock = quantity.
+                    stock: quantity,
                     allocatedStock: quantity,
                     sellerBasePrice: sellerBasePrice || product.basePrice,
                     sellerMoq: sellerMoq || 1,
                     maxMargin: maxMargin || 20,
                     isAllocated: true,
-                    price: sellerBasePrice || product.basePrice
+                    allocationId: allocationId, // Link to allocation
+                    price: sellerBasePrice || product.basePrice,
+                    remainingQuantity: quantity,
+                    soldQuantity: 0,
+                    allocationStatus: 'APPROVED',
+                    isListed: true // Auto-list for direct allocation? Usually yes.
                 }], { session });
                 result = result[0];
             }

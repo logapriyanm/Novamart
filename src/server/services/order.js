@@ -21,142 +21,191 @@ class OrderService {
     /**
      * Create an order and lock inventory.
      */
-    async createOrder(customerId, sellerId, items, shippingAddress, idempotencyKey = null) {
+    /**
+     * INTERNAL: Create a single order within a session.
+     * Does NOT commit transaction.
+     */
+    async _createOrderInternal(session, customerId, sellerId, items, shippingAddress) {
+        let totalAmount = 0;
+        const processedItems = [];
+
+        // PHASE 1: ATOMIC ALLOCATION DEDUCTION WITH OVERSELLING PROTECTION
+        for (const item of items) {
+            // Validation: Must have inventoryId to link to allocation
+            if (!item.inventoryId) {
+                throw new Error('Each item must have an inventoryId linked to an allocation.');
+            }
+
+            // CRITICAL: Lock inventory row using SELECT FOR UPDATE pattern
+            const inventory = await Inventory.findById(item.inventoryId)
+                .session(session)
+                .select('+__v');
+
+            if (!inventory) {
+                throw new Error(`Inventory ${item.inventoryId} not found.`);
+            }
+
+            // Direct sales requires allocation check
+            if (!inventory.allocationId) {
+                throw new Error(`Inventory ${item.inventoryId} has no allocation. Direct sales not allowed.`);
+            }
+
+            const allocation = await Allocation.findById(inventory.allocationId)
+                .session(session)
+                .select('+__v');
+
+            if (!allocation) {
+                throw new Error(`Allocation ${inventory.allocationId} not found.`);
+            }
+
+            // OVERSELLING PROTECTION
+            if (allocation.remainingQuantity < item.quantity) {
+                throw new Error(
+                    `INSUFFICIENT_STOCK: Only ${allocation.remainingQuantity} units remaining for this product.`
+                );
+            }
+
+            // ATOMIC DEDUCTION: Update allocation
+            await Allocation.findOneAndUpdate(
+                {
+                    _id: allocation._id,
+                    __v: allocation.__v,
+                    remainingQuantity: { $gte: item.quantity }
+                },
+                {
+                    $inc: { soldQuantity: item.quantity, remainingQuantity: -item.quantity },
+                    $set: { __v: allocation.__v + 1 }
+                },
+                { session, new: true }
+            );
+
+            // ATOMIC DEDUCTION: Update inventory
+            await Inventory.findByIdAndUpdate(
+                inventory._id,
+                {
+                    $inc: {
+                        soldQuantity: item.quantity,
+                        remainingQuantity: -item.quantity,
+                        stock: -item.quantity,
+                        locked: item.quantity
+                    }
+                },
+                { session }
+            );
+
+            // Use negotiated price
+            item.price = inventory.retailPrice || inventory.price;
+            totalAmount += Number(item.price) * item.quantity;
+
+            processedItems.push({
+                productId: inventory.productId,
+                inventoryId: inventory._id,
+                allocationId: allocation._id,
+                quantity: item.quantity,
+                price: item.price
+            });
+        }
+
+        // PHASE 2: SERVER-SIDE COMMISSION
+        const COMMISSION_RATE = 0.05;
+        const taxRule = await TaxRule.findOne({ isActive: true }).session(session) || { taxSlab: 18 };
+        const taxAmount = (totalAmount * Number(taxRule.taxSlab)) / 100;
+        const commissionAmount = totalAmount * COMMISSION_RATE;
+        const sellerPayout = totalAmount - commissionAmount;
+
+        // PHASE 3: Create Order
+        const [order] = await Order.create([{
+            customerId,
+            sellerId,
+            totalAmount,
+            taxAmount,
+            commissionAmount,
+            sellerPayout,
+            shippingAddress,
+            status: 'CREATED',
+            items: processedItems,
+            timeline: [{
+                fromState: 'CREATED',
+                toState: 'CREATED',
+                reason: 'Order initialized via Batch Checkout'
+            }]
+        }], { session });
+
+        return order;
+    }
+
+    /**
+     * Create Batch Orders (Atomic Checkout).
+     * Groups items by seller, creates orders, and initializes single Payment.
+     */
+    async createBatchOrders(customerId, items, shippingAddress) {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            let totalAmount = 0;
-            const processedItems = [];
-
-            // PHASE 1: ATOMIC ALLOCATION DEDUCTION WITH OVERSELLING PROTECTION
+            // Group items by Seller
+            const sellerGroups = {};
             for (const item of items) {
-                // Validation: Must have inventoryId to link to allocation
-                if (!item.inventoryId) {
-                    throw new Error('Each item must have an inventoryId linked to an allocation.');
-                }
-
-                // CRITICAL: Lock inventory row using SELECT FOR UPDATE pattern
-                // This prevents concurrent orders from overselling
-                const inventory = await Inventory.findById(item.inventoryId)
-                    .session(session)
-                    .select('+__v'); // Include version for optimistic locking
-
-                if (!inventory) {
-                    throw new Error(`Inventory ${item.inventoryId} not found.`);
-                }
-
-                // Validation: Check if inventory is linked to allocation
-                if (!inventory.allocationId) {
-                    throw new Error(`Inventory ${item.inventoryId} has no allocation. Direct sales not allowed.`);
-                }
-
-                // CRITICAL: Lock and validate allocation with SELECT FOR UPDATE
-                const allocation = await Allocation.findById(inventory.allocationId)
-                    .session(session)
-                    .select('+__v');
-
-                if (!allocation) {
-                    throw new Error(`Allocation ${inventory.allocationId} not found.`);
-                }
-
-                // OVERSELLING PROTECTION: Validate remaining quantity
-                if (allocation.remainingQuantity < item.quantity) {
-                    throw new Error(
-                        `INSUFFICIENT_STOCK: Only ${allocation.remainingQuantity} units remaining for this product. You requested ${item.quantity}.`
-                    );
-                }
-
-                // ATOMIC DEDUCTION: Update allocation quantities
-                await Allocation.findOneAndUpdate(
-                    {
-                        _id: allocation._id,
-                        __v: allocation.__v, // Optimistic locking
-                        remainingQuantity: { $gte: item.quantity } // Double-check at DB level
-                    },
-                    {
-                        $inc: {
-                            soldQuantity: item.quantity,
-                            remainingQuantity: -item.quantity
-                        },
-                        $set: { __v: allocation.__v + 1 }
-                    },
-                    { session, new: true }
-                );
-
-                // ATOMIC DEDUCTION: Update inventory
-                await Inventory.findByIdAndUpdate(
-                    inventory._id,
-                    {
-                        $inc: {
-                            soldQuantity: item.quantity,
-                            remainingQuantity: -item.quantity,
-                            stock: -item.quantity,
-                            locked: item.quantity
-                        }
-                    },
-                    { session }
-                );
-
-                // Use negotiated price from allocation, not user input
-                item.price = inventory.retailPrice || inventory.price;
-                totalAmount += Number(item.price) * item.quantity;
-
-                processedItems.push({
-                    productId: inventory.productId,
-                    inventoryId: inventory._id,
-                    allocationId: allocation._id,
-                    quantity: item.quantity,
-                    price: item.price
-                });
+                const sId = item.sellerId || item.manufacturerId; // Fallback? Ideally item should have sellerId attached from Cart
+                if (!sId) throw new Error('Item missing sellerId');
+                if (!sellerGroups[sId]) sellerGroups[sId] = [];
+                sellerGroups[sId].push(item);
             }
 
-            // PHASE 2: SERVER-SIDE COMMISSION CALCULATION (NEVER TRUST CLIENT)
-            const COMMISSION_RATE = 0.05; // 5% - IMMUTABLE
-            const taxRule = await TaxRule.findOne({ isActive: true }).session(session) || { taxSlab: 18 };
+            const createdOrders = [];
+            let grandTotal = 0;
 
-            const taxAmount = (totalAmount * Number(taxRule.taxSlab)) / 100;
-            const commissionAmount = totalAmount * COMMISSION_RATE; // MUST be server-calculated
-            const sellerPayout = totalAmount - commissionAmount;
+            // Create Order per Seller
+            for (const sellerId of Object.keys(sellerGroups)) {
+                const sellerItems = sellerGroups[sellerId];
+                const order = await this._createOrderInternal(session, customerId, sellerId, sellerItems, shippingAddress);
+                createdOrders.push(order);
+                grandTotal += order.totalAmount;
+            }
 
-            // PHASE 3: Create Order with immutable commission
-            const [order] = await Order.create([{
-                customerId,
-                sellerId,
-                totalAmount,
-                taxAmount,
-                commissionAmount, // Server-calculated, immutable
-                sellerPayout, // Seller receives this after commission
-                shippingAddress,
-                status: 'CREATED',
-                idempotencyKey: idempotencyKey || null,
-                items: processedItems,
-                timeline: [{
-                    fromState: 'CREATED',
-                    toState: 'CREATED',
-                    reason: 'Order initialized with allocation deduction'
-                }]
-            }], { session });
+            // Initialize Payment (RAZORPAY)
+            const { default: paymentService } = await import('./paymentService.js');
+            const razorpayOrder = await paymentService.createBatchRazorpayOrder(
+                grandTotal,
+                createdOrders.map(o => o._id),
+                customerId
+            );
+
+            // Create Pending Payment Records for ALL orders linked to same Razorpay Order ID
+            const { Payment } = await import('../models/index.js');
+            for (const order of createdOrders) {
+                await Payment.create([{
+                    orderId: order._id,
+                    razorpayOrderId: razorpayOrder.id,
+                    amount: order.totalAmount,
+                    status: 'PENDING',
+                    method: 'PENDING'
+                }], { session });
+            }
 
             await session.commitTransaction();
 
-            // 4. Asynchronous Audit Logging (Background)
-            // We use standard create (no session) post-commit for audit
-            AuditLog.create({
-                action: 'ORDER_CREATED',
-                entityType: 'ORDER',
-                entityId: order._id,
-                userId: customerId,
-                metadata: { order, reason: 'User placed a new order' }
-            }).catch(err => console.error('Background Audit Log Failed:', err));
+            // Background Audit Log
+            createdOrders.forEach(order => {
+                AuditLog.create({
+                    action: 'ORDER_CREATED',
+                    entityType: 'ORDER',
+                    entityId: order._id,
+                    userId: customerId,
+                    metadata: { orderId: order._id, type: 'BATCH' }
+                }).catch(console.error);
 
-            // 5. Emit System Event
-            systemEvents.emit(EVENTS.ORDER.PLACED, {
-                order,
-                customerId,
-                sellerId
+                systemEvents.emit(EVENTS.ORDER.PLACED, { order, customerId, sellerId: order.sellerId });
             });
 
-            return order;
+            return {
+                success: true,
+                razorpayOrderId: razorpayOrder.id,
+                amount: razorpayOrder.amount, // in paisa
+                currency: razorpayOrder.currency,
+                orderIds: createdOrders.map(o => o._id),
+                key: process.env.RAZORPAY_KEY_ID
+            };
+
         } catch (error) {
             await session.abortTransaction();
             throw error;
@@ -166,7 +215,28 @@ class OrderService {
     }
 
     /**
-     * Confirm payment and initialize escrow.
+     * Legacy Single Order Creation (Deprecated/Wrapped)
+     * Kept for backward compatibility but routes should move to createBatchOrders.
+     */
+    async createOrder(customerId, sellerId, items, shippingAddress, idempotencyKey = null) {
+        // Redirect to new internal logic wrapped in transaction
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        try {
+            const order = await this._createOrderInternal(session, customerId, sellerId, items, shippingAddress);
+            await session.commitTransaction();
+            return order;
+        } catch (e) {
+            await session.abortTransaction();
+            throw e;
+        } finally {
+            session.endSession();
+        }
+    }
+
+    /**
+     * Confirm payment and update order status.
+     * NOTE: Escrow is created ONLY in paymentService.processPaymentSuccess — NOT here.
      */
     async confirmPayment(orderId) {
         const session = await mongoose.startSession();
@@ -174,6 +244,12 @@ class OrderService {
         try {
             const orderBuf = await Order.findById(orderId).session(session);
             if (!orderBuf) throw new Error('Order not found');
+
+            // SECURITY: Enforce state machine — only valid transitions to PAID
+            const { isValidTransition } = await import('../lib/stateMachine.js');
+            if (!isValidTransition(orderBuf.status, 'PAID')) {
+                throw new Error(`Invalid state transition: ${orderBuf.status} → PAID`);
+            }
 
             const order = await Order.findByIdAndUpdate(orderId, {
                 status: 'PAID',
@@ -186,12 +262,7 @@ class OrderService {
                 }
             }, { session, new: true });
 
-            const { Escrow } = await import('../models/index.js');
-            await Escrow.create([{
-                orderId,
-                amount: order.totalAmount,
-                status: 'HOLD'
-            }], { session });
+            // NOTE: Escrow creation removed — handled exclusively by paymentService.processPaymentSuccess
 
             await session.commitTransaction();
 
@@ -200,8 +271,8 @@ class OrderService {
                 entityType: 'ORDER',
                 entityId: orderId,
                 userId: order.customerId,
-                metadata: { status: 'PAID', escrow: 'INITIALIZED', reason: 'Payment successful' }
-            }).catch(err => console.error('Background Audit Log Failed:', err));
+                metadata: { status: 'PAID', reason: 'Payment successful' }
+            }).catch(err => logger.error('Background Audit Log Failed:', err));
 
             systemEvents.emit(EVENTS.ORDER.PAID, {
                 orderId,
@@ -405,12 +476,29 @@ class OrderService {
             query.status = status.toUpperCase();
         }
 
-        return await Order.find(query)
+        const orders = await Order.find(query)
             .populate('customerId', 'name')
             .populate('items.productId', 'name images')
+            .populate('items.inventoryId', 'customName customImages') // Populate overrides
             .populate('sellerId', 'businessName')
             .sort({ createdAt: -1 })
             .lean();
+
+        // Merge Overrides
+        return orders.map(order => ({
+            ...order,
+            items: order.items.map(item => ({
+                ...item,
+                product: {
+                    ...item.productId,
+                    name: item.inventoryId?.customName || item.productId?.name,
+                    image: (item.inventoryId?.customImages?.length > 0)
+                        ? item.inventoryId.customImages[0]
+                        : (item.productId?.images?.[0] || '')
+                },
+                productId: item.productId // Keep original reference if needed
+            }))
+        }));
     }
 
     /**
@@ -418,7 +506,8 @@ class OrderService {
      */
     async getOrderById(orderId, userId, role) {
         const order = await Order.findById(orderId)
-            .populate({ path: 'items.productId', select: 'name images manufacturerId' })
+            .populate({ path: 'items.productId', select: 'name images manufacturerId description' })
+            .populate({ path: 'items.inventoryId', select: 'customName customImages customDescription' }) // Populate overrides
             .populate('customerId')
             .populate('sellerId')
             .populate('escrow')
@@ -436,6 +525,19 @@ class OrderService {
             if (!hasProduct) throw new Error('UNAUTHORIZED_ACCESS');
         }
 
+        // Merge Overrides
+        order.items = order.items.map(item => ({
+            ...item,
+            product: {
+                ...item.productId,
+                name: item.inventoryId?.customName || item.productId?.name,
+                description: item.inventoryId?.customDescription || item.productId?.description,
+                image: (item.inventoryId?.customImages?.length > 0)
+                    ? item.inventoryId.customImages[0]
+                    : (item.productId?.images?.[0] || '')
+            }
+        }));
+
         return order;
     }
 
@@ -452,60 +554,30 @@ class OrderService {
 
             // Security / Permission Check
             if (role !== 'ADMIN') {
+                const { Seller, Customer, Manufacturer } = await import('../models/index.js');
+
                 if (role === 'SELLER') {
-                    // Seller is the Vendor (for B2C) or Buyer (for B2B)?
-                    // Usually Seller is Vendor.
-                    if (current.sellerId.toString() !== userId.toString()) {
-                        // Check if this is a B2B order where Seller is the Customer?
-                        // If Seller is buying from Manufacturer, Seller is Customer.
-                        // But Order.customerId is a Customer/User ID.
-                        // We need to check if current.customerId resolves to this Seller's User ID.
-                        // For now, assume strict: Seller = Vendor.
+                    // Verify the User owns the Seller Profile linked to this Order
+                    const seller = await Seller.findOne({ userId }).session(session);
+                    // Check if seller exists and matches the order's sellerId
+                    if (!seller || current.sellerId.toString() !== seller._id.toString()) {
                         throw new Error('UNAUTHORIZED_ORDER_UPDATE');
                     }
                 } else if (role === 'CUSTOMER') {
-                    // Customer is Buyer
-                    // current.customerId refers to Customer Profile ID, not User ID.
-                    // We need to resolve. Assuming userId passed is the User ID.
-                    // But strictly, we should fetch Customer profile for this userId.
-                    // For performance, we assume userId validation happened in Controller or we fetch here.
-                    // Since we don't have Customer model access easily without import loop or overhead,
-                    // we assume Validated in Controller OR we just rely on ID match if we query.
-                    // Let's rely on checking if the user owns the customer profile linked.
-                    // Actually, easiest is: Controller passes correct args.
-                    // But Controller passed req.user._id.
-                    // current.customerId is a Profile ID.
-                    // We need to check if that Profile belongs to req.user._id.
-                    // This is duplicate work from getOrders.
-                    // Let's assume passed authorized flag or do a quick lookup.
-                    // For robust security, we MUST fetch.
-                    const { Customer } = await import('../models/index.js');
+                    // Verify the User owns the Customer Profile linked to this Order
                     const customer = await Customer.findOne({ userId }).session(session);
+                    // Order.customerId is a reference to Customer Profile
                     if (!customer || current.customerId.toString() !== customer._id.toString()) {
                         throw new Error('UNAUTHORIZED_ORDER_UPDATE');
                     }
                 } else if (role === 'MANUFACTURER') {
-                    // Manufacturer updating status? (e.g. Shipping B2B order)
-                    // Check if Manufacturer is the vendor (sellerId logic?)
-                    // If Order.items contains products from this Manufacturer, allow?
-                    // Or if Order.sellerId is actually the Manufacturer (shadow seller).
-                    // PROMPT: "Seller places B2B order -> Manufacturer confirms".
-                    // This implies Manufacturer acts as Seller.
-                    // If Manufacturer has no Seller Profile, this fails.
-                    // We will assume Manufacturer ID matches sellerId if we use Shadow Profile,
-                    // OR we check Line Items.
-                    // If B2B Order: sellerId should be Manufacturer's Seller Profile.
-                    // If not, we check if generic permission allowed.
-                    // Let's assume Manufacturer can update if they are the 'sellerId' (via shadow profile).
-                    // If not, we deny.
-                    // Logic: Check if current.sellerId is linked to this Manufacturer.
-                    // Since we don't have that link easily without Shadow Profile, we might block.
-                    // Allow if current.sellerId is NOT set (direct mfg order?) - unlikely.
-
-                    // FALLBACK: If Manufacturer is the vendor, the sellerId should point to a Seller record 
-                    // that belongs to this Manufacturer.
-                    const { Seller } = await import('../models/index.js');
+                    // Manufacturer acting as a Seller (Direct to Consumer or B2B)
+                    // They must own the Seller Profile listed on the order
                     const sellerProfile = await Seller.findOne({ userId }).session(session);
+
+                    // If they don't have a seller profile, they might be a pure manufacturer.
+                    // But if they are fulfilling an order, they are the 'sellerId' on that order record.
+                    // Strict check:
                     if (!sellerProfile || current.sellerId.toString() !== sellerProfile._id.toString()) {
                         throw new Error('UNAUTHORIZED_ORDER_UPDATE');
                     }

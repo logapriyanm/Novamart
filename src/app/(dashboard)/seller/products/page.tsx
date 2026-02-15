@@ -1,163 +1,170 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
-    FaBox,
+    FaPlus,
     FaSearch,
     FaFilter,
-    FaShieldAlt,
-    FaHistory,
-    FaPlus,
-    FaStore,
-    FaTags
+    FaRocket
 } from 'react-icons/fa';
 import { MdOutlineProductionQuantityLimits } from 'react-icons/md';
-import Link from 'next/link';
-import { sellerService } from '@/lib/api/services/seller.service';
+import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
-import Loader from '@/client/components/ui/Loader';
+import SellerProductCard from '@/client/components/features/seller/SellerProductCard';
+import ProductSkeleton from '@/client/components/ui/ProductSkeleton';
 
 export default function SellerProducts() {
     const [products, setProducts] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'DRAFT'>('ALL');
 
     useEffect(() => {
         fetchProducts();
     }, []);
 
     const fetchProducts = async () => {
+        setIsLoading(true);
         try {
-            const data = await sellerService.getInventory();
-            setProducts(data || []);
-        } catch (error: any) {
-            console.error('Products fetch error:', error);
+            const res = await apiClient.get<any>('/seller/inventory');
+            setProducts(res || []);
+        } catch (error) {
             toast.error('Failed to load products');
-            setProducts([]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const filteredProducts = products.filter(product => {
-        const name = product.productName || product.productId?.name || '';
-        const sku = product.sku || product.productId?.sku || '';
-        return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            sku.toLowerCase().includes(searchTerm.toLowerCase());
+    const handleToggleListing = async (inventoryId: string, currentStatus: boolean) => {
+        const newStatus = !currentStatus;
+
+        // Optimistic Update
+        setProducts(prev => prev.map(p =>
+            p._id === inventoryId ? { ...p, isListed: newStatus } : p
+        ));
+
+        try {
+            await apiClient.put('/seller/inventory/toggle-listing', {
+                inventoryId,
+                isListed: newStatus
+            });
+            toast.success(newStatus ? 'Product listed successfully' : 'Product delisted');
+        } catch (error: any) {
+            // Revert
+            setProducts(prev => prev.map(p =>
+                p._id === inventoryId ? { ...p, isListed: currentStatus } : p
+            ));
+            toast.error(error.message || 'Failed to update listing status');
+        }
+    };
+
+    const filteredProducts = products.filter(p => {
+        const matchesSearch = (p.customName || p.productId?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesFilter = filter === 'ALL'
+            ? true
+            : filter === 'ACTIVE'
+                ? p.isListed
+                : !p.isListed;
+        return matchesSearch && matchesFilter;
     });
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader size="lg" variant="primary" />
-            </div>
-        );
-    }
-
     return (
-        <div className="space-y-8 animate-fade-in pb-12">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="space-y-8 animate-fade-in pb-12 text-slate-900 min-h-screen">
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-200">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight italic">Product <span className="text-[#067FF9]">Catalog</span></h1>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-2">Inventory Management Portal</p>
+                    <h1 className="text-3xl font-black tracking-tight italic">My <span className="text-[#067FF9]">Inventory</span></h1>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1">Manage Listings & Visuals</p>
                 </div>
-                <Link
-                    href="/seller/discovery"
-                    className="px-6 py-3 bg-[#067FF9] text-white text-sm font-bold rounded-[10px] hover:bg-[#0d2a5f] transition-all shadow-lg flex items-center gap-2"
-                >
-                    <FaPlus className="w-4 h-4" />
-                    Source New Product
-                </Link>
-            </div>
-
-            {/* Search & Filter Bar */}
-            <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
-                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-                    <input
-                        type="text"
-                        placeholder="Search by product name or SKU..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-[10px] text-sm font-medium focus:outline-none focus:border-[#067FF9]/30"
-                    />
-                </div>
-                <button className="px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-[10px] hover:bg-slate-50 transition-all text-sm font-bold flex items-center gap-2">
-                    <FaFilter className="w-4 h-4" />
-                    Filter
-                </button>
-            </div>
-
-            {/* Products Grid */}
-            {filteredProducts.length === 0 ? (
-                <div className="bg-white rounded-[10px] p-16 text-center border border-slate-100">
-                    <FaStore className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">No Products Found</h3>
-                    <p className="text-sm text-slate-500 mb-6">
-                        {searchTerm ? 'No products match your search criteria.' : 'Start adding products to your inventory.'}
-                    </p>
+                <div className="flex items-center gap-4">
                     <Link
-                        href="/seller/inventory/add"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#067FF9] text-white text-sm font-bold rounded-[10px] hover:bg-[#0d2a5f] transition-all"
+                        href="/seller/discovery"
+                        className="px-6 py-4 bg-[#067FF9] text-white rounded-[10px] font-black text-sm uppercase tracking-[0.1em] shadow-lg shadow-[#067FF9]/30 hover:scale-[1.05] active:scale-[0.98] transition-all flex items-center gap-3"
                     >
                         <FaPlus className="w-4 h-4" />
-                        Add First Product
+                        Source New Product
                     </Link>
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredProducts.map((product, index) => (
-                        <motion.div
-                            key={product._id || index}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="bg-white rounded-[10px] p-6 border border-slate-100 hover:shadow-lg transition-all group"
+            </div>
+
+            {/* Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between sticky top-0 bg-[#f8fafc] z-20 py-4 -my-4 px-1">
+                {/* Search */}
+                <div className="relative w-full sm:w-96 group">
+                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#067FF9] transition-colors" />
+                    <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#067FF9]/10 focus:border-[#067FF9] transition-all shadow-sm"
+                    />
+                </div>
+
+                {/* Filters */}
+                <div className="flex gap-2 p-1 bg-slate-100 rounded-lg">
+                    {['ALL', 'ACTIVE', 'DRAFT'].map((f) => (
+                        <button
+                            key={f}
+                            onClick={() => setFilter(f as any)}
+                            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${filter === f
+                                    ? 'bg-white text-[#067FF9] shadow-sm'
+                                    : 'text-slate-400 hover:text-slate-600'
+                                }`}
                         >
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="w-12 h-12 rounded-[10px] bg-primary/5 text-primary flex items-center justify-center">
-                                    {product.allocationStatus === 'PENDING' ? (
-                                        <FaHistory className="w-5 h-5 text-amber-500" />
-                                    ) : (
-                                        <MdOutlineProductionQuantityLimits className="w-5 h-5" />
-                                    )}
-                                </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${product.allocationStatus === 'PENDING' ? 'bg-amber-100 text-amber-700' :
-                                    product.stock > 10 ? 'bg-emerald-50 text-emerald-600' :
-                                        product.stock > 0 ? 'bg-amber-50 text-amber-600' :
-                                            'bg-red-50 text-red-600'
-                                    }`}>
-                                    {product.allocationStatus === 'PENDING' ? 'Request Pending' :
-                                        product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                                </span>
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-[#067FF9] transition-colors">
-                                {product.productName || product.productId?.name || 'Unnamed Product'}
-                            </h3>
-                            <p className="text-sm text-slate-500 mb-4">SKU: {product.sku || product.productId?.sku || 'N/A'}</p>
-                            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                                <div>
-                                    <p className="text-xs text-slate-400 mb-1">Price</p>
-                                    <p className="text-lg font-bold text-slate-900">₹{product.price?.toLocaleString() || product.pricePerUnit?.toLocaleString() || '0'}</p>
-                                </div>
-                                {product.allocationStatus === 'PENDING' ? (
-                                    <button disabled className="px-4 py-2 bg-slate-100 text-slate-400 text-sm font-bold rounded-[10px] cursor-not-allowed">
-                                        Pending Approval
-                                    </button>
-                                ) : (
-                                    <Link
-                                        href={`/seller/inventory/${product._id || ''}`}
-                                        className="px-4 py-2 bg-slate-50 text-slate-600 text-sm font-bold rounded-[10px] hover:bg-[#067FF9] hover:text-white transition-all"
-                                    >
-                                        View Details
-                                    </Link>
-                                )}
-                            </div>
-                        </motion.div>
+                            {f === 'ALL' ? 'All Items' : f}
+                        </button>
                     ))}
                 </div>
-            )}
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {isLoading ? (
+                    Array(8).fill(0).map((_, i) => (
+                        <ProductSkeleton key={i} />
+                    ))
+                ) : filteredProducts.length === 0 ? (
+                    <div className="col-span-full py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <MdOutlineProductionQuantityLimits className="w-8 h-8 text-slate-300" />
+                        </div>
+                        <h3 className="text-xl font-black italic text-slate-900">No products found</h3>
+                        <p className="text-slate-400 font-medium mt-2">Try adjusting your search or filters.</p>
+                        {searchQuery && (
+                            <button onClick={() => setSearchQuery('')} className="mt-6 text-[#067FF9] font-bold text-sm hover:underline">
+                                Clear Search
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    filteredProducts.map((item) => (
+                        <SellerProductCard
+                            key={item._id}
+                            id={item.productId?._id} // For router push if needed
+                            inventoryId={item._id}
+                            name={item.productId?.name}
+                            customName={item.customName}
+                            price={item.price}
+                            originalPrice={item.originalPrice}
+                            image={item.productId?.images?.[0]}
+                            customImages={item.customImages}
+                            rating={item.productId?.averageRating || 0}
+                            reviewsCount={item.productId?.reviewCount || 0}
+                            brand={item.productId?.manufacturerId?.companyName}
+                            isListed={item.isListed}
+                            stock={item.stock}
+                            highlights={{
+                                freeDelivery: item.price > 2000,
+                                installation: false,
+                                warranty: item.productId?.specifications?.warranty || 'Standard'
+                            }}
+                            onToggleListing={handleToggleListing}
+                        />
+                    ))
+                )}
+            </div>
         </div>
     );
 }

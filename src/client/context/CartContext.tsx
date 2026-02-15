@@ -19,6 +19,9 @@ export interface CartItem {
     region?: string;
     stock?: number;
     originalPrice?: number;
+    manufacturerId?: string;
+    color?: string;
+    size?: string;
 }
 
 interface CartContextType {
@@ -74,7 +77,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     sellerId: item.seller?.id || '',
                     sellerName: item.seller?.businessName || '',
                     stock: item.stock,
-                    originalPrice: Number(item.originalPrice || item.price)
+                    originalPrice: Number(item.originalPrice || item.price),
+                    manufacturerId: item.product?.manufacturerId || '',
+                    color: item.color,
+                    size: item.size
                 }));
                 setCart(items);
                 // Also save to localStorage for offline access
@@ -100,7 +106,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                             // Sync to backend
                             const itemsToSync = localItems.map((item: CartItem) => ({
                                 inventoryId: item.inventoryId,
-                                quantity: item.quantity
+                                quantity: item.quantity,
+                                color: item.color,
+                                size: item.size
                             }));
                             await cartService.syncCart(itemsToSync);
                             localStorage.removeItem('novamart_cart'); // Clear local storage after sync
@@ -124,7 +132,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const addToCart = async (item: Omit<CartItem, 'id'>) => {
         if (!isAuthenticated) {
             // Check stock for local cart
-            const existing = cart.find(i => i.inventoryId === item.inventoryId);
+            const existing = cart.find(i =>
+                i.inventoryId === item.inventoryId &&
+                (i.color || '') === (item.color || '') &&
+                (i.size || '') === (item.size || '')
+            );
             const currentQty = existing ? existing.quantity : 0;
             const newQty = currentQty + item.quantity;
 
@@ -138,7 +150,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 let updated;
                 if (existing) {
                     updated = prev.map(i =>
-                        i.inventoryId === item.inventoryId
+                        (i.inventoryId === item.inventoryId && (i.color || '') === (item.color || '') && (i.size || '') === (item.size || ''))
                             ? { ...i, quantity: i.quantity + item.quantity }
                             : i
                     );
@@ -153,9 +165,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Check stock for backend cart (optimistic check)
-        // We might not have the current cart item stock here if it's a new item, 
-        // but we rely on the passed 'item.stock' or the existing item's stock in context.
-        const existing = cart.find(i => i.inventoryId === item.inventoryId);
+        const existing = cart.find(i =>
+            i.inventoryId === item.inventoryId &&
+            (i.color || '') === (item.color || '') &&
+            (i.size || '') === (item.size || '')
+        );
         const currentQty = existing ? existing.quantity : 0;
         const newQty = currentQty + item.quantity;
 
@@ -166,7 +180,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         setIsLoading(true);
         try {
-            await cartService.addToCart(item.inventoryId, item.quantity);
+            await cartService.addToCart(item.inventoryId, item.quantity, item.color, item.size);
             await fetchCart(); // Refresh cart
             toast.success('Product added to cart');
         } catch (error: any) {

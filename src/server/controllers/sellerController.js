@@ -116,6 +116,31 @@ export const updateStock = async (req, res) => {
 };
 
 /**
+ * Update Inventory Details (Custom Images, Name, Description)
+ */
+export const updateDetails = async (req, res) => {
+    const sellerId = req.user.seller?._id || req.user.seller?.id;
+    const { inventoryId, ...updates } = req.body;
+    try {
+        const result = await sellerService.updateInventoryDetails(inventoryId, sellerId, updates);
+
+        await auditService.logAction('INVENTORY_UPDATE', 'INVENTORY', inventoryId, {
+            userId: req.user.id,
+            newData: updates,
+            req
+        });
+
+        res.json({
+            success: true,
+            message: 'Product details updated successfully',
+            data: result
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+};
+
+/**
  * Toggle Product Visibility (Go Live)
  */
 export const toggleListing = async (req, res) => {
@@ -191,7 +216,7 @@ export const sourceProduct = async (req, res) => {
         const inventory = await sellerService.sourceProduct(sellerId, productId, region, stock, price);
         res.status(201).json({
             success: true,
-            message: 'Product sourced successfully',
+            message: inventory.allocationStatus === 'PENDING' ? 'REQUEST_PENDING' : 'Product sourced successfully',
             data: inventory
         });
     } catch (error) {
@@ -278,43 +303,59 @@ export const getPublicSellerProfile = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const { Seller } = await import('../models/index.js');
+        const { Seller, Inventory, Review } = await import('../models/index.js');
+
         const seller = await Seller.findById(id)
             .populate('userId', 'createdAt')
-            .populate({
-                path: 'sellerReviews',
-                populate: { path: 'customerId', select: 'name' }
-            })
-            .populate({
-                path: 'inventory',
-                match: { stock: { $gt: 0 } },
-                populate: { path: 'productId', select: 'name images basePrice category' }
-            })
             .lean();
 
         if (!seller) {
             return res.status(404).json({ success: false, error: 'Seller not found' });
         }
 
-        // Mask sensitive data
+        // Fetch inventory and reviews separately (no virtuals needed)
+        const [inventory, reviews] = await Promise.all([
+            Inventory.find({ sellerId: id, stock: { $gt: 0 } })
+                .populate('productId', 'name images basePrice category description')
+                .lean(),
+            Review.find({ sellerId: id, type: 'SELLER' })
+                .populate('customerId', 'name')
+                .sort({ createdAt: -1 })
+                .lean()
+        ]);
+
         const publicProfile = {
             id: seller._id,
             businessName: seller.businessName,
+            description: seller.description,
             city: seller.city,
             state: seller.state,
+            isVerified: seller.isVerified,
+            profileImage: seller.profileImage,
             joinedAt: seller.userId?.createdAt,
             stats: {
-                averageRating: seller.averageRating,
-                reviewCount: seller.reviewCount,
-                totalProducts: seller.inventory.length
+                averageRating: seller.averageRating || 0,
+                reviewCount: seller.reviewCount || 0,
+                totalProducts: inventory.length
             },
-            reviews: seller.sellerReviews || [],
-            inventory: (seller.inventory || []).map(item => ({
-                ...item.productId, // Flatten product details
-                inventoryId: item._id,
-                price: item.price,
-                stock: item.stock
-            }))
+            reviews: reviews || [],
+            products: (inventory || [])
+                .filter(item => item.productId)
+                .map(item => ({
+                    ...item.productId,
+                    id: item.productId._id,
+
+                    // Merge Seller Overrides
+                    name: item.customName || item.productId.name,
+                    description: item.customDescription || item.productId.description,
+                    images: (item.customImages && item.customImages.length > 0) ? item.customImages : item.productId.images,
+                    category: item.customCategory || item.productId.category,
+
+                    // Inventory Metadata
+                    inventoryId: item._id,
+                    price: item.price,
+                    stock: item.stock
+                }))
         };
 
         res.json({
@@ -354,11 +395,10 @@ export const getManufacturerDetails = async (req, res) => {
 };
 
 export const requestManufacturerAccess = async (req, res) => {
-    const sellerId = req.user.seller?._id || req.user.seller?.id;
+    const userId = req.user._id; // Use Requesting User ID
     const { manufacturerId, ...metadata } = req.body;
     try {
-        if (!sellerId) throw new Error('Seller profile not found. Please complete your profile.');
-        const request = await sellerService.requestAccess(sellerId, manufacturerId, metadata);
+        const request = await sellerService.requestAccess(userId, manufacturerId, metadata);
         res.status(201).json({
             success: true,
             message: 'Access request sent successfully',
@@ -409,6 +449,7 @@ export default {
     getMyAllocations,
     updatePrice,
     updateStock,
+    updateDetails,
     toggleListing,
     getSellerStats,
     confirmOrder,

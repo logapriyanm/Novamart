@@ -15,6 +15,7 @@ import {
 import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 import Loader from '@/client/components/ui/Loader';
+import Link from 'next/link';
 
 // Helper for currency formatting
 const formatCurrency = (amount: number) => {
@@ -28,6 +29,7 @@ const formatCurrency = (amount: number) => {
 export default function PaymentsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [stats, setStats] = useState<any>(null);
+    const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
     const [payoutStatus, setPayoutStatus] = useState<'IDLE' | 'PROCESSING' | 'SUCCESS'>('IDLE');
 
     useEffect(() => {
@@ -37,10 +39,29 @@ export default function PaymentsPage() {
     const fetchFinancials = async () => {
         setIsLoading(true);
         try {
-            const res = await apiClient.get<any>('/seller/analytics');
-            if (res.data?.success) {
-                setStats(res.data.data.finance);
+            // Parallel fetch: Analytics Stats & Recent Paid Orders
+            const [statsRes, ordersRes] = await Promise.all([
+                apiClient.get<any>('/seller/analytics'),
+                apiClient.get<any>('/orders?status=PAID&limit=5')
+            ]);
+
+            if (statsRes.data?.success) {
+                setStats(statsRes.data.data.finance);
             }
+
+            if (ordersRes.data) {
+                // Map orders to transaction-like objects
+                const txs = (ordersRes.data || []).map((o: any) => ({
+                    id: o.id,
+                    displayId: o.id.slice(0, 8).toUpperCase(),
+                    date: new Date(o.createdAt).toLocaleDateString(),
+                    customer: o.customer?.name || 'Guest',
+                    amount: formatCurrency(o.totalAmount),
+                    status: 'PAID'
+                }));
+                setRecentTransactions(txs);
+            }
+
         } catch (error) {
             console.error('Failed to load financials:', error);
             toast.error('Failed to load financial data');
@@ -51,11 +72,10 @@ export default function PaymentsPage() {
 
     const handleRequestPayout = async () => {
         setPayoutStatus('PROCESSING');
-        // Mock payout request for now as per controller behavior
+        // Payouts are automatic, just show info
         setTimeout(() => {
-            setPayoutStatus('SUCCESS');
-            toast.success('Payout request submitted successfully');
-            setTimeout(() => setPayoutStatus('IDLE'), 3000);
+            setPayoutStatus('IDLE');
+            toast.info('Payouts are processed automatically every Monday. No manual action required.');
         }, 1500);
     };
 
@@ -156,59 +176,45 @@ export default function PaymentsPage() {
                 </motion.div>
             </div>
 
-            {/* Recent Transactions Mock */}
+            {/* Recent Transactions */}
             <div className="bg-white rounded-[10px] border border-slate-100 shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                    <h3 className="font-bold text-slate-800 text-lg">Recent Transactions</h3>
-                    <button className="text-xs font-bold text-[#067FF9] uppercase tracking-wide hover:underline">View All</button>
+                    <h3 className="font-bold text-slate-800 text-lg">Recent Transactions (Paid Orders)</h3>
+                    <Link href="/seller/orders?status=PAID" className="text-xs font-bold text-[#067FF9] uppercase tracking-wide hover:underline">View All</Link>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-slate-50 text-sm uppercase font-black text-slate-400 tracking-wider">
                             <tr>
-                                <th className="px-6 py-4">Transaction ID</th>
+                                <th className="px-6 py-4">Order ID</th>
                                 <th className="px-6 py-4">Date</th>
-                                <th className="px-6 py-4">Type</th>
+                                <th className="px-6 py-4">Customer</th>
                                 <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4 text-right">Amount</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-sm font-medium text-slate-600">
-                            {/* Mock Data since no direct Transaction API exists yet */}
-                            {[1, 2, 3].map((_, i) => (
-                                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                                    <td className="px-6 py-4 font-mono text-slate-400">#TXN-782{i}9</td>
-                                    <td className="px-6 py-4 flex items-center gap-2">
-                                        <FaCalendarAlt className="text-slate-300 w-3 h-3" />
-                                        Oct {24 - i}, 2024
-                                    </td>
-                                    <td className="px-6 py-4">Order Settlement</td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2 py-1 rounded-[4px] bg-emerald-50 text-emerald-600 text-sm font-bold border border-emerald-100 uppercase">
-                                            Completed
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right font-bold text-slate-800">
-                                        + {formatCurrency(12500 - (i * 1500))}
+                            {recentTransactions.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-8 text-center text-slate-400 font-bold italic">
+                                        No recent paid transactions found.
                                     </td>
                                 </tr>
-                            ))}
-                            <tr className="hover:bg-slate-50/50 transition-colors">
-                                <td className="px-6 py-4 font-mono text-slate-400">#PAY-99210</td>
-                                <td className="px-6 py-4 flex items-center gap-2">
-                                    <FaCalendarAlt className="text-slate-300 w-3 h-3" />
-                                    Oct 20, 2024
-                                </td>
-                                <td className="px-6 py-4">Weekly Payout</td>
-                                <td className="px-6 py-4">
-                                    <span className="px-2 py-1 rounded-[4px] bg-blue-50 text-blue-600 text-sm font-bold border border-blue-100 uppercase">
-                                        Processed
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-right font-bold text-slate-800">
-                                    - {formatCurrency(45000)}
-                                </td>
-                            </tr>
+                            ) : (
+                                recentTransactions.map((tx: any) => (
+                                    <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
+                                        <td className="px-6 py-4 font-bold text-slate-900">{tx.displayId}</td>
+                                        <td className="px-6 py-4">{tx.date}</td>
+                                        <td className="px-6 py-4">{tx.customer}</td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-[4px] text-xs font-bold uppercase">
+                                                Paid
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right font-bold text-slate-900">{tx.amount}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

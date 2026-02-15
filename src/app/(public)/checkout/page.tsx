@@ -27,7 +27,7 @@ import { useCart } from '@/client/context/CartContext';
 import { useAuth } from '@/client/hooks/useAuth';
 import { orderService } from '@/lib/api/services/order.service';
 import { wishlistService } from '@/lib/api/services/wishlist.service';
-import { paymentService } from '@/lib/api/services/payment.service';
+import { customerService } from '@/lib/api/services/customer.service';
 import { toast } from 'sonner';
 
 export default function CheckoutPage() {
@@ -45,95 +45,97 @@ export default function CheckoutPage() {
         }
     }, [isAuthenticated, authLoading, router]);
 
-    if (authLoading || !isAuthenticated) {
-        return (
-            <div className="min-h-screen pt-32 flex justify-center bg-background">
-                <Loader size="lg" variant="primary" />
-            </div>
-        );
-    }
-
     // Address Management
     const [addresses, setAddresses] = useState<any[]>([]);
     const [selectedAddressId, setSelectedAddressId] = useState('');
     const [showAddressForm, setShowAddressForm] = useState(false);
     const [newAddress, setNewAddress] = useState({ label: '', name: '', line1: '', city: '', state: '', zip: '', type: 'home' });
 
-    // const { showSnackbar } = useSnackbar();
+    // Fetch addresses on mount
+    React.useEffect(() => {
+        if (isAuthenticated) {
+            const loadAddresses = async () => {
+                try {
+                    const profile = await customerService.getProfile();
+                    if (profile && profile.addresses) {
+                        setAddresses(profile.addresses);
+                        const defaultAddr = profile.addresses.find((a: any) => a.isDefault);
+                        if (defaultAddr) setSelectedAddressId(defaultAddr._id);
+                    }
+                } catch (error) {
+                    console.error('Failed to load addresses', error);
+                }
+            };
+            loadAddresses();
+        }
+    }, [isAuthenticated]);
 
-    const handleAddAddress = (e: React.FormEvent) => {
+    const handleAddAddress = async (e: React.FormEvent) => {
         e.preventDefault();
-        const id = `addr_${Date.now()}`;
-        setAddresses([...addresses, { ...newAddress, id }]);
-        setSelectedAddressId(id);
-        setShowAddressForm(false);
-        setNewAddress({ label: '', name: '', line1: '', city: '', state: '', zip: '', type: 'home' });
-        toast.success('Address added successfully!');
+        try {
+            const updatedProfile = await customerService.addAddress(newAddress);
+            // The backend returns the updated info, let's assume it returns the new list of addresses or we fetch profile again.
+            // My controller returns: res.json({ success: true, data: addresses }); where addresses is the updated array.
+            if (updatedProfile) {
+                setAddresses(updatedProfile);
+                const newAddr = updatedProfile[updatedProfile.length - 1];
+                if (newAddr) setSelectedAddressId(newAddr._id);
+                toast.success('Address added successfully!');
+                setShowAddressForm(false);
+                setNewAddress({ label: '', name: '', line1: '', city: '', state: '', zip: '', type: 'home' });
+            }
+        } catch (error) {
+            toast.error('Failed to save address');
+        }
     };
 
     const handleCreateOrder = async () => {
         if (!selectedAddressId) {
-            toast.error('Please select a shipping address.');
+            toast.error('Please select a shipping address');
             return;
         }
 
-        const address = addresses.find(a => a.id === selectedAddressId);
-        const addressString = `${address?.name}, ${address?.line1}, ${address?.city}, ${address?.state} ${address?.zip}`;
+        const selectedAddress = addresses.find(a => a._id === selectedAddressId);
+        if (!selectedAddress) {
+            toast.error('Invalid address selected');
+            return;
+        }
 
         setIsProcessing(true);
         try {
-            // Group cart items by seller
-            const groups: Record<string, any[]> = {};
-            cart.forEach(item => {
-                const sId = item.sellerId || 'unknown';
-                if (!groups[sId]) groups[sId] = [];
-                groups[sId].push(item);
-            });
+            // PHASE 3: SECURE SERVER-SIDE BATCH CHECKOUT
+            // We send all items and address to the backend.
+            // Backend handles grouping, inventory locking, and order creation in a transaction.
+            const payload = {
+                items: cart.map(item => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    inventoryId: item.inventoryId,
+                    sellerId: item.sellerId, // Important for grouping
+                    manufacturerId: item.manufacturerId, // Fallback
+                    price: item.price
+                })),
+                shippingAddress: selectedAddress
+            };
 
-            const sellerIds = Object.keys(groups);
-            const orderIds: string[] = [];
+            const initiateRes: any = await apiClient.post('/orders/checkout/initiate', payload);
 
-            // Create orders for each seller
-            for (const sId of sellerIds) {
-                const groupItems = groups[sId];
-                // Calculate total for this group
-                const groupTotal = groupItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-                const orderRes = await apiClient.post('/orders', {
-                    items: groupItems.map(i => ({
-                        productId: i.productId,
-                        quantity: i.quantity,
-                        price: i.price,
-                        inventoryId: i.inventoryId // Important for inventory deduction
-                    })),
-                    shippingAddress: addressString, // Using addressString from selectedAddress
-                    paymentMethod: 'ESCROW', // Defaulting to Escrow for now
-                    totalAmount: groupTotal,
-                    sellerId: sId,
-                    type: 'Standard'
-                });
-
-                if ((orderRes as any).id) { // Assuming orderRes is the order object
-                    orderIds.push((orderRes as any).id);
-                }
-            }
-
-            if (orderIds.length > 0) {
-                toast.success('Order placed successfully');
-                // For simplicity, redirect to the first order's payment
-                router.push(`/checkout/payment?orderId=${orderIds[0]}`);
+            if (initiateRes.success && initiateRes.razorpayOrderId) {
+                toast.success('Checkout initiated successfully!');
+                // Redirect to payment page with razorpayOrderId (Batch Payment)
+                // We use 'razorpay_order_id' query param to signal batch mode
+                router.push(`/checkout/payment?razorpay_order_id=${initiateRes.razorpayOrderId}`);
             } else {
-                toast.error('Order creation failed.');
+                toast.error(initiateRes.error || 'Failed to initiate checkout.');
             }
 
         } catch (error: any) {
-            console.error('Checkout error:', error);
-            toast.error(error.message || 'Critical error during checkout.');
+            console.error('Checkout Error:', error);
+            toast.error(error.response?.data?.error || 'Failed to create order. Please try again.');
         } finally {
             setIsProcessing(false);
         }
     };
-
     const steps = [
         { id: 1, label: 'Cart' },
         { id: 2, label: 'Shipping' },
@@ -206,19 +208,19 @@ export default function CheckoutPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {addresses.map((addr) => (
                                         <div
-                                            key={addr.id}
-                                            onClick={() => setSelectedAddressId(addr.id)}
-                                            className={`p-6 xs:p-8 rounded-[10px] border-2 transition-all cursor-pointer relative group ${selectedAddressId === addr.id ? 'border-black bg-white shadow-xl shadow-black/5' : 'border-foreground/5 bg-white/50 hover:border-black/20'
+                                            key={addr._id}
+                                            onClick={() => setSelectedAddressId(addr._id)}
+                                            className={`p-6 xs:p-8 rounded-[10px] border-2 transition-all cursor-pointer relative group ${selectedAddressId === addr._id ? 'border-black bg-white shadow-xl shadow-black/5' : 'border-foreground/5 bg-white/50 hover:border-black/20'
                                                 }`}
                                         >
                                             <div className="flex items-start justify-between mb-6">
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${selectedAddressId === addr.id ? 'bg-black text-white' : 'bg-surface text-foreground/20'}`}>
+                                                    <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${selectedAddressId === addr._id ? 'bg-black text-white' : 'bg-surface text-foreground/20'}`}>
                                                         {addr.type === 'office' ? <HiOutlineOfficeBuilding className="w-6 h-6" /> : <HiOutlineHome className="w-6 h-6" />}
                                                     </div>
                                                     <span className="text-sm font-black text-foreground uppercase tracking-tight">{addr.label}</span>
                                                 </div>
-                                                {selectedAddressId === addr.id && <HiOutlineCheckCircle className="text-black w-6 h-6" />}
+                                                {selectedAddressId === addr._id && <HiOutlineCheckCircle className="text-black w-6 h-6" />}
                                             </div>
                                             <div className="space-y-1.5 opacity-60">
                                                 <p className="text-xs font-black text-foreground">{addr.name}</p>
@@ -230,9 +232,18 @@ export default function CheckoutPage() {
                                             <div className="mt-8 flex gap-4">
                                                 <button className="text-xs font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-black transition-colors">Edit</button>
                                                 <button
-                                                    onClick={(e) => {
+                                                    onClick={async (e) => {
                                                         e.stopPropagation();
-                                                        setAddresses(addresses.filter(a => a.id !== addr.id));
+                                                        if (confirm('Are you sure?')) {
+                                                            try {
+                                                                const updated = await customerService.removeAddress(addr._id);
+                                                                setAddresses(updated);
+                                                                if (selectedAddressId === addr._id) setSelectedAddressId('');
+                                                                toast.success('Address removed');
+                                                            } catch (err) {
+                                                                toast.error('Failed to remove address');
+                                                            }
+                                                        }
                                                     }}
                                                     className="text-xs font-black text-foreground/30 uppercase tracking-[0.2em] hover:text-red-500 transition-colors"
                                                 >Delete</button>
@@ -240,7 +251,7 @@ export default function CheckoutPage() {
                                         </div>
                                     ))}
                                 </div>
-                                </div>  
+                            </div>
                         </section>
 
                         {/* Step 3: Payment Method (Placeholder) */}

@@ -53,7 +53,7 @@ export default function ManufacturerDashboard() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-200/60">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Production <span className="text-primary">Monitor</span></h1>
+                    <h1 className="text-2xl font-bold italic uppercase tracking-tight text-slate-900">Production <span className="text-primary">Monitor</span></h1>
                     <p className="text-sm font-medium text-slate-400 mt-2">Global Operations & Manufacturer Analytics</p>
                 </div>
             </div>
@@ -79,7 +79,7 @@ export default function ManufacturerDashboard() {
                 <StatsCard
                     icon={FaUsers}
                     label="Seller Network"
-                    value={profile?.dealersApproved?.length?.toString() || '0'}
+                    value={stats?.network?.totalSellers?.toString() || '0'}
                     trend="Growing"
                     color="text-primary"
                     bgColor="bg-primary/10"
@@ -87,8 +87,8 @@ export default function ManufacturerDashboard() {
                 <StatsCard
                     icon={FaClipboardList}
                     label="Pending Requests"
-                    value={stats?.pendingDealerRequests?.toString() || '0'}
-                    trend={stats?.pendingDealerRequests > 0 ? "Action Required" : "All Clear"}
+                    value={stats?.network?.pendingSellerRequests?.toString() || '0'}
+                    trend={stats?.network?.pendingSellerRequests > 0 ? "Action Required" : "All Clear"}
                     color="text-amber-600"
                     bgColor="bg-amber-50/50"
                 />
@@ -154,7 +154,7 @@ export default function ManufacturerDashboard() {
                                 title="No New Requests"
                                 description="Your seller network is up to date."
                                 actionLabel="Grow Network"
-                                actionPath="/manufacturer/dealers"
+                                actionPath="/manufacturer/sellers"
                             />
                         ) : (
                             <div className="text-center py-8 bg-slate-50 rounded-[10px] border border-dashed border-slate-200">
@@ -162,9 +162,9 @@ export default function ManufacturerDashboard() {
                                     <FaHandshake className="w-5 h-5" />
                                 </div>
                                 <p className="text-sm font-medium text-slate-600 mb-4">
-                                    You have <span className="font-bold text-slate-900">{stats.pendingDealerRequests}</span> pending approval.
+                                    You have <span className="font-bold text-slate-900">{stats.network?.pendingSellerRequests}</span> pending approval.
                                 </p>
-                                <Link href="/manufacturer/dealers/requests" className="inline-block px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-[10px] hover:bg-slate-800 transition-colors">
+                                <Link href="/manufacturer/sellers/requests" className="inline-block px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-[10px] hover:bg-slate-800 transition-colors">
                                     Review Requests
                                 </Link>
                             </div>

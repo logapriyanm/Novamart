@@ -17,32 +17,39 @@ declare global {
 export default function PaymentPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const orderId = searchParams.get('orderId');
+    const orderId = searchParams.get('orderId'); // Legacy / Single
+    const razorpayOrderId = searchParams.get('razorpay_order_id'); // Batch
+
     const [order, setOrder] = useState<any>(null);
+    const [paymentDetails, setPaymentDetails] = useState<any>(null); // For Batch
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    // const { showSnackbar } = useSnackbar();
 
     useEffect(() => {
-        if (!orderId) {
+        if (!orderId && !razorpayOrderId) {
             router.push('/checkout');
             return;
         }
 
-        const fetchOrder = async () => {
+        const fetchData = async () => {
             try {
-                const res = await orderService.getOrderById(orderId);
-                setOrder(res.data);
+                if (orderId) {
+                    const res = await orderService.getOrderById(orderId);
+                    setOrder(res.data);
+                } else if (razorpayOrderId) {
+                    const res = await paymentService.getRazorpayOrderDetails(razorpayOrderId);
+                    setPaymentDetails(res.data);
+                }
             } catch (err) {
-                console.error('Failed to load order:', err);
-                setError('Could not load order details.');
+                console.error('Failed to load payment details:', err);
+                setError('Could not load payment details.');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchOrder();
+        fetchData();
 
         // Load Razorpay script
         const script = document.createElement('script');
@@ -51,40 +58,47 @@ export default function PaymentPage() {
         document.body.appendChild(script);
 
         return () => {
-            document.body.removeChild(script);
+            if (document.body.contains(script)) {
+                document.body.removeChild(script);
+            }
         };
-    }, [orderId, router]);
+    }, [orderId, razorpayOrderId, router]);
 
     const handlePayment = async () => {
-        if (!orderId) return;
+        if (!orderId && !paymentDetails) return;
 
         setIsProcessing(true);
         try {
-            // 1. Create payment order on backend
-            const paymentOrder = await paymentService.createPaymentOrder(orderId);
+            let rzpOrderId, amount, currency, key, isMock;
 
-            if (!paymentOrder.success) {
-                throw new Error('Failed to create payment order');
+            if (orderId) {
+                // Legacy: Create payment order on demand
+                const paymentOrder = await paymentService.createPaymentOrder(orderId);
+                if (!paymentOrder.success) throw new Error('Failed to create payment order');
+                ({ razorpayOrderId: rzpOrderId, amount, currency, key, isMock } = paymentOrder.data);
+            } else {
+                // Batch: Use pre-existing details
+                ({ razorpayOrderId: rzpOrderId, amount, currency, key } = paymentDetails);
+                // Mock check? Backend mock mode might handle it in verify, but here we assume standard key unless key is missing
+                // For batch, we rely on the key returned from getRazorpayOrderDetails
             }
 
-            const { razorpayOrderId, amount, currency, key, isMock } = paymentOrder.data;
-
-            // 2a. If mock mode, simulate payment
-            if (isMock) {
+            // 2a. If mock mode (legacy only mostly, or if key implies mock)
+            if (isMock) { // Batch doesn't explicitly return isMock unless we add it. Assuming prod/test env vars handle it.
+                // ... Legacy Mock Logic ...
                 toast.info('Mock payment mode - auto-completing');
-
                 setTimeout(async () => {
                     try {
                         const verifyRes = await paymentService.verifyPayment({
-                            orderId,
-                            razorpay_order_id: razorpayOrderId,
+                            orderId: orderId || '',
+                            razorpay_order_id: rzpOrderId,
                             razorpay_payment_id: `mock_payment_${Date.now()}`,
                             razorpay_signature: 'mock_signature'
                         });
 
                         if (verifyRes.success) {
                             toast.success('Payment successful!');
-                            router.push(`/checkout/success?id=${orderId}`);
+                            router.push(orderId ? `/checkout/success?id=${orderId}` : `/customer/orders`);
                         } else {
                             throw new Error('Payment verification failed');
                         }
@@ -94,11 +108,10 @@ export default function PaymentPage() {
                         setIsProcessing(false);
                     }
                 }, 1500);
-
                 return;
             }
 
-            // 2b. Real Razorpay integration
+            // 2b. Real Razorpay Integration
             if (typeof window.Razorpay === 'undefined') {
                 toast.error('Payment gateway not loaded. Please refresh.');
                 setIsProcessing(false);
@@ -110,13 +123,13 @@ export default function PaymentPage() {
                 amount,
                 currency,
                 name: 'NovaMart',
-                description: `Order #${orderId.slice(0, 8)}`,
-                order_id: razorpayOrderId,
+                description: orderId ? `Order #${orderId.slice(0, 8)}` : `Batch Order`,
+                order_id: rzpOrderId,
                 handler: async function (response: any) {
                     try {
                         // Verify payment on backend
                         const verifyRes = await paymentService.verifyPayment({
-                            orderId,
+                            orderId: orderId || '', // Empty for batch
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature
@@ -124,7 +137,8 @@ export default function PaymentPage() {
 
                         if (verifyRes.success) {
                             toast.success('Payment successful!');
-                            router.push(`/checkout/success?id=${orderId}`);
+                            // Redirect to orders or success page. For batch, we might not have a single ID.
+                            router.push(orderId ? `/checkout/success?id=${orderId}` : `/customer/orders`);
                         } else {
                             toast.error('Payment verification failed');
                         }
@@ -136,9 +150,9 @@ export default function PaymentPage() {
                     }
                 },
                 prefill: {
-                    name: order.customer?.name || '',
-                    email: order.customer?.email || '',
-                    contact: order.customer?.phone || ''
+                    name: order?.customer?.name || 'Customer', // Fallback for batch if order not loaded
+                    email: order?.customer?.email || '',
+                    contact: order?.customer?.phone || ''
                 },
                 theme: {
                     color: '#FF5733'
@@ -175,12 +189,15 @@ export default function PaymentPage() {
         </div>
     );
 
+    const displayAmount = order ? order.totalAmount : (paymentDetails ? paymentDetails.amount : 0);
+    const displayId = orderId ? orderId.slice(0, 8) : (razorpayOrderId ? razorpayOrderId.slice(-8) : 'Unknown');
+
     return (
         <div className="min-h-screen pt-24 pb-24 bg-background">
             <div className="max-w-3xl mx-auto px-6 lg:px-12">
                 <header className="mb-12 text-center">
                     <h1 className="text-4xl font-black text-foreground tracking-tight mb-2 italic uppercase">Secure <span className="text-black">Payment</span></h1>
-                    <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">Order ID: {orderId?.slice(0, 8)}</p>
+                    <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">Reference: {displayId}</p>
                 </header>
 
                 <div className="bg-white rounded-[10px] border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02] overflow-hidden p-8 lg:p-12">
@@ -188,7 +205,7 @@ export default function PaymentPage() {
                     <div className="mb-10 text-center">
                         <p className="text-sm font-black text-foreground/30 uppercase tracking-[0.2em] mb-2">Total Amount Due</p>
                         <p className="text-5xl font-black text-black tracking-tighter italic">
-                            ₹{Number(order?.totalAmount || 0).toLocaleString('en-IN')}
+                            ₹{Number(displayAmount).toLocaleString('en-IN')}
                         </p>
                     </div>
 

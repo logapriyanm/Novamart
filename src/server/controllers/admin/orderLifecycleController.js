@@ -57,7 +57,14 @@ export const auditInventory = async (req, res) => {
  */
 export const getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find()
+        const { status } = req.query;
+
+        let query = {};
+        if (status && status !== 'ALL') {
+            query.status = status;
+        }
+
+        const orders = await Order.find(query)
             .populate('customerId', 'name email')
             .populate('sellerId', 'businessName')
             .populate('items.inventoryId')

@@ -33,7 +33,19 @@ const InventorySchema = new mongoose.Schema({
     remainingQuantity: { type: Number }, // Computed: allocated - sold
     retailPrice: { type: Number }, // Seller's retail price
     negotiatedPrice: { type: Number }, // Price from allocation/negotiation
-    minRetailPrice: { type: Number } // Min allowed: negotiatedPrice * 1.05
+    minRetailPrice: { type: Number }, // Min allowed: negotiatedPrice * 1.05
+
+    // Custom Details (Seller Overrides)
+    customName: { type: String },
+    customDescription: { type: String },
+    customImages: [{ type: String }],
+
+    // NEW: Full Product Details Overrides
+    customCategory: { type: String },
+    customSubCategory: { type: String },
+    customMainCategory: { type: String },
+    customSpecifications: { type: Map, of: String }, // Flexible key-value pairs
+
 }, { timestamps: true });
 
 InventorySchema.index({ sellerId: 1, productId: 1 }, { unique: true });

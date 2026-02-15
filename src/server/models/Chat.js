@@ -15,7 +15,7 @@ const ChatSchema = new mongoose.Schema({
         userId: { type: String, required: true },
         role: {
             type: String,
-            enum: ['CUSTOMER', 'DEALER', 'SELLER', 'MANUFACTURER', 'ADMIN'],
+            enum: ['CUSTOMER', 'SELLER', 'MANUFACTURER', 'ADMIN'],
             required: true
         }
     }],

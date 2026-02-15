@@ -3,8 +3,9 @@
  * Manages the state-driven wallet logic for the platform.
  */
 
-import { Escrow, Order, Dispute, AuditLog } from '../models/index.js'; // Dealer removed if unused, or change to Seller if needed
+import { Escrow, Order, Dispute, AuditLog } from '../models/index.js';
 import systemEvents, { EVENTS } from '../lib/systemEvents.js';
+import logger from '../lib/logger.js';
 import mongoose from 'mongoose';
 
 class EscrowService {
@@ -126,8 +127,8 @@ class EscrowService {
                 mfgPayout += Number(item.productId.basePrice) * item.quantity;
             }
 
-            // Dealer Share (Remainder)
-            const dealerPayout = total - tax - platformCommission - mfgPayout;
+            // Seller Share (Remainder after tax, commission, and manufacturer)
+            const sellerPayout = Math.max(0, total - tax - platformCommission - mfgPayout);
 
             // 2. Update Escrow Status
             const updatedEscrow = await Escrow.findByIdAndUpdate(escrow._id, {
@@ -150,23 +151,23 @@ class EscrowService {
                     entityType: 'ESCROW',
                     distribution: {
                         manufacturer: mfgPayout,
-                        dealer: dealerPayout,
+                        seller: sellerPayout,
                         platform: platformCommission,
                         tax_withheld: tax
                     },
                     total_volume: total,
                     reason: 'Post-delivery return window closure.'
                 }
-            }).catch(err => console.error('Background Audit Log Failed:', err));
+            }).catch(err => logger.error('Background Audit Log Failed:', err));
 
             // Emit System Event
             systemEvents.emit(EVENTS.ESCROW.RELEASE, {
                 orderId,
                 sellerId: order.sellerId._id,
-                amount: dealerPayout
+                amount: sellerPayout
             });
 
-            return { updatedEscrow, distribution: { mfgPayout, dealerPayout, platformCommission } };
+            return { updatedEscrow, distribution: { mfgPayout, sellerPayout, platformCommission } };
         } catch (error) {
             await session.abortTransaction();
             throw error;

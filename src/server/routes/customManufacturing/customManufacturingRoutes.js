@@ -20,7 +20,7 @@ const router = express.Router();
 router.use(authenticate);
 router.use(checkSubscriptionExpiry);
 
-// Dealer routes (PRO or ENTERPRISE)
+// Seller routes (PRO or ENTERPRISE)
 router.post('/requests', requirePROorHigher, createCustomRequest);
 router.get('/requests', requirePROorHigher, getMyRequests);
 router.get('/requests/:id', requirePROorHigher, getRequestDetails);

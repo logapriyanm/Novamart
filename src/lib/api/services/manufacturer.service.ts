@@ -22,12 +22,12 @@ export const manufacturerService = {
         return apiClient.get<any[]>(ENDPOINTS.MANUFACTURER.ORDERS);
     },
 
-    async handleDealerRequest(dealerId: string, status: string): Promise<any> {
-        return apiClient.post('/manufacturer/dealers/handle', { dealerId, status });
+    async handleSellerRequest(sellerId: string, status: string): Promise<any> {
+        return apiClient.post('/manufacturer/network/handle', { sellerId, status });
     },
 
-    async allocateStock(productId: string, dealerId: string, region: string, quantity: number, price: number): Promise<any> {
-        return apiClient.post('/manufacturer/inventory/allocate', { productId, dealerId, region, quantity, price });
+    async allocateStock(productId: string, sellerId: string, region: string, quantity: number, price: number): Promise<any> {
+        return apiClient.post('/manufacturer/inventory/allocate', { productId, sellerId, region, quantity, price });
     },
 
     async updateProduct(id: string, data: any): Promise<any> {
@@ -40,6 +40,10 @@ export const manufacturerService = {
 
     async bulkImport(products: any[]): Promise<any> {
         return apiClient.post('/products/bulk', { products });
+    },
+
+    async confirmOrderPayment(orderId: string): Promise<any> {
+        return apiClient.patch(`/orders/${orderId}/status`, { status: 'PAID', reason: 'Manufacturer confirmed receipt' });
     }
 };
 

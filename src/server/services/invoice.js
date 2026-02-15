@@ -16,7 +16,7 @@ class InvoiceService {
                 populate: { path: 'userId' }
             })
             .populate({
-                path: 'dealerId',
+                path: 'sellerId',
                 populate: { path: 'userId' }
             })
             .populate('items.productId');
@@ -34,9 +34,9 @@ class InvoiceService {
             billingDetails: {
                 customerName: order.customerId?.name || 'Customer',
                 customerPhone: order.customerId?.userId?.phone,
-                dealerName: order.dealerId?.businessName,
-                dealerGst: order.dealerId?.gstNumber,
-                dealerAddress: order.dealerId?.businessAddress
+                sellerName: order.sellerId?.businessName,
+                sellerGst: order.sellerId?.gstNumber,
+                sellerAddress: order.sellerId?.businessAddress
             },
             items: order.items.map(item => ({
                 name: item.productId?.name || 'Product',

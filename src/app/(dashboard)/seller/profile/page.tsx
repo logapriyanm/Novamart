@@ -679,22 +679,28 @@ function RatingsSection({ profile }: any) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-8 bg-slate-50 rounded-[10px] text-center space-y-4">
                     <p className="text-xs font-semibold text-slate-400 tracking-wide">Aggregate Trust Score</p>
-                    <p className="text-5xl font-bold text-slate-900">4.9</p>
+                    <p className="text-5xl font-bold text-slate-900">{profile.averageRating || 'N/A'}</p>
                     <div className="flex justify-center gap-1 text-amber-500">
-                        {[1, 2, 3, 4, 5].map(i => <FaStar key={i} />)}
+                        {profile.averageRating ? (
+                            [...Array(Math.round(profile.averageRating))].map((_, i) => <FaStar key={i} />)
+                        ) : (
+                            <span className="text-xs text-slate-400 font-medium">No ratings yet</span>
+                        )}
                     </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
-                    <StatMinimal label="Fulfillment SLA" value="98.4%" />
-                    <StatMinimal label="Dispute Ratio" value="0.2%" />
-                    <StatMinimal label="Stock Reliability" value="100%" />
+                    <StatMinimal label="Fulfillment SLA" value="Tracking..." />
+                    <StatMinimal label="Dispute Ratio" value="Tracking..." />
+                    <StatMinimal label="Stock Reliability" value="Tracking..." />
                 </div>
             </div>
 
             <div className="p-6 bg-blue-50/50 rounded-[10px] border border-blue-100">
                 <p className="text-xs font-bold text-blue-800 tracking-wide mb-2">Reputation Insight</p>
                 <p className="text-sm font-medium text-slate-700 leading-relaxed">
-                    "Your profile is within the top 5% of regional partners. This status grants you prioritized visibility in the seller terminal and eligibility for the 'Gold Merchant' trust badge."
+                    {profile.averageRating > 4.5
+                        ? "Your profile is performing exceptionally well. Keep maintaining high standards for Gold Merchant eligibility."
+                        : "Complete more orders and gather positive reviews to unlock higher seller tiers."}
                 </p>
             </div>
         </div>

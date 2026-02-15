@@ -47,3 +47,44 @@ export const loginRateLimiter = rateLimit({
     validate: { xForwardedForHeader: false, trustProxy: false }
 });
 
+// Checkout rate limiter (prevent rapid order spam)
+export const checkoutRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10, // 10 checkout attempts per 15 minutes
+    message: {
+        success: false,
+        error: 'Too many checkout attempts. Please try again later.',
+        retryAfter: '15 minutes'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false, trustProxy: false }
+});
+
+// Payment endpoint rate limiter
+export const paymentRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20, // 20 payment-related requests per 15 minutes
+    message: {
+        success: false,
+        error: 'Too many payment requests. Please try again later.',
+        retryAfter: '15 minutes'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false, trustProxy: false }
+});
+
+// Negotiation rate limiter (prevent spam offers)
+export const negotiationRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 30, // 30 negotiation actions per 15 minutes
+    message: {
+        success: false,
+        error: 'Too many negotiation requests. Please slow down.',
+        retryAfter: '15 minutes'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false, trustProxy: false }
+});

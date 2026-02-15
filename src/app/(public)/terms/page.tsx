@@ -9,7 +9,7 @@ export default function TermsPage() {
         {
             title: "1. Zero-Trust Verification",
             icon: ShieldCheck,
-            content: "All participants in the NovaMart platform—including manufacturers, dealers, and customers—must undergo rigorous identity and business verification. We reserves the right to suspend any account that fails periodic security audits."
+            content: "All participants in the NovaMart platform—including manufacturers, sellers, and customers—must undergo rigorous identity and business verification. We reserves the right to suspend any account that fails periodic security audits."
         },
         {
             title: "2. Ledger Integrity",
@@ -19,7 +19,7 @@ export default function TermsPage() {
         {
             title: "3. Order Fulfillment & Escrow",
             icon: Scale,
-            content: "Payments are held in a secure escrow layer and only released upon successful delivery verification. Manufacturers and Dealers must adhere to the platform's SLA (Service Level Agreement) for shipping and quality assurance."
+            content: "Payments are held in a secure escrow layer and only released upon successful delivery verification. Manufacturers and Sellers must adhere to the platform's SLA (Service Level Agreement) for shipping and quality assurance."
         },
         {
             title: "4. Compliance & Governing Law",

@@ -56,7 +56,7 @@ export default function DealerAllocationView() {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            const res = await fetch('/api/dealer/source', {
+            const res = await fetch('/api/seller/source', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

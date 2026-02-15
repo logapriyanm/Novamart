@@ -34,15 +34,30 @@ export const getCart = async (req, res) => {
 
         const enrichedItems = cart.items.map(item => {
             const inventory = item.inventoryId;
+            const product = inventory?.productId;
+
+            // Merge Seller Overrides
+            const productObj = product && typeof product.toObject === 'function' ? product.toObject() : product;
+
+            const displayProduct = productObj ? {
+                ...productObj,
+                name: inventory?.customName || productObj.name,
+                image: (inventory?.customImages && inventory.customImages.length > 0)
+                    ? inventory.customImages[0]
+                    : (productObj.images?.[0] || '')
+            } : null;
+
             return {
                 id: item._id,
                 quantity: item.quantity,
                 price: item.price,
-                product: inventory?.productId,
-                dealerId: inventory?.sellerId,
+                product: displayProduct,
+                sellerId: inventory?.sellerId,
                 inventoryId: inventory?._id,
                 stock: inventory?.stock || 0,
-                originalPrice: inventory?.originalPrice
+                originalPrice: inventory?.originalPrice,
+                color: item.color,
+                size: item.size
             };
         });
 
@@ -64,7 +79,7 @@ export const getCart = async (req, res) => {
 export const addToCart = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { inventoryId, quantity = 1 } = req.body;
+        const { inventoryId, quantity = 1, color, size } = req.body;
 
         if (!inventoryId) {
             return res.status(400).json({ success: false, error: 'Inventory ID required' });
@@ -87,6 +102,19 @@ export const addToCart = async (req, res) => {
             return res.status(404).json({ success: false, error: 'Product not found' });
         }
 
+        if (!inventory.isListed) {
+            return res.status(400).json({ success: false, error: 'This product is not currently listed for sale' });
+        }
+
+        // Variant selection validation: require color/size if product has options
+        const product = inventory.productId;
+        if (product?.colors?.length > 0 && !color) {
+            return res.status(400).json({ success: false, error: 'Please select a color for this product' });
+        }
+        if (product?.sizes?.length > 0 && !size) {
+            return res.status(400).json({ success: false, error: 'Please select a size for this product' });
+        }
+
         if (inventory.stock < quantity) {
             return res.status(400).json({ success: false, error: 'Insufficient stock' });
         }
@@ -96,7 +124,12 @@ export const addToCart = async (req, res) => {
             cart = await Cart.create({ customerId: customer._id });
         }
 
-        const itemIndex = cart.items.findIndex(item => item.inventoryId.toString() === inventoryId);
+        // Find existing item with same inventoryId AND same variants
+        const itemIndex = cart.items.findIndex(item =>
+            item.inventoryId.toString() === inventoryId &&
+            (item.color || '') === (color || '') &&
+            (item.size || '') === (size || '')
+        );
 
         if (itemIndex > -1) {
             const newQuantity = cart.items[itemIndex].quantity + quantity;
@@ -113,7 +146,9 @@ export const addToCart = async (req, res) => {
                 inventoryId,
                 productId: inventory.productId._id,
                 quantity,
-                price: inventory.price
+                price: inventory.price,
+                color,
+                size
             });
         }
 

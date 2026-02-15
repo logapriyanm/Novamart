@@ -13,7 +13,11 @@ class SellerService {
      */
     async getInventory(sellerId) {
         return await Inventory.find({ sellerId })
-            .populate('productId')
+            .populate({
+                path: 'productId',
+                populate: { path: 'manufacturerId', select: 'companyName businessType' }
+            })
+            .sort({ listedAt: -1 })
             .lean();
     }
 
@@ -88,6 +92,30 @@ class SellerService {
     }
 
     /**
+     * Update Inventory Details (Custom overrides).
+     */
+    async updateInventoryDetails(inventoryId, sellerId, updates) {
+        const inv = await Inventory.findById(inventoryId);
+
+        if (!inv || inv.sellerId.toString() !== sellerId.toString()) {
+            throw new Error('UNAUTHORIZED_INVENTORY_ACCESS');
+        }
+
+        const allowedUpdates = {};
+        if (updates.customName !== undefined) allowedUpdates.customName = updates.customName;
+        if (updates.customDescription !== undefined) allowedUpdates.customDescription = updates.customDescription;
+        if (updates.customImages !== undefined) allowedUpdates.customImages = updates.customImages;
+
+        // NEW: Full Product Details Overrides
+        if (updates.customCategory !== undefined) allowedUpdates.customCategory = updates.customCategory;
+        if (updates.customSubCategory !== undefined) allowedUpdates.customSubCategory = updates.customSubCategory;
+        if (updates.customMainCategory !== undefined) allowedUpdates.customMainCategory = updates.customMainCategory;
+        if (updates.customSpecifications !== undefined) allowedUpdates.customSpecifications = updates.customSpecifications;
+
+        return await Inventory.findByIdAndUpdate(inventoryId, allowedUpdates, { new: true });
+    }
+
+    /**
      * Respond to a Customer Review.
      */
     async replyToReview(sellerId, reviewId, response) {
@@ -122,8 +150,14 @@ class SellerService {
         }
 
         // V-005: Prevent relisting depleted inventory
-        if (isListed && (inv.stock <= 0 && (!inv.remainingQuantity || inv.remainingQuantity <= 0))) {
-            throw new Error('CANNOT_LIST_EMPTY_INVENTORY: Stock or remaining quantity must be greater than 0 to list.');
+        // STRICTER CHECK: If allocated, verify remainingQuantity > 0
+        if (isListed) {
+            if (inv.stock <= 0 && (!inv.remainingQuantity || inv.remainingQuantity <= 0)) {
+                throw new Error('CANNOT_LIST_EMPTY_INVENTORY: Stock or remaining quantity must be greater than 0 to list.');
+            }
+            if (inv.isAllocated && inv.remainingQuantity <= 0) {
+                throw new Error('ALLOCATION_DEPLETED: No remaining quantity in this allocation. Cannot list.');
+            }
         }
 
         return await Inventory.findByIdAndUpdate(inventoryId, {
@@ -220,19 +254,19 @@ class SellerService {
                     sellerId,
                     productId,
                     region,
-                    stock: Number(quantity), // Auto-stock for immediate availability
+                    stock: 0, // No stock until manufacturer approves
                     price: Number(initialPrice) || estimatedPrice * 1.2,
                     originalPrice: estimatedPrice, // Wholesale price
                     isAllocated: false,
-                    allocationStatus: 'APPROVED', // Auto-approve for demo/testing
+                    allocationStatus: 'PENDING', // Require manufacturer approval
                     allocationId: null, // No allocation yet
-                    isListed: true, // Auto-list
-                    listedAt: new Date(),
-                    allocatedStock: Number(quantity),
+                    isListed: false, // Not listed until approved
+                    listedAt: null,
+                    allocatedStock: 0,
                     sellerBasePrice: estimatedPrice,
                     sellerMoq: product.moq,
                     soldQuantity: 0,
-                    remainingQuantity: Number(quantity),
+                    remainingQuantity: 0,
                     requestedQuantity: Number(quantity) // Store requested amount
                 }], { session });
 
@@ -421,7 +455,7 @@ class SellerService {
     async getManufacturersForDiscovery() {
         const manufacturers = await Manufacturer.find({})
             .populate('userId', 'email status')
-            .sort({ companyName: 1 })
+            .sort({ createdAt: -1 })
             .lean();
 
         // Manual filter for suspended and attachment of products (Take 6)
@@ -475,12 +509,29 @@ class SellerService {
             productId: { $in: productIds }
         }).select('productId allocationStatus isAllocated stock').lean();
 
+
+
         const inventoryMap = {};
         inventories.forEach(inv => {
-            inventoryMap[inv.productId.toString()] = {
-                status: inv.allocationStatus || (inv.isAllocated ? 'APPROVED' : 'NONE'),
-                stock: inv.stock
-            };
+            const prodId = inv.productId.toString();
+            const newStatus = inv.allocationStatus || (inv.isAllocated ? 'APPROVED' : 'NONE');
+            const current = inventoryMap[prodId];
+
+            if (current) {
+                // Prioritize APPROVED status
+                if (newStatus === 'APPROVED') {
+                    current.status = 'APPROVED';
+                } else if (current.status !== 'APPROVED' && newStatus === 'PENDING') {
+                    current.status = 'PENDING';
+                }
+                // Accumulate stock from all allocations
+                current.stock = (current.stock || 0) + (inv.stock || 0);
+            } else {
+                inventoryMap[prodId] = {
+                    status: newStatus,
+                    stock: inv.stock || 0
+                };
+            }
         });
 
         const productsWithStatus = products.map(p => ({
@@ -499,10 +550,31 @@ class SellerService {
     /**
      * Request access to a manufacturer's product line.
      */
-    async requestAccess(sellerId, manufacturerId, metadata = {}) {
+    async requestAccess(userId, manufacturerId, metadata = {}) {
         const { message, expectedQuantity, region, priceExpectation } = metadata;
 
-        const existing = await SellerRequest.findOne({ sellerId, manufacturerId });
+        // 1. Resolve Seller Profile from User ID
+        const seller = await Seller.findOne({ userId });
+        if (!seller) {
+            throw new Error('SELLER_PROFILE_NOT_FOUND: Please complete your seller profile first.');
+        }
+        const sellerId = seller._id;
+
+        // 2. Resolve Manufacturer Profile (Robust check for Profile ID vs User ID)
+        let manufacturer = await Manufacturer.findById(manufacturerId);
+        if (!manufacturer) {
+            // Fallback: Check if ID provided was actually a User ID
+            manufacturer = await Manufacturer.findOne({ userId: manufacturerId });
+        }
+
+        if (!manufacturer) {
+            throw new Error('MANUFACTURER_NOT_FOUND: Invalid Manufacturer ID.');
+        }
+
+        const resolvedMfgId = manufacturer._id;
+
+        // 3. Check for Existing Request
+        const existing = await SellerRequest.findOne({ sellerId, manufacturerId: resolvedMfgId });
 
         if (existing) {
             if (existing.status === 'PENDING') throw new Error('Request already sent. Please wait for approval.');
@@ -525,7 +597,7 @@ class SellerService {
         try {
             const request = await SellerRequest.create([{
                 sellerId,
-                manufacturerId,
+                manufacturerId: resolvedMfgId,
                 message: message || '',
                 status: 'PENDING',
                 metadata: {
@@ -535,12 +607,13 @@ class SellerService {
                 }
             }], { session });
 
-            // Create notification for manufacturer
-            const manufacturer = await Manufacturer.findById(manufacturerId).populate('userId');
-            if (manufacturer?.userId) {
-                const seller = await Seller.findById(sellerId);
+            // Create notification for manufacturer user
+            if (manufacturer.userId) { // manufacturer doc might have userId populated or just ID
+                // If not populated, we need to fetch user? 
+                // Wait, Manufacturer schema has userId ref. 
+                // We need to send notification to that User ID.
                 await Notification.create([{
-                    userId: manufacturer.userId._id,
+                    userId: manufacturer.userId, // This is the User ID (ref)
                     type: 'SELLER_REQUEST',
                     title: 'New Seller Partnership Request',
                     message: `${seller.businessName} has requested access to your products.`,

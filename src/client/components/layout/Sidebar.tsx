@@ -83,66 +83,40 @@ interface MenuGroup {
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     items: MenuItem[];
+    isFlat?: boolean; // New property to render items without group header
 }
 
 // =============================================================================
-// ADMIN MENU (23 pages → 6 groups)
+// ADMIN MENU (Simplified to 13 items)
 // =============================================================================
 const adminMenuGroups: MenuGroup[] = [
     {
-        label: 'Overview',
+        label: 'Management',
         icon: DashboardIcon,
         items: [
             { name: 'Dashboard', icon: DashboardIcon, path: '/admin' },
-            { name: 'Analytics', icon: FaChartBar, path: '/admin/analytics' },
-            { name: 'Product Analytics', icon: FaChartLine, path: '/admin/analytics/products' },
-        ],
-    },
-    {
-        label: 'User & Role Management',
-        icon: FaUsers,
-        items: [
-            { name: 'All Users', icon: FaUsers, path: '/admin/users' },
+            { name: 'Users', icon: FaUsers, path: '/admin/users' },
             { name: 'Manufacturers', icon: FaIndustry, path: '/admin/manufacturers' },
-            { name: 'Sellers', icon: SellersIcon, path: '/admin/dealers' },
-            { name: 'Verification', icon: FaShieldAlt, path: '/admin/verification' },
-            { name: 'Badges', icon: FaAward, path: '/admin/badges' },
+            { name: 'Sellers', icon: SellersIcon, path: '/admin/sellers' },
         ],
     },
     {
-        label: 'Commerce Control',
+        label: 'Commerce',
         icon: FaStore,
         items: [
             { name: 'Products', icon: ProductsIcon, path: '/admin/products' },
             { name: 'Orders', icon: LogisticsIcon, path: '/admin/orders' },
-            { name: 'Escrow', icon: FaMoneyCheckAlt, path: '/admin/escrow' },
-            { name: 'Disputes', icon: DisputesIcon, path: '/admin/disputes' },
-            { name: 'Escalations', icon: FaExclamationTriangle, path: '/admin/escalations' },
             { name: 'Finance', icon: WalletIcon, path: '/admin/finance' },
+            { name: 'Disputes', icon: DisputesIcon, path: '/admin/disputes' },
             { name: 'Reviews', icon: ReviewsIcon, path: '/admin/reviews' },
-        ],
-    },
-    {
-        label: 'Governance & Security',
-        icon: FaUserShield,
-        items: [
-            { name: 'Audit Log', icon: FaClipboardList, path: '/admin/audit' },
-            { name: 'Rules', icon: FaBalanceScale, path: '/admin/rules' },
-            { name: 'Fraud Detection', icon: FaExclamationTriangle, path: '/admin/fraud' },
-            { name: 'Messages', icon: FaEnvelope, path: '/admin/messages' },
-        ],
-    },
-    {
-        label: 'CMS & Content',
-        icon: FaGlobe,
-        items: [
-            { name: 'Home CMS', icon: FaDesktop, path: '/admin/cms' },
         ],
     },
     {
         label: 'System',
         icon: SettingsIcon,
         items: [
+            { name: 'CMS', icon: FaGlobe, path: '/admin/cms' },
+            { name: 'Audit Log', icon: FaClipboardList, path: '/admin/audit' },
             { name: 'Settings', icon: SettingsIcon, path: '/admin/settings' },
             { name: 'Profile', icon: FaUserCog, path: '/admin/profile' },
         ],
@@ -155,8 +129,9 @@ const adminMenuGroups: MenuGroup[] = [
 const customerMenuItems: MenuItem[] = [
     { name: 'Dashboard', icon: DashboardIcon, path: '/customer' },
     { name: 'My Orders', icon: LogisticsIcon, path: '/customer/orders' },
+    { name: 'My Messages', icon: FaEnvelope, path: '/customer/messages' },
     { name: 'Wishlist', icon: WishlistIcon, path: '/customer/wishlist' },
-    { name: 'Addresses & Billing', icon: WalletIcon, path: '/customer/profile?tab=billing' },
+    { name: 'Addresses', icon: WalletIcon, path: '/customer/profile?tab=addresses' },
     { name: 'My Reviews', icon: ReviewsIcon, path: '/customer/reviews' },
 ];
 
@@ -165,40 +140,25 @@ const customerMenuItems: MenuItem[] = [
 // =============================================================================
 const sellerMenuGroups: MenuGroup[] = [
     {
-        label: 'Sourcing & Network',
+        label: 'Manufacturers',
         icon: FaNetworkWired,
         items: [
-            { name: 'Discover Manufacturers', icon: FaSearch, path: '/seller/discovery' },
+            { name: 'Discover', icon: FaSearch, path: '/seller/discovery' },
             { name: 'My Network', icon: FaNetworkWired, path: '/seller/network' },
-            { name: 'Sourced Products', icon: FaBox, path: '/seller/sourced-products' },
             { name: 'Negotiations', icon: FaHandshake, path: '/seller/negotiations' },
         ],
     },
     {
-        label: 'Retail Operations',
+        label: 'Operations',
         icon: FaStore,
+        isFlat: true,
         items: [
-            { name: 'Inventory', icon: FaWarehouse, path: '/seller/products' },
-            { name: 'Customer Orders', icon: LogisticsIcon, path: '/seller/orders' },
-        ],
-    },
-    {
-        label: 'Finance & Performance',
-        icon: FaChartBar,
-        items: [
-            { name: 'Payments & Earnings', icon: WalletIcon, path: '/seller/payments' },
-            { name: 'Analytics', icon: FaChartLine, path: '/seller/analytics' },
-            { name: 'Reviews & Ratings', icon: ReviewsIcon, path: '/seller/reviews' },
-        ],
-    },
-    {
-        label: 'Account & Communication',
-        icon: FaUserCog,
-        items: [
-            { name: 'Notifications', icon: FaBell, path: '/seller/notifications' },
+            { name: 'Products', icon: FaBox, path: '/seller/products' },
+            { name: 'Orders', icon: LogisticsIcon, path: '/seller/orders' },
+            { name: 'Payments', icon: WalletIcon, path: '/seller/payments' },
+            { name: 'Reviews', icon: ReviewsIcon, path: '/seller/reviews' },
             { name: 'Messages', icon: FaEnvelope, path: '/seller/messages' },
-            { name: 'Profile & Business', icon: FaUserTie, path: '/seller/profile' },
-            { name: 'Settings', icon: SettingsIcon, path: '/seller/settings' },
+            { name: 'Profile', icon: FaUserTie, path: '/seller/profile' },
         ],
     },
 ];
@@ -207,42 +167,25 @@ const sellerMenuGroups: MenuGroup[] = [
 // MANUFACTURER MENU (21 pages → 5 groups)
 // =============================================================================
 const manufacturerMenuGroups: MenuGroup[] = [
-
     {
-        label: 'Product & Inventory',
+        label: 'Supply Chain',
         icon: ProductsIcon,
         items: [
             { name: 'Products', icon: ProductsIcon, path: '/manufacturer/products' },
-            { name: 'Product Requests', icon: FaClock, path: '/manufacturer/products/requests' },
             { name: 'Allocations', icon: FaLayerGroup, path: '/manufacturer/allocations' },
-            { name: 'Pricing Rules', icon: FaTag, path: '/manufacturer/pricing' },
-        ],
-    },
-    {
-        label: 'Seller Network',
-        icon: FaNetworkWired,
-        items: [
-            { name: 'Seller Requests', icon: FaUserCheck, path: '/manufacturer/dealers/requests' },
-            { name: 'Approved Sellers', icon: SellersIcon, path: '/manufacturer/dealers' },
+            { name: 'Network', icon: SellersIcon, path: '/manufacturer/sellers' },
             { name: 'Negotiations', icon: FaHandshake, path: '/manufacturer/negotiations' },
-        ],
-    },
-    {
-        label: 'Orders & Revenue',
-        icon: LogisticsIcon,
-        items: [
             { name: 'Orders', icon: LogisticsIcon, path: '/manufacturer/orders' },
-            { name: 'Analytics', icon: FaChartBar, path: '/manufacturer/analytics' },
         ],
     },
     {
-        label: 'Account',
-        icon: FaUserCog,
+        label: 'Platform',
+        icon: FaChartBar,
         items: [
-            { name: 'Profile & Compliance', icon: FaShieldAlt, path: '/manufacturer/profile' },
-            { name: 'Notifications', icon: FaBell, path: '/manufacturer/notifications' },
+            { name: 'Analytics', icon: FaChartBar, path: '/manufacturer/analytics' },
             { name: 'Messages', icon: FaEnvelope, path: '/manufacturer/messages' },
-            { name: 'Settings', icon: SettingsIcon, path: '/manufacturer/settings' },
+            { name: 'Notifications', icon: FaBell, path: '/manufacturer/notifications' },
+            { name: 'Profile', icon: FaUserCog, path: '/manufacturer/profile' },
         ],
     },
 ];
@@ -263,6 +206,15 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
     const { user, logout } = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Handle resize to determine mobile state safely
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Persist collapsed state per role
     useEffect(() => {
@@ -369,6 +321,9 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
         );
     };
 
+    const SIDEBAR_WIDTH = '280px';
+    const COLLAPSED_WIDTH = '5rem';
+
     return (
         <>
             {/* Mobile Backdrop */}
@@ -388,8 +343,8 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
             <motion.aside
                 initial={false}
                 animate={{
-                    x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 1025 ? 300 : 0),
-                    width: isCollapsed ? '5rem' : '20%'
+                    x: isOpen ? 0 : (isMobile ? 300 : 0),
+                    width: isCollapsed ? COLLAPSED_WIDTH : SIDEBAR_WIDTH
                 }}
                 className={`fixed inset-y-0 right-0 bg-surface border-l border-border z-50 flex flex-col transition-all no-scrollbar lg:relative lg:border-r lg:border-l-0 lg:left-0`}
             >
@@ -487,6 +442,16 @@ export default function Sidebar({ isOpen, onClose, role = 'ADMIN', isCollapsed =
                     {isGrouped && (
                         <div className="space-y-0.5">
                             {filteredGroups.map((group) => {
+                                if (group.isFlat) {
+                                    return (
+                                        <div key={group.label} className="space-y-0.5 pt-2">
+                                            {/* Optional: Add separator or minimal header if needed, but per req, just flat items */}
+                                            {group.items.map((item) => (
+                                                <NavItem key={item.path} item={item} />
+                                            ))}
+                                        </div>
+                                    );
+                                }
                                 const isGroupOpen = !collapsedGroups[group.label];
                                 return (
                                     <div key={group.label}>

@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
+import sanitizeHtml from 'sanitize-html';
 
 import mongoose from 'mongoose';
 import { createServer } from 'http';
@@ -44,6 +45,7 @@ import customManufacturingRoutes from './routes/customManufacturing/customManufa
 import customEscrowRoutes from './routes/customEscrow/customEscrowRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import pricingRoutes from './routes/manufacturer/pricingRoutes.js';
 
 
 const app = express();
@@ -59,8 +61,14 @@ const ALLOWED_ORIGINS = [
 
 const corsOptions = {
     origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, server-to-server)
-        if (!origin) return callback(null, true);
+        // SECURITY: Reject requests with no origin in production
+        // In development, allow no-origin for tools like curl/Postman
+        if (!origin) {
+            if (process.env.NODE_ENV === 'production') {
+                return callback(new Error('Origin header required'));
+            }
+            return callback(null, true);
+        }
         if (ALLOWED_ORIGINS.includes(origin)) {
             return callback(null, true);
         }
@@ -86,15 +94,18 @@ const PORT = process.env.PORT || 5002;
 
 // === Security Middleware ===
 app.set('trust proxy', 1); // Trust first proxy for rate limiting (fixes IPv6 issues)
-app.use(helmet());                         // HTTP security headers (X-Frame-Options, HSTS, etc.)
+app.use(helmet({
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));                         // HTTP security headers (X-Frame-Options, HSTS, etc.)
 app.use(cors(corsOptions));                // Restricted CORS
 app.use(express.json({ limit: '10mb' })); // Body parser with size limit
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Standard URL-encoded parser
 app.use(mongoSanitize()); // Prevent NoSQL injection ($gt, $ne, etc.)
-// Inline XSS sanitization (replaces deprecated xss-clean which has 'next is not a function' bug)
+// XSS sanitization using sanitize-html (handles attribute-based, encoded, and URL-based XSS)
 app.use((req, res, next) => {
     const sanitize = (obj) => {
-        if (typeof obj === 'string') return obj.replace(/[<>]/g, '');
+        if (typeof obj === 'string') return sanitizeHtml(obj, { allowedTags: [], allowedAttributes: {} });
         if (Array.isArray(obj)) return obj.map(sanitize);
         if (obj && typeof obj === 'object') {
             const clean = {};
@@ -106,6 +117,8 @@ app.use((req, res, next) => {
         return obj;
     };
     if (req.body) req.body = sanitize(req.body);
+    if (req.query) req.query = sanitize(req.query);
+    if (req.params) req.params = sanitize(req.params);
     next();
 });
 app.use((req, res, next) => {
@@ -130,7 +143,7 @@ io.use(async (socket, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded.id)
             .populate('customer')
-            .populate('dealer')
+            .populate('seller')
             .populate('manufacturer');
 
         if (!user) return next(new Error('Authentication error: User not found'));
@@ -219,7 +232,7 @@ io.on('connection', (socket) => {
 app.use('/api/admin', adminRoutes);
 app.use('/api/manufacturer', manufacturerRoutes);
 app.use('/api/seller', sellerRoutes);
-app.use('/api/dealer', sellerRoutes); // Alias for backward compatibility
+
 app.use('/api/customer', customerRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/tracking', trackingRoutes);
@@ -242,6 +255,7 @@ app.use('/api/collaboration', collaborationRoutes);
 app.use('/api/custom-manufacturing', customManufacturingRoutes);
 app.use('/api/custom-escrow', customEscrowRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/manufacturer/pricing', pricingRoutes);
 
 
 // Log all routes
@@ -318,8 +332,7 @@ const startServer = async () => {
                 await mongoose.connect(process.env.MONGODB_URI, {
                     serverSelectionTimeoutMS: 5000,
                 });
-                logger.info('✅ Connected to MongoDB (Chat & Tracking)');
-                console.log('✅ Connected to MongoDB URI:', process.env.MONGODB_URI.replace(/:([^:@]+)@/, ':****@'));
+                logger.info('✅ Connected to MongoDB');
             } catch (err) {
                 logger.error('⚠️ MongoDB Connection Failed (Chat/Tracking features limited):', err.message);
             }
@@ -341,4 +354,8 @@ const startServer = async () => {
     }
 };
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
+}
+
+export default app;

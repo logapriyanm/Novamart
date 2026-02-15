@@ -51,7 +51,7 @@ export const createEscrow = async (req, res) => {
             const participants = await GroupParticipant.find({
                 groupId: request.collaborationGroupId._id,
                 status: 'JOINED'
-            }).populate('dealerId userId');
+            }).populate('sellerId userId');
 
             const totalQuantity = request.totalQuantity;
 
@@ -62,7 +62,7 @@ export const createEscrow = async (req, res) => {
                 const balanceShare = balanceAmount * sharePercentage;
 
                 participantPayments.push({
-                    dealerId: participant.dealerId._id,
+                    sellerId: participant.sellerId._id,
                     userId: participant.userId._id,
                     shareAmount,
                     advanceShare,
@@ -73,9 +73,9 @@ export const createEscrow = async (req, res) => {
             }
         } else {
             // Individual order
-            const seller = await Seller.findById(request.dealerId);
+            const seller = await Seller.findById(request.sellerId);
             participantPayments.push({
-                dealerId: seller._id,
+                sellerId: seller._id,
                 userId: seller.userId,
                 shareAmount: totalAmount,
                 advanceShare: advanceAmount,

@@ -25,7 +25,7 @@ export function middleware(request: NextRequest) {
     const token = request.cookies.get('auth_token')?.value;
 
     // 1. If trying to access protected path without token
-    const isProtected = PROTECTED_PATHS.some(path => pathname.startsWith(path));
+    const isProtected = PROTECTED_PATHS.some(path => pathname === path || pathname.startsWith(path + '/'));
     if (isProtected && !token) {
         const url = new URL('/auth/login', request.url);
         url.searchParams.set('from', pathname);
@@ -57,7 +57,7 @@ export function middleware(request: NextRequest) {
         if (pathname.startsWith('/manufacturer') && role !== 'MANUFACTURER') {
             return NextResponse.redirect(new URL('/', request.url));
         }
-        if (pathname.startsWith('/seller') && role !== 'SELLER') {
+        if ((pathname === '/seller' || pathname.startsWith('/seller/')) && role !== 'SELLER') {
             return NextResponse.redirect(new URL('/', request.url));
         }
         // CUSTOMER role is allowed to access root and customer specific paths (if any)

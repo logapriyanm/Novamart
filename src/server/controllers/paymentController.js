@@ -1,6 +1,6 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import { Order, Payment } from '../models/index.js';
+import { Order, Payment, Customer } from '../models/index.js';
 import paymentService from '../services/paymentService.js';
 import logger from '../lib/logger.js';
 
@@ -23,6 +23,12 @@ export const createPaymentOrder = async (req, res) => {
 
         if (!order) {
             return res.status(404).json({ success: false, error: 'Order not found' });
+        }
+
+        // SECURITY: Verify ownership — the requesting user must own this order
+        const customer = await Customer.findOne({ userId: req.user._id });
+        if (!customer || order.customerId.toString() !== customer._id.toString()) {
+            return res.status(403).json({ success: false, error: 'Not authorized for this order' });
         }
 
         if (order.status !== 'CREATED') {
@@ -102,6 +108,40 @@ export const verifyPayment = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
+        // BATCH FLOW: If no orderId, but we have razorpay_order_id
+        if (!orderId && razorpay_order_id) {
+
+            // Validate Signature
+            const body = razorpay_order_id + '|' + razorpay_payment_id;
+            const expectedSignature = crypto
+                .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+                .update(body)
+                .digest('hex');
+
+            if (expectedSignature !== razorpay_signature) {
+                return res.status(400).json({ success: false, error: 'Invalid payment signature' });
+            }
+
+            // Process Batch
+            const result = await paymentService.processBatchPaymentSuccess({
+                razorpayOrderId: razorpay_order_id,
+                razorpayPaymentId: razorpay_payment_id,
+                razorpaySignature: razorpay_signature
+            });
+
+            // Send Emails (Async)
+            result.orders.forEach(order => {
+                import('../services/emailService.js').then((module) => {
+                    module.default.sendOrderConfirmation(order._id).catch(err =>
+                        logger.error('Failed to send order confirmation email:', err)
+                    );
+                }).catch(() => { });
+            });
+
+            return res.json({ success: true, data: result });
+        }
+
+        // LEGACY / SINGLE FLOW
         if (!orderId) {
             return res.status(400).json({ success: false, error: 'Order ID required' });
         }
@@ -156,23 +196,56 @@ export const verifyPayment = async (req, res) => {
     }
 };
 
+// Get details for a Razorpay Order (for Batch Payment Page)
+export const getRazorpayOrderDetails = async (req, res) => {
+    try {
+        const { razorpayOrderId } = req.params;
+
+        // Find payments linked to this Razorpay Order
+        const payments = await Payment.find({ razorpayOrderId });
+        if (!payments.length) {
+            return res.status(404).json({ success: false, error: 'Payment record not found' });
+        }
+
+        // Aggregate info
+        const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+
+        res.json({
+            success: true,
+            data: {
+                razorpayOrderId,
+                amount: totalAmount,
+                currency: 'INR', // Assuming INR
+                key: process.env.RAZORPAY_KEY_ID
+            }
+        });
+
+    } catch (error) {
+        logger.error('Get Razorpay Order Details Error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch payment details' });
+    }
+};
+
 // Webhook Handler
 export const handleWebhook = async (req, res) => {
     try {
+        // SECURITY: Webhook signature verification is MANDATORY
         const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+        if (!secret) {
+            logger.error('RAZORPAY_WEBHOOK_SECRET is not configured — rejecting webhook');
+            return res.status(500).json({ error: 'Webhook secret not configured' });
+        }
 
-        if (secret) {
-            const receivedSignature = req.headers['x-razorpay-signature'];
-            const body = JSON.stringify(req.body);
+        const receivedSignature = req.headers['x-razorpay-signature'];
+        const body = JSON.stringify(req.body);
 
-            const expectedSignature = crypto
-                .createHmac('sha256', secret)
-                .update(body)
-                .digest('hex');
+        const expectedSignature = crypto
+            .createHmac('sha256', secret)
+            .update(body)
+            .digest('hex');
 
-            if (receivedSignature !== expectedSignature) {
-                return res.status(400).json({ error: 'Invalid signature' });
-            }
+        if (receivedSignature !== expectedSignature) {
+            return res.status(400).json({ error: 'Invalid signature' });
         }
 
         const event = req.body.event;
@@ -213,6 +286,19 @@ export const handleWebhook = async (req, res) => {
 export const getPaymentStatus = async (req, res) => {
     try {
         const { orderId } = req.params;
+
+        // SECURITY: Verify the user owns this order or is an admin
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Order not found' });
+        }
+
+        if (req.user.role !== 'ADMIN') {
+            const customer = await Customer.findOne({ userId: req.user._id });
+            if (!customer || order.customerId.toString() !== customer._id.toString()) {
+                return res.status(403).json({ success: false, error: 'Not authorized for this order' });
+            }
+        }
 
         const payment = await Payment.findOne({ orderId })
             .populate({

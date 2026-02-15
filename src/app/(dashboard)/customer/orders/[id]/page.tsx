@@ -210,18 +210,7 @@ export default function OrderDetailsPage() {
                             <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
                                 <FaTruck className="text-primary" /> Delivery Journey
                             </h2>
-                            {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
-                                <button
-                                    onClick={async () => {
-                                        await apiClient.post(`/orders/${order.id}/simulate-tracking`, {});
-                                        toast.info('Tracking simulation started!');
-                                        setTimeout(() => window.location.reload(), 2000);
-                                    }}
-                                    className="text-sm font-black uppercase tracking-widest bg-slate-900 text-white px-4 py-2 rounded-[10px] hover:bg-black transition-all"
-                                >
-                                    Simulate Journey
-                                </button>
-                            )}
+                            {/* Simulation button removed for production */}
                         </div>
 
                         <div className="relative space-y-10 pl-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100">

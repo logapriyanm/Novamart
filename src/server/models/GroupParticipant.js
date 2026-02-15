@@ -24,7 +24,7 @@ const GroupParticipantSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Unique constraint: one dealer per group
+// Unique constraint: one seller per group
 GroupParticipantSchema.index({ groupId: 1, sellerId: 1 }, { unique: true });
 
 // Index for efficient queries

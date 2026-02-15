@@ -7,7 +7,7 @@ export interface OrderItem {
 }
 
 export interface OrderCreateData {
-    dealerId: string;
+    sellerId: string;
     shippingAddress: string;
     items: OrderItem[];
 }

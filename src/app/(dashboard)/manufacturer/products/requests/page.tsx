@@ -43,7 +43,7 @@ export default function ProductRequestsPage() {
     const fetchRequests = async () => {
         try {
             const data = await apiClient.get<any>('/manufacturer/products/requests');
-            setRequests(data?.data || []); // Adjusted for response structure { success: true, data: [] }
+            setRequests(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Error fetching requests:', error);
             toast.error('Failed to load product requests');

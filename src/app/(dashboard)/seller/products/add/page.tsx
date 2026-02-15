@@ -57,7 +57,7 @@ function AddProductContent() {
             // Call sourceProduct API
             await sellerService.sourceProduct(product.id, region, stock, retailPrice);
             toast.success('Product listed successfully!');
-            router.push('/seller/inventory');
+            router.push('/seller/products');
         } catch (error: any) {
             console.error('Sourcing failed:', error);
             toast.error(error.message || 'Failed to list product');

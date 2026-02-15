@@ -165,7 +165,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'Hero Section',
                 componentName: 'HeroSection',
                 order: 10,
-                visibleFor: ['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER'],
+                visibleFor: ['GUEST', 'CUSTOMER', SELLER, 'MANUFACTURER'],
                 isActive: true,
                 content: {
                     slides: [
@@ -179,7 +179,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'Brand Spotlight',
                 componentName: 'BrandSpotlight',
                 order: 20,
-                visibleFor: ['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER'],
+                visibleFor: ['GUEST', 'CUSTOMER', SELLER, 'MANUFACTURER'],
                 isActive: true,
                 content: {
                     setups: [
@@ -194,7 +194,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'Trending Now',
                 componentName: 'TrendingBar',
                 order: 30,
-                visibleFor: ['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER'],
+                visibleFor: ['GUEST', 'CUSTOMER', SELLER, 'MANUFACTURER'],
                 isActive: true,
                 content: {
                     categories: [
@@ -246,7 +246,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'Special Occasion Banner',
                 componentName: 'OccasionBanner',
                 order: 55,
-                visibleFor: ['CUSTOMER', 'DEALER', 'MANUFACTURER'],
+                visibleFor: ['CUSTOMER', SELLER, 'MANUFACTURER'],
                 isActive: true,
                 content: {}
             },
@@ -255,7 +255,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'B2B Quick Actions',
                 componentName: 'B2BShortcuts',
                 order: 60,
-                visibleFor: ['DEALER', 'MANUFACTURER'],
+                visibleFor: [SELLER, 'MANUFACTURER'],
                 isActive: true,
                 content: {}
             },
@@ -264,7 +264,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'Recommended For You',
                 componentName: 'RecommendedProducts',
                 order: 65,
-                visibleFor: ['CUSTOMER', 'DEALER'],
+                visibleFor: ['CUSTOMER', SELLER],
                 isActive: true,
                 content: { title: 'Top Pick For You' }
             },
@@ -273,7 +273,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'Continue Viewing',
                 componentName: 'RecommendedProducts',
                 order: 66,
-                visibleFor: ['CUSTOMER', 'DEALER'],
+                visibleFor: ['CUSTOMER', SELLER],
                 isActive: true,
                 content: { title: 'Continue Where You Left Off' }
             },
@@ -282,7 +282,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'Trust Indicators',
                 componentName: 'TrustStrip',
                 order: 70,
-                visibleFor: ['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER'],
+                visibleFor: ['GUEST', 'CUSTOMER', SELLER, 'MANUFACTURER'],
                 isActive: true,
                 content: {
                     items: [
@@ -298,7 +298,7 @@ export const seedDefaults = async (req, res) => {
                 title: 'Shop By Category',
                 componentName: 'CategoryGrid',
                 order: 80,
-                visibleFor: ['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER'],
+                visibleFor: ['GUEST', 'CUSTOMER', SELLER, 'MANUFACTURER'],
                 isActive: true,
                 content: {}
             },

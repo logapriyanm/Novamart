@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const RatingsSummarySchema = new mongoose.Schema({
-    entityType: { type: String, enum: ['DEALER', 'PRODUCT'], required: true },
+    entityType: { type: String, enum: ['SELLER', 'PRODUCT'], required: true },
     entityId: { type: String, required: true, index: true },
     avgRating: { type: Number, default: 0 },
     totalReviews: { type: Number, default: 0 }

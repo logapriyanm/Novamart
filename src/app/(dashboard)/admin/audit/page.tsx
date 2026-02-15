@@ -56,7 +56,7 @@ export default function AuditLogsPanel() {
 
     const filteredLogs = auditEntries.filter(log =>
         log.action?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        log.actorRole?.toLowerCase().includes(searchQuery.toLowerCase())
+        (log.role || log.actorRole)?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -121,9 +121,9 @@ export default function AuditLogsPanel() {
                             ) : filteredLogs.map((log) => {
                                 const Icon = getIcon(log.action);
                                 return (
-                                    <tr key={log.id} className="hover:bg-slate-50 group transition-colors">
+                                    <tr key={log._id} className="hover:bg-slate-50 group transition-colors">
                                         <td className="px-10 py-6">
-                                            <span className="text-sm font-black text-[#067FF9] tracking-wider">{log.id?.slice(-8).toUpperCase()}</span>
+                                            <span className="text-sm font-black text-[#067FF9] tracking-wider">{(log._id || log.id)?.slice(-8).toUpperCase()}</span>
                                         </td>
                                         <td className="px-10 py-6">
                                             <div className="flex items-center gap-4">
@@ -136,7 +136,7 @@ export default function AuditLogsPanel() {
                                             </div>
                                         </td>
                                         <td className="px-10 py-6">
-                                            <span className="text-sm font-bold text-[#1E293B]">{log.actorRole}</span>
+                                            <span className="text-sm font-bold text-[#1E293B]">{log.role || log.actorRole || 'UNKNOWN'}</span>
                                         </td>
                                         <td className="px-10 py-6">
                                             <div className="flex flex-col">

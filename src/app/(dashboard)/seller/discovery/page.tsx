@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, MapPin, Package, Star, ArrowRight, Building2 } from 'lucide-react';
+import { Search, MapPin, Package, Star, ArrowRight, Building2, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { apiClient } from '@/lib/api/client';
 
@@ -117,7 +117,7 @@ export default function ManufacturerDiscoveryPage() {
                                     <h3 className="font-bold text-lg text-gray-900 group-hover:text-amber-600 transition-colors">
                                         {m.companyName}
                                     </h3>
-                                    <span className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Verified</span>
+                                    <span className="bg-blue-50 text-[#067FF9] text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Verified</span>
                                 </div>
 
                                 <div className="space-y-3 mb-6">
@@ -127,7 +127,7 @@ export default function ManufacturerDiscoveryPage() {
                                     </div>
                                     <div className="flex items-center text-sm text-gray-500">
                                         <Package className="h-3.5 w-3.5 mr-2" />
-                                        {m._count?.products || 0} Products Listed
+                                        {m._count?.products || 0} Products
                                     </div>
                                 </div>
 

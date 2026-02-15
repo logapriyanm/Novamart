@@ -4,7 +4,7 @@ const RoleProfileSchema = new mongoose.Schema({
     userId: { type: String, required: true, unique: true, index: true },
     role: {
         type: String,
-        enum: ['MANUFACTURER', 'DEALER', 'CUSTOMER'],
+        enum: ['MANUFACTURER', 'SELLER', 'CUSTOMER'],
         required: true
     },
     batchId: String, // e.g., MFG-IND-0001

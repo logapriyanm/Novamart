@@ -30,8 +30,8 @@ export const placeOrder = async (req, res) => {
         const customer = await Customer.findOne({ userId });
         if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
 
-        const { dealerId, sellerId, items } = req.body;
-        const targetSellerId = sellerId || dealerId;
+        const { sellerId, items } = req.body;
+        const targetSellerId = sellerId;
 
         const order = await orderService.createOrder(customer._id, targetSellerId, items);
         res.status(201).json({
@@ -137,8 +137,8 @@ export const rateService = async (req, res) => {
         const customer = await Customer.findOne({ userId });
         if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
 
-        const { dealerId, sellerId, rating, comment } = req.body;
-        const targetSellerId = sellerId || dealerId;
+        const { sellerId, rating, comment } = req.body;
+        const targetSellerId = sellerId;
 
         const result = await customerService.submitRating(customer._id, { sellerId: targetSellerId, rating, comment });
         res.json({ success: true, message: 'Rating submitted', data: result });
@@ -199,6 +199,45 @@ export default {
     rateService,
     raiseOrderDispute,
     getProfile,
-    updateProfile
+    updateProfile,
+
+    addAddress: async (req, res) => {
+        try {
+            const userId = req.user._id;
+            const customer = await Customer.findOne({ userId });
+            if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
+
+            const addresses = await customerService.addAddress(customer._id, req.body);
+            res.json({ success: true, data: addresses });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    },
+
+    removeAddress: async (req, res) => {
+        try {
+            const userId = req.user._id;
+            const customer = await Customer.findOne({ userId });
+            if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
+
+            const addresses = await customerService.removeAddress(customer._id, req.params.id);
+            res.json({ success: true, data: addresses });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    },
+
+    updateAddress: async (req, res) => {
+        try {
+            const userId = req.user._id;
+            const customer = await Customer.findOne({ userId });
+            if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
+
+            const addresses = await customerService.updateAddress(customer._id, req.params.id, req.body);
+            res.json({ success: true, data: addresses });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    }
 };
 

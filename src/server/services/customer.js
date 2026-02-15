@@ -51,6 +51,9 @@ class CustomerService {
     /**
      * Get Customer Order History with Status & Escrow Info.
      */
+    /**
+     * Get Customer Order History with Status & Escrow Info.
+     */
     async getOrderHistory(customerId) {
         return await Order.find({ customerId })
             .populate({
@@ -59,6 +62,48 @@ class CustomerService {
             })
             .populate('escrow')
             .sort({ createdAt: -1 });
+    }
+
+    async addAddress(customerId, addressData) {
+        const customer = await Customer.findById(customerId);
+        if (!customer) throw new Error('CUSTOMER_NOT_FOUND');
+
+        if (addressData.isDefault) {
+            customer.addresses.forEach(a => a.isDefault = false);
+        } else if (customer.addresses.length === 0) {
+            addressData.isDefault = true;
+        }
+
+        customer.addresses.push(addressData);
+        await customer.save();
+        return customer.addresses;
+    }
+
+    async removeAddress(customerId, addressId) {
+        const customer = await Customer.findById(customerId);
+        if (!customer) throw new Error('CUSTOMER_NOT_FOUND');
+
+        customer.addresses = customer.addresses.filter(a => a._id.toString() !== addressId);
+        await customer.save();
+        return customer.addresses;
+    }
+
+    async updateAddress(customerId, addressId, addressData) {
+        const customer = await Customer.findById(customerId);
+        if (!customer) throw new Error('CUSTOMER_NOT_FOUND');
+
+        const addr = customer.addresses.id(addressId);
+        if (!addr) throw new Error('ADDRESS_NOT_FOUND');
+
+        if (addressData.isDefault) {
+            customer.addresses.forEach(a => {
+                if (a._id.toString() !== addressId) a.isDefault = false;
+            });
+        }
+
+        Object.assign(addr, addressData);
+        await customer.save();
+        return customer.addresses;
     }
 }
 

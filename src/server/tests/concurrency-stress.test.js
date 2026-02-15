@@ -30,6 +30,11 @@ describe('Concurrency Stress Tests', function () {
         let testAllocationId, testInventoryId;
 
         before(async () => {
+            // Connect to DB if not connected
+            if (mongoose.connection.readyState === 0) {
+                await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/novamart_test');
+            }
+
             // Create test allocation with exactly 50 units
             const allocation = await Allocation.create({
                 negotiationId: new mongoose.Types.ObjectId(),

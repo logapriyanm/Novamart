@@ -38,19 +38,22 @@ export default function SellerAnalytics() {
     const fetchAnalytics = async () => {
         try {
             const data = await apiClient.get<any>('/seller/analytics');
-            setAnalytics(data || {});
+            if (data.success) {
+                const finance = data.data.finance || {};
+                setAnalytics({
+                    revenue: finance.totalRevenue,
+                    growth: 0, // Not calculated yet
+                    ranking: 'N/A', // Not implemented
+                    returnRate: 0,
+                    avgPayoutTime: 0,
+                    repeatClients: 0
+                });
+            }
         } catch (error: any) {
             console.error('Analytics error:', error);
             toast.error(error.message || 'Failed to load analytics');
             // Use fallback data
-            setAnalytics({
-                revenue: 1420400,
-                growth: 18,
-                ranking: 12,
-                returnRate: 0.8,
-                avgPayoutTime: 1.2,
-                repeatClients: 12
-            });
+            setAnalytics({});
         } finally {
             setLoading(false);
         }
@@ -95,7 +98,7 @@ export default function SellerAnalytics() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Revenue Curve Placeholder */}
-                <div className="lg:col-span-2 bg-white rounded-[3.5rem] p-12 border border-slate-100 shadow-sm relative overflow-hidden group">
+                <div className="lg:col-span-2 bg-white rounded-[10px] p-12 border border-slate-100 shadow-sm relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-3xl rounded-full" />
                     <div className="relative z-10 flex items-center justify-between mb-12">
                         <div>
@@ -110,7 +113,7 @@ export default function SellerAnalytics() {
                         </div>
                     </div>
 
-                    <div className="h-64 bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-100 flex items-center justify-center text-slate-200">
+                    <div className="h-64 bg-slate-50/50 rounded-[10px] border-2 border-dashed border-slate-100 flex items-center justify-center text-slate-200">
                         <FaChartBar className="w-16 h-16 opacity-10" />
                         <span className="text-sm font-black uppercase tracking-widest ml-4">Momentum Graph Terminal</span>
                     </div>
@@ -118,7 +121,7 @@ export default function SellerAnalytics() {
 
                 {/* Score & Ranking */}
                 <div className="space-y-8">
-                    <div className="bg-slate-900 rounded-[3.5rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+                    <div className="bg-slate-900 rounded-[10px] p-10 text-white shadow-2xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent" />
                         <div className="relative z-10 text-center">
                             <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-[10px] flex items-center justify-center text-[#067FF9] mx-auto mb-6 shadow-xl">
@@ -130,18 +133,20 @@ export default function SellerAnalytics() {
                         </div>
                     </div>
 
-                    <div className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-sm divide-y divide-slate-50">
+                    <div className="p-10 bg-white rounded-[10px] border border-slate-100 shadow-sm divide-y divide-slate-50">
                         {[
-                            { label: 'Return Index', val: `${analytics.returnRate || 0}%`, change: '-0.2%', up: false },
-                            { label: 'Avg Payout Time', val: `${analytics.avgPayoutTime || 0} Days`, change: '+5%', up: true },
-                            { label: 'Repeat Clients', val: `${analytics.repeatClients || 0}%`, change: '+2%', up: true },
+                            { label: 'Return Index', val: analytics.returnRate ? `${analytics.returnRate}%` : '-', change: '0%', up: false },
+                            { label: 'Avg Payout Time', val: analytics.avgPayoutTime ? `${analytics.avgPayoutTime} Days` : '-', change: '0%', up: true },
+                            { label: 'Repeat Clients', val: analytics.repeatClients ? `${analytics.repeatClients}%` : '-', change: '0%', up: true },
                         ].map((s, i) => (
                             <div key={i} className="py-6 first:pt-0 last:pb-0 flex items-center justify-between">
                                 <div>
                                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
                                     <p className="text-lg font-black text-slate-900">{s.val}</p>
                                 </div>
-                                <span className={`text-xs font-black uppercase ${s.up ? 'text-emerald-500' : 'text-rose-500'}`}>{s.change}</span>
+                                {s.val !== '-' && (
+                                    <span className={`text-xs font-black uppercase ${s.up ? 'text-emerald-500' : 'text-rose-500'}`}>{s.change}</span>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -149,8 +154,8 @@ export default function SellerAnalytics() {
             </div>
 
             {/* Geographic Coverage */}
-            <div className="p-10 bg-blue-50/50 rounded-[3.5rem] border border-[#067FF9]/10 flex flex-col md:flex-row items-center gap-12">
-                <div className="w-20 h-20 rounded-[2rem] bg-white text-[#067FF9] border border-blue-100 flex items-center justify-center shrink-0 shadow-lg">
+            <div className="p-10 bg-blue-50/50 rounded-[10px] border border-[#067FF9]/10 flex flex-col md:flex-row items-center gap-12">
+                <div className="w-20 h-20 rounded-[10px] bg-white text-[#067FF9] border border-blue-100 flex items-center justify-center shrink-0 shadow-lg">
                     <FaGlobe className="w-10 h-10" />
                 </div>
                 <div className="flex-1 text-center md:text-left">

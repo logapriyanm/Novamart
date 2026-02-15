@@ -33,8 +33,8 @@ const homePageCMSSchema = new mongoose.Schema({
     },
     visibleFor: {
         type: [String],
-        enum: ['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER', 'ADMIN'],
-        default: ['GUEST', 'CUSTOMER', 'DEALER', 'MANUFACTURER']
+        enum: ['GUEST', 'CUSTOMER', 'MANUFACTURER', 'ADMIN'],
+        default: ['GUEST', 'CUSTOMER', 'MANUFACTURER']
     },
     content: {
         type: mongoose.Schema.Types.Mixed, // Flexible JSON for component-specific props

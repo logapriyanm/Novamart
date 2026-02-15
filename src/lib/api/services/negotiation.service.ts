@@ -3,7 +3,7 @@ import { ENDPOINTS, ApiResponse } from '../contract';
 
 export interface Negotiation {
     id: string;
-    dealerId: string;
+    sellerId: string;
     manufacturerId: string;
     productId: string;
     status: 'REQUESTED' | 'NEGOTIATING' | 'OFFER_MADE' | 'ACCEPTED' | 'DEAL_CLOSED' | 'REJECTED';
@@ -11,7 +11,7 @@ export interface Negotiation {
     quantity: number;
     chatLog: any[];
     product: any;
-    dealer?: any;
+    seller?: any;
     manufacturer?: any;
     updatedAt: string;
 }

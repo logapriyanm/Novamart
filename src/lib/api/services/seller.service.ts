@@ -23,11 +23,11 @@ export const sellerService = {
     },
 
     async updateStock(inventoryId: string, stock: number): Promise<any> {
-        return apiClient.patch(`/seller/inventory/${inventoryId}/stock`, { stock });
+        return apiClient.put('/seller/inventory/stock', { inventoryId, stock });
     },
 
     async updatePrice(inventoryId: string, price: number): Promise<any> {
-        return apiClient.patch(`/seller/inventory/${inventoryId}/price`, { price });
+        return apiClient.put('/seller/inventory/price', { inventoryId, price });
     },
 
     async getOrders(): Promise<any[]> {

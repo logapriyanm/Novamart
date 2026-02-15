@@ -39,7 +39,7 @@ export default function ManufacturerDealerProfilePage() {
                 // Determine which endpoint to use. Ideally manufacturer should have a richer view,
                 // but public profile is a good fallback for basic info.
                 // We'll use the public endpoint as it exists and provides core data.
-                const response = await apiClient.get<any>(`/dealer/public/${params.id}`);
+                const response = await apiClient.get<any>(`/seller/public/${params.id}`);
                 setDealer(response);
             } catch (error: any) {
                 console.error('Failed to fetch dealer profile:', error);

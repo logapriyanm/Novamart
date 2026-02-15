@@ -13,14 +13,14 @@ import mongoose from 'mongoose';
 /**
  * Handle Seller Application (Approve/Reject)
  */
-export const handleDealerNetwork = async (req, res) => {
-    const { dealerId, sellerId, status } = req.body;
-    const targetSellerId = sellerId || dealerId;
+export const handleSellerNetwork = async (req, res) => {
+    const { sellerId, status } = req.body;
+    const targetSellerId = sellerId;
     const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
-        const result = await manufacturerService.handleDealerRequest(mfgId, targetSellerId, status);
+        const result = await manufacturerService.handleSellerRequest(mfgId, targetSellerId, status);
 
         await auditService.logAction('SELLER_NETWORK_UPDATE', 'MANUFACTURER', mfgId, {
             userId: req.user.id,
@@ -55,13 +55,12 @@ export const handleDealerNetwork = async (req, res) => {
 /**
  * Get Seller Requests
  */
-export const getDealerRequests = async (req, res) => {
-    const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
+export const getSellerRequests = async (req, res) => {
+    const userId = req.user._id; // Use Requesting User ID
     const { status } = req.query;
-    if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
-        const requests = await manufacturerService.getDealerRequests(mfgId, status || 'PENDING');
+        const requests = await manufacturerService.getSellerRequests(userId, status || 'PENDING');
         res.json({ success: true, data: requests });
     } catch (error) {
         res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_REQUESTS' });
@@ -72,8 +71,8 @@ export const getDealerRequests = async (req, res) => {
  * Allocate Stock to Region/Seller
  */
 export const allocateInventory = async (req, res) => {
-    const { productId, dealerId, sellerId, region, quantity, dealerBasePrice, dealerMoq, maxMargin } = req.body;
-    const targetSellerId = sellerId || dealerId;
+    const { productId, sellerId, region, quantity, sellerBasePrice, sellerMoq, maxMargin } = req.body;
+    const targetSellerId = sellerId;
     const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
@@ -83,11 +82,8 @@ export const allocateInventory = async (req, res) => {
             sellerId: targetSellerId,
             region,
             quantity,
-            sellerBasePrice: dealerBasePrice, // Mapping legacy input to service expected input if service changed? 
-            // Service expects sellerBasePrice. If frontend sends dealerBasePrice, we map it.
-            // Wait, service `allocateStock` destructures `sellerBasePrice`.
-            sellerBasePrice: dealerBasePrice,
-            sellerMoq: dealerMoq,
+            sellerBasePrice,
+            sellerMoq,
             maxMargin
         });
         res.status(201).json({ success: true, message: 'Stock allocated successfully', data: result });
@@ -159,9 +155,15 @@ export const getManufacturerStats = async (req, res) => {
         const approvedProducts = await Product.countDocuments({ manufacturerId: mfgId, status: 'APPROVED' });
 
         // Network Stats
-        const totalDealers = await Seller.countDocuments({
-            'manufacturerNetwork.manufacturerId': mfgId,
-            'manufacturerNetwork.status': 'APPROVED'
+        const totalSellers = await Seller.countDocuments({
+            approvedBy: mfgId
+        });
+
+        // Pending Requests
+        const { default: SellerRequest } = await import('../models/SellerRequest.js');
+        const pendingSellerRequests = await SellerRequest.countDocuments({
+            manufacturerId: mfgId,
+            status: 'PENDING'
         });
 
         // Orders Stats via Aggregation (Performance Optimized)
@@ -216,7 +218,8 @@ export const getManufacturerStats = async (req, res) => {
                     pending: totalProducts - approvedProducts
                 },
                 network: {
-                    totalDealers,
+                    totalSellers,
+                    pendingSellerRequests
                 },
                 orders: {
                     total: orderStats.totalOrders,
@@ -234,25 +237,26 @@ export const getManufacturerStats = async (req, res) => {
 /**
  * Get My Dealers/Sellers Network
  */
-export const getMyDealers = async (req, res) => {
+export const getMySellers = async (req, res) => {
     const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
     if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
 
     try {
         const { Seller } = await import('../models/index.js');
 
-        const dealers = await Seller.find({
-            'manufacturerNetwork.manufacturerId': mfgId,
-            'manufacturerNetwork.status': 'APPROVED'
+        // Query sellers who have this manufacturer in their approvedBy array
+        // (set by handleSellerRequest when manufacturer approves the seller)
+        const sellers = await Seller.find({
+            approvedBy: mfgId
         })
             .populate('userId', 'email')
-            .select('businessName contactInfo userId manufacturerNetwork')
+            .select('businessName contactInfo userId city approvedBy')
             .lean();
 
-        res.json({ success: true, data: dealers });
+        res.json({ success: true, data: sellers });
     } catch (error) {
-        logger.error('Error fetching dealer network:', error);
-        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_DEALERS' });
+        logger.error('Error fetching seller network:', error);
+        res.status(500).json({ success: false, error: 'FAILED_TO_FETCH_SELLERS' });
     }
 };
 
@@ -402,14 +406,14 @@ export const getAllManufacturers = async (req, res) => {
 };
 
 export default {
-    handleDealerNetwork,
-    getDealerRequests,
+    handleSellerNetwork,
+    getSellerRequests,
     allocateInventory,
     getAllocations,
     updateAllocation,
     revokeAllocation,
     getManufacturerStats,
-    getMyDealers,
+    getMySellers,
     getProfile,
     updateProfile,
     getOrders,
@@ -437,6 +441,19 @@ export default {
         try {
             const result = await manufacturerService.approveProductRequest(mfgId, inventoryId);
             res.json({ success: true, message: 'Request approved', data: result });
+        } catch (error) {
+            res.status(400).json({ success: false, error: error.message });
+        }
+    },
+
+    rejectProductRequest: async (req, res) => {
+        const mfgId = req.user.manufacturer?._id || req.user.manufacturer?.id;
+        const { inventoryId, reason } = req.body;
+        if (!mfgId) return res.status(403).json({ error: 'MANUFACTURER_ONLY' });
+
+        try {
+            const result = await manufacturerService.rejectProductRequest(mfgId, inventoryId, reason);
+            res.json({ success: true, message: 'Request rejected', data: result });
         } catch (error) {
             res.status(400).json({ success: false, error: error.message });
         }

@@ -136,16 +136,16 @@ export default function ManufacturerProfilePage() {
             setSourceProduct(null);
             setSourceForm({ region: '', stock: '', price: '' });
 
-            if (response?.message === 'REQUEST_PENDING') {
-                alert('Request sent successfully! Waiting for manufacturer approval.');
+            // The apiClient unwraps data, so check allocationStatus on the returned inventory
+            if (response?.allocationStatus === 'PENDING') {
+                toast.success('Request sent! Waiting for manufacturer approval.');
             } else {
-                alert('Product sourced successfully! Check your inventory.');
+                toast.success('Product sourced successfully! Check your inventory.');
             }
             // Refresh to show updated status
             fetchDetails();
         } catch (error: any) {
-            alert(error.message || 'Failed to source product');
-            // If error is about pending request, maybe refresh?
+            toast.error(error.message || 'Failed to source product');
             if (error.message?.includes('PENDING')) fetchDetails();
         } finally {
             setSourcing(false);
@@ -330,48 +330,54 @@ export default function ManufacturerProfilePage() {
                                         <Eye className="h-3.5 w-3.5" />
                                         Details
                                     </button>
-                                    {isPartner && (
-                                        <button
-                                            onClick={() => {
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (isPartner) {
                                                 if (product.allocation?.status === 'PENDING') return;
                                                 openSourceModal(product);
-                                            }}
-                                            disabled={product.allocation?.status === 'PENDING'}
-                                            className={`flex-1 h-10 text-xs font-bold rounded-[10px] transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md ${product.allocation?.status === 'PENDING'
-                                                ? 'bg-amber-100 text-amber-700 cursor-not-allowed shadow-none'
-                                                : product.allocation?.status === 'APPROVED'
-                                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                                                    : 'bg-black text-white hover:bg-gray-800'
-                                                }`}
-                                        >
-                                            {product.allocation?.status === 'PENDING' ? (
-                                                <>
-                                                    <Clock className="h-3.5 w-3.5" />
-                                                    Pending
-                                                </>
-                                            ) : product.allocation?.status === 'APPROVED' ? (
-                                                <>
-                                                    <CheckCircle className="h-3.5 w-3.5" />
-                                                    Sourced
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <ShoppingCart className="h-3.5 w-3.5" />
-                                                    Source
-                                                </>
-                                            )}
-                                        </button>
-                                    )}
+                                            } else {
+                                                setRequestForm(prev => ({ ...prev, message: `I am interested in sourcing ${product.name}. Please approve my partnership request.` }));
+                                                setShowRequestModal(true);
+                                            }
+                                        }}
+                                        disabled={isPartner && product.allocation?.status === 'PENDING'}
+                                        className={`flex-1 h-10 px-3 rounded-[10px] text-xs font-bold transition-all flex items-center justify-center gap-2 ${product.allocation?.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' : isPartner && product.allocation?.status === 'PENDING' ? 'bg-amber-100 text-amber-700 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800 shadow-md shadow-black/10'}`}
+                                    >
+                                        {product.allocation?.status === 'PENDING' ? (
+                                            <>
+                                                <Clock className="h-3.5 w-3.5" />
+                                                Pending
+                                            </>
+                                        ) : product.allocation?.status === 'APPROVED' ? (
+                                            <>
+                                                <CheckCircle className="h-3.5 w-3.5" />
+                                                Sourced
+                                            </>
+                                        ) : isPartner ? (
+                                            <>
+                                                <ShoppingCart className="h-3.5 w-3.5" />
+                                                Source
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send className="h-3.5 w-3.5" />
+                                                Request Access
+                                            </>
+                                        )}
+                                    </button>
                                     {/* Negotiation Button */}
-                                    {isPartner && !product.allocation && (
-                                        <button
-                                            onClick={() => openNegotiateModal(product)}
-                                            className="h-10 w-10 text-xs font-bold text-gray-600 bg-gray-50 rounded-[10px] hover:bg-gray-100 transition-colors flex items-center justify-center border border-transparent hover:border-gray-200"
-                                            title="Negotiate Price"
-                                        >
-                                            <IndianRupee className="h-3.5 w-3.5" />
-                                        </button>
-                                    )}
+                                    {
+                                        isPartner && !product.allocation && (
+                                            <button
+                                                onClick={() => openNegotiateModal(product)}
+                                                className="h-10 w-10 text-xs font-bold text-gray-600 bg-gray-50 rounded-[10px] hover:bg-gray-100 transition-colors flex items-center justify-center border border-transparent hover:border-gray-200"
+                                                title="Negotiate Price"
+                                            >
+                                                <IndianRupee className="h-3.5 w-3.5" />
+                                            </button>
+                                        )
+                                    }
                                 </div>
                             </div>
                         </motion.div>
@@ -518,7 +524,11 @@ export default function ManufacturerProfilePage() {
                                     </button>
                                 ) : !manufacturer.requestStatus ? (
                                     <button
-                                        onClick={() => { setSelectedProduct(null); setShowRequestModal(true); }}
+                                        onClick={() => {
+                                            setSelectedProduct(null);
+                                            setRequestForm(prev => ({ ...prev, message: `I am interested in sourcing ${selectedProduct.name}. Please approve my partnership request.` }));
+                                            setShowRequestModal(true);
+                                        }}
                                         className="flex-1 py-3 text-sm font-medium text-white bg-black rounded-[10px] hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-black/10"
                                     >
                                         <Send className="h-4 w-4" />
