@@ -335,6 +335,25 @@ const startServer = async () => {
                     serverSelectionTimeoutMS: 5000,
                 });
                 logger.info('✅ Connected to MongoDB');
+
+                // --- AUTOMATIC FIX for Duplicate Key Error (Batch Payments) ---
+                try {
+                    const collection = mongoose.connection.collection('payments');
+                    const indexes = await collection.indexes();
+                    const indexExists = indexes.some(idx => idx.name === 'razorpayOrderId_1');
+                    if (indexExists) {
+                        logger.info('🔧 Found legacy unique index "razorpayOrderId_1". Dropping it...');
+                        await collection.dropIndex('razorpayOrderId_1');
+                        logger.info('✅ Index dropped successfully. Batch payments are now supported.');
+                    }
+                } catch (idxErr) {
+                    // Ignore error if collection doesn't exist or index not found (race condition)
+                    if (idxErr.code !== 26 && idxErr.codeName !== 'NamespaceNotFound') {
+                        logger.warn('⚠️ Index cleanup check warning:', idxErr.message);
+                    }
+                }
+                // ------------------------------------------------------------
+
             } catch (err) {
                 logger.error('⚠️ MongoDB Connection Failed (Chat/Tracking features limited):', err.message);
             }

@@ -39,8 +39,8 @@ export default function LoginPage() {
                         Elevate your business to the next level.
                     </h1>
 
-                    <p className="text-lg text-gray-200 leading-relaxed mb-12 drop-shadow-lg">
-                        Join thousands of B2B and B2C partners scaling their operations through our secure global marketplace ecosystem.
+                    <p className="text-xl font-bold italic tracking-wide text-white/90 drop-shadow-md mb-12">
+                        Structured Commerce. Trusted Connections.
                     </p>
 
                     <div className="flex items-center gap-4 text-xs text-gray-400 font-medium">
@@ -69,7 +69,7 @@ export default function LoginPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

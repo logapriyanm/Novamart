@@ -29,15 +29,15 @@ export default function DealerOrderManagement() {
 
     const fetchOrders = async () => {
         try {
-            const data = await apiClient.get<any[]>('/orders');
-            const ordersList = data || [];
+            const data = await apiClient.get<any>('/orders');
+            const ordersList = Array.isArray(data) ? data : (data?.orders || []);
 
             const mappedOrders = ordersList.map((order: any) => ({
-                id: order.id,
-                displayId: order.id.slice(0, 8).toUpperCase(),
-                customer: order.customer?.name || 'Guest User',
-                total: Number(order.totalAmount),
-                totalFormatted: `₹${Number(order.totalAmount).toLocaleString()}`,
+                id: order._id || order.id,
+                displayId: (order._id || order.id || '').slice(0, 8).toUpperCase(),
+                customer: order.customerId?.name || order.customer?.name || 'Guest User',
+                total: Number(order.totalAmount || 0),
+                totalFormatted: `₹${Number(order.totalAmount || 0).toLocaleString()}`,
                 date: new Date(order.createdAt).toLocaleString(),
                 status: order.status === 'CREATED' ? 'Pending' :
                     order.status === 'PAID' ? 'Pending' :
@@ -146,7 +146,7 @@ export default function DealerOrderManagement() {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h4 className="text-sm font-bold text-slate-900">{order.displayId}</h4>
-                                            <span className={`text-sm font-bold uppercase px-1.5 py-0.5 rounded-[10px] ${order.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>{order.status}</span>
+                                            <span className={`text-sm font-bold uppercase px-1.5 py-0.5 rounded-[10px] ${order.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-[#1212A1]/10 text-[#1212A1]'}`}>{order.status}</span>
                                         </div>
                                         <p className="text-xs font-medium text-slate-500 mt-0.5">{order.customer}</p>
                                     </div>

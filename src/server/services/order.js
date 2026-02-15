@@ -162,6 +162,8 @@ class OrderService {
                 grandTotal += order.totalAmount;
             }
 
+            console.log(`[BatchCheckout] Initializing Razorpay for Grand Total: ${grandTotal} (Paisa: ${Math.round(grandTotal * 100)})`);
+
             // Initialize Payment (RAZORPAY)
             const { default: paymentService } = await import('./paymentService.js');
             const razorpayOrder = await paymentService.createBatchRazorpayOrder(
@@ -514,7 +516,7 @@ class OrderService {
             .populate({ path: 'items.inventoryId', select: 'customName customImages customDescription' }) // Populate overrides
             .populate('customerId')
             .populate('sellerId')
-            .populate('escrow')
+
             .lean();
 
         if (!order) throw new Error('ORDER_NOT_FOUND');

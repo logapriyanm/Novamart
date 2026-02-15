@@ -28,8 +28,8 @@ const OrderSchema = new mongoose.Schema({
     taxAmount: { type: Number, required: true },
     commissionAmount: { type: Number, required: true, immutable: true },
     sellerPayout: { type: Number }, // Net amount seller receives after settlement
-    shippingAddress: { type: String, required: true },
-    billingAddress: { type: String },
+    shippingAddress: { type: mongoose.Schema.Types.Mixed, required: true },
+    billingAddress: { type: mongoose.Schema.Types.Mixed },
     items: [OrderItemSchema],
     timeline: [TimelineSchema],
     shipmentTracking: {

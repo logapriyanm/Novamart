@@ -31,7 +31,7 @@ export const initiateCheckout = async (req, res) => {
         if (!customer) throw new Error('Customer profile required');
 
         const result = await orderService.createBatchOrders(customer._id, items, shippingAddress);
-        res.status(200).json(result);
+        res.status(200).json({ success: true, data: result });
     } catch (error) {
         logger.error('Checkout Initiation Failed:', error);
         res.status(400).json({ success: false, error: error.message });

@@ -36,7 +36,8 @@ export default function HighSellingProducts() {
                         installation: p.installationType ? true : false,
                         warranty: p.specifications?.warranty || 'Standard Warranty'
                     },
-                    inventoryId: p.inventory?.[0]?.id
+                    inventoryId: p.inventory?.[0]?.id,
+                    stock: p.inventory?.[0]?.stock || 0
                 }));
 
                 setProducts(transformed);

@@ -153,7 +153,7 @@ export default function ManufacturerProfilePage() {
                                     <button
                                         id="kyc-trigger"
                                         onClick={() => setKycModalOpen(true)}
-                                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-[10px] font-black text-xs tracking-wide transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+                                        className="w-full py-3 bg-[#1212A1] hover:bg-[#0e0e81] text-white rounded-[10px] font-black text-xs tracking-wide transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#1212A1]/20"
                                     >
                                         <FaUpload className="w-3.5 h-3.5" />
                                         Submit for Verification
@@ -184,7 +184,7 @@ export default function ManufacturerProfilePage() {
                                     </div>
                                     <button
                                         onClick={() => setKycModalOpen(true)}
-                                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-[8px] font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2"
+                                        className="w-full py-2.5 bg-[#1212A1] hover:bg-[#0e0e81] text-white rounded-[8px] font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2"
                                     >
                                         <FaSync className="w-3 h-3" />
                                         Resubmit Documents

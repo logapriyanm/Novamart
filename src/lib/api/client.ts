@@ -162,6 +162,15 @@ class ApiClient {
                 return await this.handleTokenRefresh<T>(endpoint, method, body, options);
             }
 
+            // If we get 401 but have no refresh token, or it's an auth endpoint, we should logout
+            const isAuthEndpoint = ['/auth/login', '/auth/register', '/auth/refresh'].includes(endpoint);
+            if (error.status === 401 && !isAuthEndpoint) {
+                this.setTokens(null, null);
+                if (this.onAuthError) {
+                    this.onAuthError();
+                }
+            }
+
             // Only log non-network errors in development, and skip 401s (handled by auth flow)
             if (process.env.NODE_ENV === 'development' && !error.isNetworkError && error.status !== 401) {
                 console.error(`API Error [${method} ${endpoint}]:`, error);

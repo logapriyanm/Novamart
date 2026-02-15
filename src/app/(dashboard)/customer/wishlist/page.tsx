@@ -36,11 +36,31 @@ export default function WishlistPage() {
     }
   };
 
+  const handleRemoveAll = async () => {
+    try {
+      await wishlistService.clearWishlist();
+      setWishlist([]);
+      toast.success("Wishlist cleared");
+    } catch (error) {
+      toast.error("Failed to clear wishlist");
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in max-w-7xl mx-auto pb-12">
-      <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">
-        My Wishlist
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">
+          My Wishlist
+        </h1>
+        {wishlist.length > 0 && (
+          <button
+            onClick={handleRemoveAll}
+            className="text-sm font-bold text-red-600 hover:text-red-700 hover:underline flex items-center gap-1"
+          >
+            <FaTrash className="w-3 h-3" /> Remove All
+          </button>
+        )}
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center p-12">
@@ -62,7 +82,7 @@ export default function WishlistPage() {
           {wishlist.map((product) => (
             <div key={product.id} className="bg-white p-4 rounded-[20px] border border-slate-100 shadow-sm hover:shadow-md transition-all group">
               <div className="relative aspect-square bg-slate-50 rounded-[10px] mb-4 overflow-hidden">
-                <img src={product.images?.[0] || '/placeholder.png'} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={product.images?.[0] || 'https://placehold.co/400x400?text=No+Image'} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <button
                   onClick={() => handleRemove(product.id)}
                   className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm pt-2.5 rounded-full text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"

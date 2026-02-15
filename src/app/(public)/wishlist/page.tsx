@@ -2,34 +2,22 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   FaHeart,
-  FaBookmark,
-  FaPlus,
-  FaFilter,
-  FaLaptopHouse,
-  FaUtensils,
-  FaTools,
-  FaThLarge,
+  FaTrash,
+  FaShoppingCart,
 } from "react-icons/fa";
-import WishlistCard from "@/client/components/features/wishlist/WishlistCard";
-import WishlistSidebar from "@/client/components/features/wishlist/WishlistSidebar";
 import { wishlistService } from "@/lib/api/services/wishlist.service";
-import RecentlySaved from "@/client/components/features/wishlist/RecentlySaved";
 import { toast } from "sonner";
 import { useAuth } from "@/client/context/AuthContext";
 import Loader from "@/client/components/ui/Loader";
 
 export default function WishlistPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"wishlist" | "saved">("wishlist");
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchWishlist = async () => {
-    // Only fetch if user is authenticated
     if (!user) {
       setIsLoading(false);
       return;
@@ -41,14 +29,13 @@ export default function WishlistPage() {
       const adapted = data.map((p: any) => ({
         id: p._id || p.id,
         name: p.name,
-        brand: "NovaMart", // Default brand if missing
+        brand: "NovaMart",
         price: p.basePrice,
         image:
           p.images?.[0] ||
-          "https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=400",
-        status: ((p as any).inventory?.[0]?.stock < 10
-          ? "Low Stock"
-          : undefined) as any,
+          "https://placehold.co/400x400?text=No+Image",
+        category: p.category,
+        stock: (p as any).inventory?.[0]?.stock,
       }));
       setItems(adapted);
     } catch (error) {
@@ -60,7 +47,6 @@ export default function WishlistPage() {
   };
 
   useEffect(() => {
-    // Wait for auth to load before attempting to fetch wishlist
     if (!authLoading) {
       fetchWishlist();
     }
@@ -77,7 +63,15 @@ export default function WishlistPage() {
     }
   };
 
-  const displayItems = activeTab === "wishlist" ? items : []; // Only show wishlist items for now
+  const handleRemoveAll = async () => {
+    try {
+      await wishlistService.clearWishlist();
+      setItems([]);
+      toast.success("Wishlist cleared");
+    } catch (error) {
+      toast.error("Failed to clear wishlist");
+    }
+  };
 
   if (authLoading) {
     return (
@@ -87,20 +81,14 @@ export default function WishlistPage() {
     );
   }
 
-  // Show login prompt if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen  pt-32 pb-20">
+      <div className="min-h-screen pt-32 pb-20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-          {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-black text-foreground tracking-tight mb-2 italic uppercase">
-              My Collections
+              My Wishlist
             </h1>
-            <p className="text-muted-foreground/60 text-sm font-bold uppercase tracking-[0.2em]">
-              Organize your procurement lists and manage saved items for future
-              orders.
-            </p>
           </div>
 
           <div className="py-20 text-center">
@@ -129,117 +117,93 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="min-h-screen  pt-32 pb-20">
+    <div className="min-h-screen pt-32 pb-20">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-black text-foreground tracking-tight mb-2 italic uppercase">
-            My Collections
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-black text-foreground tracking-tight italic uppercase">
+            My Wishlist
           </h1>
-          <p className="text-sm font-medium text-muted-foreground/60">
-            Organize your procurement lists and manage saved items for future
-            orders.
-          </p>
+          {items.length > 0 && (
+            <button
+              onClick={handleRemoveAll}
+              className="text-sm font-bold text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <FaTrash className="w-3 h-3" /> Remove All
+            </button>
+          )}
         </div>
 
-        {/* Main Layout */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Content Area */}
-          <div className="flex-1">
-            {/* Tabs */}
-            <div className="flex items-center gap-8 border-b border-border mb-8">
-              <button
-                onClick={() => setActiveTab("wishlist")}
-                className={`flex items-center gap-2 pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === "wishlist" ? "border-primary text-primary" : "border-transparent text-muted-foreground/50 hover:text-muted-foreground"}`}
-              >
-                <FaHeart
-                  className={
-                    activeTab === "wishlist"
-                      ? "text-primary"
-                      : "text-muted-foreground/20"
-                  }
-                />
-                My Wishlist ({items.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("saved")}
-                className={`flex items-center gap-2 pb-4 text-sm font-bold border-b-2 transition-all ${activeTab === "saved" ? "border-primary text-primary" : "border-transparent text-muted-foreground/50 hover:text-muted-foreground"}`}
-              >
-                <FaBookmark
-                  className={
-                    activeTab === "saved"
-                      ? "text-primary"
-                      : "text-muted-foreground/20"
-                  }
-                />
-                Saved for Later (0)
-              </button>
-            </div>
-
-            {/* Filters Toolbar */}
-            <div className="flex flex-wrap items-center gap-3 mb-8">
-              <button className="px-4 py-2 bg-primary text-primary-foreground rounded-[10px] text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20">
-                <FaThLarge /> All Items
-              </button>
-              <button className="px-4 py-2 bg-white text-muted-foreground/60 border border-border hover:border-foreground/30 hover:text-foreground rounded-[10px] text-sm font-bold flex items-center gap-2 transition-colors">
-                <FaLaptopHouse /> Home Office
-              </button>
-              <button className="px-4 py-2 bg-white text-muted-foreground/60 border border-border hover:border-foreground/30 hover:text-foreground rounded-[10px] text-sm font-bold flex items-center gap-2 transition-colors">
-                <FaUtensils /> Kitchen Upgrades
-              </button>
-              <button className="px-4 py-2 bg-white text-muted-foreground/60 border border-border hover:border-foreground/30 hover:text-foreground rounded-[10px] text-sm font-bold flex items-center gap-2 transition-colors">
-                <FaTools /> Industrial Gear
-              </button>
-              <button className="ml-auto text-primary font-bold text-xs flex items-center gap-1 hover:underline">
-                <FaPlus /> Create New List
-              </button>
-            </div>
-
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-[420px] bg-white rounded-[10px] animate-pulse border border-border"
-                  />
-                ))}
-              </div>
-            ) : activeTab === "wishlist" && displayItems.length === 0 ? (
-              <div className="col-span-full py-20 text-center">
-                <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FaHeart className="text-muted-foreground/30 text-2xl" />
-                </div>
-                <p className="text-sm font-bold text-muted-foreground">
-                  Your wishlist is empty
-                </p>
-                <Link
-                  href="/products"
-                  className="inline-block mt-4 text-sm font-bold text-primary hover:underline"
-                >
-                  Browse Products
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayItems.map((item) => (
-                  <div key={item.id} className="h-[420px]">
-                    <WishlistCard {...item} onRemove={handleRemove} />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Recentely Saved Section */}
-            <RecentlySaved
-              onMoveToCart={(id) => {
-                // TODO: Implement move to cart logic
-              }}
-            />
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-[380px] bg-white rounded-[16px] animate-pulse border border-slate-100"
+              />
+            ))}
           </div>
-
-          {/* Right Sidebar */}
-          <WishlistSidebar />
-        </div>
+        ) : items.length === 0 ? (
+          <div className="py-20 text-center">
+            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FaHeart className="text-slate-300 text-3xl" />
+            </div>
+            <h2 className="text-xl font-black text-black mb-2">
+              Your wishlist is empty
+            </h2>
+            <p className="text-sm font-bold text-slate-400 mb-6">
+              Save items you love to buy later.
+            </p>
+            <Link
+              href="/products"
+              className="inline-block px-6 py-2.5 bg-black text-white text-sm font-bold tracking-widest rounded-lg hover:bg-slate-800 transition-all cursor-pointer"
+            >
+              Browse Products
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {items.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white p-4 rounded-[16px] border border-slate-100 shadow-sm hover:shadow-md transition-all group"
+              >
+                <div className="relative aspect-square bg-slate-50 rounded-[10px] mb-4 overflow-hidden">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <button
+                    onClick={() => handleRemove(product.id)}
+                    className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm cursor-pointer"
+                  >
+                    <FaTrash className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-800 line-clamp-1">
+                    {product.name}
+                  </h3>
+                  <p className="text-sm font-bold text-slate-400 tracking-wide mt-1">
+                    {product.category}
+                  </p>
+                  <div className="flex items-center justify-between mt-4">
+                    <span className="text-lg font-black text-slate-900">
+                      ₹{product.price?.toLocaleString()}
+                    </span>
+                    <Link
+                      href={`/products/${product.id}`}
+                      className="p-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                      <FaShoppingCart className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

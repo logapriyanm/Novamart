@@ -14,9 +14,9 @@ interface CategoryLayoutProps {
 export default function CategoryLayout({ categorySlug }: CategoryLayoutProps) {
   const categoryName = categorySlug
     ? categorySlug
-        .split("-")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ")
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ")
     : "Category";
 
   // Lifted Filter State
@@ -84,11 +84,10 @@ export default function CategoryLayout({ categorySlug }: CategoryLayoutProps) {
                 <div className="hidden sm:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/60">
                   <button
                     onClick={() => handleFilterChange("viewMode", "grid")}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                      filters.viewMode !== "list"
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${filters.viewMode !== "list"
                         ? "bg-white text-slate-900 shadow-sm"
                         : "bg-transparent text-slate-400 hover:text-slate-600"
-                    }`}
+                      }`}
                     title="Grid View"
                   >
                     <svg
@@ -111,11 +110,10 @@ export default function CategoryLayout({ categorySlug }: CategoryLayoutProps) {
                   </button>
                   <button
                     onClick={() => handleFilterChange("viewMode", "list")}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
-                      filters.viewMode === "list"
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${filters.viewMode === "list"
                         ? "bg-white text-slate-900 shadow-sm"
                         : "bg-transparent text-slate-400 hover:text-slate-600"
-                    }`}
+                      }`}
                     title="List View"
                   >
                     <svg
@@ -141,7 +139,7 @@ export default function CategoryLayout({ categorySlug }: CategoryLayoutProps) {
                 </div>
 
                 {/* Sort Dropdown */}
-                <div className="bg-white px-3 py-1.5 rounded-xl border border-foreground/5 shadow-sm hover:border-primary/30 transition-all flex items-center">
+                {/* <div className="bg-white px-3 py-1.5 rounded-xl border border-foreground/5 shadow-sm hover:border-primary/30 transition-all flex items-center">
                   <select
                     className="bg-transparent text-sm font-bold outline-none text-foreground/80 cursor-pointer py-1 pr-1 text-center"
                     value={filters.sortBy || "relevance"}
@@ -155,7 +153,7 @@ export default function CategoryLayout({ categorySlug }: CategoryLayoutProps) {
                     <option value="rating">Top Rated</option>
                     <option value="newest">Newest</option>
                   </select>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -174,14 +172,15 @@ export default function CategoryLayout({ categorySlug }: CategoryLayoutProps) {
               />
             </section>
 
-            <section className="bg-surface rounded-[2.5rem] p-8 lg:p-12 border border-foreground/5">
+            {/* Offer Products Section Removed as per requirement */}
+            {/* <section className="bg-surface rounded-[2.5rem] p-8 lg:p-12 border border-foreground/5">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold tracking-tight text-foreground">
                   Offer Products
                 </h2>
               </div>
               <SpecialProductsList />
-            </section>
+            </section> */}
           </main>
         </div>
       </div>

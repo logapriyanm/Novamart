@@ -140,27 +140,27 @@ export default function Navbar() {
                 </button>
               </form>
             </div>
-            <Link href="/products" className="btn-secondary hidden lg:flex" style={{ backgroundColor: '#067FF9', color: 'white', borderColor: '#067FF9' }}>
+            <Link href="/products" className="btn-secondary hidden lg:flex" style={{ backgroundColor: '#1212A1', color: 'white', borderColor: '#067FF9' }}>
               <AiOutlineProduct className="w-4 h-4" />
               <span>Products</span>
             </Link>
 
             {user?.role === "ADMIN" && (
-              <Link href="/admin" className="btn-primary" style={{ backgroundColor: '#067FF9', borderColor: '#067FF9' }}>
+              <Link href="/admin" className="btn-primary" style={{ backgroundColor: '#1212A1', borderColor: '#1212A1' }}>
                 <FaShieldAlt className="w-4 h-4" />
                 <span>Admin </span>
               </Link>
             )}
 
             {user?.role === "MANUFACTURER" && (
-              <Link href="/manufacturer" className="btn-primary" style={{ backgroundColor: '#067FF9', borderColor: '#067FF9' }}>
+              <Link href="/manufacturer" className="btn-primary" style={{ backgroundColor: '#1212A1', borderColor: '#1212A1' }}>
                 <FaIndustry className="w-4 h-4" />
                 <span>Manufacturer</span>
               </Link>
             )}
 
             {user?.role === "SELLER" && (
-              <Link href="/seller" className="btn-primary" style={{ backgroundColor: '#067FF9', borderColor: '#067FF9' }}>
+              <Link href="/seller" className="btn-primary" style={{ backgroundColor: '#1212A1', borderColor: '#1212A1' }}>
                 <FaStore className="w-4 h-4" />
                 <span>Seller</span>
               </Link>

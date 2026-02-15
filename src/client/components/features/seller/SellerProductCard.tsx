@@ -58,7 +58,7 @@ export default function SellerProductCard({
 }: SellerProductCardProps) {
     const router = useRouter();
 
-    const displayImage = (customImages && customImages.length > 0) ? customImages[0] : image;
+    const displayImage = (customImages && customImages.length > 0) ? customImages[0] : (image || '/placeholder.png');
     const displayName = customName || name;
 
     const handleToggle = (e: React.MouseEvent) => {
@@ -81,8 +81,8 @@ export default function SellerProductCard({
             {/* Status Badge */}
             <div className="absolute top-3 left-3 z-10 font-sans">
                 <span className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md border shadow-sm ${isListed
-                        ? 'bg-emerald-500 text-white border-emerald-600'
-                        : 'bg-slate-200 text-slate-600 border-slate-300'
+                    ? 'bg-emerald-500 text-white border-emerald-600'
+                    : 'bg-slate-200 text-slate-600 border-slate-300'
                     }`}>
                     {isListed ? 'Active' : 'Draft'}
                 </span>
@@ -94,8 +94,8 @@ export default function SellerProductCard({
                     onClick={handleToggle}
                     title={isListed ? "Deactivate" : "Activate"}
                     className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm backdrop-blur-sm border ${isListed
-                            ? 'bg-white/90 text-emerald-600 border-emerald-100 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
-                            : 'bg-white/90 text-slate-400 border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200'
+                        ? 'bg-white/90 text-emerald-600 border-emerald-100 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                        : 'bg-white/90 text-slate-400 border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200'
                         }`}
                 >
                     {isListed ? <FaEye className="w-3.5 h-3.5" /> : <FaEyeSlash className="w-3.5 h-3.5" />}
@@ -103,7 +103,7 @@ export default function SellerProductCard({
                 <button
                     onClick={handleEdit}
                     title="Edit Details"
-                    className="w-8 h-8 rounded-full bg-white/90 text-blue-600 border border-blue-100 flex items-center justify-center transition-all shadow-sm backdrop-blur-sm hover:bg-blue-600 hover:text-white"
+                    className="w-8 h-8 rounded-full bg-white/90 text-primary border border-primary/20 flex items-center justify-center transition-all shadow-sm backdrop-blur-sm hover:bg-primary hover:text-white"
                 >
                     <FaEdit className="w-3.5 h-3.5" />
                 </button>
@@ -116,11 +116,12 @@ export default function SellerProductCard({
             >
                 <div className="w-full h-full flex items-center justify-center p-4">
                     <OptimizedImage
-                        src={displayImage}
-                        alt={displayName}
+                        src={displayImage || '/placeholder.png'}
+                        alt={displayName || 'Product Image'}
                         width={300}
                         height={300}
                         className={`w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105 ${!isListed ? 'grayscale opacity-70' : ''}`}
+                        fallbackSrc="/placeholder.png"
                     />
                 </div>
             </div>
@@ -129,22 +130,22 @@ export default function SellerProductCard({
             <div className="flex flex-col flex-1">
                 {/* Brand */}
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 line-clamp-1">
-                    {brand}
+                    {brand || 'Brand'}
                 </span>
 
                 {/* Product Name */}
                 <h3
-                    className="font-bold text-slate-800 text-sm leading-relaxed mb-2 line-clamp-2 min-h-[2.5rem] cursor-pointer hover:text-blue-600 transition-colors"
+                    className="font-bold text-slate-800 text-sm leading-relaxed mb-2 line-clamp-2 min-h-[2.5rem] cursor-pointer hover:text-primary transition-colors"
                     onClick={handleEdit}
                 >
-                    {displayName}
+                    {displayName || 'Untitled Product'}
                 </h3>
 
                 {/* Stock Status */}
                 <div className="flex items-center gap-2 mb-3 text-xs font-medium">
-                    <FaBoxOpen className={stock > 0 ? "text-slate-400" : "text-red-400"} />
-                    <span className={stock > 10 ? "text-emerald-600" : stock > 0 ? "text-amber-600" : "text-red-600"}>
-                        {stock > 0 ? `${stock} Units in Stock` : 'Out of Stock'}
+                    <FaBoxOpen className={(stock || 0) > 0 ? "text-slate-400" : "text-red-400"} />
+                    <span className={(stock || 0) > 10 ? "text-emerald-600" : (stock || 0) > 0 ? "text-amber-600" : "text-red-600"}>
+                        {(stock || 0) > 0 ? `${stock} Units in Stock` : 'Out of Stock'}
                     </span>
                 </div>
 
@@ -152,13 +153,13 @@ export default function SellerProductCard({
                     <div className="flex flex-col">
                         <span className="text-xs text-slate-400 font-medium">Selling Price</span>
                         <span className="text-lg font-black text-slate-900 tracking-tight">
-                            ₹{price.toLocaleString()}
+                            ₹{(price || 0).toLocaleString()}
                         </span>
                     </div>
 
                     <button
                         onClick={handleEdit}
-                        className="px-4 py-2 bg-slate-50 border border-slate-200 hover:bg-white hover:border-blue-200 hover:text-blue-600 text-slate-600 text-sm font-bold rounded-[6px] transition-all"
+                        className="px-4 py-2 bg-slate-50 border border-slate-200 hover:bg-white hover:border-primary/20 hover:text-primary text-slate-600 text-sm font-bold rounded-[6px] transition-all"
                     >
                         Manage
                     </button>

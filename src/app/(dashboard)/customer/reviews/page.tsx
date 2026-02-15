@@ -96,7 +96,7 @@ export default function MyReviewsPage() {
                         >
                             {tab.label}
                             {activeTab === tab.id && (
-                                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1212A1]" />
                             )}
                         </button>
                     ))}

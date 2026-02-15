@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import {
     FaSearch as Search,
     FaFilter as Filter,
@@ -34,6 +35,7 @@ export default function MyOrders() {
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [disputeReason, setDisputeReason] = useState('');
     const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
+    const router = useRouter();
 
     const handleOpenReview = (order: any) => {
         setSelectedOrder(order);
@@ -43,23 +45,37 @@ export default function MyOrders() {
     const fetchOrders = async () => {
         try {
             const data = await apiClient.get<any[]>('/orders/my');
-            const ordersList = data || [];
+            const ordersList = Array.isArray(data) ? data : [];
 
-            const mappedOrders = ordersList.map((order: any) => ({
-                id: order.id,
-                displayId: `NM-${order.id.slice(0, 5).toUpperCase()}`,
-                seller: order.seller?.businessName || 'Unknown Seller',
-                sellerId: order.sellerId,
-                total: Number(order.totalAmount),
-                status: order.status,
-                currentStep: getStepFromStatus(order.status),
-                items: order.items.map((item: any) => `${item.linkedProduct?.name || 'Product'} (${item.quantity})`),
-                rawItems: order.items.map((item: any) => ({
-                    id: item.linkedProduct?._id || item.productId,
-                    name: item.linkedProduct?.name || 'Product'
-                })),
-                date: new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-            }));
+            const mappedOrders = ordersList.map((order: any) => {
+                try {
+                    const orderId = order._id || order.id;
+                    const items = Array.isArray(order.items) ? order.items.map((item: any) => ({
+                        id: item.linkedProduct?._id || item.productId,
+                        name: item.linkedProduct?.name || item.product?.name || 'Product',
+                        image: item.linkedProduct?.images?.[0] || item.product?.images?.[0] || '/placeholder.png',
+                        quantity: item.quantity || 1,
+                        price: item.price || 0,
+                        variant: item.variant || 'Standard Edition' // Placeholder if variant not available
+                    })) : [];
+
+                    return {
+                        id: orderId,
+                        displayId: `NM-${(orderId || '').slice(0, 5).toUpperCase()}`,
+                        seller: typeof order.seller === 'string' ? order.seller : (order.seller?.businessName || 'Unknown Seller'),
+                        sellerId: order.sellerId,
+                        total: Number(order.totalAmount || 0),
+                        status: typeof order.status === 'string' ? order.status : 'PENDING',
+                        currentStep: getStepFromStatus(order.status),
+                        items: items, // structured items
+                        rawItems: items, // keeping for backward compat if needed (though items is now structured)
+                        date: new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    };
+                } catch (err) {
+                    console.error('Error mapping order:', order, err);
+                    return null;
+                }
+            }).filter(Boolean);
 
             setOrders(mappedOrders);
         } catch (error) {
@@ -89,7 +105,10 @@ export default function MyOrders() {
         try {
             const res = await apiClient.get<any>(`/orders/${orderId}`);
             if (res) {
-                setSelectedOrder(res);
+                console.log('Tracking Order Data:', res);
+                // Ensure ID is mapped correctly for UI
+                const data = { ...res, id: res._id || res.id };
+                setSelectedOrder(data);
                 setIsTrackingOpen(true);
             }
         } catch (error) {
@@ -129,8 +148,8 @@ export default function MyOrders() {
     );
 
     return (
-        <div className="space-y-10 pb-20 animate-fade-in">
-            {/* Modal Components */}
+        <div className="space-y-10 pb-20 animate-fade-in font-sans">
+            {/* Modal Components - kept as is */}
             <AnimatePresence>
                 {/* Tracking Modal */}
                 {isTrackingOpen && selectedOrder && (
@@ -149,7 +168,7 @@ export default function MyOrders() {
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">Live Tracking</h3>
-                                    <p className="text-sm font-black text-slate-400 mt-1">Package NM-{selectedOrder.id.slice(0, 5).toUpperCase()}</p>
+                                    <p className="text-sm font-black text-slate-400 mt-1">Package NM-{(selectedOrder.id || '').toUpperCase().slice(0, 5)}</p>
                                 </div>
                                 <button onClick={() => setIsTrackingOpen(false)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
                                     <FaTimes />
@@ -159,12 +178,12 @@ export default function MyOrders() {
                                 <Stepper currentStep={getStepFromStatus(selectedOrder.status)} />
 
                                 {selectedOrder.shipmentTracking && (
-                                    <div className="p-6 bg-blue-50/50 rounded-[10px] border border-blue-100/50 flex items-center justify-between">
+                                    <div className="p-6 bg-[#1212A1]/5 rounded-[10px] border border-[#1212A1]/10 flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-black text-blue-400 mb-1">Carrier: {selectedOrder.shipmentTracking.carrier}</p>
+                                            <p className="text-sm font-black text-[#1212A1]/60 mb-1">Carrier: {selectedOrder.shipmentTracking.carrier}</p>
                                             <p className="text-sm font-black text-slate-800 tracking-tight">ID: {selectedOrder.shipmentTracking.trackingNumber}</p>
                                         </div>
-                                        <Truck className="text-blue-600 w-6 h-6" />
+                                        <Truck className="text-[#1212A1] w-6 h-6" />
                                     </div>
                                 )}
 
@@ -173,7 +192,7 @@ export default function MyOrders() {
                                     <div className="space-y-6 relative ml-4 border-l-2 border-slate-50 pl-8">
                                         {selectedOrder.timeline?.map((event: any, i: number) => (
                                             <div key={i} className="relative">
-                                                <div className="absolute -left-[41px] top-1 w-4 h-4 rounded-full bg-white border-4 border-blue-600 shadow-sm" />
+                                                <div className="absolute -left-[41px] top-1 w-4 h-4 rounded-full bg-white border-4 border-[#1212A1] shadow-sm" />
                                                 <p className="text-sm font-black text-slate-400 mb-1">{new Date(event.createdAt).toLocaleString()}</p>
                                                 <p className="text-sm font-black text-slate-800 tracking-tight italic">{event.toState.replace(/_/g, ' ')}</p>
                                                 <p className="text-sm font-bold text-slate-500 mt-1">{event.reason}</p>
@@ -203,7 +222,11 @@ export default function MyOrders() {
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                                 <div>
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight italic uppercase">Return Request</h3>
-                                    <p className="text-sm font-black text-slate-400 mt-1">Order NM-{selectedOrder.id.slice(0, 5).toUpperCase()}</p>
+                                    <p className="text-sm font-black text-slate-400 mt-1">Order NM-{(selectedOrder.id || '').toUpperCase().slice(0, 5)}</p>
+// ... (inside Return Modal)
+
+                                    // ... (in ReviewModal)
+                                    <p className="text-sm font-black text-slate-400 mt-1">Order NM-{(selectedOrder.id || '').toUpperCase().slice(0, 5)}</p>
                                 </div>
                                 <button onClick={() => setIsDisputeOpen(false)} className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
                                     <FaTimes />
@@ -222,13 +245,13 @@ export default function MyOrders() {
                                         value={disputeReason}
                                         onChange={(e) => setDisputeReason(e.target.value)}
                                         placeholder="Please describe why you want to return this product (e.g. wrong item, damaged, not as described)..."
-                                        className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[150px] transition-all"
+                                        className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1212A1]/10 focus:bg-white min-h-[150px] transition-all"
                                     />
                                 </div>
                                 <button
                                     onClick={submitDispute}
                                     disabled={isSubmittingDispute}
-                                    className="w-full py-5 bg-black text-white rounded-[10px] text-sm font-black shadow-xl shadow-black/10 hover:bg-[#067FF9] active:scale-95 transition-all disabled:opacity-50"
+                                    className="w-full py-5 bg-black text-white rounded-[10px] text-sm font-black shadow-xl shadow-black/10 hover:bg-[#1212A1] active:scale-95 transition-all disabled:opacity-50"
                                 >
                                     {isSubmittingDispute ? 'Submitting...' : 'Submit Return Request'}
                                 </button>
@@ -236,6 +259,7 @@ export default function MyOrders() {
                         </motion.div>
                     </div>
                 )}
+
                 {/* Review & Rating Modal */}
                 {isReviewOpen && selectedOrder && (
                     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -256,162 +280,160 @@ export default function MyOrders() {
                 )}
             </AnimatePresence>
 
-            {/* Header & Breadcrumbs */}
-            <div>
-                <nav className="flex items-center gap-2 text-sm font-black text-slate-400 mb-4">
-                    <span>Dashboard</span>
-                    <ChevronDown className="w-2.5 h-2.5 -rotate-90" />
-                    <span className="text-blue-600">My Orders</span>
-                </nav>
-                <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">My Orders</h1>
-                <p className="text-slate-400 font-bold mt-2">
-                    Manage and track your <span className="text-slate-800">recent purchases</span> from various dealers.
+            {/* Header & Breadcrumbs - REFINED */}
+            <div className="bg-white p-6 rounded-[10px] shadow-sm border border-slate-100/50">
+                <h1 className="text-2xl font-black text-slate-800 tracking-tight uppercase italic mb-2">My Orders</h1>
+                <p className="text-slate-500 font-medium text-sm">
+                    Track your orders, request returns, and manage your purchase history.
                 </p>
             </div>
 
-            {/* Filter Bar */}
-            <WhiteCard className="p-4 flex flex-wrap items-center gap-4 border-none shadow-xl shadow-blue-600/2">
-                <div className="flex-1 min-w-[240px] relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            {/* Filter Bar - UPDATED DESIGN */}
+            <div className="bg-white p-4 rounded-[10px] shadow-sm border border-slate-100/50 flex flex-wrap items-center gap-4">
+                <div className="flex-1 min-w-[300px] relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                     <input
                         type="text"
-                        placeholder="Search by Order ID or Item..."
-                        className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white transition-all"
+                        placeholder="Search by Order ID, Product..."
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-[8px] text-sm font-medium focus:outline-none focus:ring-1 focus:ring-[#1212A1] transition-all placeholder:text-slate-400"
                     />
                 </div>
-                {[
-                    { label: 'Status: All' },
-                    { label: 'Date: Last 30 Days' },
-                    { label: 'Dealer: All Dealers' },
-                ].map((filter, i) => (
-                    <button key={i} className="px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-[10px] flex items-center gap-3 text-sm font-black text-slate-600 hover:bg-white hover:shadow-sm transition-all">
-                        {filter.label}
-                        <ChevronDown className="w-3 h-3 text-slate-400" />
+                <div className="flex items-center gap-3">
+                    <div className="relative">
+                        <select className="appearance-none pl-4 pr-10 py-2.5 bg-slate-50/50 border border-slate-200 rounded-[8px] text-sm font-bold text-slate-700 focus:outline-none cursor-pointer hover:bg-slate-100 transition-all">
+                            <option>All Statuses</option>
+                            <option>Delivered</option>
+                            <option>In Transit</option>
+                            <option>Pending</option>
+                        </select>
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+                    </div>
+                    <div className="relative">
+                        <select className="appearance-none pl-4 pr-10 py-2.5 bg-slate-50/50 border border-slate-200 rounded-[8px] text-sm font-bold text-slate-700 focus:outline-none cursor-pointer hover:bg-slate-100 transition-all">
+                            <option>Last 30 Days</option>
+                            <option>Last 3 Months</option>
+                            <option>2023</option>
+                        </select>
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+                    </div>
+                    <button className="w-10 h-10 bg-slate-900 text-white rounded-[8px] flex items-center justify-center hover:bg-black transition-all">
+                        <Filter className="w-3.5 h-3.5" />
                     </button>
-                ))}
-                <button className="w-12 h-12 bg-slate-900 text-white rounded-[10px] flex items-center justify-center hover:bg-black transition-all">
-                    <Filter className="w-4 h-4" />
-                </button>
-            </WhiteCard>
-
-            {/* Orders List */}
-            <div className="space-y-8">
-                {orders.length === 0 ? (
-                    <div className="p-10 text-center text-slate-400 font-bold tracking-widest text-sm border border-slate-100 rounded-[10px]">No orders found. Start shopping!</div>
-                ) : orders.map((order) => (
-                    <WhiteCard key={order.id} className="p-0 border-none shadow-xl shadow-blue-600/5 overflow-hidden">
-                        <div className="p-8 space-y-8">
-                            {/* Card Header */}
-                            <div className="flex flex-wrap justify-between items-start gap-6">
-                                <div className="flex items-center gap-5">
-                                    <div className={`w-14 h-14 rounded-[10px] flex items-center justify-center ${order.status === 'CANCELLED' ? 'bg-slate-100' : 'bg-blue-50'} border border-slate-100`}>
-                                        <Package className={`w-6 h-6 ${order.status === 'CANCELLED' ? 'text-slate-400' : 'text-blue-600'}`} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-black text-slate-800 tracking-tight">Order #{order.displayId}</h3>
-                                        <p className="text-sm font-bold text-slate-400 mt-1">
-                                            Seller: <span className="text-blue-600 font-black">{order.seller}</span>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    {order.status !== 'CANCELLED' ? (
-                                        <>
-                                            <p className="text-sm font-black text-slate-400 leading-none mb-1">Total Amount</p>
-                                            <p className="text-xl font-black text-blue-600 tracking-tight">₹{order.total.toLocaleString()}</p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <p className="text-sm font-black text-slate-400 leading-none mb-1">Refund Status</p>
-                                            <p className="text-sm font-black text-slate-800">{order.refundStatus || 'Processed'}</p>
-                                        </>
-                                    )}
-                                    <div className="mt-2">
-                                        <TrackingBadge status={order.status} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Tracking Stepper */}
-                            {order.status !== 'CANCELLED' && (
-                                <div className="py-4 border-y border-slate-50">
-                                    <Stepper currentStep={order.currentStep} />
-                                </div>
-                            )}
-
-                            {order.status === 'CANCELLED' && (
-                                <div className="p-6 bg-slate-50 rounded-[10px] border border-slate-100 flex items-center justify-between">
-                                    <p className="text-sm font-bold text-slate-500 italic">Canceled on {order.date}</p>
-                                    <button className="text-sm font-black text-blue-600 hover:underline">Re-order Items</button>
-                                </div>
-                            )}
-
-                            {/* Card Footer */}
-                            <div className="flex flex-wrap items-center justify-between gap-6 pt-2">
-                                <div className="space-y-2">
-                                    <p className="text-sm font-bold text-slate-400 leading-none mb-2">Items:</p>
-                                    <p className="text-sm font-black text-slate-800 leading-relaxed max-w-sm">
-                                        {order.items.join(', ')}
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <button className="px-6 py-3 border border-slate-100 rounded-[10px] text-sm font-black text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
-                                        <Invoice className="w-3 h-3" /> Invoice
-                                    </button>
-                                    <button onClick={() => handleTrackOrder(order.id)} className="px-6 py-3 border border-slate-100 rounded-[10px] text-sm font-black text-slate-600 hover:bg-slate-50 transition-all">
-                                        View Details
-                                    </button>
-                                    {order.status !== 'CANCELLED' && order.status !== 'DISPUTED' && (
-                                        <div className="flex items-center gap-3">
-                                            {order.status === 'DELIVERED' && (
-                                                <button
-                                                    onClick={() => handleOpenReview(order)}
-                                                    className="px-6 py-3 bg-white border border-blue-600 text-blue-600 rounded-[10px] text-sm font-black hover:bg-blue-50 transition-all shadow-sm"
-                                                >
-                                                    Rate Items
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={order.status === 'DELIVERED' ? () => handleOpenDispute(order) : () => handleTrackOrder(order.id)}
-                                                className="px-6 py-3 bg-blue-600 text-white rounded-[10px] text-sm font-black shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all"
-                                            >
-                                                {order.status === 'DELIVERED' ? 'Request Return' : 'Track Order'}
-                                            </button>
-                                        </div>
-                                    )}
-                                    {order.status === 'DISPUTED' && (
-                                        <div className="px-6 py-3 bg-amber-50 text-amber-600 rounded-[10px] text-sm font-black border border-amber-100">
-                                            Return Requested
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </WhiteCard>
-                ))}
+                </div>
             </div>
 
-            {/* Resource Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                    { title: 'Shipping Support', desc: 'Got questions about your delivery? Our team is 24/7 available.', icon: Support, link: 'Contact Support', color: 'bg-blue-50 text-blue-600' },
-                    { title: 'Refund Policy', desc: 'You have 30 days from delivery to request a full refund for any item.', icon: Undo, link: 'View Policy', color: 'bg-slate-900 text-white dark-card' },
-                    { title: 'Buyer Protection', desc: "Every purchase is secured by NovaMart's fraud protection program.", icon: Shield, link: 'Learn More', color: 'bg-amber-50 text-amber-700' },
-                ].map((item, i) => (
-                    <div key={i} className={`p-8 rounded-[10px] border border-slate-100 shadow-xl shadow-blue-600/2 space-y-6 ${item.color.includes('dark-card') ? 'bg-slate-900 text-white' : item.color.split(' ')[0] + ' bg-opacity-50'}`}>
-                        <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${item.color.includes('dark-card') ? 'bg-white/10' : item.color}`}>
-                            <item.icon className="w-5 h-5" />
+            {/* Orders List - REDESIGNED */}
+            <div className="space-y-6">
+                {orders.length === 0 ? (
+                    <div className="p-12 text-center bg-white border border-slate-100 rounded-[10px] shadow-sm">
+                        <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Package className="w-6 h-6" />
                         </div>
-                        <div className="space-y-2">
-                            <h4 className="text-base font-black tracking-tight">{item.title}</h4>
-                            <p className={`text-sm font-bold leading-relaxed ${item.color.includes('dark-card') ? 'text-white/60' : 'text-slate-500'}`}>
-                                {item.desc}
-                            </p>
-                        </div>
-                        <button className={`text-sm font-black flex items-center gap-2 group ${item.color.includes('dark-card') ? 'text-white' : 'text-blue-600'}`}>
-                            {item.link}
-                            <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                        <h3 className="text-lg font-black text-slate-800 mb-1">No Orders Found</h3>
+                        <p className="text-slate-400 text-sm font-bold mb-6">Looks like you haven't placed any orders yet.</p>
+                        <button onClick={() => router.push('/')} className="px-6 py-2.5 bg-[#1212A1] text-white rounded-[8px] text-sm font-bold shadow-lg shadow-[#1212A1]/20 hover:bg-[#0e0e81] transition-all">
+                            Start Shopping
                         </button>
+                    </div>
+                ) : orders.map((order) => (
+                    <div key={order.id} className="bg-white rounded-[10px] shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+                        {/* Order Header */}
+                        <div className="p-6 border-b border-slate-50 bg-slate-50/30 flex flex-wrap justify-between items-start gap-4">
+                            <div>
+                                <div className="flex items-center gap-3 mb-1">
+                                    <h3 className="text-base font-black text-slate-800">Order #{order.displayId}</h3>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black tracking-wider uppercase ${order.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-600' :
+                                        order.status === 'SHIPPED' ? 'bg-[#1212A1]/10 text-[#1212A1]' :
+                                            order.status === 'CANCELLED' ? 'bg-red-100 text-red-600' :
+                                                'bg-slate-100 text-slate-600'
+                                        }`}>
+                                        {order.status}
+                                    </span>
+                                </div>
+                                <p className="text-xs font-bold text-slate-500">
+                                    Seller: <span className="text-slate-700">{order.seller}</span> <span className="mx-2 text-slate-300 text-[10px]">|</span> Date: {order.date}
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Amount</p>
+                                <p className="text-lg font-black text-slate-800">₹{order.total.toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        {/* Stepper (Only active orders) */}
+                        {order.status !== 'CANCELLED' && order.status !== 'DISPUTED' && (
+                            <div className="px-8 py-6 border-b border-slate-50">
+                                <Stepper currentStep={order.currentStep} />
+                            </div>
+                        )}
+
+                        {/* Order Items */}
+                        <div className="divide-y divide-slate-50">
+                            {order.items.map((item: any, idx: number) => (
+                                <div key={idx} className="p-6 flex flex-col md:flex-row gap-6 items-center">
+                                    {/* Product Image */}
+                                    <div className="w-20 h-20 bg-slate-50 rounded-[8px] border border-slate-100 flex-shrink-0 overflow-hidden">
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="w-full h-full object-cover mix-blend-multiply"
+                                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://placehold.co/80x80/f1f5f9/94a3b8?text=No+Img' }}
+                                        />
+                                    </div>
+
+                                    {/* Product Details */}
+                                    <div className="flex-1 text-center md:text-left">
+                                        <h4 className="font-bold text-slate-800 text-sm mb-1 line-clamp-1">{item.name}</h4>
+                                        <p className="text-xs font-medium text-slate-500">
+                                            Quantity: {item.quantity} <span className="mx-1">|</span> {item.variant}
+                                        </p>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex items-center gap-3">
+                                        <button className="px-4 py-2 bg-white border border-slate-200 rounded-[6px] text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-all flex items-center gap-2">
+                                            <Invoice className="w-3 h-3" /> Invoice
+                                        </button>
+                                        <button
+                                            onClick={() => router.push(`/product/${item.id}`)}
+                                            className="px-4 py-2 bg-white border border-slate-200 rounded-[6px] text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-all"
+                                        >
+                                            View Details
+                                        </button>
+
+                                        {/* Primary Action Button Logic */}
+                                        {order.status === 'DELIVERED' ? (
+                                            <button
+                                                onClick={() => handleTrackOrder(order.id)} // Used for re-order or review logically, but keeping basic for now or changing to Review if implemented
+                                                className="px-5 py-2 bg-slate-900 text-white rounded-[6px] text-xs font-bold hover:bg-black transition-all flex items-center gap-2"
+                                            >
+                                                <ArrowRight className="w-3 h-3" /> Buy Again
+                                            </button>
+                                        ) : order.status === 'CANCELLED' ? (
+                                            <button className="px-5 py-2 bg-slate-100 text-slate-400 rounded-[6px] text-xs font-bold cursor-not-allowed">
+                                                Canceled
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleTrackOrder(order.id)}
+                                                className="px-5 py-2 bg-[#1212A1] text-white rounded-[6px] text-xs font-bold shadow-lg shadow-[#1212A1]/20 hover:bg-[#0e0e81] transition-all flex items-center gap-2"
+                                            >
+                                                <Truck className="w-3 h-3" /> Track Order
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Footer / Meta Actions */}
+                        {order.status === 'DELIVERED' && (
+                            <div className="bg-slate-50/50 p-4 border-t border-slate-50 flex justify-end gap-3">
+                                <button onClick={() => handleOpenReview(order)} className="text-xs font-bold text-[#1212A1] hover:underline">Write a Review</button>
+                                <span className="text-slate-300">|</span>
+                                <button onClick={() => handleOpenDispute(order)} className="text-xs font-bold text-amber-600 hover:underline">Return / Report Issue</button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -502,7 +524,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                                 <textarea
                                     placeholder="What did you like or dislike about this item?"
                                     onChange={(e) => setRatings({ ...ratings, [i]: { ...ratings[i], comment: e.target.value } })}
-                                    className="w-full p-4 bg-white border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 min-h-[80px]"
+                                    className="w-full p-4 bg-white border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1212A1]/10 min-h-[80px]"
                                 />
                             </div>
                         ))}
@@ -516,7 +538,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                                     <button
                                         key={star}
                                         onClick={() => setSellerRating({ ...sellerRating, rating: star })}
-                                        className={`w-14 h-14 rounded-[10px] flex items-center justify-center transition-all ${sellerRating.rating >= star ? 'bg-blue-600 text-white scale-110 shadow-xl' : 'bg-slate-50 text-slate-200'}`}
+                                        className={`w-14 h-14 rounded-[10px] flex items-center justify-center transition-all ${sellerRating.rating >= star ? 'bg-[#1212A1] text-white scale-110 shadow-xl' : 'bg-slate-50 text-slate-200'}`}
                                     >
                                         <FaStar className="w-6 h-6" />
                                     </button>
@@ -551,7 +573,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                             placeholder="Share your experience with the delivery and service..."
                             value={sellerRating.comment}
                             onChange={(e) => setSellerRating({ ...sellerRating, comment: e.target.value })}
-                            className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:bg-white min-h-[120px] transition-all"
+                            className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[10px] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#1212A1]/10 focus:bg-white min-h-[120px] transition-all"
                         />
                     </div>
                 )}
@@ -569,7 +591,7 @@ function ReviewModal({ order, onClose, onSuccess }: { order: any, onClose: () =>
                 <button
                     onClick={step === 1 ? () => setStep(2) : handleSubmit}
                     disabled={isSubmitting}
-                    className="flex-1 py-4 bg-black text-white rounded-[10px] text-sm font-black shadow-xl hover:bg-[#067FF9] active:scale-95 transition-all disabled:opacity-50"
+                    className="flex-1 py-4 bg-black text-white rounded-[10px] text-sm font-black shadow-xl hover:bg-[#1212A1] active:scale-95 transition-all disabled:opacity-50"
                 >
                     {isSubmitting ? 'Submitting...' : step === 1 ? 'Next: Rate Seller' : 'Submit Review'}
                 </button>

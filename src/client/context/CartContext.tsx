@@ -64,17 +64,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(true);
         try {
             const response = await cartService.getCart();
-            if (response.success && response.data) {
+            // apiClient already unwraps { success, data } envelope
+            // So response IS the inner data: { id, items, itemCount }
+            const cartData = response;
+            if (cartData && cartData.items) {
                 // Map backend response to frontend format
-                const items = response.data.items.map((item: any) => ({
+                const items = cartData.items.map((item: any) => ({
                     id: item.id,
                     inventoryId: item.inventoryId,
-                    productId: item.product?.id || item.productId,
+                    productId: item.product?.id || item.product?._id || item.productId,
                     name: item.product?.name || 'Product',
                     price: Number(item.price),
-                    image: item.product?.images?.[0] || '',
+                    image: item.product?.image || item.product?.images?.[0] || '',
                     quantity: item.quantity,
-                    sellerId: item.seller?.id || '',
+                    sellerId: item.sellerId?.toString() || item.seller?.id || '',
                     sellerName: item.seller?.businessName || '',
                     stock: item.stock,
                     originalPrice: Number(item.originalPrice || item.price),
@@ -86,6 +89,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 // Also save to localStorage for offline access
                 localStorage.setItem('novamart_cart', JSON.stringify(items));
             }
+
         } catch (error) {
             console.error('Failed to fetch cart:', error);
         } finally {
@@ -185,7 +189,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             toast.success('Product added to cart');
         } catch (error: any) {
             console.error('Failed to add to cart:', error);
-            toast.error('Something went wrong. Please try again.');
+            toast.error(error.message || 'Something went wrong. Please try again.');
             throw error;
         } finally {
             setIsLoading(false);
@@ -257,9 +261,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 await fetchCart(); // Refresh cart
                 toast.success('Cart updated');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to update quantity:', error);
-            toast.error('Something went wrong. Please try again.');
+            toast.error(error.message || 'Something went wrong. Please try again.');
             throw error;
         } finally {
             setIsLoading(false);
@@ -279,8 +283,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             await cartService.clearCart();
             setCart([]);
             localStorage.removeItem('novamart_cart');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to clear cart:', error);
+            toast.error(error.message || 'Failed to clear cart');
             throw error;
         } finally {
             setIsLoading(false);

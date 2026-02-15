@@ -17,6 +17,10 @@ export const wishlistService = {
 
     async toggleWishlist(productId: string): Promise<ApiResponse<any>> {
         return apiClient.post<ApiResponse<any>>('/wishlist/toggle', { productId });
+    },
+
+    async clearWishlist(): Promise<ApiResponse<any>> {
+        return apiClient.delete<ApiResponse<any>>('/wishlist');
     }
 };
 

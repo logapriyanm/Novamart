@@ -38,7 +38,11 @@ class RecommendationService {
                 Order.find({ customerId: customer?._id })
                     .sort({ createdAt: -1 })
                     .limit(10)
-                    .populate('items.productId'),
+                    .populate('items.productId')
+                    .populate({
+                        path: 'items.productId.inventory',
+                        select: 'stock price'
+                    }),
                 // CART: Current cart items
                 customer ? Cart.findOne({ customerId: customer._id }).populate('items.productId') : Promise.resolve(null),
                 // BEHAVIORS: Last 50 actions
@@ -81,6 +85,11 @@ class RecommendationService {
                     isApproved: true
                 })
                     .populate('manufacturerId', 'companyName')
+                    .populate({
+                        path: 'inventory',
+                        match: { stock: { $gt: 0 } },
+                        select: 'stock price'
+                    })
                     .limit(8)
                     .sort({ reviewCount: -1 });
             }
@@ -92,6 +101,11 @@ class RecommendationService {
                     _id: { $nin: recommendations.map(r => r._id) }
                 })
                     .populate('manufacturerId', 'companyName')
+                    .populate({
+                        path: 'inventory',
+                        match: { stock: { $gt: 0 } },
+                        select: 'stock price'
+                    })
                     .limit(8 - recommendations.length)
                     .sort({ reviewCount: -1 });
                 recommendations = [...recommendations, ...popular];
@@ -100,11 +114,21 @@ class RecommendationService {
             // 6. Section Data
             const newArrivals = await Product.find({ isApproved: true })
                 .populate('manufacturerId', 'companyName')
+                .populate({
+                    path: 'inventory',
+                    match: { stock: { $gt: 0 } },
+                    select: 'stock price'
+                })
                 .limit(8)
                 .sort({ createdAt: -1 });
 
             const trending = await Product.find({ isApproved: true })
                 .populate('manufacturerId', 'companyName')
+                .populate({
+                    path: 'inventory',
+                    match: { stock: { $gt: 0 } },
+                    select: 'stock price'
+                })
                 .limit(8)
                 .sort({ averageRating: -1, reviewCount: -1 });
 
@@ -174,11 +198,21 @@ class RecommendationService {
                 .map(b => b.metadata.productId);
 
             const resolvedHistory = await Product.find({ _id: { $in: continueViewingIds } })
-                .populate('manufacturerId', 'companyName');
+                .populate('manufacturerId', 'companyName')
+                .populate({
+                    path: 'inventory',
+                    match: { stock: { $gt: 0 } },
+                    select: 'stock price'
+                });
 
             // 10. Combos (Placeholder for now)
             const combos = await Product.find({ isApproved: true })
                 .populate('manufacturerId', 'companyName')
+                .populate({
+                    path: 'inventory',
+                    match: { stock: { $gt: 0 } },
+                    select: 'stock price'
+                })
                 .limit(4)
                 .sort({ reviewCount: 1 }); // Just pick different ones
 

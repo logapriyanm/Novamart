@@ -36,10 +36,10 @@ export default function PaymentPage() {
             try {
                 if (orderId) {
                     const res = await orderService.getOrderById(orderId);
-                    setOrder(res.data);
+                    setOrder(res);
                 } else if (razorpayOrderId) {
                     const res = await paymentService.getRazorpayOrderDetails(razorpayOrderId);
-                    setPaymentDetails(res.data);
+                    setPaymentDetails(res);
                 }
             } catch (err) {
                 console.error('Failed to load payment details:', err);
@@ -74,8 +74,8 @@ export default function PaymentPage() {
             if (orderId) {
                 // Legacy: Create payment order on demand
                 const paymentOrder = await paymentService.createPaymentOrder(orderId);
-                if (!paymentOrder.success) throw new Error('Failed to create payment order');
-                ({ razorpayOrderId: rzpOrderId, amount, currency, key, isMock } = paymentOrder.data);
+                // if (!paymentOrder.success) throw new Error('Failed to create payment order'); // Success check handled by ApiClient
+                ({ razorpayOrderId: rzpOrderId, amount, currency, key, isMock } = paymentOrder);
             } else {
                 // Batch: Use pre-existing details
                 ({ razorpayOrderId: rzpOrderId, amount, currency, key } = paymentDetails);
@@ -96,11 +96,9 @@ export default function PaymentPage() {
                             razorpay_signature: 'mock_signature'
                         });
 
-                        if (verifyRes.success) {
+                        if (verifyRes) {
                             toast.success('Payment successful!');
                             router.push(orderId ? `/checkout/success?id=${orderId}` : `/customer/orders`);
-                        } else {
-                            throw new Error('Payment verification failed');
                         }
                     } catch (err: any) {
                         toast.error(err.message || 'Payment failed');
@@ -135,12 +133,10 @@ export default function PaymentPage() {
                             razorpay_signature: response.razorpay_signature
                         });
 
-                        if (verifyRes.success) {
+                        if (verifyRes) {
                             toast.success('Payment successful!');
                             // Redirect to orders or success page. For batch, we might not have a single ID.
                             router.push(orderId ? `/checkout/success?id=${orderId}` : `/customer/orders`);
-                        } else {
-                            toast.error('Payment verification failed');
                         }
                     } catch (err: any) {
                         console.error('Payment verification error:', err);
@@ -180,12 +176,12 @@ export default function PaymentPage() {
         }
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-background text-foreground/50 font-bold uppercase tracking-widest text-xs">Processing Secure Transaction...</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center bg-background text-foreground/50 font-bold text-xs">Processing Secure Transaction...</div>;
 
     if (error) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-            <p className="text-red-500 font-bold uppercase tracking-widest">{error}</p>
-            <button onClick={() => window.location.reload()} className="text-primary underline font-bold text-xs uppercase tracking-widest">Try Again</button>
+            <p className="text-red-500 font-bold">{error}</p>
+            <button onClick={() => window.location.reload()} className="text-primary underline font-bold text-xs">Try Again</button>
         </div>
     );
 
@@ -197,13 +193,13 @@ export default function PaymentPage() {
             <div className="max-w-3xl mx-auto px-6 lg:px-12">
                 <header className="mb-12 text-center">
                     <h1 className="text-4xl font-black text-foreground tracking-tight mb-2 italic uppercase">Secure <span className="text-black">Payment</span></h1>
-                    <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">Reference: {displayId}</p>
+                    <p className="text-foreground/40 font-bold text-xs">Reference: {displayId}</p>
                 </header>
 
                 <div className="bg-white rounded-[10px] border border-foreground/[0.03] shadow-xl shadow-foreground/[0.02] overflow-hidden p-8 lg:p-12">
                     {/* Order Summary */}
                     <div className="mb-10 text-center">
-                        <p className="text-sm font-black text-foreground/30 uppercase tracking-[0.2em] mb-2">Total Amount Due</p>
+                        <p className="text-sm font-black text-foreground/30 mb-2">Total Amount Due</p>
                         <p className="text-5xl font-black text-black tracking-tighter italic">
                             ₹{Number(displayAmount).toLocaleString('en-IN')}
                         </p>
@@ -215,8 +211,8 @@ export default function PaymentPage() {
                             <HiOutlineShieldCheck className="w-6 h-6" />
                         </div>
                         <div>
-                            <h4 className="text-sm font-black text-emerald-600 uppercase tracking-widest mb-1 italic">Escrow Protection Active</h4>
-                            <p className="text-sm font-bold text-emerald-900/60 leading-relaxed uppercase tracking-widest">
+                            <h4 className="text-sm font-black text-emerald-600 mb-1 italic">Escrow Protection Active</h4>
+                            <p className="text-sm font-bold text-emerald-900/60 leading-relaxed">
                                 Your payment will be held securely in escrow. The seller will not receive funds until you confirm delivery of your order.
                             </p>
                         </div>
@@ -225,9 +221,9 @@ export default function PaymentPage() {
                     {/* Payment Form */}
                     <div className="space-y-6">
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-black text-foreground/50 uppercase tracking-widest">Razorpay Secure Checkout</label>
+                            <label className="text-sm font-black text-foreground/50">Razorpay Secure Checkout</label>
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="border-2 border-black/20 bg-black/5 text-foreground rounded-[10px] p-4 flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest">
+                                <div className="border-2 border-black/20 bg-black/5 text-foreground rounded-[10px] p-4 flex items-center justify-center gap-2 font-black text-xs">
                                     <HiOutlineCreditCard className="w-4 h-4 text-black" />
                                     <span>Card / UPI / Net Banking / Wallet</span>
                                 </div>
@@ -237,19 +233,19 @@ export default function PaymentPage() {
                         <button
                             onClick={handlePayment}
                             disabled={isProcessing}
-                            className="w-full bg-black text-white py-5 rounded-[10px] font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-black/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-black text-white py-5 rounded-[10px] font-black text-xs shadow-xl shadow-black/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <HiOutlineLockClosed className="w-4 h-4" />
                             {isProcessing ? 'Processing...' : 'Pay Securely with Razorpay'}
                         </button>
 
-                        <p className="text-center text-xs text-foreground/30 uppercase tracking-widest">
+                        <p className="text-center text-xs text-foreground/30">
                             Powered by Razorpay • PCI DSS Compliant
                         </p>
                     </div>
                 </div>
 
-                <div className="mt-8 text-center text-xs font-bold text-foreground/20 uppercase tracking-widest">
+                <div className="mt-8 text-center text-xs font-bold text-foreground/20">
                     Powered by NovaMart Secure Escrow • 256-Bit SSL Encryption
                 </div>
             </div>

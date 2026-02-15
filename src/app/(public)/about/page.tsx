@@ -100,6 +100,14 @@ export default function AboutPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
+                        className="max-w-2xl text-lg text-foreground/60 font-medium italic leading-relaxed mb-6"
+                    >
+                        Structured Commerce. Trusted Connections.
+                    </motion.p>
+                    <motion.p
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 }}
                         className="max-w-2xl text-lg text-foreground/60 font-medium italic leading-relaxed"
                     >
                         NovaMart is the world's first B2B2C connection platform built on a zero-trust governance model,

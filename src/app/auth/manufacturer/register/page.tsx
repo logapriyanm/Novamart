@@ -59,7 +59,7 @@ export default function ManufacturerRegistration() {
                         <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Current Status</p>
                         <span className="text-xs font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full border border-amber-100">Pending Verification</span>
                     </div>
-                    <Link href="/" className="inline-block w-full py-4 bg-[#067FF9] text-white rounded-[10px] font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all">
+                    <Link href="/" className="inline-block w-full py-4 bg-[#1212A1] text-white rounded-[10px] font-black text-xs uppercase tracking-widest hover:bg-[#0e0e81] transition-all">
                         Return to Public Terminal
                     </Link>
                 </motion.div>
@@ -218,7 +218,7 @@ export default function ManufacturerRegistration() {
                                         <input type="email" placeholder="signatory@company.com" className="w-full bg-white/5 border border-white/10 rounded-[10px] py-4 px-6 text-sm font-medium focus:outline-none focus:border-blue-400/30 text-white placeholder:text-slate-500" />
                                         <div className="flex gap-4">
                                             <input type="text" placeholder="OTP Code" className="flex-1 bg-white/5 border border-white/10 rounded-[10px] py-4 px-6 text-sm font-medium focus:outline-none focus:border-blue-400/30 text-white" />
-                                            <button className="px-6 py-4 bg-blue-600 rounded-[10px] text-sm font-black uppercase tracking-widest">Send OTP</button>
+                                            <button className="px-6 py-4 bg-[#1212A1] rounded-[10px] text-sm font-black uppercase tracking-widest">Send OTP</button>
                                         </div>
                                     </div>
                                 </div>

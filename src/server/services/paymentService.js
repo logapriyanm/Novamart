@@ -35,13 +35,18 @@ class PaymentService {
             throw new Error('Payment gateway not configured');
         }
 
+        // Validation for Amount
+        if (!amount || isNaN(amount) || amount <= 0) {
+            throw new Error(`Invalid payment amount: ${amount}`);
+        }
+
         const options = {
             amount: Math.round(amount * 100), // amount in paisa
             currency: 'INR',
             receipt: `batch_${Date.now()}`,
             notes: {
                 type: 'BATCH_ORDER',
-                orderIds: JSON.stringify(orderIds),
+                orderIds: JSON.stringify(orderIds).substring(0, 1024), // Truncate notes if too long
                 customerId: customerId.toString()
             }
         };
@@ -51,7 +56,8 @@ class PaymentService {
             return order;
         } catch (error) {
             logger.error('Razorpay Create Order Failed:', error);
-            throw new Error('Failed to initialize payment gateway');
+            // Throw specific error description from Razorpay if available
+            throw new Error(error.error?.description || error.description || error.message || 'Failed to initialize payment gateway');
         }
     }
 

@@ -137,7 +137,7 @@ function ProfileContent() {
                                         <FaUser className="w-10 h-10 text-slate-300" />
                                     )}
                                 </div>
-                                <label className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-all shadow-lg border-2 border-white">
+                                <label className="absolute bottom-0 right-0 w-8 h-8 bg-[#1212A1] text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-[#0e0e81] transition-all shadow-lg border-2 border-white">
                                     <FaCamera className="w-3 h-3" />
                                     <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} />
                                 </label>
@@ -150,7 +150,7 @@ function ProfileContent() {
                             <div className="flex-1 text-center md:text-left">
                                 <div className="flex items-center justify-center md:justify-between mb-4">
                                     <h3 className="text-xl font-black text-slate-800 tracking-tight">Personal Information</h3>
-                                    <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-[10px] text-sm font-black tracking-widest shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all">
+                                    <button className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-[#1212A1] text-white rounded-[10px] text-sm font-black tracking-widest shadow-lg shadow-[#1212A1]/20 hover:bg-[#0e0e81] transition-all">
                                         <FaEdit className="w-3 h-3" /> Edit Profile
                                     </button>
                                 </div>
@@ -159,17 +159,41 @@ function ProfileContent() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {[
-                                { label: 'Full Name', value: user?.name, icon: FaUser },
-                                { label: 'Email Address', value: user?.email, icon: FaBell },
-                                { label: 'Phone Number', value: user?.phone || '+91 98765 43210', icon: FaComments },
-                                { label: 'Primary Address', value: user?.address || '123 Enterprise Way, Tech City, 560001', icon: FaMapMarkerAlt },
+                                { label: 'Full Name', value: String(user?.name || ''), icon: FaUser },
+                                { label: 'Email Address', value: String(user?.email || ''), icon: FaBell },
+                                { label: 'Phone Number', value: String(user?.phone || '+91 98765 43210'), icon: FaComments },
+                                {
+                                    label: 'Primary Address',
+                                    value: (() => {
+                                        try {
+                                            const addr = user?.address;
+                                            if (!addr) return 'No primary address set';
+                                            if (typeof addr === 'string') return addr;
+                                            if (typeof addr === 'object') {
+                                                const a = addr as any;
+                                                // Explicitly extract primitive values
+                                                const parts = [
+                                                    String(a?.line1 || ''),
+                                                    String(a?.city || ''),
+                                                    String(a?.state || ''),
+                                                    String(a?.zip || '')
+                                                ];
+                                                return parts.filter(p => p !== '').join(', ');
+                                            }
+                                            return String(addr);
+                                        } catch (e) {
+                                            return 'Address Error';
+                                        }
+                                    })(),
+                                    icon: FaMapMarkerAlt
+                                },
                             ].map((field, idx) => (
                                 <div key={idx} className="space-y-2 p-6 bg-slate-50/50 rounded-[10px] border border-slate-100">
                                     <div className="flex items-center gap-2 text-sm font-black text-slate-400 tracking-widest">
                                         <field.icon className="w-3 h-3 text-blue-600" />
                                         {field.label}
                                     </div>
-                                    <p className="text-sm font-bold text-slate-800">{field.value}</p>
+                                    <p className="text-sm font-bold text-slate-800">{String(field.value)}</p>
                                 </div>
                             ))}
                         </div>
@@ -189,10 +213,10 @@ function ProfileContent() {
                                         <FaBox className="w-8 h-8 text-slate-300" />
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-black text-slate-400 tracking-widest leading-none mb-1">{order.id ? `NM-${order.id.slice(0, 5).toUpperCase()}` : 'ORDER'}</p>
-                                        <h4 className="font-black text-slate-800 mb-2">{order.items?.[0]?.linkedProduct?.name || `Order #${order.id.slice(0, 5)}`} {order.items?.length > 1 && `+ ${order.items.length - 1} more`}</h4>
+                                        <p className="text-sm font-black text-slate-400 tracking-widest leading-none mb-1">{order.id ? `NM-${String(order.id).slice(0, 5).toUpperCase()}` : 'ORDER'}</p>
+                                        <h4 className="font-black text-slate-800 mb-2">{String(order.items?.[0]?.linkedProduct?.name || `Order #${String(order.id).slice(0, 5)}`)} {order.items?.length > 1 && `+ ${order.items.length - 1} more`}</h4>
                                         <span className={`px-3 py-1 rounded-[10px] text-xs font-black tracking-widest ${order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
-                                            {order.status}
+                                            {String(order.status)}
                                         </span>
                                     </div>
                                     <div className="text-right pr-4">
@@ -214,7 +238,7 @@ function ProfileContent() {
                             <h1 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Need Assistance?</h1>
                             <p className="text-slate-400 text-sm font-bold mt-2">Our technical experts are available 24/7 to resolve your issues.</p>
                         </div>
-                        <button className="px-10 py-4 bg-blue-600 text-white rounded-[10px] text-sm font-black shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all transform active:scale-95">
+                        <button className="px-10 py-4 bg-[#1212A1] text-white rounded-[10px] text-sm font-black shadow-xl shadow-[#1212A1]/20 hover:bg-[#0e0e81] transition-all transform active:scale-95">
                             Open New Support Ticket
                         </button>
                     </Card>
@@ -234,13 +258,13 @@ function ProfileContent() {
                                             {review.product?.images?.[0] && <img src={review.product.images[0]} className="w-full h-full object-cover" />}
                                         </div>
                                         <div>
-                                            <p className="text-xs font-black text-slate-800 line-clamp-1">{review.product?.name || 'Product Review'}</p>
+                                            <p className="text-xs font-black text-slate-800 line-clamp-1">{String(review.product?.name || 'Product Review')}</p>
                                             <div className="flex gap-1 mt-1">
                                                 {[1, 2, 3, 4, 5].map(s => <FaStar key={s} className={`w-2 h-2 ${s <= review.rating ? 'text-amber-500' : 'text-slate-200'}`} />)}
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-slate-500 font-bold leading-relaxed italic border-l-2 border-slate-100 pl-4">"{review.comment}"</p>
+                                    <p className="text-xs text-slate-500 font-bold leading-relaxed italic border-l-2 border-slate-100 pl-4">"{String(review.comment)}"</p>
                                 </Card>
                             ))
                         )}
@@ -283,7 +307,7 @@ function ProfileContent() {
                                     <div key={addr._id} className="relative p-6 border-2 border-slate-100 rounded-[10px] hover:border-slate-300 transition-all group">
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="flex items-center gap-2">
-                                                <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded">{addr.label}</span>
+                                                <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded">{String(addr.label || 'Home')}</span>
                                                 {addr.isDefault && <span className="px-2 py-1 bg-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded">Default</span>}
                                             </div>
                                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -305,11 +329,11 @@ function ProfileContent() {
                                                 ><FaSignOutAlt className="rotate-180" /></button>
                                             </div>
                                         </div>
-                                        <p className="font-bold text-slate-800 text-sm mb-1">{addr.name}</p>
+                                        <p className="font-bold text-slate-800 text-sm mb-1">{typeof addr.name === 'string' ? addr.name : 'Unknown Contact'}</p>
                                         <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                                            {addr.line1}<br />
-                                            {addr.city}, {addr.state} - {addr.zip}<br />
-                                            Phone: {addr.phone || 'N/A'}
+                                            {String(addr.line1 || '')}<br />
+                                            {String(addr.city || '')}, {String(addr.state || '')} - {String(addr.zip || '')}<br />
+                                            Phone: {typeof addr.phone === 'string' ? addr.phone : 'N/A'}
                                         </p>
                                     </div>
                                 ))}

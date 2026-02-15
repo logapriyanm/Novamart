@@ -199,7 +199,7 @@ function AddProductContent() {
                 <div className="lg:col-span-5 space-y-6 pt-6">
                     <div className="bg-white rounded-[24px] p-8 border border-foreground/5 shadow-2xl shadow-black/[0.02] sticky top-32">
                         <div className="flex items-center gap-3 mb-8">
-                            <div className="w-8 h-8 rounded-[8px] bg-blue-600 flex items-center justify-center text-white">
+                            <div className="w-8 h-8 rounded-[8px] bg-[#1212A1] flex items-center justify-center text-white">
                                 <FaCalculator className="w-3.5 h-3.5" />
                             </div>
                             <h3 className="text-base font-black text-foreground tracking-tight">Profit Calculator</h3>

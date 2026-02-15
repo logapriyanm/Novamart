@@ -36,6 +36,8 @@ export default function FeaturedProducts() {
                             name: p.manufacturer?.companyName || 'Verified Seller',
                             isVerified: p.manufacturer?.isVerified || false
                         },
+                        stock: firstInventory?.stock || 0,
+                        inventoryId: firstInventory?._id,
                         highlights: {
                             freeDelivery: price > 1000,
                             installation: ['air-conditioners', 'washing-machines', 'refrigerators', 'dishwashers'].some(c => p.category?.toLowerCase().includes(c)),

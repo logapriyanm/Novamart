@@ -95,8 +95,8 @@ export default function ReviewForm({ type, orderId, targetId, orderItemId, onSuc
     const StarRating = ({ value, onChange, label, size = 'md' }: any) => {
         const [hover, setHover] = useState(0);
         return (
-            <div className="flex flex-col gap-1">
-                {label && <span className="text-sm font-medium text-slate-600">{label}</span>}
+            <div className="flex items-center justify-between gap-4 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                {label && <span className="text-sm font-semibold text-slate-700">{label}</span>}
                 <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -123,8 +123,13 @@ export default function ReviewForm({ type, orderId, targetId, orderItemId, onSuc
             </h3>
 
             {/* Main Rating */}
-            <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 flex flex-col items-center gap-2">
-                <span className="text-lg font-semibold text-slate-700">Overall Rating</span>
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 flex flex-row items-center justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                    <span className="text-lg font-semibold text-slate-700">Overall Rating</span>
+                    <span className="text-sm font-medium text-slate-500">
+                        {rating === 5 ? 'Excellent!' : rating === 4 ? 'Great' : rating === 3 ? 'Average' : rating === 2 ? 'Poor' : rating === 1 ? 'Terrible' : 'Select a rating'}
+                    </span>
+                </div>
                 <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -140,17 +145,14 @@ export default function ReviewForm({ type, orderId, targetId, orderItemId, onSuc
                         </button>
                     ))}
                 </div>
-                <span className="text-sm font-medium text-slate-500">
-                    {rating === 5 ? 'Excellent!' : rating === 4 ? 'Great' : rating === 3 ? 'Average' : rating === 2 ? 'Poor' : rating === 1 ? 'Terrible' : 'Select a rating'}
-                </span>
             </div>
 
             {/* Seller Specific Ratings */}
             {type === 'SELLER' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <StarRating label="Delivery" value={deliveryRating} onChange={setDeliveryRating} />
-                    <StarRating label="Packaging" value={packagingRating} onChange={setPackagingRating} />
-                    <StarRating label="Communication" value={communicationRating} onChange={setCommunicationRating} />
+                <div className="space-y-3">
+                    <StarRating label="Delivery Speed" value={deliveryRating} onChange={setDeliveryRating} />
+                    <StarRating label="Product Packaging" value={packagingRating} onChange={setPackagingRating} />
+                    <StarRating label="Seller Communication" value={communicationRating} onChange={setCommunicationRating} />
                 </div>
             )}
 

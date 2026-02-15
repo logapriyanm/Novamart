@@ -74,13 +74,13 @@ export default function SellerProducts() {
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-200">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight italic">My <span className="text-[#067FF9]">Inventory</span></h1>
+                    <h1 className="text-3xl font-black tracking-tight italic">My <span className="text-secondary">Inventory</span></h1>
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1">Manage Listings & Visuals</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <Link
                         href="/seller/discovery"
-                        className="px-6 py-4 bg-[#067FF9] text-white rounded-[10px] font-black text-sm uppercase tracking-[0.1em] shadow-lg shadow-[#067FF9]/30 hover:scale-[1.05] active:scale-[0.98] transition-all flex items-center gap-3"
+                        className="px-6 py-4 bg-primary text-white rounded-[10px] font-black text-sm uppercase tracking-[0.1em] shadow-lg shadow-primary/30 hover:scale-[1.05] active:scale-[0.98] transition-all flex items-center gap-3"
                     >
                         <FaPlus className="w-4 h-4" />
                         Source New Product
@@ -92,13 +92,13 @@ export default function SellerProducts() {
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between sticky top-0 bg-[#f8fafc] z-20 py-4 -my-4 px-1">
                 {/* Search */}
                 <div className="relative w-full sm:w-96 group">
-                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#067FF9] transition-colors" />
+                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                     <input
                         type="text"
                         placeholder="Search products..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#067FF9]/10 focus:border-[#067FF9] transition-all shadow-sm"
+                        className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all shadow-sm"
                     />
                 </div>
 
@@ -109,8 +109,8 @@ export default function SellerProducts() {
                             key={f}
                             onClick={() => setFilter(f as any)}
                             className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${filter === f
-                                    ? 'bg-white text-[#067FF9] shadow-sm'
-                                    : 'text-slate-400 hover:text-slate-600'
+                                ? 'bg-white text-primary shadow-sm'
+                                : 'text-slate-400 hover:text-slate-600'
                                 }`}
                         >
                             {f === 'ALL' ? 'All Items' : f}
@@ -133,7 +133,7 @@ export default function SellerProducts() {
                         <h3 className="text-xl font-black italic text-slate-900">No products found</h3>
                         <p className="text-slate-400 font-medium mt-2">Try adjusting your search or filters.</p>
                         {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="mt-6 text-[#067FF9] font-bold text-sm hover:underline">
+                            <button onClick={() => setSearchQuery('')} className="mt-6 text-primary font-bold text-sm hover:underline">
                                 Clear Search
                             </button>
                         )}

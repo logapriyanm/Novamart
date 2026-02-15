@@ -235,7 +235,7 @@ export default function ManufacturerApprovalPanel() {
                                                     <p className="text-sm font-bold text-slate-400 mb-0.5">Registration</p>
                                                     <p className="text-sm font-bold text-slate-600 truncate max-w-[120px]">{mfg.registrationNo}</p>
                                                 </div>
-                                                <button className="w-10 h-10 rounded-[10px] bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                                <button className="w-10 h-10 rounded-[10px] bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#1212A1] group-hover:text-white transition-all">
                                                     <FaArrowRight className="w-3 h-3" />
                                                 </button>
                                             </div>
@@ -344,7 +344,7 @@ export default function ManufacturerApprovalPanel() {
                                                 <button
                                                     onClick={() => handleAction(selectedRequest._id || selectedRequest.id, true)}
                                                     disabled={isVerifying}
-                                                    className="group/btn relative py-3 bg-[#067FF9] hover:bg-blue-600 text-white rounded-[10px] font-black text-sm shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
+                                                    className="group/btn relative py-3 bg-[#1212A1] hover:bg-[#0e0e81] text-white rounded-[10px] font-black text-sm shadow-2xl shadow-[#1212A1]/20 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 overflow-hidden"
                                                 >
                                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shine" />
                                                     <div className="flex items-center justify-center gap-3">

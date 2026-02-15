@@ -24,7 +24,7 @@ export default function WhyNovaMart({ features = [] }: WhyNovaMartProps) {
                         Platform Governance
                     </div>
                     <h2 className="text-3xl xs:text-4xl lg:text-5xl font-bold text-black tracking-tight mb-6">
-                        Why the world trusts <span className="text-black/40">NovaMart</span>
+                        Why the world trusts <span className="text-[#1212A1] italic text-[48px]">NovaMart</span>
                     </h2>
                     <p className="text-sm xs:text-base text-foreground/60 font-medium italic">
                         "Building India's most secure digital bridge between manufacturers and global consumers."

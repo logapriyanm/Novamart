@@ -13,6 +13,7 @@ router.use(authorize(['CUSTOMER', 'ADMIN', 'MANUFACTURER', 'SELLER'], [], ['ACTI
 router.get('/', wishlistController.getWishlist);
 router.post('/', wishlistController.toggleWishlist); // Handle add/toggle via root POST
 router.post('/toggle', wishlistController.toggleWishlist);
+router.delete('/', wishlistController.clearWishlist);
 router.delete('/:productId', wishlistController.removeFromWishlist);
 
 export default router;

@@ -1,5 +1,6 @@
 import { Cart, Customer, Inventory, Product } from '../models/index.js';
 import mongoose from 'mongoose';
+import logger from '../lib/logger.js';
 
 // Get Cart for authenticated customer
 export const getCart = async (req, res) => {
@@ -228,7 +229,7 @@ export const clearCart = async (req, res) => {
 
         await Cart.findOneAndUpdate({ customerId: customer._id }, { $set: { items: [] } });
 
-        res.json({ success: true, message: 'Cart cleared' });
+        res.json({ success: true, data: { message: 'Cart cleared' } });
     } catch (error) {
         console.error('Clear Cart Error:', error);
         res.status(500).json({ success: false, error: 'Failed to clear cart' });

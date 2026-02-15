@@ -51,6 +51,8 @@ export default function ComboOfferProducts({ products }: ComboOfferProductsProps
                             reviewsCount={89}
                             brand={product.manufacturer?.companyName || 'NovaMart'}
                             seller={{ name: 'Verified Bundle', isVerified: true }}
+                            inventoryId={product.inventory?.[0]?._id}
+                            stock={product.inventory?.[0]?.stock || 0}
                             highlights={{ freeDelivery: true, installation: true, warranty: '1 Year' }}
                         />
                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[80%] bg-emerald-500 text-white text-[8px] font-black py-1 rounded-full uppercase tracking-widest text-center shadow-lg shadow-emerald-900/20 pointer-events-none">

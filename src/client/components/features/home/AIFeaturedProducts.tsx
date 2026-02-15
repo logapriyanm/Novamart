@@ -59,6 +59,8 @@ export default function AIFeaturedProducts({ products }: AIFeaturedProductsProps
                             reviewsCount={product.reviewCount || 42}
                             brand={product.manufacturer?.companyName || 'NovaMart'}
                             seller={{ name: 'AI Verified', isVerified: true }}
+                            inventoryId={product.inventory?.[0]?._id}
+                            stock={product.inventory?.[0]?.stock || 0}
                             highlights={{ freeDelivery: true, installation: true, warranty: '2 Year' }}
                         />
                     </motion.div>

@@ -93,7 +93,7 @@ export default function SupportPage() {
                         whileHover={{ y: -5 }}
                         className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/5 group cursor-pointer"
                     >
-                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <div className="w-16 h-16 bg-[#1212A1]/10 text-[#1212A1] rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-[#1212A1] group-hover:text-white transition-colors">
                             <FaShoppingCart />
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-3">I am a Buyer</h3>
@@ -118,7 +118,7 @@ export default function SupportPage() {
 
                     {/* Seller Card */}
                     <Link href="/seller/support" className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/5 group cursor-pointer">
-                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <div className="w-16 h-16 bg-[#1212A1]/10 text-[#1212A1] rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-[#1212A1] group-hover:text-white transition-colors">
                             <FaStore /> {/* Using FaStore as 'Store' was not imported */}
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-3">I am a Seller</h3>
@@ -146,7 +146,7 @@ export default function SupportPage() {
                         whileHover={{ y: -5 }}
                         className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-600/5 group cursor-pointer"
                     >
-                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <div className="w-16 h-16 bg-[#1212A1]/10 text-[#1212A1] rounded-[10px] flex items-center justify-center mb-6 text-2xl group-hover:bg-[#1212A1] group-hover:text-white transition-colors">
                             <FaIndustry />
                         </div>
                         <h3 className="text-xl font-black text-slate-800 mb-3">I am a Manufacturer</h3>

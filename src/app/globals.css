@@ -6,9 +6,9 @@
 
   /* stylelint-disable at-rule-no-unknown */
   :root {
-    --primary: #067FF9;
-    /* Blue Accent */
-    --secondary: #067FF9;
+    --primary: #1212A1;
+    /* Deep Blue Accent */
+    --secondary: #000000;
     /* Black */
     --accent: #000000;
     --background: #FFFFFF;
@@ -53,6 +53,19 @@
     /* border-color: color-mix(in srgb, var(--foreground), transparent 90%); equivalent to 10% opacity */
     border-color: rgba(0, 0, 0, 0.1);
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Global cursor pointer for all interactive elements */
+  button,
+  a,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  select,
+  label[for],
+  summary {
+    cursor: pointer;
   }
 
   /* Typography System - Production Standards */

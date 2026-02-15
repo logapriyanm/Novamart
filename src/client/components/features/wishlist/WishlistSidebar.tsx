@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaPlus, FaShareAlt } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
@@ -8,33 +8,30 @@ import { useAuth } from "../../../context/AuthContext";
 import { toast } from "sonner";
 import { useCart } from "../../../context/CartContext";
 import OptimizedImage from "../../ui/OptimizedImage";
-
-const recommendations = [
-  {
-    id: "r1",
-    name: "Silent Mechanical Keyboard",
-    price: 79.99,
-    image:
-      "https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=200&auto=format&fit=crop",
-  },
-  {
-    id: "r2",
-    name: "Height Adjustable Converter",
-    price: 199.0,
-    image:
-      "https://images.unsplash.com/photo-1595846519845-68e298c2edd8?q=80&w=200&auto=format&fit=crop",
-  },
-  {
-    id: "r3",
-    name: "USB-C 12-in-1 Docking Station",
-    price: 149.0,
-    image:
-      "https://images.unsplash.com/photo-1625723044792-44de16ccb4e9?q=80&w=200&auto=format&fit=crop",
-  },
-];
+import { productService } from "@/lib/api/services/product.service";
 
 export default function WishlistSidebar() {
   // const { showSnackbar } = useSnackbar();
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      try {
+        // Fetch some products, maybe specific category if possible, or just default
+        const response = await productService.getAllProducts({ limit: 3 });
+        if (response && response.products) {
+          setRecommendations(response.products.slice(0, 3));
+        }
+      } catch (error) {
+        console.error("Failed to fetch recommendations", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecommendations();
+  }, []);
 
   const handleShare = () => {
     toast.success("Wishlist shared successfully");
@@ -51,45 +48,59 @@ export default function WishlistSidebar() {
           </h3>
         </div>
         <p className="text-sm text-muted-foreground font-medium mb-6 leading-relaxed">
-          Based on your "Home Office" wishlist and recent saves.
+          Based on your wishlist and recent saves.
         </p>
 
         <div className="space-y-6">
-          {recommendations.map((item) => (
-            <Link
-              href={`/products/${item.id}`}
-              key={item.id}
-              className="flex gap-4 group"
-            >
-              <div className="w-12 h-12 bg-muted/20 rounded-[5px] overflow-hidden shrink-0 border border-border group-hover:border-primary/20 transition-colors">
-                <OptimizedImage
-                  src={item.image}
-                  alt={item.name}
-                  width={48}
-                  height={48}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
-                  {item.name}
-                </h4>
-                <p className="text-xs text-muted-foreground font-medium mb-1">
-                  From ${item.price.toFixed(2)}
-                </p>
-                <button className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
-                  Quick Add <FaPlus className="w-2 h-2" />
-                </button>
-              </div>
-            </Link>
-          ))}
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="flex gap-4 animate-pulse">
+                  <div className="w-12 h-12 bg-gray-200 rounded"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-2 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            recommendations.map((item) => (
+              <Link
+                href={`/products/${item.id}`}
+                key={item.id}
+                className="flex gap-4 group"
+              >
+                <div className="w-12 h-12 bg-muted/20 rounded-[5px] overflow-hidden shrink-0 border border-border group-hover:border-primary/20 transition-colors">
+                  <OptimizedImage
+                    src={item.images?.[0] || 'https://placehold.co/200x200'}
+                    alt={item.name}
+                    width={48}
+                    height={48}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                    {item.name}
+                  </h4>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">
+                    From ₹{(item.basePrice || item.price || 0).toLocaleString()}
+                  </p>
+                  <button className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                    Quick View <FaPlus className="w-2 h-2" />
+                  </button>
+                </div>
+              </Link>
+            ))
+          )}
         </div>
 
         <Link
-          href="/recommendations"
+          href="/products"
           className="block w-full py-3 mt-6 border border-border text-foreground text-center rounded-[10px] text-sm font-bold hover:bg-muted/10 transition-colors"
         >
-          View All Recommendations
+          View All Products
         </Link>
       </div>
 
@@ -113,3 +124,4 @@ export default function WishlistSidebar() {
     </aside>
   );
 }
+

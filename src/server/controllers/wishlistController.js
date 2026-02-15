@@ -18,7 +18,7 @@ export const getWishlist = async (req, res) => {
         // Extract products from wishlist items
         const products = items.map(item => item.productId).filter(p => p !== null);
 
-        res.json({ success: true, data: products });
+        res.json({ success: true, data: products.map(p => ({ ...p.toObject ? p.toObject() : p, id: p._id || p.id })) });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -39,11 +39,11 @@ export const toggleWishlist = async (req, res) => {
 
         if (existing) {
             await Wishlist.findByIdAndDelete(existing._id);
-            return res.json({ success: true, message: 'Removed from wishlist', action: 'REMOVED' });
+            return res.json({ success: true, data: { message: 'Removed from wishlist', action: 'REMOVED', productId } });
         } else {
             const newItem = new Wishlist({ customerId: customer._id, productId });
             await newItem.save();
-            return res.status(201).json({ success: true, message: 'Added to wishlist', action: 'ADDED' });
+            return res.status(201).json({ success: true, data: { message: 'Added to wishlist', action: 'ADDED', productId } });
         }
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -62,7 +62,24 @@ export const removeFromWishlist = async (req, res) => {
         if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
 
         await Wishlist.findOneAndDelete({ customerId: customer._id, productId });
-        res.json({ success: true, message: 'Removed from wishlist' });
+        res.json({ success: true, data: { message: 'Removed from wishlist' } });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+/**
+ * Clear Wishlist
+ */
+export const clearWishlist = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const customer = await Customer.findOne({ userId });
+
+        if (!customer) return res.status(403).json({ success: false, error: 'Customer profile required' });
+
+        await Wishlist.deleteMany({ customerId: customer._id });
+        res.json({ success: true, data: { message: 'Wishlist cleared' } });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -71,5 +88,6 @@ export const removeFromWishlist = async (req, res) => {
 export default {
     getWishlist,
     toggleWishlist,
-    removeFromWishlist
+    removeFromWishlist,
+    clearWishlist
 };

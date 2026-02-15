@@ -206,7 +206,7 @@ export default function SellerProductEdit({ params }: { params: Promise<{ id: st
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="px-6 py-2 bg-[#067FF9] text-white rounded-lg font-bold shadow-lg hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
+                        className="px-6 py-2 bg-[#1212A1] text-white rounded-lg font-bold shadow-lg hover:bg-[#0e0e81] active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}
                         <FaSave />

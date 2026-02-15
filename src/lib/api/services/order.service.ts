@@ -13,24 +13,24 @@ export interface OrderCreateData {
 }
 
 export const orderService = {
-    async createOrder(data: OrderCreateData): Promise<ApiResponse<any>> {
-        return apiClient.post<ApiResponse<any>>('/orders', data);
+    async createOrder(data: OrderCreateData): Promise<any> {
+        return apiClient.post<any>('/orders', data);
     },
 
-    async getOrderById(id: string): Promise<ApiResponse<any>> {
-        return apiClient.get<ApiResponse<any>>(`/orders/${id}`);
+    async getOrderById(id: string): Promise<any> {
+        return apiClient.get<any>(`/orders/${id}`);
     },
 
     async getCustomerOrders(): Promise<any[]> {
         return apiClient.get<any[]>('/orders/my');
     },
 
-    async updateStatus(orderId: string, status: string): Promise<ApiResponse<any>> {
-        return apiClient.patch<ApiResponse<any>>(`/orders/${orderId}/status`, { status });
+    async updateStatus(orderId: string, status: string): Promise<any> {
+        return apiClient.patch<any>(`/orders/${orderId}/status`, { status });
     },
 
-    async getPaymentDetails(orderId: string): Promise<ApiResponse<any>> {
-        return apiClient.get<ApiResponse<any>>(`/orders/${orderId}/payment`);
+    async getPaymentDetails(orderId: string): Promise<any> {
+        return apiClient.get<any>(`/orders/${orderId}/payment`);
     }
 };
 

@@ -42,6 +42,11 @@ export const getGuestHome = async (req, res) => {
     try {
         const featuredProducts = await Product.find({ isApproved: true })
             .populate('manufacturerId', 'companyName')
+            .populate({
+                path: 'inventory',
+                match: { stock: { $gt: 0 } },
+                select: 'stock price'
+            })
             .limit(8)
             .sort({ createdAt: -1 });
 

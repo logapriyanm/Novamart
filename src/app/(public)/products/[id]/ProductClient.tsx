@@ -234,7 +234,7 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
 
         try {
             await addToCart({
-                inventoryId: inventory.id,
+                inventoryId: inventory.id || inventory._id,
                 productId: product.id,
                 name: displayProduct.name,
                 price: parseFloat(inventory.price),

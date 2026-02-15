@@ -9,16 +9,16 @@ export interface PaymentVerifyData {
 }
 
 export const paymentService = {
-    async createPaymentOrder(orderId: string): Promise<ApiResponse<any>> {
-        return apiClient.post<ApiResponse<any>>('/payments/create-order', { orderId });
+    async createPaymentOrder(orderId: string): Promise<any> {
+        return apiClient.post<any>('/payments/create-order', { orderId });
     },
 
-    async verifyPayment(data: PaymentVerifyData): Promise<ApiResponse<any>> {
-        return apiClient.post<ApiResponse<any>>('/payments/verify', data);
+    async verifyPayment(data: PaymentVerifyData): Promise<any> {
+        return apiClient.post<any>('/payments/verify', data);
     },
 
-    async getRazorpayOrderDetails(razorpayOrderId: string): Promise<ApiResponse<any>> {
-        return apiClient.get<ApiResponse<any>>(`/payments/razorpay/${razorpayOrderId}`);
+    async getRazorpayOrderDetails(razorpayOrderId: string): Promise<any> {
+        return apiClient.get<any>(`/payments/razorpay/${razorpayOrderId}`);
     }
 };
 

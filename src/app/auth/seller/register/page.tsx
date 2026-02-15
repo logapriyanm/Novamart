@@ -60,7 +60,7 @@ export default function SellerRegistration() {
                         <p className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Account Protocol State</p>
                         <span className="text-xs font-black text-[#067FF9] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Audit Pending</span>
                     </div>
-                    <Link href="/" className="inline-block w-full py-4 bg-[#067FF9] text-white rounded-[10px] font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all">
+                    <Link href="/" className="inline-block w-full py-4 bg-[#1212A1] text-white rounded-[10px] font-black text-xs uppercase tracking-widest hover:bg-[#0e0e81] transition-all">
                         Exit to Terminal
                     </Link>
                 </motion.div>

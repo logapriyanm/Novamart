@@ -42,10 +42,10 @@ export default function RecommendedSection({ data }: RecommendedSectionProps) {
                             reviewsCount={product.reviewCount || 120}
                             brand={product.manufacturer?.companyName || 'NovaMart'}
                             seller={{
-                                id: bestInventory?.sellerId, // Critical for Add to Cart
                                 name: bestInventory?.seller?.businessName || 'NovaMart Official',
                                 isVerified: product.manufacturer?.isVerified || true
                             }}
+                            stock={bestInventory?.stock || 0}
                             highlights={{
                                 freeDelivery: true,
                                 installation: product.category === 'Appliances',
