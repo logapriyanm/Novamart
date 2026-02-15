@@ -38,7 +38,7 @@ export default function SellerAnalyticsDashboard() {
         <div className="space-y-8">
             {/* Daily Sales */}
             <ChartCard title="Daily Sales" currentRange={range} onRangeChange={setRange}>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <AreaChart data={data.salesChart}>
                         <defs>
                             <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
@@ -58,7 +58,7 @@ export default function SellerAnalyticsDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Sales Volume */}
                 <ChartCard title="Order Volume">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                         <BarChart data={data.salesChart}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                             <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />

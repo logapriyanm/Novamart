@@ -396,9 +396,9 @@ export const getManufacturerDetails = async (req, res) => {
 
 export const requestManufacturerAccess = async (req, res) => {
     const userId = req.user._id; // Use Requesting User ID
-    const { manufacturerId, ...metadata } = req.body;
+    const { manufacturerId, productId, ...metadata } = req.body;
     try {
-        const request = await sellerService.requestAccess(userId, manufacturerId, metadata);
+        const request = await sellerService.requestAccess(userId, manufacturerId, { ...metadata, productId });
         res.status(201).json({
             success: true,
             message: 'Access request sent successfully',

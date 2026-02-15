@@ -75,6 +75,7 @@ export default function ManufacturerProfilePage() {
         region: '',
         priceExpectation: ''
     });
+    const [requestProductId, setRequestProductId] = useState<string | null>(null); // NEW: Track target product
     const [submitting, setSubmitting] = useState(false);
 
     // Negotiation Modal
@@ -108,11 +109,14 @@ export default function ManufacturerProfilePage() {
         try {
             await apiClient.post('/seller/request-access', {
                 manufacturerId: manufacturer?._id,
+                productId: requestProductId, // NEW: Send productId
                 ...requestForm,
                 expectedQuantity: Number(requestForm.expectedQuantity)
             });
             setShowRequestModal(false);
+            setRequestProductId(null); // Reset
             fetchDetails();
+            toast.success('Request sent successfully');
         } catch (error: any) {
             alert(error.message || 'Failed to send request');
         } finally {
@@ -265,7 +269,10 @@ export default function ManufacturerProfilePage() {
                                 </div>
                             ) : (
                                 <button
-                                    onClick={() => setShowRequestModal(true)}
+                                    onClick={() => {
+                                        setRequestProductId(null); // General Request
+                                        setShowRequestModal(true);
+                                    }}
                                     className="px-6 py-2.5 bg-black text-white rounded-[10px] font-medium hover:bg-gray-800 transition-all flex items-center shadow-lg shadow-black/10"
                                 >
                                     <Send className="h-4 w-4 mr-2" />
@@ -338,6 +345,7 @@ export default function ManufacturerProfilePage() {
                                                 openSourceModal(product);
                                             } else {
                                                 setRequestForm(prev => ({ ...prev, message: `I am interested in sourcing ${product.name}. Please approve my partnership request.` }));
+                                                setRequestProductId(product._id); // NEW: Set Request Product ID
                                                 setShowRequestModal(true);
                                             }
                                         }}
@@ -527,6 +535,7 @@ export default function ManufacturerProfilePage() {
                                         onClick={() => {
                                             setSelectedProduct(null);
                                             setRequestForm(prev => ({ ...prev, message: `I am interested in sourcing ${selectedProduct.name}. Please approve my partnership request.` }));
+                                            setRequestProductId(selectedProduct._id); // NEW
                                             setShowRequestModal(true);
                                         }}
                                         className="flex-1 py-3 text-sm font-medium text-white bg-black rounded-[10px] hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-black/10"

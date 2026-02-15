@@ -52,7 +52,7 @@ export const getOrders = async (req, res) => {
 export const getMyOrders = async (req, res) => {
     try {
         const userId = req.user._id;
-        const orders = await orderService.getOrders('CUSTOMER', userId);
+        const orders = await orderService.getOrders('CUSTOMER', userId, req.query);
         res.json({ success: true, data: orders });
     } catch (error) {
         res.status(500).json({ success: false, error: 'Failed to fetch your orders' });

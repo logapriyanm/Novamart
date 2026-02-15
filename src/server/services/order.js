@@ -476,6 +476,10 @@ class OrderService {
             query.status = status.toUpperCase();
         }
 
+        if (filters.productId) {
+            query['items.productId'] = filters.productId;
+        }
+
         const orders = await Order.find(query)
             .populate('customerId', 'name')
             .populate('items.productId', 'name images')

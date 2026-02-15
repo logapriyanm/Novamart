@@ -551,7 +551,7 @@ class SellerService {
      * Request access to a manufacturer's product line.
      */
     async requestAccess(userId, manufacturerId, metadata = {}) {
-        const { message, expectedQuantity, region, priceExpectation } = metadata;
+        const { message, expectedQuantity, region, priceExpectation, productId } = metadata;
 
         // 1. Resolve Seller Profile from User ID
         const seller = await Seller.findOne({ userId });
@@ -573,12 +573,28 @@ class SellerService {
 
         const resolvedMfgId = manufacturer._id;
 
-        // 3. Check for Existing Request
-        const existing = await SellerRequest.findOne({ sellerId, manufacturerId: resolvedMfgId });
+        // 3. Check for Existing Request (Specific to Product if provided)
+        const query = { sellerId, manufacturerId: resolvedMfgId };
+        if (productId) {
+            query.productId = productId;
+        } else {
+            // If no productId, check for general partnership request where productId is null/undefined
+            query.productId = { $exists: false }; // Or null, depending on how mixed handling works. Better to be explicit if possible.
+            // Actually, to safe guard, let's just query by productId if it exists.
+            // If duplicate requests for "general" partnership are allowed, we might need stricter logic.
+            // For now, let's assume if no productId, it's a general request.
+            query.productId = null;
+        }
+
+        const existing = await SellerRequest.findOne(query);
 
         if (existing) {
             if (existing.status === 'PENDING') throw new Error('Request already sent. Please wait for approval.');
-            if (existing.status === 'APPROVED') throw new Error('You are already an approved seller for this manufacturer.');
+            // Allow re-requesting if previously approved? 
+            // If product specific, "APPROVED" usually means "Allocation Granted". 
+            // If they request AGAIN, maybe they want MORE? That should be "Restock Request" ideally.
+            // But for "Access Request", if already approved, we inform them.
+            if (existing.status === 'APPROVED') throw new Error('You normally already have access. Check your allocations.');
 
             return await SellerRequest.findByIdAndUpdate(existing._id, {
                 status: 'PENDING',
@@ -595,7 +611,7 @@ class SellerService {
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-            const request = await SellerRequest.create([{
+            const requestData = {
                 sellerId,
                 manufacturerId: resolvedMfgId,
                 message: message || '',
@@ -605,18 +621,21 @@ class SellerService {
                     region,
                     priceExpectation
                 }
-            }], { session });
+            };
+
+            if (productId) {
+                requestData.productId = productId;
+            }
+
+            const request = await SellerRequest.create([requestData], { session });
 
             // Create notification for manufacturer user
-            if (manufacturer.userId) { // manufacturer doc might have userId populated or just ID
-                // If not populated, we need to fetch user? 
-                // Wait, Manufacturer schema has userId ref. 
-                // We need to send notification to that User ID.
+            if (manufacturer.userId) {
                 await Notification.create([{
-                    userId: manufacturer.userId, // This is the User ID (ref)
+                    userId: manufacturer.userId,
                     type: 'SELLER_REQUEST',
-                    title: 'New Seller Partnership Request',
-                    message: `${seller.businessName} has requested access to your products.`,
+                    title: productId ? 'New Product Access Request' : 'New Seller Partnership Request',
+                    message: `${seller.businessName} has requested access${productId ? ' to a product' : ''}.`,
                     link: '/manufacturer/sellers/requests'
                 }], { session });
             }

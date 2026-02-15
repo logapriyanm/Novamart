@@ -140,27 +140,27 @@ export default function Navbar() {
                 </button>
               </form>
             </div>
-            <Link href="/products" className="btn-secondary hidden lg:flex">
+            <Link href="/products" className="btn-secondary hidden lg:flex" style={{ backgroundColor: '#067FF9', color: 'white', borderColor: '#067FF9' }}>
               <AiOutlineProduct className="w-4 h-4" />
               <span>Products</span>
             </Link>
 
             {user?.role === "ADMIN" && (
-              <Link href="/admin" className="btn-primary">
+              <Link href="/admin" className="btn-primary" style={{ backgroundColor: '#067FF9', borderColor: '#067FF9' }}>
                 <FaShieldAlt className="w-4 h-4" />
                 <span>Admin </span>
               </Link>
             )}
 
             {user?.role === "MANUFACTURER" && (
-              <Link href="/manufacturer" className="btn-primary">
+              <Link href="/manufacturer" className="btn-primary" style={{ backgroundColor: '#067FF9', borderColor: '#067FF9' }}>
                 <FaIndustry className="w-4 h-4" />
                 <span>Manufacturer</span>
               </Link>
             )}
 
             {user?.role === "SELLER" && (
-              <Link href="/seller" className="btn-primary">
+              <Link href="/seller" className="btn-primary" style={{ backgroundColor: '#067FF9', borderColor: '#067FF9' }}>
                 <FaStore className="w-4 h-4" />
                 <span>Seller</span>
               </Link>
@@ -309,7 +309,7 @@ export default function Navbar() {
                           </span>
                         </Link>
                         <Link
-                          href="/profile?tab=complaints"
+                          href="/customer/complaints"
                           onClick={() => setIsProfileDropdownOpen(false)}
                           className="flex items-center gap-3 px-4 py-3 rounded-[10px] hover:bg-primary/5 text-foreground/80 hover:text-primary transition-all group"
                         >
@@ -373,11 +373,10 @@ export default function Navbar() {
                 <div className="relative group">
                   <button
                     onClick={sidebarContext.toggleCategorySidebar}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] text-sm font-bold transition-all duration-200 shrink-0 border-2 ${
-                      sidebarContext.isCategorySidebarOpen
-                        ? "bg-primary text-background border-primary"
-                        : "bg-background border-foreground/10 text-foreground/60 hover:border-primary hover:bg-primary/5"
-                    }`}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] text-sm font-bold transition-all duration-200 shrink-0 border-2 ${sidebarContext.isCategorySidebarOpen
+                      ? "bg-primary text-background border-primary"
+                      : "bg-background border-foreground/10 text-foreground/60 hover:border-primary hover:bg-primary/5"
+                      }`}
                   >
                     <div className="w-6 h-6 flex items-center justify-center">
                       <Lottie
@@ -450,11 +449,10 @@ export default function Navbar() {
                       <Link
                         key={i}
                         href={cat.href}
-                        className={`px-4 py-2 text-xs font-bold whitespace-nowrap transition-all rounded-[10px] flex items-center gap-2 ${
-                          isActive
-                            ? "bg-black text-white shadow-md"
-                            : "text-foreground/60 hover:text-primary hover:bg-background"
-                        }`}
+                        className={`px-4 py-2 text-xs font-bold whitespace-nowrap transition-all rounded-[10px] flex items-center gap-2 ${isActive
+                          ? "bg-black text-white shadow-md"
+                          : "text-foreground/60 hover:text-primary hover:bg-background"
+                          }`}
                       >
                         {cat.name}
                       </Link>

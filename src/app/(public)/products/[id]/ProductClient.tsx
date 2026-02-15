@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
 import {
     FaStar,
     FaTruck,
@@ -15,7 +16,8 @@ import {
     FaShieldAlt,
     FaChevronRight,
     FaHeart,
-    FaRegHeart
+    FaRegHeart,
+    FaTimes
 } from 'react-icons/fa';
 import { HiOutlineShieldCheck } from 'react-icons/hi';
 import { useAuth } from '@/client/hooks/useAuth';
@@ -38,6 +40,17 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
     const { addToCart } = useCart();
     const [product, setProduct] = useState<any>(initialData || null);
     const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+
+    // Review Modal State
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [eligibleOrders, setEligibleOrders] = useState<any[]>([]);
+    const [reviewForm, setReviewForm] = useState({
+        rating: 5,
+        title: '',
+        comment: '',
+        orderItemId: ''
+    });
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [selectedColor, setSelectedColor] = useState<string>('');
     const [selectedSize, setSelectedSize] = useState<string>('');
     const [selectedImage, setSelectedImage] = useState(0);
@@ -115,6 +128,92 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
 
         fetchProductData();
     }, [id]);
+
+    const fetchEligibleOrders = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const res = await axios.get(
+                `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/orders/my?productId=${id}&status=DELIVERED`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data.success) {
+                const orders = res.data.data;
+                const validOrders = orders.map((order: any) => {
+                    const item = order.items.find((i: any) => (i.productId._id || i.productId) === id);
+                    return item ? { ...order, targetItem: item } : null;
+                }).filter(Boolean);
+
+                setEligibleOrders(validOrders);
+            }
+        } catch (error) {
+            console.error('Failed to fetch orders:', error);
+        }
+    };
+
+    const handleOpenReviewModal = () => {
+        if (!isAuthenticated) {
+            router.push(`/auth/login?redirect=/products/${id}`);
+            return;
+        }
+        fetchEligibleOrders();
+        setShowReviewModal(true);
+    };
+
+    const handleSubmitReview = async () => {
+        if (!reviewForm.orderItemId) {
+            toast.error('Please select an order to verify your purchase');
+            return;
+        }
+        if (!reviewForm.title.trim() || !reviewForm.comment.trim()) {
+            toast.error('Please fill in all fields');
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/reviews/product`,
+                {
+                    productId: id,
+                    orderItemId: reviewForm.orderItemId,
+                    rating: reviewForm.rating,
+                    title: reviewForm.title,
+                    comment: reviewForm.comment,
+                    images: []
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            toast.success('Review submitted successfully!');
+            setShowReviewModal(false);
+            setReviewForm({ rating: 5, title: '', comment: '', orderItemId: '' });
+            window.location.reload();
+
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || 'Failed to submit review');
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
+
+    const StarSelector = ({ value, onChange }: { value: number, onChange: (v: number) => void }) => (
+        <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map(star => (
+                <button
+                    key={star}
+                    type="button"
+                    onClick={() => onChange(star)}
+                    className="focus:outline-none transition-transform hover:scale-110"
+                >
+                    <FaStar className={`w-8 h-8 ${star <= value ? 'text-amber-400' : 'text-slate-200'}`} />
+                </button>
+            ))}
+        </div>
+    );
 
     const handleAction = async (action: 'cart' | 'buy') => {
         const inventory = product.inventory?.[0];
@@ -506,14 +605,7 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                                             <p className="text-xs font-medium text-slate-400">{product.reviewCount || 0} Reviews</p>
                                         </div>
                                         <button
-                                            onClick={() => {
-                                                if (!isAuthenticated) {
-                                                    router.push(`/auth/login?redirect=/products/${id}`);
-                                                    return;
-                                                }
-                                                toast.info('Please select the item from your Orders to review.');
-                                                router.push('/orders');
-                                            }}
+                                            onClick={handleOpenReviewModal}
                                             className="w-full py-3 bg-black text-white rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-black/90 transition-all"
                                         >
                                             Write a Review
@@ -543,6 +635,95 @@ export default function ProductClient({ id, initialData }: ProductClientProps) {
                         </div>
                     </div>
                 )}
+                {/* Review Modal */}
+                <AnimatePresence>
+                    {showReviewModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowReviewModal(false)}>
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                onClick={e => e.stopPropagation()}
+                                className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
+                            >
+                                <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                                    <h3 className="text-lg font-bold text-black">Write a Review</h3>
+                                    <button onClick={() => setShowReviewModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors">
+                                        <FaTimes className="w-3 h-3 text-slate-400" />
+                                    </button>
+                                </div>
+
+                                <div className="p-8 space-y-6">
+                                    {/* Order Selection */}
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Select Verified Purchase</label>
+                                        {eligibleOrders.length > 0 ? (
+                                            <select
+                                                className="w-full p-3 bg-slate-50 border-none rounded-lg text-sm font-medium focus:ring-2 focus:ring-black"
+                                                value={reviewForm.orderItemId}
+                                                onChange={(e) => setReviewForm({ ...reviewForm, orderItemId: e.target.value })}
+                                            >
+                                                <option value="">Select your order...</option>
+                                                {eligibleOrders.map((order, i) => (
+                                                    <option key={i} value={order.targetItem._id}>
+                                                        Order #{order._id.slice(-6).toUpperCase()} — {new Date(order.createdAt).toLocaleDateString()}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <div className="p-4 bg-red-50 text-red-600 text-xs font-bold rounded-lg border border-red-100">
+                                                You haven't purchased this item yet (or it hasn't been delivered).
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {eligibleOrders.length > 0 && (
+                                        <>
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Your Rating</label>
+                                                <StarSelector
+                                                    value={reviewForm.rating}
+                                                    onChange={(r) => setReviewForm({ ...reviewForm, rating: r })}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Review Title</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full p-3 bg-slate-50 border-none rounded-lg text-sm font-bold placeholder:font-medium focus:ring-2 focus:ring-black"
+                                                    placeholder="Summarize your experience"
+                                                    value={reviewForm.title}
+                                                    onChange={(e) => setReviewForm({ ...reviewForm, title: e.target.value })}
+                                                    maxLength={100}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Review</label>
+                                                <textarea
+                                                    className="w-full p-3 bg-slate-50 border-none rounded-lg text-sm font-medium min-h-[120px] focus:ring-2 focus:ring-black resize-none"
+                                                    placeholder="Tell us what you liked or didn't like..."
+                                                    value={reviewForm.comment}
+                                                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                                                    maxLength={1000}
+                                                />
+                                            </div>
+
+                                            <button
+                                                onClick={handleSubmitReview}
+                                                disabled={isSubmittingReview || !reviewForm.orderItemId}
+                                                className="w-full py-4 bg-black text-white font-bold text-sm uppercase tracking-widest rounded-xl hover:bg-neutral-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </div>
             <style jsx>{`
                 .scrollbar-hide::-webkit-scrollbar {

@@ -46,6 +46,7 @@ import customEscrowRoutes from './routes/customEscrow/customEscrowRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import pricingRoutes from './routes/manufacturer/pricingRoutes.js';
+import disputeRoutes from './routes/disputeRoutes.js';
 
 
 const app = express();
@@ -256,6 +257,7 @@ app.use('/api/custom-manufacturing', customManufacturingRoutes);
 app.use('/api/custom-escrow', customEscrowRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/manufacturer/pricing', pricingRoutes);
+app.use('/api/disputes', disputeRoutes);
 
 
 // Log all routes
